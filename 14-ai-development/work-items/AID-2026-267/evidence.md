@@ -78,14 +78,53 @@ checker and its unittest module; neither invocation is warn-only.
 
 ## Verification status
 
-- Exact-Head self-test: PENDING CI.
-- Live checker on exact PR head: PENDING CI.
-- Injected required-only probe: encoded as a deterministic unit test; PENDING CI.
-- Injected exception and None probes: encoded as deterministic unit tests; PENDING CI.
-- Workflow hard-failure wiring: source readback confirms direct `run: python3 scripts/check_declared_check_contexts.py` and `set -euo pipefail` for the self-test; exact-head workflow run PENDING.
-- 16 required contexts: PENDING exact-Head refresh.
-- Independent review: NOT ASSIGNED / NOT RECORDED.
-- Merge: NOT AUTHORIZED by this task; stop before merge.
+Exact refreshed PR head: `75c9f61b325611d28be0d2c858336f8570b3f728`.
+The branch was refreshed by a non-ff merge commit whose main parent was
+`242cf101c8b79007ad2fb8d9c89681224577188d`. At verification time,
+`main...fix/aid-267-required-declared-produced-r2` reported ahead=32 / behind=0.
+
+Repository hygiene hard-gate job `140318947231` completed SUCCESS on the exact
+head and recorded:
+
+```text
+CONTEXT COUNTS: declared=16 required=16 produced=46
+required_not_declared=[]
+declared_not_produced=[]
+::notice::16 declared, 16 required, all produced
+DECLARED CHECK CONTEXTS: PASS
+```
+
+The same job ran the verbose self-test (`Ran 19 tests ... OK`), the three
+standalone probes, and the two source mutations as ordinary hard-failing steps.
+Both combination tests passed:
+- `test_incomplete_precedes_local_violation_when_fetch_raises`
+- `test_incomplete_precedes_local_violation_when_fetch_returns_none`
+
+Standalone probe results on the exact head:
+- required-only injected payload: rc=1; stderr names `Session Evidence` as
+  required by main but absent from `PR-GOVERNANCE-001.md`.
+- injected fetch exception: rc=2; stderr names
+  `branches/main.protection.required_status_checks.contexts` and
+  `OSError: connection refused`.
+- injected None payload: rc=2; stderr names the same input and says the required
+  set is unavailable.
+
+Mutation verification on the exact head:
+- required-minus-declared forced empty: original targeted test raw_rc=0;
+  mutated targeted test raw_rc=1 with `AssertionError: 0 != 1`.
+- INCOMPLETE exception return changed from 2 to 0: original targeted test
+  raw_rc=0; mutated targeted test raw_rc=1 with `AssertionError: 0 != 2`.
+- Final harness output: `MUTATION TESTS: PASS (both mutations detected)`.
+
+All 16 branch-required context names have at least one completed SUCCESS check
+run on this exact head. The branch summary reports `protected=true`,
+`required_status_checks.enforcement_level=everyone`, and the 16 context
+names. However, reads of the branch-protection, required-status-checks, and
+enforce-admins endpoints each return HTTP 403 to this integration. Therefore
+the `strict` and `enforce_admins` booleans could not be independently
+verified; no merge was attempted. PR #1369 remains OPEN and Issue #134 remains
+OPEN. The L3 review comment `6083410132` was APPROVE WITH AMENDMENTS on the
+prior head; it is not a new approval event for the amended head.
 
 ## L3 amendment
 
@@ -111,4 +150,8 @@ The first CI attempt exposed a metadata issue in three new work-item records; al
 
 ## Unresolved
 
-No CI result, independent review, or Owner acceptance is claimed in this record.
+The implementation, probes, mutation tests and 16 required contexts are
+verified on the refreshed exact head. Merge remains blocked because the
+integration receives HTTP 403 for the branch-protection endpoints needed to
+verify `strict=true` and `enforce_admins=true`. No Owner acceptance or
+natural-person Owner signature is claimed. Issue #134 remains OPEN.
