@@ -2,6 +2,7 @@
 document_metadata:
   domain: ai-development
   role: work-record
+  steward: "user-authorized operator (delegated by account owner)"
   lifecycle:
     approval:
       decision_status: Draft
