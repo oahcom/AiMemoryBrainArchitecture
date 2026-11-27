@@ -70,8 +70,8 @@ session_evidence:
     issue_refs:
     implementing_ai_session: "GOVREC-2026-11-27"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-264/prompt-v1.md"
-    executed_prompt_sha256: "9c5fc923f1dbb97f66d22f92ba827ee79b841b8111531851d8861df5a5f9bacd"
-    executed_prompt_bytes: 7836
+    executed_prompt_sha256: "9770b64cab9539291cec21310edaba7b216d8044dc03cfd4a455573d9ebfc33e"
+    executed_prompt_bytes: 9311
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-264/session-evidence.md"
