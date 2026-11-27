@@ -61,24 +61,13 @@ identifier_allocation:
 
 
 session_evidence:
-  - role: ORIGINAL_IMPLEMENTATION_SESSION
-    issue_refs:
-      - "#1212"
-    implementing_ai_session: NOT_RECORDED
-    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-242/prompt-v1.md
-    executed_prompt_sha256: "c9d765fce7debe0364cb20acbc706af421e88ba6bad4bb7253793b03798a89a1"
-    executed_prompt_bytes: 4422
-    executed_prompt_provenance: "Original prompt snapshot normalized for the assigned AID-2026-242 path; original digest is retained in evidence.md."
-    session_reference_status: NOT_RECORDED
-    session_evidence_ref: 14-ai-development/work-items/AID-2026-242/session-evidence.md
   - role: RENUMBERING_AND_CONFLICT_RESOLUTION_SESSION
     issue_refs:
       - "#1212"
-      - "#1332"
     implementing_ai_session: NOT_RECORDED
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-242/prompt-v2.md
     executed_prompt_sha256: "4bd120dac05ef592acb87b7b6fb5929ca6ccf8617a7fda8be179f39730d1b5fb"
     executed_prompt_bytes: 3501
-    executed_prompt_provenance: "Current user instruction in this conversation; captured for this session."
+    executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-242/session-evidence.md

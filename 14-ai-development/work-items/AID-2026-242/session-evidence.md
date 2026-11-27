@@ -64,7 +64,7 @@ User-authorized operator (delegated by account owner), continuing PR #1297 as th
 
 ## Actual AI input
 
-The original D source-recovery instruction is retained as `14-ai-development/work-items/AID-2026-242/prompt-v1.md`, normalized only for the reassigned ID and internal paths; its pre-normalization digest is retained above. The current W4 instruction is captured in `14-ai-development/work-items/AID-2026-242/prompt-v2.md` (SHA-256 `4bd120dac05ef592acb87b7b6fb5929ca6ccf8617a7fda8be179f39730d1b5fb`, 3501 UTF-8 bytes). It directs the AID-2026-242 renumbering, a real merge of origin/main, semantic reconciliation of the bilingual checker, local validation, and exact-Head CI/merge/blob verification. It forbids force-push, squash/rebase merge, branch-protection changes, fabricated checks, and closing Issue #1212.
+Prompt provenance is `NOT_VERIFIED` because the runtime does not expose a stable session identifier or a platform-signed prompt export; the repository snapshots and their byte hashes are recorded here. The original D source-recovery instruction is retained as `14-ai-development/work-items/AID-2026-242/prompt-v1.md`, normalized only for the reassigned ID and internal paths; its pre-normalization digest is retained above. The current W4 instruction is captured in `14-ai-development/work-items/AID-2026-242/prompt-v2.md` (SHA-256 `4bd120dac05ef592acb87b7b6fb5929ca6ccf8617a7fda8be179f39730d1b5fb`, 3501 UTF-8 bytes). It directs the AID-2026-242 renumbering, a real merge of origin/main, semantic reconciliation of the bilingual checker, local validation, and exact-Head CI/merge/blob verification. It forbids force-push, squash/rebase merge, branch-protection changes, fabricated checks, and closing Issue #1212.
 
 ## AI-visible output
 
