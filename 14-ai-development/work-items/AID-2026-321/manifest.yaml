@@ -1,0 +1,142 @@
+work_item_id: AID-2026-321
+title: "Correct platform-scoped test totals in AID-2026-079 AC1 and AC5 measurements"
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Documentation-only correction to acceptance-criteria measurements. The change records
+  platform-specific test totals, exact reproduction commands, the measured commit and date,
+  and the distinction between an observed counterfactual and an arithmetic projection.
+  No executable code, test behavior, gate, workflow, branch protection or acceptance
+  authority is changed.
+status: DISPATCHED
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "229c0a6b51f4c761ed969337f6ddf7d0bbbb7d0c"
+tracking_issue: "#1269"
+
+prompt_id: AID-2026-321-PROMPT
+prompt_version: 1
+prompt_file: 14-ai-development/work-items/AID-2026-321/prompt-v1.md
+prompt_status: RECORDED_NOT_FROZEN
+prompt_sha256: d587f3178bb90287c05313937e9364d1efe93dd6a9666cbf85cfaf52df71864f
+prompt_bytes: 7957
+
+scope:
+  objective: >-
+    Replace the platform-ambiguous AC1 and AC5 measurements in AID-2026-079 with
+    measurements that explicitly identify both Windows and Ubuntu CI totals, the
+    command used on each platform, the measurement date and the commit measured.
+  files_to_modify:
+    - 14-ai-development/work-items/AID-2026-079/manifest.yaml
+    - 14-ai-development/work-items/INDEX.md
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-321/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-321/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-321/evidence.md
+    - 14-ai-development/work-items/AID-2026-321/session-evidence.md
+  files_out_of_scope:
+    - scripts/test_check_document_management.py
+    - scripts/check_document_management.py
+  constraints:
+    - Modify only AC1 and AC5 measurement values in AID-2026-079.
+    - Preserve both platform totals; do not replace them with invariants alone.
+    - Record the exact reproduction command for each platform.
+    - Record commit 229c0a6b51f4c761ed969337f6ddf7d0bbbb7d0c and date 2026-11-27.
+    - Label the Ubuntu counterfactual 371/372 as arithmetic, not measured.
+    - Do not claim CI execution on the changed branch.
+    - Do not claim review, Owner acceptance, merge or issue closure.
+    - Do not change the T68c implementation or its skip wording.
+    - Do not change the existing acceptance criteria text.
+
+acceptance_criteria:
+  - id: AC1
+    criterion: >-
+      AID-2026-079 AC1 records the Windows and Ubuntu baseline totals, each with
+      its exact reproduction command, and distinguishes the measured Windows
+      counterfactual from the arithmetic-only Ubuntu projection.
+    measurement: >-
+      Both platform totals are recorded against commit
+      229c0a6b51f4c761ed969337f6ddf7d0bbbb7d0c and date 2026-11-27.
+      Windows: 371/371; Ubuntu: 372/372. The Windows counterfactual
+      370/371 is measured. Ubuntu 371/372 is explicitly arithmetic only.
+  - id: AC2
+    criterion: >-
+      AID-2026-079 AC5 records both platform totals, exact reproduction commands,
+      the T68c platform-dependent accounting behavior, and the T93a-T93h
+      same-invocation scope without claiming a platform-independent total.
+    measurement: >-
+      Windows command exits 0 with 371/371 passed and one T68c skip;
+      Ubuntu command exits 0 with 372/372 passed and no suite-level skip summary.
+      Both observations are tied to the same commit and date.
+  - id: AC3
+    criterion: >-
+      The new work-item records identify the evidence as operator-supplied and
+      do not misrepresent arithmetic projections as executed tests.
+    measurement: >-
+      Evidence and session-evidence distinguish observed platform output,
+      the measured Windows counterfactual, and the arithmetic-only Ubuntu
+      counterfactual.
+  - id: AC4
+    criterion: >-
+      The change remains documentation-only and does not modify either test
+      implementation or gate implementation.
+    measurement: >-
+      The declared changed-file scope contains only the AID-2026-079 manifest,
+      the four AID-2026-321 records, and the AID work-item INDEX row.
+
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-321/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-321/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-321/session-evidence.md
+    relationship: evidence
+
+implementation:
+  status: DOCUMENTATION_AUTHORED
+  summary: >-
+    Proposed documentation-only correction authored for operator application.
+    The AC1 and AC5 measurement replacements preserve the two platform totals
+    and bind them to commands, commit and date. No repository mutation or
+    changed-branch CI execution is claimed by this record.
+  files_changed:
+    - 14-ai-development/work-items/AID-2026-079/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-321/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-321/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-321/evidence.md
+    - 14-ai-development/work-items/AID-2026-321/session-evidence.md
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - "python scripts/test_check_document_management.py"
+    - "python3 scripts/test_check_document_management.py"
+    - "python scripts/check_document_management.py"
+    - "Session Evidence validator"
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    No independent review is recorded. This authoring session is not an independent
+    reviewer of its own proposed documentation.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no Owner acceptance decision is asserted)"
+
+session_evidence:
+  - role: DOCUMENTATION_AUTHOR
+    issue_refs:
+      - "#1269"
+    implementing_ai_session: 6b0926ee-d24c-83ec-9ce4-69e18656db14
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-321/prompt-v1.md
+    executed_prompt_sha256: d587f3178bb90287c05313937e9364d1efe93dd6a9666cbf85cfaf52df71864f
+    executed_prompt_bytes: 7957
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-321/session-evidence.md
