@@ -49,3 +49,10 @@ The transition from baseline to repository-wide completion is closed only when a
 ## Verification status
 
 Final exact-head test results, Actions contexts, merge SHA, and post-merge blob identities are recorded only after direct readback. No CI result, merge, Owner approval, or acceptance is claimed here.
+
+## Observed validation — PR #1365 head 635e9220c9cbf1d3b93434fde7f6a7c224dbb6ca
+
+- GOV-DOC-002 self-check: 372/372 passed, including the three DM-15 regression cases.
+- Incremental GOV-DOC-002 verdict: PASS; 644 classified, 371 unclassified; no violations in the changed set.
+- Repository-wide adoption census: 641 classified governed documents missing a non-empty steward. This is the observed baseline, not a claim that all 641 are part of the 424-file normative_status census cited in Issue #266.
+- The first Session Evidence attempt identified two correctable defects: the PR Issue mapping for historical Issue #266 must be LEGACY_UNDECLARED / N/A, and the manifest must use canonical session_evidence entries with a prompt snapshot. These are being corrected; no acceptance or merge is claimed.

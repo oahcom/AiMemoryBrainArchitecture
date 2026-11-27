@@ -50,3 +50,14 @@ non_goals:
 evidence:
   record: 14-ai-development/work-items/AID-2026-252/evidence.md
   session: 14-ai-development/work-items/AID-2026-252/session-evidence.md
+
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-252/prompt-v1.md"
+    executed_prompt_sha256: "4edd5996ba26ed286be04aad2d2bf20a61489a15719b5e954891c53a77859ff2"
+    executed_prompt_bytes: 3595
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-252/session-evidence.md"

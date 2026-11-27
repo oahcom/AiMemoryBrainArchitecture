@@ -40,3 +40,10 @@ The user assigned Work Item AID-2026-252 and required a schema field other than 
 2. Confirmed AID-2026-252 had no manifest on main and created a dedicated branch from the fetched main.
 3. Selected strategy (b): new governed documents must supply a non-empty steward; legacy omissions are reported as a non-blocking census. The closure threshold is zero missing stewards across all classified governed documents.
 4. Final exact-head test, CI, merge and blob verification results are to be recorded only after direct readback. No natural-person Owner signature or acceptance is represented.
+
+## Additional execution record
+
+- Initial PR #1363 had zero Actions workflow runs within the required recovery window. It was commented and closed; the branch was rebuilt with two parents, retaining the change tree and merging the observed main.
+- Replacement PR #1365 was opened from the rebuilt branch. The PR-level AI declaration is YES; because Issue #266 predates the Issue-level declaration policy, its mapping row is LEGACY_UNDECLARED / N/A.
+- The first GOV-DOC-002 self-check exposed an incorrect test-helper return-value assumption. The test was corrected to use the suite's expect_gate helper. The observed corrected self-check was 372/372 PASS.
+- The first Session Evidence validation then identified the missing canonical manifest session_evidence entry. A prompt snapshot and canonical manifest entry are now being added; final Session Evidence status remains pending direct readback.
