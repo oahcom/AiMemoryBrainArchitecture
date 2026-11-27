@@ -1,0 +1,79 @@
+work_item_id: AID-2026-253
+title: "W10 AC3 conflict register closure and AC4 mature implementation dispositions"
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: "Documentation-only reassessment of 16 existing conflicts and four mature implementation options. No production code, schema, Owner branch, Issue body or branch protection changes. Main risks are overclaiming closure or misattributing a proxy decision; each unresolved row and authority limit is retained explicitly."
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: f18adc9fa1d06837433a09498f5297bf13b35756
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: DISPATCHED_TASK_FILE
+evidence: "14-ai-development/work-items/AID-2026-253/evidence.md"
+scope:
+  objective: "Reassess CF-001..CF-016 against their own closure conditions, record only evidence-supported status changes, and decide the bounded disposition of SQLite, PostgreSQL, Cedar PDP and Tantivy."
+  files_changed:
+    - "14-ai-development/work-items/AID-2026-253/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-253/evidence.md"
+    - "14-ai-development/work-items/AID-2026-253/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-253/session-evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+    - "docs/architecture-convergence/ARCH-CONVERGENCE-001-CONFLICT-REGISTER.md"
+    - "13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
+    - "docs/en/13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
+    - "docs/zh-CN/13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-253/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-253/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-253/session-evidence.md"
+    relationship: evidence
+  - path: "docs/architecture-convergence/ARCH-CONVERGENCE-001-CONFLICT-REGISTER.md"
+    relationship: design
+  - path: "13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
+    relationship: design
+  - path: "docs/en/13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
+    relationship: reference
+  - path: "docs/zh-CN/13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
+    relationship: reference
+session_evidence:
+  - role: "ARCHITECTURE_GOVERNANCE_EVIDENCE_WORKER"
+    issue_refs:
+    implementing_ai_session: "ChatGPT-GPT-6"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-253/prompt-v1.md"
+    executed_prompt_sha256: "82ebbf1e4a3c0a8f7c809b0f3200feaf5add03bc88ee2e9a9ddac3785ed8a5d3"
+    executed_prompt_bytes: 2309
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-253/session-evidence.md"
+implementation:
+  status: NOT_APPLICABLE
+  summary: "Documentation-only work; no product implementation or runtime change."
+  files_changed:
+    - "docs/architecture-convergence/ARCH-CONVERGENCE-001-CONFLICT-REGISTER.md"
+    - "13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
+    - "docs/en/13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
+    - "docs/zh-CN/13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
+  tests:
+    - "No local test run claimed."
+    - "GitHub Actions required contexts on PR #1366; pending at manifest authoring time."
+carrier:
+  branch: "docs/w10-ac3-ac4-aid-2026-253"
+  pull_request: "#1366"
+  merge_sha: "PENDING"
+  merge_method: "merge"
+  required_contexts: "PENDING"
+review:
+  status: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+  proxy_ruling: "代理裁决，非自然人 Owner 签署"
+acceptance:
+  gate: PENDING_CI
