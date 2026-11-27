@@ -100,7 +100,12 @@ The follow-up task supplied independent L3 review ID `6083410132` and required:
 4. Added `scripts/run_declared_check_contexts_mutation_tests.py` to run each targeted test first against the original checker (must pass) and then against a mutated temporary copy (must fail).
 5. Wired both scripts into the existing Repository hygiene hard-gate job; no `|| true` or `continue-on-error`.
 6. Fixed the three new governed document records to declare `document_metadata.steward: USER-PRINCIPAL-DELEGATED`.
-7. Refreshed base target observed during amendment work: `242cf101c8b79007ad2fb8d9c89681224577188d`. A merge commit and final exact-head gate verification remain pending.
+7. Refreshed the branch onto main `242cf101c8b79007ad2fb8d9c89681224577188d`; exact head became `75c9f61b325611d28be0d2c858336f8570b3f728`, compare ahead=32 / behind=0.
+8. Exact-head Repository hygiene job `140318947231` completed SUCCESS. The checker reported `declared=16 required=16 produced=46`, both differences empty, and PASS; all 19 unit tests passed.
+9. The three standalone probes emitted raw rc/stderr: required-only rc=1 naming `Session Evidence`; fetch exception rc=2 naming the branch-protection contexts input and `OSError: connection refused`; None rc=2 naming the same input and unavailable required set.
+10. Both actual source mutations were detected: each targeted original test raw_rc=0, each mutated test raw_rc=1 with the expected assertion failure; harness ended `MUTATION TESTS: PASS (both mutations detected)`.
+11. All 16 required contexts have completed SUCCESS check runs on the exact head. PR #1369 remains OPEN and Issue #134 remains OPEN.
+12. Reads of `/branches/main/protection`, `/protection/required_status_checks`, and `/protection/enforce_admins` each returned HTTP 403. The branch summary exposes `protected=true`, `enforcement_level=everyone`, and the required context names, but not the `strict` and `enforce_admins` booleans. No merge was attempted because both booleans could not be verified.
 
 Attribution: user-authorized operator (delegated by account owner), 2026-11-27.
 代理裁决，非自然人 Owner 签署。
