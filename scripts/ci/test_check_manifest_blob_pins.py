@@ -76,6 +76,7 @@ class BlobPinsTest(unittest.TestCase):
         self.assertEqual(code, 1, out + err)
         self.assertIn(f"declared={wrong}", out)
         self.assertIn(f"actual={self.blob_sha(data)}", out)
+        print(out.strip())
 
     def test_deleted_path_is_rejected_and_named(self):
         commit_tree(self.root, {
@@ -86,6 +87,7 @@ class BlobPinsTest(unittest.TestCase):
         self.assertEqual(code, 1, out + err)
         self.assertIn("PATH_MISSING", out)
         self.assertIn("path=missing.md", out)
+        print(out.strip())
 
     def test_cross_commit_pin_reads_the_declared_source_commit(self):
         source_data = b"source revision\n"
@@ -109,6 +111,7 @@ class BlobPinsTest(unittest.TestCase):
         code, out, err = self.run_gate()
         self.assertEqual(code, 2, out + err)
         self.assertIn("INCOMPLETE", out)
+        print(out.strip())
 
     def test_prompt_sha256_and_byte_count_are_both_checked(self):
         data = b"prompt\n"
