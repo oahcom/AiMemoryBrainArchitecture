@@ -2,6 +2,7 @@
 document_metadata:
   domain: ai-development
   role: work-record
+  steward: USER-PRINCIPAL-DELEGATED
   lifecycle:
     approval:
       decision_status: Draft

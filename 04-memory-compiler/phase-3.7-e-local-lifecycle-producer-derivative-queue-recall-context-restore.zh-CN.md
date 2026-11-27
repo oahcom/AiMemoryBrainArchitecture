@@ -2,6 +2,7 @@
 document_metadata:
   domain: memory-compiler
   role: design-specification
+  steward: USER-PRINCIPAL-DELEGATED
   lifecycle:
     approval:
       decision_status: Draft
@@ -30,7 +31,7 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Canonical
+    canonical_status: Non-Canonical
     canonical_scope: "E 域 Memory Compiler 记录 phase-3.7-e-local-lifecycle-producer-derivative-queue-recall-context-restore.md；规范归属位置待 Owner 接受后确定。"
     canonical_scope_id: "memory-compiler/e-phase-3-7-e-local-lifecycle-producer-derivative-queue-recall-context-restore"
     canonical_scope_keywords:

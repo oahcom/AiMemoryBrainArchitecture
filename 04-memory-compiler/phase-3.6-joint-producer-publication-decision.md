@@ -2,6 +2,7 @@
 document_metadata:
   domain: memory-compiler
   role: design-specification
+  steward: USER-PRINCIPAL-DELEGATED
   lifecycle:
     approval:
       decision_status: Draft
