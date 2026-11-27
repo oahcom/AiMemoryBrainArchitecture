@@ -1,5 +1,5 @@
 {
-  "commit": "5e30d49776a2ce75069227a41470fa7e4ae00b2e",
+  "commit": "cd1722e753a429247d91f990caa2defac565e308",
   "manifests": {
     "AID-2026-001": {
       "findings": [
@@ -915,6 +915,13 @@
       ],
       "primary_status": "NO_TRACE"
     },
+    "AID-2026-325": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
     "FIX-2026-P1-T1": {
       "findings": [
         "digest_absent",
@@ -924,11 +931,6 @@
     }
   },
   "schema_version": 1,
-  "seeded_work_items": {
-    "AID-2026-291": {
-      "observed_in_pr_head": "57ff99cf3986d2effea75460a206e8754e3561a2",
-      "reason": "Initial ratchet seed for the newly registered work item; this records its current NO_TRACE state without claiming traceability."
-    }
-  },
-  "source_commit": "5e30d49776a2ce75069227a41470fa7e4ae00b2e"
+  "seeded_work_items": {},
+  "source_commit": "cd1722e753a429247d91f990caa2defac565e308"
 }
