@@ -22,8 +22,8 @@ prompt_id: AID-2026-082-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-082/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 79bcd0738f9c0f0c5b3dcf05675629c12a7eb51bcaaff0e184ba1ec93e31b7cb
-prompt_bytes: 5831
+prompt_sha256: ff3eccdc7154cd2f95858c25215ba4198e1a96a2210186b0784e975dd5e7c5cd
+prompt_bytes: 5773
 prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST; no independent prompt-source verification claimed
 
 authorization:

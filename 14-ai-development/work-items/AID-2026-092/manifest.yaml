@@ -26,8 +26,8 @@ prompt_id: AID-2026-083-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-092/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: a459d7e523fbba4ffb8c0f6ade8d3d8c1ec6ce45b95c3f48f65b192c0413edb3
-prompt_bytes: 3772
+prompt_sha256: 9de0895124032230b3418ff062ef2d590d27f37582d2847032a46b7116a53724
+prompt_bytes: 3714
 prompt_digest_correction: >-
   The digest recorded at registration was 9be8aebf7d595f81cc062e5c03a67fd8317aeefaf69dd635fd9031f112dc25d1
   at 2455 bytes. It matched no version of prompt-v1.md at any commit reachable from any ref:
