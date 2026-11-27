@@ -99,3 +99,7 @@ rework:
     - "reviews/complexity/architecture-complexity-assessment.zh-CN.md"
   gate_behaviour_change: "The existing required Schema non-empty audit job validates the four assessment documents in the checked-out tree rather than the four Issue comments; no required context or job name changes."
   retrospective_boundary: "Three signature fields were attached on 2026-11-27 and do not satisfy the contemporaneity requirement; Owner adjudication remains required."
+
+  pull_request: 1424
+  branch: "rework/aid-250-doc-signatures"
+  exact_head_with_16_successful_required_contexts: "aab994d3e40671a41012b8110a3b2fa84aec359f"
