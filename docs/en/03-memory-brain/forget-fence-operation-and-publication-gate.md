@@ -50,8 +50,8 @@ document_metadata:
 - Document ID: D-FORGET-GATE-001
 - Version: 1.0 (split bilingual companion)
 - Source branch: session-d-memory-brain-2026-11-16
-- Source revision: RESTORED — original source body blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` is restored at the canonical root path; the root file carries GOV-DOC-002 metadata.
-- Canonical source: [restored root document](../../../03-memory-brain/forget-fence-operation-and-publication-gate.md) (source body blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5`; restored file includes GOV-DOC-002 metadata). This page remains a non-canonical navigation stub; the split family is pending Owner disposition.
+- Source revision: dd26e3cae2e60dbdc44a6e084004effcd2033efa
+- Source: [restored root document](../../../03-memory-brain/forget-fence-operation-and-publication-gate.md) (source body blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5`; restored file includes GOV-DOC-002 metadata). This page remains a non-canonical navigation stub; the split family is pending Owner disposition.
 - Chinese counterpart: [Forget Fence Operation and Publication Gate](../../zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate.md)
 - Status: D semantic contract DECIDED; E/Storage enforcement, I authorization freshness and cross-module conformance OPEN
 

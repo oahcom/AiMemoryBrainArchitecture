@@ -49,9 +49,9 @@ document_metadata:
 - 文档 ID：D-FORGET-CONTRACT-001
 - 版本：1.0
 - 源分支：main
-- 源文件版本：AID-2026-089 已恢复规范根路径；精确 Blob 记录于 Draft PR Head。
+- 源文件版本：b3562da378c5dcc54cbdba71f759288a0fe36142
 - 历史源分支 HEAD：6b654d5cffaeb71b01f2b0750daa0abc14eb64b3（仅作来源证据）
-- 规范源：[01-system-architecture/forget-fence-and-completion-contract.md](../../../01-system-architecture/forget-fence-and-completion-contract.md)；本文件和英文文件均为镜像。
+- 源规范：[01-system-architecture/forget-fence-and-completion-contract.md](../../../01-system-architecture/forget-fence-and-completion-contract.md)；本文件和英文文件均为镜像。
 - 对应英文：[Canonical Forget Fence and Completion Contract](../../en/01-system-architecture/forget-fence-and-completion-contract.md)
 - Owner：Session D — Memory Brain Principal Architect
 - 状态：D Canonical Domain 语义为 DECIDED；跨模块执行和全局完成策略为 OPEN / 由 I 拥有
