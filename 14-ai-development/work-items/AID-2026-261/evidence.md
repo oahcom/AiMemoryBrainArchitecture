@@ -151,7 +151,26 @@ Run links for this synchronized Head:
 - Rust workspace: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45940575545
 - Runner admission policy: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45940575731
 
-The synchronized-Head check runs above predate this evidence/manifest/index status-refresh commit; the new resulting Head must complete its own 16-context run before merge. No merge SHA or post-merge blob identity is claimed yet.
+## Latest main synchronization and exact-Head validation
+
+A further parallel main update was integrated before merge. The latest observed main and the merge commit bringing it into this branch are:
+- Latest main included: `6f597e2dd8b6e879bf7539aa16b88a39504d9c49`
+- Synchronization merge commit: `81680b0f61d79ebc9a3fa2f54c19db94d66b94d9`
+- Compare immediately after synchronization: `ahead=21, behind=0`.
+
+On exact synchronized Head `81680b0f61d79ebc9a3fa2f54c19db94d66b94d9`, all 16 required contexts were observed `completed/success`. The latest run set was:
+- GOV-DOC-001: run `45941445883`, job `140316450731`, PASS; checker output `OWNER NAMESPACE: PASS (15 registered documents scanned)` and `GOVERNANCE OPERATION TRACEABILITY: PASS (7 operations x 3 mirrors)`; suites `12 tests OK` and `16 tests OK`.
+- GOV-DOC-002: run `45941445889`, success.
+- Repository hygiene: run `45941446418`, success; `Test reachability: 67 test files, 67 reachable, 0 unreachable`.
+- Branch freshness: run `45941445932`, success.
+- Session Evidence and self-tests: run `45941445933`, success.
+- Existing required checks (audit, BMCP, schema, Rust): run `45941445918`, success.
+- Rust workspace tests: run `45941445940`, success.
+- Runner admission policy: run `45941445902`, success.
+
+The eleven fixture functions all emitted `... ok` in GOV-DOC-001 run `45941445883`; see the PR table for each function and assertion. The negative-control failure remains independently demonstrated by run `45940254262` and was reverted/closed as recorded above.
+
+This evidence/manifest refresh itself follows the exact-Head validation above and changes only the AID-2026-261 evidence and manifest records; the PR's final resulting Head is required to rerun the full required contexts before merge. No merge SHA or post-merge blob identity is claimed yet.
 
 ## Session record
 
