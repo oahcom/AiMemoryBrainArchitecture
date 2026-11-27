@@ -194,13 +194,49 @@ entries:
     carrier: "branch fix/2026-11-27-aid260-manifest-blob-pins"
     note: "#1350 manifest blob-pin 完整性检查器；当前仅有登记骨架，实现未完成"
   - id: AID-2026-262
-    state: RESERVED
-    carrier: "Issue #1341 (serialized merge-time work-item uniqueness gate)"
-    note: "2026-11-27 重分配：241/242 均已被占用，261 属未 push 的本地 worktree 不可信；262 经 main + 已知分支扫描为空闲"
+    state: OCCUPIED_BY_OTHER
+    carrier: "local worktree wt-a262 (commit 2b63b8ba) + ref origin/work-item/aid-2026-262-merge-broker (commit 8908bb16)"
+    note: "本地未发布实现曾占此号，AIDSCAN 判定其非权威占用；#1341 已改号 263"
   - id: AID-2026-281
     state: RESERVED
     carrier: "Issues #1128 #1129 #1136 #1138 #1139 (P0 authorization read boundary)"
     note: "2026-11-27: main work-items tree occupies up to AID-2026-279; AID-2026-280 was consumed by PR #1384 branch naming; 281 scanned free on the main tree and on all open PR branches. Scope: authorize Memory/Event reads by I authority rather than caller-supplied Scope; partial-Scope readers must not learn hidden membership, aggregate refs or canonical identity."
+  - id: AID-2026-250
+    state: OCCUPIED_BY_OTHER
+    carrier: "branch w7/aid-250 (commit fe623d7e)"
+    note: "AIDSCAN 补录：ledger 全历史零出现，但该号被 w7/aid-250 的 signature gate 登记占用；未进 main"
+  - id: AID-2026-253
+    state: MERGED
+    carrier: "PR #1374 (merged into main at 6f597e2d)"
+    note: "AIDSCAN 补录：main 现存 AID-2026-253/ 四件套（evidence.md / manifest.yaml / prompt-v1.md / session-evidence.md）；Issue #265 AC3/AC4 冲突登记收口"
+  - id: AID-2026-255
+    state: OCCUPIED_BY_OTHER
+    carrier: "branch work/AID-2026-255-manifest-blob-pin-integrity (commit ed2f3a94)"
+    note: "AIDSCAN 补录：manifest blob-pin integrity ratchet；未进 main"
+  - id: AID-2026-256
+    state: OCCUPIED_BY_OTHER
+    carrier: "branch work-item/aid-2026-256-governance-registration-reconciliation (commit b04202ee)"
+    note: "AIDSCAN 补录：INDEX 状态与 manifest 状态对账；未进 main"
+  - id: AID-2026-261
+    state: OCCUPIED_BY_OTHER
+    carrier: "PR #1383 (merged into main at 242cf101) + branch fix/2026-11-27-aid261-workitem-uniqueness-gate (commit 017659dc)"
+    note: "双主张：main 已用 261 承载 Owner namespace / governance-operation traceability 检查（#1383，Issue #1237 线），而 fix/2026-11-27-aid261-workitem-uniqueness-gate 的 manifest 自述 Issue #1341 用同一号。取 OCCUPIED_BY_OTHER 而非 IN_FLIGHT 的理由：main 已落地该号，后到者无权复用；#1341 因此改号 263"
+  - id: AID-2026-263
+    state: RESERVED
+    carrier: "Issue #1341 (serialized merge-time work-item uniqueness gate)"
+    note: "AIDSCAN 五范围零命中（main 全历史 2829 提交 / 2349 ref 去重 1317 唯一树 / ledger 21 版本 / 280 worktree / PR refs 无降级）后预留；占号走 aid-ledger 单写者 push，非快进即输掉竞争需重扫"
+  - id: AID-2026-267
+    state: OCCUPIED_BY_OTHER
+    carrier: "PR #1369 (branch fix/aid-267-required-declared-produced-r2, commit eb93ac7e)"
+    note: "AIDSCAN 补录：required / declared / produced 三态对齐；PR ref 存在但未进 main"
+  - id: AID-2026-268
+    state: OCCUPIED_BY_OTHER
+    carrier: "branches fix/aid-268-manifest-blob-pins + fix/aid-268-manifest-blob-pins-s6b (commit e4dd4ab5)"
+    note: "AIDSCAN 补录：按已提交字节校验 manifest blob pin；未进 main，未发现对应 PR ref"
+  - id: AID-2026-279
+    state: MERGED
+    carrier: "PR #1372 (merged into main; merge commit 386d8f57)"
+    note: "AIDSCAN 补录：main 现存 AID-2026-279/ 四件套；强制 work-item 目录在合并时的串行唯一性"
   - id: AID-2026-117
     state: FREE
     note: "do not trust this row: external numbering is already at 188 in flight. Re-scan main's work-items tree immediately before any reservation push; the next plausibly free number is >= 189."
