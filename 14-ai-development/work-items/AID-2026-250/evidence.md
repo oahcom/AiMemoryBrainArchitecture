@@ -166,3 +166,12 @@ mutation file=reviews/complexity/architecture-complexity-assessment.zh-CN.md fie
 mutation file=reviews/complexity/architecture-complexity-assessment.zh-CN.md field=evidence_baseline exit=1
 MUTATION OK: 12 of 12 deletions rejected
 ```
+
+ 
+### Required-context verification and final mutation run
+
+Exact tested head: `aab994d3e40671a41012b8110a3b2fa84aec359f`. Existing gates run: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45947620221 . The required `Schema non-empty audit (hard gate)` job and mutation step: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45947620221/job/140335838728 . The run's stdout is the same 4 PASS lines, `SUMMARY files=4 failures=0`, 8 unit tests `OK`, `baseline_exit=0`, 12 mutation lines each `exit=1`, and `MUTATION OK: 12 of 12 deletions rejected` as transcribed above. This run was on the exact `aab994d3...` head.
+
+All 16 required contexts reported SUCCESS on that exact head: GOV-DOC-001 structural checks; Branch freshness vs base; audit; GOV-DOC-002 metadata checks; BMCP protocol index (hard gate); BMCP conformance suite (hard gate); Schema non-empty audit (hard gate); Bilingual docs coverage (ratchet); Rust clippy (hard gate); Repository hygiene (hard gate); Rust format (hard gate); Rust doctests (hard gate); Session Evidence; Session Evidence self-test (base); Session Evidence self-test (head); rust-workspace-test. The additional Work Item manifest schema check also succeeded. Branch freshness reported success and the compare against main `af2660d55a93278157fa6668aba338daf81e127c` reported `behind_by=0`.
+
+Branch API reports `protected=true` and exposes the same 16 required contexts. Direct GET of `/branches/main/protection` and its required-status-check subresource returned HTTP 403 (Resource not accessible by integration), and repository rulesets returned an empty list. No branch-protection setting was changed. The merge will be attempted only through GitHub's merge method after exact-head checks and behind=0 are revalidated.
