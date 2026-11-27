@@ -4988,6 +4988,90 @@ def run_unbound_emissions() -> None:
             )
 
 
+def run_m02_optional_approval_identity_fields() -> None:
+    """M-02: The gate validates `decision_status`; for `Approved` it requires
+    `approved_version`, `approval_scope` and `approval_applicability`, and DM-10
+    binds the body hash to `approved_version`. It does not require `approver` or
+    `decision_date` to be present, and does not verify that any approval exists.
+
+    This feature test pins the negative boundary: optional identity/date fields
+    may be absent without turning a structurally valid Draft document into an
+    error. It does not assert that a policy-required approval has occurred.
+    """
+    with_fields = BASE.replace(
+        "decision_status: Draft",
+        'decision_status: Draft\n      approver: "reviewer@example.invalid"\n'
+        '      decision_date: "2026-11-27"',
+    )
+    without_fields = with_fields.replace(
+        '      approver: "reviewer@example.invalid"\n', ""
+    ).replace('      decision_date: "2026-11-27"\n', "")
+    errors, _ = check_document(FILE, doc(without_fields))
+    record(
+        "M-02 does not require approver or decision_date",
+        not errors,
+        f"  unexpected: {errors}",
+    )
+
+
+def run_security_readme_canonical_status() -> None:
+    """The security-governance guide must describe the five files by their
+    authoritative `canonical_status: Canonical` frontmatter, not Candidate.
+
+    The README is navigation, not the normative source; Informative/Draft and
+    the non-approval/non-conformance disclaimer remain explicit.
+    """
+    root = Path(__file__).resolve().parents[1]
+    names = (
+        "global-forget-target-inventory-and-completion-evidence.md",
+        "forget-retention-backup-and-erasure-policy.md",
+        "principal-actor-and-authorization-contract.md",
+        "scope-and-revocation-policy.md",
+        "security-and-identity-overview.md",
+    )
+    readme_paths = (
+        root / "09-security-governance" / "README.md",
+        root / "docs/en/09-security-governance/README.md",
+        root / "docs/zh-CN/09-security-governance/README.md",
+    )
+    readmes = [path.read_text(encoding="utf-8") for path in readme_paths]
+    readme = readmes[0]
+    obsolete = ("remain **Candidate / Informative**", "remain Candidate / Informative",
+                "五份文档均保持 Candidate / Informative")
+    declaration = (
+        "Each of the five documents declares `canonical_status: Canonical` in its own frontmatter. "
+        "That field is authoritative; this README is a guide, not a normative source."
+    )
+    disclaimers = (
+        "does not ratify Phase 3.x decisions",
+        "establish implementation/conformance evidence",
+    )
+    statuses_ok = True
+    details: list[str] = []
+    for name in names:
+        path = root / "09-security-governance" / name
+        metadata = read_metadata(path.read_text(encoding="utf-8"))
+        authority = (metadata or {}).get("authority", {})
+        approval = (metadata or {}).get("lifecycle", {}).get("approval", {})
+        if (authority.get("canonical_status") != "Canonical"
+                or authority.get("normative_status") != "Informative"
+                or approval.get("decision_status") != "Draft"
+                or approval.get("approved_version") is not None):
+            statuses_ok = False
+            details.append(name)
+    ok = (
+        all(not phrase in text for text in readmes for phrase in obsolete)
+        and declaration in readme
+        and all(item in readme for item in disclaimers)
+        and statuses_ok
+    )
+    record(
+        "09-security-governance README matches five Canonical frontmatters",
+        ok,
+        f"  stale wording/status mismatch: {details}; declaration/disclaimer missing",
+    )
+
+
 def main() -> int:
     print("check_document_management self-check")
     run_parser()
@@ -5020,6 +5104,8 @@ def main() -> int:
     run_bilingual_count()
     run_unreadable_walk()
     run_manual_controls()
+    run_m02_optional_approval_identity_fields()
+    run_security_readme_canonical_status()
     run_count_vocabulary()
     run_skip_boundary()
     run_policy_assertions()
