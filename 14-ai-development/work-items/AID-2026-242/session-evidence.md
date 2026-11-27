@@ -51,7 +51,7 @@ document_metadata:
 - Attribution: `user-authorized operator (delegated by account owner)`, 2026-11-27. 代理登记，非自然人 Owner 签署.
 - Session ID: NOT_RECORDED.
 - Original branch: `docs/2026-11-26-aid-2026-109-d-memory-brain-root-restore`; original head: `e476fef38b998cf35e75043fb030fa1fb2053d26`.
-- Original base: `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c`; current fetched main at initial reconciliation: `788fbc011877a14976fc0a974ffe2e013dd9991b`; latest fetched main: `f18adc9fa1d06837433a09498f5297bf13b35756`.
+- Original base: `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c`; current fetched main at initial reconciliation: `788fbc011877a14976fc0a974ffe2e013dd9991b`; latest fetched main: `bc741bdce7b47d3695d85fa9649fe9506f23c595`.
 - Original D ID `AID-2026-109` collided with the main I Security & Governance work item (PR #1300); D work item reassigned to `AID-2026-242`. Main's I work item at AID-2026-109 is retained.
 - Source branch/head: `session-d-memory-brain-2026-11-16` @ `b525e1f8fee2471a131e4a38efda99804045e424`.
 - Exact source blob: `6b37c91033fda21f072e2a3bde6f274663b1e76e`.
@@ -82,5 +82,13 @@ The original D scope remains one path: `03-memory-brain/canonical-memory-store.m
 - Second sync merge: `51ac5e254293242c1112f97579608bd89a66fb51` (parents include prior W4 head and `origin/main` `f18adc9fa1d06837433a09498f5297bf13b35756`); behind count is 0.
 - Final validation against base `f18adc9fa1d06837433a09498f5297bf13b35756` and head `51ac5e254293242c1112f97579608bd89a66fb51`: 27 bilingual checker tests passed; bilingual checker PASS (9 changed paths, 0 new gaps); GOV-DOC-002 incremental check PASS (no violations).
 - Pushed PR head `7f71f083aad6b14eefad804e23e66b963a169eb3` has 16 distinct latest required-context check runs, all completed/success. The first Session Evidence attempt failed only because the PR Work Item ID line contained explanatory text; the body was corrected to the bare ID and the latest Session Evidence rerun passed.
-- GitHub compare `main...PR head`: `ahead_by=21`, `behind_by=0`; merge base equals main `f18adc9fa1d06837433a09498f5297bf13b35756`.
+- GitHub compare `main...PR head` at the previous head: `ahead_by=21`, `behind_by=0`; merge base equals main `f18adc9fa1d06837433a09498f5297bf13b35756`.
 - Classic branch protection read returned HTTP 403 `Resource not accessible by integration`; rulesets endpoint returned `[]`. `strict` and `enforce_admins` could not be independently verified. PR merge and post-merge blob readback remain pending; no merge result is asserted.
+
+
+## Latest main synchronization and schema (2026-11-27)
+
+- Latest fetched main: `bc741bdce7b47d3695d85fa9649fe9506f23c595`. A third `git merge --no-ff origin/main` completed without conflicts; merge commit `88a3bba2875f53bd5cac0b834bd202c159f7c1d2`. It retained AID-2026-251's concurrent schema and INDEX entries and preserved the I work item's updated AID-2026-109 files.
+- The AID-2026-242 manifest now satisfies the new Work Item manifest schema. The read-only repository inventory reports AID-2026-242 as COMPLIANT (1 compliant, 110 legacy violations).
+- Local schema check: `python3 scripts/ci/check_work_item_manifest_schema.py`; exit 0; AID-2026-242 appears under `COMPLIANT`.
+- Exact-head CI and final compare must be refreshed after this schema-compliant manifest update is pushed.

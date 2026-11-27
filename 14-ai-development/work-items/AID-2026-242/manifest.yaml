@@ -1,73 +1,132 @@
-record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
-registration_stage: "STAGE_0"
-registration_status: "DRAFT_RESTRICTED_SOURCE_RECOVERY"
-work_item_id: "AID-2026-242"
-id_status: "PROVISIONAL"
-title: "Restricted recovery of the D canonical-memory-store source root"
-repository: "oahcom/AiMemoryBrainArchitecture"
-base_branch: "main"
-base_commit_sha: "b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c"
-latest_sync_main_commit: "f18adc9fa1d06837433a09498f5297bf13b35756"
-branch: "docs/2026-11-26-aid-2026-109-d-memory-brain-root-restore"
-pull_request: "1297"
-attribution:
-  actor: "user-authorized operator (delegated by account owner)"
-  date: "2026-11-27"
-  signature_status: "代理登记，非自然人 Owner 签署"
+work_item_id: AID-2026-242
+title: "Restricted recovery of the D canonical-memory-store source root with AID-2026-089 authority caveat"
+class: DOC/MEMORY-BRAIN
+risk: R2
+risk_rationale: >-
+  Restoring a historical source that contains an I-for-Forget-Fence phrase can
+  misstate authority. A permanent conflict notice and Candidate/Informative
+  status prevent that phrase from being treated as current normative authority.
+status: IMPLEMENTED_ACCEPTANCE_PENDING
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner D; no acceptance or normative approval is inferred"
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c
+latest_sync_main_commit: bc741bdce7b47d3695d85fa9649fe9506f23c595
+branch: docs/2026-11-26-aid-2026-109-d-memory-brain-root-restore
+pull_request: 1297
+authority:
+  signature_status: "代理裁决，非自然人 Owner 签署"
+  normative_approval: NOT_GRANTED
+  source_owner_acceptance: NOT_RECORDED
 scope:
-  objective: "Continue PR #1297 under AID-2026-242: preserve the existing main AID-2026-109 I work item; apply the AID-2026-089 authority-conflict notice and Candidate/Informative status to the D canonical-store source; restore its EN/ZH-CN mirror content; retain current main bilingual-checker behavior."
-  restored_paths:
-    - "03-memory-brain/canonical-memory-store.md"
-    - "docs/en/03-memory-brain/canonical-memory-store.md"
-    - "docs/zh-CN/03-memory-brain/canonical-memory-store.md"
+  objective: >-
+    Continue PR #1297 under AID-2026-242: preserve main's distinct AID-2026-109
+    I work item; apply the AID-2026-089 authority-conflict notice and
+    Candidate/Informative status to the D canonical-store source; restore the
+    EN/ZH-CN mirror content; retain main's current bilingual-checker behavior.
+  files_changed:
+    - 03-memory-brain/canonical-memory-store.md
+    - docs/en/03-memory-brain/canonical-memory-store.md
+    - docs/zh-CN/03-memory-brain/canonical-memory-store.md
+    - 14-ai-development/work-items/AID-2026-242/evidence.md
+    - 14-ai-development/work-items/AID-2026-242/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-242/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-242/prompt-v2.md
+    - 14-ai-development/work-items/AID-2026-242/session-evidence.md
+    - 14-ai-development/work-items/INDEX.md
   excluded_paths:
-    - "03-memory-brain/commit-cursor-semantics.md"
-    - "03-memory-brain/forget-fence-and-completion-contract.md"
-    - "03-memory-brain/forget-fence-operation-and-publication-gate.md"
-    - "04-memory-compiler/**"
-    - "05-memory-runtime/**"
-  evidence: "14-ai-development/work-items/AID-2026-242/evidence.md"
-  exclusions: ["No runtime changes", "No validator semantic changes", "No schema/test/workflow changes", "No 04/05 changes", "No Issue closure", "No Owner acceptance fabricated"]
+    - 03-memory-brain/commit-cursor-semantics.md
+    - 03-memory-brain/forget-fence-and-completion-contract.md
+    - 03-memory-brain/forget-fence-operation-and-publication-gate.md
+    - 04-memory-compiler/**
+    - 05-memory-runtime/**
+  exclusions:
+    - "No runtime changes"
+    - "No validator semantic changes"
+    - "No Issue closure"
+    - "No Owner acceptance fabricated"
   governance_scope_configuration:
-    - "Fetched main 788fbc011877a14976fc0a974ffe2e013dd9991b already registers 03-memory-brain and 09-security-governance in the GOV-DOC-002 governed-root registry and NORMATIVE_ROOTS"
+    - "Fetched main bc741bdce7b47d3695d85fa9649fe9506f23c595 already registers 03-memory-brain and 09-security-governance in the GOV-DOC-002 governed-root registry and NORMATIVE_ROOTS"
     - "Retain main checker implementation; branch root additions are already covered and no checker behavior is removed"
+evidence: 14-ai-development/work-items/AID-2026-242/evidence.md
+documentation:
+  - path: 03-memory-brain/canonical-memory-store.md
+    relationship: reference
+  - path: docs/en/03-memory-brain/canonical-memory-store.md
+    relationship: reference
+  - path: docs/zh-CN/03-memory-brain/canonical-memory-store.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-242/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-242/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-242/prompt-v2.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-242/session-evidence.md
+    relationship: evidence
 source:
-  branch: "session-d-memory-brain-2026-11-16"
-  branch_head: "b525e1f8fee2471a131e4a38efda99804045e424"
-  source_path: "03-memory-brain/canonical-memory-store.md"
-  source_blob_sha: "6b37c91033fda21f072e2a3bde6f274663b1e76e"
-  main_en_mirror_before: "414fe03fd40fb8ad46061d2d8c7d29ba2667f252"
-  main_zh_mirror_before: "34e0755a079f085df65c2a180cc59b6aaea7ea78"
+  branch: session-d-memory-brain-2026-11-16
+  branch_head: b525e1f8fee2471a131e4a38efda99804045e424
+  source_path: 03-memory-brain/canonical-memory-store.md
+  source_blob_sha: 6b37c91033fda21f072e2a3bde6f274663b1e76e
+  main_en_mirror_before: 414fe03fd40fb8ad46061d2d8c7d29ba2667f252
+  main_zh_mirror_before: 34e0755a079f085df65c2a180cc59b6aaea7ea78
   exact_body_preserved_after_notice: true
   fence_conflict: "Section 17 I-for-Forget-Fence wording; AID-2026-089 controls; informative-only notice added"
 classification:
   canonical_memory_store: "CONFLICTS_WITH AID-2026-089 (section 17 wording only); canonical_status Candidate; normative_status Informative"
-  gate_a_d_root: "RESTORED_CANDIDATE_INFORMATIVE; Owner acceptance and normative approval OPEN"
+  gate_a_d_root: "Candidate/Informative; Owner acceptance and normative approval OPEN"
   gate_a: "PARTIAL / OPEN"
   gate_b: "NOT VERIFIED"
   issue_1212: "OPEN"
 identifier_allocation:
-  id_status: "PROVISIONAL"
-  observed_main: "92a759ec1a8c748fc4091015a3a3e8aa97ddc3e3"
-  latest_sync_main: "f18adc9fa1d06837433a09498f5297bf13b35756"
-  observed_max_id: "AID-2026-240"
-  originally_requested_id: "AID-2026-109"
-  requested_id: "AID-2026-242"
-  assigned_id: "AID-2026-242"
+  id_status: PROVISIONAL
+  observed_main: 92a759ec1a8c748fc4091015a3a3e8aa97ddc3e3
+  latest_sync_main: bc741bdce7b47d3695d85fa9649fe9506f23c595
+  observed_max_id: AID-2026-251
+  originally_requested_id: AID-2026-109
+  requested_id: AID-2026-242
+  assigned_id: AID-2026-242
   reassignment_date: "2026-11-27"
-  reassignment_reason: "AID-2026-109 is occupied on main by the distinct I Security & Governance root restoration (PR #1300). The D work item was moved to the explicitly assigned AID-2026-242."
-  uniqueness_scope: "Verified against fetched origin/main 788fbc011877a14976fc0a974ffe2e013dd9991b; AID-2026-242 is absent on main and is explicitly assigned to this task."
+  reassignment_reason: >-
+    AID-2026-109 is occupied on main by the distinct I Security & Governance
+    root restoration (PR #1300). The D work item was moved to the explicitly
+    assigned AID-2026-242; this assigned ID remains reserved for this task.
+  uniqueness_scope: >-
+    AID-2026-242 was explicitly assigned to this task and is absent from the
+    fetched main tree at bc741bdce7b47d3695d85fa9649fe9506f23c595.
   merge_time_rule: "Preserve main's AID-2026-109 I work item; this D work item remains AID-2026-242."
-
-
 session_evidence:
   - role: RENUMBERING_AND_CONFLICT_RESOLUTION_SESSION
     issue_refs:
       - "#1212"
     implementing_ai_session: NOT_RECORDED
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-242/prompt-v2.md
-    executed_prompt_sha256: "4bd120dac05ef592acb87b7b6fb5929ca6ccf8617a7fda8be179f39730d1b5fb"
+    executed_prompt_sha256: 4bd120dac05ef592acb87b7b6fb5929ca6ccf8617a7fda8be179f39730d1b5fb
     executed_prompt_bytes: 3501
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-242/session-evidence.md
+implementation:
+  status: NOT_APPLICABLE
+  summary: "Documentation-only authority caveat and bilingual mirror correction; no runtime implementation."
+  files_changed:
+    - 03-memory-brain/canonical-memory-store.md
+    - docs/en/03-memory-brain/canonical-memory-store.md
+    - docs/zh-CN/03-memory-brain/canonical-memory-store.md
+    - 14-ai-development/work-items/AID-2026-242/evidence.md
+    - 14-ai-development/work-items/AID-2026-242/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-242/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-242/prompt-v2.md
+    - 14-ai-development/work-items/AID-2026-242/session-evidence.md
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - "python3 scripts/test_check_bilingual_docs.py: 27 tests passed"
+    - "python3 scripts/check_bilingual_docs.py: PASS; 9 changed paths inspected; 0 new bilingual gaps"
+    - "python3 scripts/check_document_management.py --require-changed REF: PASS; no GOV-DOC-002 violations in changed paths"
+    - "python3 scripts/ci/check_work_item_manifest_schema.py: read-only schema validation"
