@@ -1,9 +1,5 @@
 name: Existing gates
 
-permissions:
-  contents: read
-  issues: read
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
@@ -63,6 +59,7 @@ on:
 
 permissions:
   contents: read
+  issues: read
 
 jobs:
   protocol-index:
