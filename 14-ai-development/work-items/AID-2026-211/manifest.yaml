@@ -63,7 +63,7 @@ evidence:
   session: 14-ai-development/work-items/AID-2026-211/session-evidence.md
 session_evidence:
   - role: "IMPLEMENTATION_SESSION"
-    issue_refs: []
+    issue_refs:
     implementing_ai_session: "NOT_RECORDED"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-211/prompt-v1.md"
     executed_prompt_sha256: "9540424c8f279857360e5f1d8dac12166f1d080cddd9234d1f13258f21c11a3e"
