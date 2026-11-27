@@ -1,10 +1,8 @@
 # Architecture Complexity Assessment and Budget (English)
 
-- assessor: X — Principal Architecture Complexity Assessment (historical source; original session identity not recorded)
+- Assessor: X — Principal Architecture Complexity Assessment
 - Repository: `oahcom/AiMemoryBrainArchitecture`
 - Exact baseline: `main@b372b62c640a2b656e54b6db62a4ee67d7d8c001`
-- assessed_version: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
-- evidence_baseline: `main@b372b62c640a2b656e54b6db62a4ee67d7d8c001` (historical baseline named by source report; not a claim of contemporaneous session signature)
 - Date: 2026-11-17
 - Method: Static, source-grounded architecture assessment
 - Status: **PROVISIONAL — NOT PROVEN**

@@ -4,9 +4,6 @@
 - 审查日期：2026-11-17
 - 仓库：`oahcom/AiMemoryBrainArchitecture`
 - Main 基线：`b372b62c640a2b656e54b6db62a4ee67d7d8c001`
-- assessor: R — Principal System-wide Architecture Risk Assessment（历史来源；原始会话身份未记录）
-- assessed_version: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
-- evidence_baseline: `main@b372b62c640a2b656e54b6db62a4ee67d7d8c001`（源报告记载的历史基线；不声称存在同期会话签名）
 - 审查分支：`review/session-1-system-wide-risk-2026-11-17`
 - 状态：**全系统风险初步评估——不构成架构批准**
 - 范围：A–I、Storage、跨 Owner 协议、治理和生产可运维性影响。
