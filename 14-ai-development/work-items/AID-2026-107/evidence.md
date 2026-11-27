@@ -222,7 +222,7 @@ Rules: the original 095 matrix uses only PASS / FAIL / NOT EVIDENCED. AID-082/09
 |---|---|---|---|
 | 1 | Branch synchronized with current main | SATISFIED at PR #1299 merge; reviewed base `a7e7c64bfd6c6d709a0a7b55358f94b8535815c1`, merge commit `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c` | Final PR Head was 0 behind main immediately before merge. |
 | 2 | Cross-Owner role dispositions (10 roles: 3 ACCEPT / 7 CONDITIONAL / 0 REJECT) | SATISFIED as recorded proxy dispositions | Seven conditional obligations remain; no natural-person Owner signature is claimed. |
-| 3 | Exact-head CI | SATISFIED — 16/16 SUCCESS on final Head `d40a05c9abc68b2a4a9b007805e3e1c34e4128f9`; merged as `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c` | All 16 required contexts succeeded on the exact final PR Head; main equals the merge commit. |
+| 3 | Exact-head CI | SATISFIED — 16/16 SUCCESS on final Head `d40a05c9abc68b2a4a9b007805e3e1c34e4128f9`; merged as `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c` | All 16 required contexts succeeded on the exact final PR Head; the PR #1299 merge commit is an ancestor of current main. |
 | 4 | Complete A–I + Storage/Consistency composition review artifact | OPEN | Owner A coordinates the complete exact-version package across eight flows and nine checkpoint dimensions; relevant Owners accept their own boundaries. |
 | 5 | Missing D/E/F/I normative roots/contracts | OPEN — scope adjudicated; 5 identified roots to restore separately; F/I roots need Owner identification | Restore the 5 identified D/E roots in a separate Owner-reviewed PR; identify or explicitly replace the absent F/I README roots. No historical/undecided file enters main without Owner ruling. |
 | 6 | Storage/Consistency physical contract and evidence | OPEN — contract present, evidence missing | Candidate: `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (Candidate/Draft/Unverified/Informative). SC-04/05/06/10/12/13/17/18 remain EVIDENCE_REQUIRED; backend, WAL/flush/torn-write, crash/restore, replica visibility, fail-closed projection, anti-rollback, accepted COC/GID and repeatable RPO/RTO evidence plus exact-version Owner dispositions are missing. |
@@ -536,6 +536,8 @@ Gate A item 5 is now executable rather than an undifferentiated “IMPL2” plac
 ## 11. PR #1299 post-merge closeout
 
 - PR #1299 merged at `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c` from final Head `d40a05c9abc68b2a4a9b007805e3e1c34e4128f9`.
-- All 16 required contexts are SUCCESS on that exact final Head; main HEAD equals the merge commit.
+- All 16 required contexts are SUCCESS on that exact final Head; the PR #1299 merge commit is an ancestor of current main.
 - Post-merge Git blob equality (PR Head = main): Canonical `cce956d97b7a6d969bb3245fe0890905ca6d3979`; EN `101dcc3ca2a1d0c8358505a5a5cc221a5aa85cab`; ZH-CN `1b478d1114613adb3f7d3bbdcd913d403a78c36f`.
 - Gate A checklist item 3 (exact-head CI) is now SATISFIED. Items 4–8 remain OPEN; Gate A remains PARTIAL / OPEN and Gate B remains PARTIAL / OPEN (NOT VERIFIED).
+
+[executed on device: VM-0-9-ubuntu (3a8ee5f7-b4d2-46f3-9a7d-69e3147618fd)]

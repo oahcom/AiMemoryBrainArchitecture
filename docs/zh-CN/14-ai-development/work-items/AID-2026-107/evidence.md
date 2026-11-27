@@ -219,7 +219,7 @@ document_metadata:
 |---|---|---|---|
 | 1 | 分支与当前 main 同步 | PR #1299 合并时 SATISFIED；审查基线 `a7e7c64bfd6c6d709a0a7b55358f94b8535815c1`，merge commit `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c` | 最终 PR Head 合并前相对 main 为 0 behind。 |
 | 2 | 跨 Owner 角色处置（10 个角色：3 ACCEPT / 7 CONDITIONAL / 0 REJECT） | 已记录的代理处置为 SATISFIED | 7 项条件义务仍在；未声称自然人 Owner 签署。 |
-| 3 | 精确 Head CI | SATISFIED — 最终 Head `d40a05c9abc68b2a4a9b007805e3e1c34e4128f9` 上 16/16 SUCCESS；已合并为 `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c` | 全部 16 项必需上下文均在精确最终 PR Head 成功；main 等于 merge commit。 |
+| 3 | 精确 Head CI | SATISFIED — 最终 Head `d40a05c9abc68b2a4a9b007805e3e1c34e4128f9` 上 16/16 SUCCESS；已合并为 `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c` | 全部 16 项必需上下文均在精确最终 PR Head 成功；PR #1299 的 merge commit 是当前 main 的祖先。 |
 | 4 | 完整 A–I + Storage/Consistency 组合审查工件 | OPEN | Owner A 协调覆盖 8 条流程和 9 个检查点维度的完整精确版本包；相关 Owner 接受自身边界。 |
 | 5 | 缺失的 D/E/F/I 规范根/合同 | OPEN — 范围已裁决；5 个规范根需由单独 PR 恢复；F/I 根需 Owner 指认 | 通过单独 Owner 审查 PR 恢复 5 个已识别 D/E 根；由 Owner 指认或明确批准替代缺失的 F/I README 根。未经 Owner 裁决，历史/未决文件不得进入 main。 |
 | 6 | Storage/Consistency 物理合同与证据 | OPEN — 合同已存在，证据缺失 | 候选合同：`10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78`（Candidate/Draft/Unverified/Informative）。SC-04/05/06/10/12/13/17/18 仍为 EVIDENCE_REQUIRED；后端、WAL/flush/torn-write、崩溃/恢复、副本可见性、fail-closed projection、防回滚、已接受 COC/GID、可重复 RPO/RTO 证据和精确版本 Owner 处置仍缺。 |
@@ -533,6 +533,8 @@ Gate A 第 5 项现已从笼统的“IMPL2”占位变为可执行状态：**OPE
 ## 11. PR #1299 合并后验收记录
 
 - PR #1299 已从最终 Head `d40a05c9abc68b2a4a9b007805e3e1c34e4128f9` 合并，merge commit 为 `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c`。
-- 该精确最终 Head 上 16 项必需检查全部 SUCCESS；main HEAD 等于 merge commit。
+- 该精确最终 Head 上 16 项必需检查全部 SUCCESS；PR #1299 的 merge commit 是当前 main 的祖先。
 - 合并后 Git blob 核对（PR Head = main）：Canonical `cce956d97b7a6d969bb3245fe0890905ca6d3979`；EN `101dcc3ca2a1d0c8358505a5a5cc221a5aa85cab`；ZH-CN `1b478d1114613adb3f7d3bbdcd913d403a78c36f`。
 - Gate A 清单第 3 项（精确 Head CI）现为 SATISFIED。第 4–8 项仍 OPEN；Gate A 仍为 PARTIAL / OPEN，Gate B 仍为 PARTIAL / OPEN（NOT VERIFIED）。
+
+[executed on device: VM-0-9-ubuntu (3a8ee5f7-b4d2-46f3-9a7d-69e3147618fd)]
