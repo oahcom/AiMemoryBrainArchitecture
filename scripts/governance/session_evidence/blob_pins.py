@@ -840,17 +840,32 @@ def enumerate_blob_pins(source: str) -> list[BlobPin]:
             inherited_commit,
         )
 
-        # First process all digest-bearing keys. This guarantees that
-        # digest-only declarations cannot disappear during traversal.
-        consumed_paths = set()
+        # Classify the fields in this mapping before binding anything.
+        # Both sets are deliberately local to this mapping: a path in a
+        # parent, sibling, or nested mapping cannot satisfy a digest here.
+        digest_fields = {}
+        path_fields = set()
 
-        for key, digest in value.items():
+        explicit_path_keys = {
+            path_key
+            for path_key, _algorithm in _EXPLICIT_BINDINGS.values()
+        }
+
+        for key in value:
             binding = _digest_binding(key)
 
-            if binding is None:
-                continue
+            if binding is not None:
+                digest_fields[key] = binding
+                path_fields.add(binding[0])
 
-            path_key, algorithm = binding
+            if key in explicit_path_keys or key.endswith("_file"):
+                path_fields.add(key)
+
+        # A mapping becomes a pin declaration only through a digest field.
+        # Path-only mappings are ordinary path declarations and are ignored.
+        # Digest-only mappings, on the other hand, are malformed pins.
+        for key, (path_key, algorithm) in digest_fields.items():
+            digest = value[key]
             key_location = _location(location, key)
             path_location = _location(location, path_key)
 
@@ -883,67 +898,10 @@ def enumerate_blob_pins(source: str) -> list[BlobPin]:
                     source_commit=local_commit,
                 )
             )
-            consumed_paths.add(path_key)
 
-        # Then reject recognized path-only declarations.
-        for key, path_value in value.items():
-            if key in consumed_paths:
-                continue
-
-            if (
-                key == "path"
-                and location.startswith("$.declared_exceptions[")
-            ):
-                continue
-
-            corresponding_digest = None
-
-            for digest_key in _EXPLICIT_BINDINGS:
-                expected_path, _ = _EXPLICIT_BINDINGS[digest_key]
-                if expected_path == key:
-                    corresponding_digest = digest_key
-                    break
-
-            if corresponding_digest is None:
-                if key.endswith("_file"):
-                    candidate = key[:-5] + "_sha256"
-                    if candidate in value:
-                        continue
-                    corresponding_digest = candidate
-
-            if (
-                corresponding_digest is None
-                or corresponding_digest not in value
-            ):
-                # Generic path counterpart for *_blob.
-                candidate = key + "_blob"
-                if candidate in value:
-                    continue
-
-                # A path-like key is considered a pin only when it belongs
-                # to a known binding class.
-                if key in (
-                    "root",
-                    "path",
-                    "en_mirror",
-                    "zh_cn_mirror",
-                    "evidence_file",
-                    "prompt_file",
-                    "executed_prompt_snapshot_file",
-                ):
-                    possible = [
-                        digest_key
-                        for digest_key, (path_key, _) in
-                        _EXPLICIT_BINDINGS.items()
-                        if path_key == key
-                    ]
-                    if possible:
-                        raise BlobPinError(
-                            f"{_location(location, key)}: "
-                            f"no sibling digest {possible[0]!r}"
-                        )
-
-            # Ordinary non-pin fields are intentionally ignored.
+        # path_fields is intentionally collected even when no digest is
+        # present. Such fields are path declarations, not incomplete pins.
+        # It must not be used to search outside this mapping for a digest.
 
         # Recurse after binding the current mapping so nested mappings
         # inherit the correct source commit.

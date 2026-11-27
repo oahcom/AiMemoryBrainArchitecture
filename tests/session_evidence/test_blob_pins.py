@@ -67,13 +67,157 @@ class BlobPinContractTests(unittest.TestCase):
         ):
             self.verify(manifest)
 
-    def test_path_only_is_rejected_with_missing_digest(self):
-        """Mutation: accepting a path without its digest must fail."""
+    def test_path_only_is_not_a_pin_contract_change(self):
+        """C1 contract change: path-only declarations are not pins."""
         manifest = 'evidence_file: "docs/evidence.md"\n'
+        result = self.verify(manifest)
+        self.assertEqual(len(result), 0)
+        self.assertEqual(result, [])
+        self.assertEqual(self.calls, [])
+
+    def test_declared_exception_path_only_is_not_a_pin(self):
+        """Path-only exception records use the same structural rule."""
+        manifest = (
+            "declared_exceptions:\n"
+            '  - path: "docs/evidence.md"\n'
+        )
+        result = self.verify(manifest)
+        self.assertEqual(len(result), 0)
+        self.assertEqual(result, [])
+        self.assertEqual(self.calls, [])
+
+    def test_path_and_digest_in_different_sibling_mappings_do_not_bind(self):
+        """A path in another mapping cannot satisfy a digest."""
+        manifest = (
+            "first:\n"
+            '  evidence_file: "docs/evidence.md"\n'
+            "second:\n"
+            f'  evidence_blob: "{self.sha}"\n'
+        )
         with self.assertRaisesRegex(
-            BlobPinError, "no sibling digest"
+            BlobPinError,
+            r"\$\.second\.evidence_blob: no sibling path 'evidence_file'",
         ):
             self.verify(manifest)
+
+    def test_parent_path_does_not_bind_nested_digest(self):
+        """A parent mapping's path cannot satisfy a nested digest."""
+        manifest = (
+            'root: "docs/evidence.md"\n'
+            "child:\n"
+            f'  root_blob: "{self.sha}"\n'
+        )
+        with self.assertRaisesRegex(
+            BlobPinError,
+            r"\$\.child\.root_blob: no sibling path 'root'",
+        ):
+            self.verify(manifest)
+
+    def test_nested_path_does_not_bind_parent_digest(self):
+        """A nested mapping's path cannot satisfy a parent digest."""
+        manifest = (
+            f'root_blob: "{self.sha}"\n'
+            "child:\n"
+            '  root: "docs/evidence.md"\n'
+        )
+        with self.assertRaisesRegex(
+            BlobPinError,
+            r"\$\.root_blob: no sibling path 'root'",
+        ):
+            self.verify(manifest)
+
+    def test_invalid_digest_with_sibling_path_fails_closed(self):
+        """An invalid digest remains an error, not a path-only record."""
+        manifest = (
+            'evidence_file: "docs/evidence.md"\n'
+            'evidence_blob: "not-a-git-sha"\n'
+        )
+        with self.assertRaisesRegex(
+            BlobPinError,
+            r"\$\.evidence_blob: invalid digest",
+        ):
+            self.verify(manifest)
+
+    def test_path_only_suffix_binding_fields_are_not_pins(self):
+        """Recognized path fields without digest siblings are not pins."""
+        manifest = (
+            'evidence_file: "docs/evidence.md"\n'
+            'prompt_file: "docs/prompt.md"\n'
+            'executed_prompt_snapshot_file: "docs/executed.md"\n'
+        )
+        result = self.verify(manifest)
+        self.assertEqual(len(result), 0)
+        self.assertEqual(result, [])
+        self.assertEqual(self.calls, [])
+
+    def test_sha256_digest_cannot_bind_path_in_another_mapping(self):
+        """A SHA-256 digest must bind its path in the same mapping."""
+        expected = hashlib.sha256(self.raw).hexdigest()
+        manifest = (
+            "first:\n"
+            '  prompt_file: "docs/evidence.md"\n'
+            "second:\n"
+            f'  prompt_sha256: "{expected}"\n'
+        )
+        with self.assertRaisesRegex(
+            BlobPinError,
+            r"\$\.second\.prompt_sha256: no sibling path 'prompt_file'",
+        ):
+            self.verify(manifest)
+
+    def test_multiple_mapping_pins_preserve_order_and_locations(self):
+        """Independent mappings produce pins in traversal order."""
+        manifest = (
+            "first:\n"
+            '  evidence_file: "docs/evidence.md"\n'
+            f'  evidence_blob: "{self.sha}"\n'
+            "second:\n"
+            '  evidence_file: "docs/evidence.md"\n'
+            f'  evidence_blob: "{self.sha}"\n'
+        )
+        result = self.verify(manifest)
+        self.assertEqual(len(result), 2)
+        self.assertEqual(
+            [pin.location for pin in result],
+            [
+                "$.first.evidence_blob",
+                "$.second.evidence_blob",
+            ],
+        )
+        self.assertEqual(
+            [pin.path for pin in result],
+            ["docs/evidence.md", "docs/evidence.md"],
+        )
+
+    def test_flow_mapping_uses_structural_binding_rules(self):
+        """Flow mappings obey the same local path/digest contract."""
+        valid_manifest = (
+            "pins: [{evidence_file: "
+            '"docs/evidence.md", evidence_blob: '
+            f'"{self.sha}"'
+            "}]"
+        )
+        result = self.verify(valid_manifest)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(
+            result[0].location,
+            "$.pins[0].evidence_blob",
+        )
+
+        path_only_manifest = (
+            'pins: [{evidence_file: "docs/evidence.md"}]\n'
+        )
+        result = self.verify(path_only_manifest)
+        self.assertEqual(len(result), 0)
+
+        digest_only_manifest = (
+            f'pins: [{{evidence_blob: "{self.sha}"}}]\n'
+        )
+        with self.assertRaisesRegex(
+            BlobPinError,
+            r"\$\.pins\[0\]\.evidence_blob: no sibling path 'evidence_file'",
+        ):
+            self.verify(digest_only_manifest)
 
     def test_one_character_digest_difference_is_rejected(self):
         """Mutation: deleting the digest comparison must turn this green."""
