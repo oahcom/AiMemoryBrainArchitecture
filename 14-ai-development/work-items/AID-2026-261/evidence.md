@@ -1,3 +1,51 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-261/manifest.yaml"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "GOV-DOC-001 and both fixture suites passed on the initial PR head. GOV-DOC-002 metadata validation initially identified this record's missing document_metadata block; the block is now added. Full 16-context and negative-control proof remain pending."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords:
+      - "owner-namespace"
+      - "governance-operation-traceability"
+      - "ci-evidence"
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+  steward: "user-authorized operator (delegated by account owner)"
+---
+
 # AID-2026-261 — Execution evidence
 
 - Attribution: user-authorized operator (delegated by account owner)
