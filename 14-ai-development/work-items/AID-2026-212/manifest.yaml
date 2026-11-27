@@ -1,0 +1,106 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "IMPLEMENTATION_EVIDENCE_PENDING_FINAL_READBACK"
+work_item_id: "AID-2026-212"
+id_status: "OWNER_OR_COORDINATOR_ASSIGNED_AS_SUPPLIED"
+title: "Implement fail-closed Git blob pin integrity verification"
+date: "2026-11-26"
+
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  url: "https://github.com/oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "4fa75e7809a9319db2ab04489cc8f2f9e17fbd79"
+  implementation_branch: "fix/aid-2026-212-blob-pin-integrity"
+  carrier_issue: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1350"
+
+owning_issue:
+  number: 1350
+  url: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1350"
+  title: "Implement blob-pin integrity verification"
+
+related_issue_context:
+  defect_source:
+    number: 1349
+    url: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1349"
+    classification: "DEFECT_ORIGIN_NOT_A_CARRIER_ISSUE"
+
+scope:
+  objective: >-
+    Implement check 12 in the Session Evidence Gate. Every declared blob
+    identity must resolve to a regular committed blob and match the original
+    bytes in the merge candidate tree. Explicit historical source pins may
+    resolve only through an exact, independently retrievable source commit.
+  in_scope:
+    - "Add the standard-library-only blob_pins.py module."
+    - "Add check_12_blob_pin_integrity to validate.py."
+    - "Bind digest keys to exact sibling path keys."
+    - "Verify Git blob SHA-1 against both the tree entry and recomputed bytes."
+    - "Verify SHA-256 declarations against original committed bytes."
+    - "Support the explicitly declared d_source_blobs historical source form."
+    - "Add offline adversarial tests."
+    - "Record implementation and mutation evidence."
+  out_of_scope:
+    - "Rewrite or normalize existing historical manifests."
+    - "Require historical source blobs to exist in the current main tree."
+    - "Change checks 01, 02, 03, 04, 06, 09 or 11."
+    - "Introduce third-party YAML dependencies."
+    - "Silently skip unresolved pins."
+    - "Close Issue #1349 or Issue #1350."
+    - "Deployment or production authorization."
+
+implementation:
+  new_module: "scripts/governance/session_evidence/blob_pins.py"
+  modified_module: "scripts/governance/session_evidence/validate.py"
+  new_tests: "tests/session_evidence/test_blob_pins.py"
+  new_check_number: 12
+  runtime_requirement: "Python 3.11+, standard library only"
+  candidate_tree: "ctx.head_sha"
+  historical_source_policy: "EXACT_COMMIT_ONLY_FAIL_CLOSED"
+
+prompt:
+  prompt_file: "14-ai-development/work-items/AID-2026-212/prompt-v1.md"
+  prompt_version: "v1"
+  prompt_sha256: "e50511aab7c1f01428e90575ec430f68bf37fc4da9043106461bf3f594059299"
+  prompt_bytes: "2629"
+  prompt_provenance: "RECORDED_TASK_INPUT"
+  prompt_provenance_note: >-
+    This snapshot records the actual task requirements supplied for this
+    implementation. The coordinator must calculate SHA-256 and byte length
+    over the final committed prompt-v1.md bytes and replace the placeholders
+    before the final candidate is submitted.
+
+session_evidence:
+  - role: "IMPLEMENTER"
+    issue_refs:
+      - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1350"
+    implementing_ai_session: "CURRENT_CHATGPT_IMPLEMENTATION_SESSION"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-212/prompt-v1.md"
+    executed_prompt_sha256: "e50511aab7c1f01428e90575ec430f68bf37fc4da9043106461bf3f594059299"
+    executed_prompt_bytes: "2629"
+    executed_prompt_provenance: "VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-212/session-evidence.md"
+
+lifecycle:
+  stage_0: "IMPLEMENTATION_ARTIFACTS_PREPARED"
+  implementation: "PENDING_LOCAL_EXECUTION_AND_READBACK"
+  independent_review: "NOT_RECORDED"
+  merge: "NOT_AUTHORIZED_BY_THIS_RECORD"
+  deployment: "NOT_AUTHORIZED"
+  issue_closure: "NOT_AUTHORIZED"
+
+acceptance_criteria:
+  - "Path plus digest resolves and matches committed bytes."
+  - "Digest without path is rejected."
+  - "Path without digest is rejected."
+  - "One-character digest difference is rejected."
+  - "Corrupted returned bytes are rejected."
+  - "No-pin manifests remain unaffected."
+  - "Historical exemptions require an exact source commit."
+  - "Existing Session Evidence checks retain their semantics."
+  - "The check uses the PR candidate head tree."
+  - "Mutation tests demonstrate that the security checks are necessary."
+
+disposition: "IMPLEMENTATION_CANDIDATE"
