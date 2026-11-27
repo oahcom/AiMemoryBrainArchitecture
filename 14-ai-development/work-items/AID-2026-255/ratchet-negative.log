@@ -1,15 +1,27 @@
 AID-2026-255 ratchet-negative evidence
 
+Scan commit: 6a6eaac599d8a11c8c769433363080020482801f
+This log is committed after that commit, in a commit that touches only
+evidence files under this work-item directory. The checker reads only
+`14-ai-development/work-items/*/manifest.yaml`, so the scanned item set is
+identical at every later commit. Verify at any head with:
+
+  git diff --name-only 6a6eaac599d8a11c8c769433363080020482801f..HEAD
+
+which must list only `14-ai-development/work-items/AID-2026-255/ratchet-negative.log`
+and `14-ai-development/work-items/AID-2026-255/independent-review.md`. No
+manifest, checker, baseline or workflow file is touched after the scan commit,
+so the 91-item set below is the set at the head that carries this log.
+
 What this log is: the negative contract of the ratchet that AID-2026-268 landed,
-exercised against the landed checker and the landed baseline at scan commit
-6a6eaac599d8a11c8c769433363080020482801f.
+exercised against the landed checker and the landed baseline.
 
 The ratchet is not a green exemption. It fails when a failure appears that the
 baseline does not list (regression), and it fails when a baseline item stops
-failing (stale baseline). Case 1 and case 4 show the set is unchanged. Cases 2
-and 3 show each failure direction actually fires. Case 2 drops one real item
-from a copy of the current set, so the ratchet sees a new failure; case 3 adds
-an item no run reports, so the ratchet sees a stale baseline.
+failing (stale baseline). Cases 1 and 4 show the set is unchanged. Cases 2 and 3
+show each failure direction actually fires. Case 2 drops one real item from a
+copy of the current set, so the ratchet sees a new failure; case 3 adds an item
+no run reports, so the ratchet sees a stale baseline.
 
 What this log is not: evidence that CI ran. No workflow run, no merge and no
 Owner acceptance is claimed here. The 91 baseline items are known unresolved
