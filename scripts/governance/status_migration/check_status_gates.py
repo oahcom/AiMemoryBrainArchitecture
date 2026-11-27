@@ -52,7 +52,8 @@ REQUIRED = {"VERIFIED": 1, "REVIEWED": 2, "INTEGRATION_READY": 3,
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 EVIDENCE_FIELDS = {
     "verified": ("commands", "environment", "tested_head", "expected_result", "actual_result", "logs"),
-    "independent_review": ("reviewer", "implementer", "reviewed_head", "report", "findings_disposition"),
+    "independent_review": ("reviewer", "implementer", "reviewer_session", "implementer_session",
+                           "reviewed_head", "report", "findings_disposition"),
     "integration": ("compatibility_result", "registry_updates", "integration_report"),
     "owner_acceptance": ("authority", "decision", "decision_record"),
     "merge": ("target_branch", "merge_commit", "merge_record"),
@@ -234,6 +235,16 @@ def _identity_token(value):
     return re.sub(r"[^a-z0-9]", "", normalized)
 
 
+def _session_token(value):
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError("review sessions must be non-empty strings")
+    normalized = unicodedata.normalize("NFKC", value).strip().casefold()
+    token = re.sub(r"[^a-z0-9]", "", normalized)
+    if not token:
+        raise ValueError("review sessions must be non-empty strings")
+    return token
+
+
 def _identity(value, aliases):
     token = _identity_token(value)
     seen = set()
@@ -274,8 +285,20 @@ def _validate_evidence(name, evidence, data, lifecycle, root, subject_head):
             raise ValueError(f"{name}.{head_field} does not match manifest subject_head")
     if name == "independent_review":
         aliases = _normalized_aliases(data.get("review_identity_aliases", {}))
-        if _identity(evidence["reviewer"], aliases) == _identity(evidence["implementer"], aliases):
-            raise ValueError("REVIEWED reviewer and implementer must be different identities")
+        # Diagnostic only, never the verdict: independence is decided by the
+        # reviewing session, so two sessions on one GitHub account are the
+        # expected case and must pass.  Kept because the alias table is part of
+        # the manifest contract and must still be validated when present.
+        _same_account = (_identity(evidence["reviewer"], aliases)
+                         == _identity(evidence["implementer"], aliases))
+        # The check verifies that the manifest DECLARES two sessions.  It does
+        # not and cannot verify that two sessions existed: a session value is a
+        # string the writer chooses, and no artifact in this repository can
+        # corroborate it.
+        if _session_token(evidence["reviewer_session"]) == _session_token(
+                evidence["implementer_session"]):
+            raise ValueError(
+                "REVIEWED reviewer_session and implementer_session must be different sessions")
     for field in PATH_FIELDS[name]:
         target = _evidence_file(evidence[field], f"{name}.{field}", root, subject_head)
         # Optional independent content digest: when the manifest records a

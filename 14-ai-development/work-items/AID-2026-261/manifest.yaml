@@ -1,0 +1,91 @@
+work_item_id: AID-2026-261
+title: "Make Owner namespace and governance-operation traceability checks blocking and fixture-complete"
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  Reuses the existing read-only checkers and the already-required GOV-DOC-001
+  context. Adds focused fixtures and moves no branch-protection setting, job
+  topology, or required-context declaration. Removes the duplicate advisory
+  workflow after confirming its jobs are not required.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 386d8f57b02d8e3c511ff0e3980b9ce0af8b3028
+prompt_status: NOT_RECORDED
+prompt_provenance: DISPATCHED_TASK_FILE
+approval_scope:
+  type: Full-document
+evidence_reference:
+  - "14-ai-development/work-items/AID-2026-261/evidence.md"
+supersession:
+  supersedes: []
+  supersession_reason: null
+  effective_date: null
+archival:
+  archived_date: null
+  archival_reason: null
+  archival_reference: null
+canonical_scope_keywords:
+  - "owner-namespace"
+  - "governance-operation-traceability"
+  - "required-context-blocking"
+scope:
+  objective: >-
+    Execute the existing read-only Owner namespace and governance-operation
+    traceability checks in the required GOV-DOC-001 job, complete the eleven
+    requested positive/negative fixture cases, and remove the duplicate
+    advisory-only workflow without changing branch protection or adding jobs.
+  files_changed:
+    - ".github/workflows/bilingual-docs.yml"
+    - ".github/workflows/architecture-governance-traceability.yml"
+    - "scripts/check_owner_namespace_references.py"
+    - "tests/test_check_owner_namespace_references.py"
+    - "tests/test_check_governance_operation_traceability.py"
+    - "14-ai-development/work-items/AID-2026-261/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-261/evidence.md"
+    - "14-ai-development/work-items/AID-2026-261/session-evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1237"
+    implementing_ai_session: "ChatGPT-GPT-6-S6-C"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-261/prompt-v1.md"
+    executed_prompt_sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+    executed_prompt_bytes: 0
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-261/session-evidence.md"
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    Added both --check invocations and both unittest modules to the existing
+    GOV-DOC-001 structural-check job; removed the duplicate advisory workflow;
+    extended the Owner table ambiguity predicate and added dedicated fixture
+    tests for all eleven requested cases.
+  files_changed:
+    - ".github/workflows/bilingual-docs.yml"
+    - ".github/workflows/architecture-governance-traceability.yml"
+    - "scripts/check_owner_namespace_references.py"
+    - "tests/test_check_owner_namespace_references.py"
+    - "tests/test_check_governance_operation_traceability.py"
+tests:
+  required_context: "GOV-DOC-001 structural checks"
+  execution_evidence: "PR #1383 synchronized Head 81680b0f61d79ebc9a3fa2f54c19db94d66b94d9: GOV-DOC-001 and both suites passed; all 16 required contexts success in run set 45941445883/45941445902/45941445918/45941445932/45941445933/45941445940/45941446418."
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+acceptance:
+  gate: PENDING_OWNER_ACCEPTANCE
+
+# The exact prompt payload was available in the conversation but was not snapshotted
+# verbatim at dispatch time. The absent path and zero digest/bytes are sentinels only;
+# NOT_VERIFIED / NOT_RECORDED are the operative evidence states, not a prompt hash claim.
