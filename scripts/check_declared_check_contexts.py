@@ -26,7 +26,7 @@ permission vocabulary cannot express; it is not used here and must not be.
 `GITHUB_TOKEN` is sent when present, only to raise the anonymous rate limit.
 
 Exit codes follow the repository vocabulary:
-    0  PASS        every declared context is produced, and the two sets are equal
+    0  PASS        required ⊆ declared ⊆ produced
     1  VIOLATION   a declared context is produced by no job, is listed twice, or
                    the sets differ
     2  INCOMPLETE  a condition could not be evaluated at all
