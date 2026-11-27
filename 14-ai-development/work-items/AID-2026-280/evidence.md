@@ -18,7 +18,7 @@ document_metadata:
       last_verified_date: "2026-11-27"
       last_verification_note: "Source blobs and API response bodies read from main with cache-busting query parameters; branch-protection read denied (403)."
     usage_status: Active
-    modification_status: Draft
+    modification_status: Modified
     supersession:
       supersedes: []
       supersession_reason: null
@@ -30,8 +30,8 @@ document_metadata:
   steward: "user-authorized operator (delegated by account owner)"
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "Evidence for proxy adjudication AID-2026-280"
-    canonical_scope_id: "ai-development/req-04-ac8-conflict-evidence"
+    canonical_scope: null
+    canonical_scope_id: null
     canonical_scope_keywords:
       - "req-04"
       - "ac8"
