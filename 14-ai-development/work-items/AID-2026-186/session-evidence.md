@@ -102,5 +102,5 @@ The later session was instructed to bring PR #1335 to all-green on the latest `m
 
 # Executed prompt snapshot preservation
 
-- The exact prompt bytes that were executed are preserved at `14-ai-development/work-items/AID-2026-186/prompt-v1-executed.snapshot.txt`, restored from the pre-metadata-edit Git blob `398fa6ac6976c7d78bf154616ab6cd55f035acbc`.
+- The exact prompt bytes that were executed are preserved at `14-ai-development/work-items/AID-2026-186/prompt-v1-original.source.txt`, restored from the pre-metadata-edit Git blob `398fa6ac6976c7d78bf154616ab6cd55f035acbc`.
 - `manifest.yaml:session_evidence[0].executed_prompt_snapshot_file` points to that immutable snapshot; its SHA-256 remains `a421889d3654e49e2247b7207faef0113c188c0e28c7dd0caeea91127c21d67e` and its UTF-8 byte count remains 2285. The separately governed `prompt-v1.md` now carries required steward metadata; it is not substituted for the executed prompt bytes.
