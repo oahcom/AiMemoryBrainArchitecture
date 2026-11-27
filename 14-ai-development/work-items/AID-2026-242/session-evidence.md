@@ -75,4 +75,8 @@ The original D scope remains one path: `03-memory-brain/canonical-memory-store.m
 - `git merge origin/main` produced seven conflicts: canonical D source, AID-2026-109 manifest/prompt/session, EN mirror, ZH-CN mirror, and `scripts/check_bilingual_docs.py`.
 - Main's AID-2026-109 I work item was preserved; the D work item's four original files were moved to AID-2026-242 and prompt digests recalculated.
 - The main checker implementation was retained because its current behavior is newer; the branch's only intended checker change was adding 03 and 09 roots, both already present on main.
-- Local test output, exact pushed head, CI contexts, merge SHA and merged blob checks will be appended only after measurement.
+- Merge commit: `2a0bbb23dc4837864efab85b4031481550d81ba5` (parents `e476fef38b998cf35e75043fb030fa1fb2053d26` and `788fbc011877a14976fc0a974ffe2e013dd9991b`).
+- `python3 scripts/test_check_bilingual_docs.py`: 27 tests, `OK`, exit 0.
+- `BASE_SHA=788fbc011877a14976fc0a974ffe2e013dd9991b HEAD_SHA=2a0bbb23dc4837864efab85b4031481550d81ba5 PR_BODY='... BILINGUAL-MANIFEST: COMPLETE' python3 scripts/check_bilingual_docs.py`: PASS, 9 changed paths inspected, 0 new gaps, exit 0.
+- `python3 scripts/check_document_management.py --require-changed 788fbc011877a14976fc0a974ffe2e013dd9991b`: PASS (incremental), no GOV-DOC-002 violations, exit 0.
+- GitHub exact-Head CI contexts, branch protection, behind count, final merge SHA and merged blob readback remain pending; no check or merge result is asserted.

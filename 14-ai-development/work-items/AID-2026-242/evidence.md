@@ -85,7 +85,7 @@ AID-2026-089 was merged by PR #1232 as `d914e8a1f8a1ba24c21c41a9249489d544388185
 
 - Canonical, EN and ZH-CN files carry complete `document_metadata` blocks using the current schema/template and the checker's actual field/enumeration contract.
 - All three are `Draft`, `Unverified`, `Informative`; canonical file is `Candidate`, mirrors are `Non-Canonical`. No approval or natural-person Owner signature is claimed.
-- Canonical/EN body suffix after the conflict notice is byte-identical to the source blob. The source body Git blob SHA remains `6b37c91033fda21f072e2a3bde6f274663b1e76e`.
+- The canonical body, reconstructed by removing the inserted authority-conflict notice and its surrounding blank lines, matches source blob `6b37c91033fda21f072e2a3bde6f274663b1e76e` byte-for-byte (17,387 bytes). The EN and ZH-CN files are translations/mirrors, not byte-identical copies of the source.
 - ZH-CN is a structural mirror based on the pre-existing translated mirror; headings are aligned to the 18 source sections (14 Performance, 15 Observability, 16 Failure, 17 Dependencies, 18 Open Questions) without changing the D source bytes.
 
 ## 5. Governance scope configuration
@@ -102,11 +102,11 @@ Documentation and work-item registration only. At fetched main `788fbc011877a149
 
 | File | Source / prior-main blob SHA | New blob SHA | Added frontmatter blob SHA | Body treatment |
 |---|---|---|---|---|
-| Canonical `03-memory-brain/canonical-memory-store.md` | Source branch blob `6b37c91033fda21f072e2a3bde6f274663b1e76e` | `1583a80211b7fa37c1d9b98d90b971810f18248f` | `1ed6b54072d5dbe2fbc9da7c969cda1a2867ed3c` | Original source bytes are the exact suffix after the mandatory conflict notice; unmodified source body blob readback reproduced the source SHA exactly. |
-| EN mirror `docs/en/03-memory-brain/canonical-memory-store.md` | Prior main blob `414fe03fd40fb8ad46061d2d8c7d29ba2667f252` | `53b092af95f7e9cf36e4e9ddafa93e76f9a5f13e` | `088a9e882671f1f2c957ee1f7183c4f3d18b12f6` | Rebuilt from the exact canonical source body plus the same conflict notice to align section structure. |
-| ZH-CN mirror `docs/zh-CN/03-memory-brain/canonical-memory-store.md` | Prior main blob `34e0755a079f085df65c2a180cc59b6aaea7ea78` | `41dd113497a5ad8f7cc522904a1bf855e92923ef` | `b0f28b7da314e9d2f297d64d06c73cedc83b5843` | Existing translation retained; sections 14–18 split to match canonical structure; same authority-conflict notice translated. |
+| Canonical `03-memory-brain/canonical-memory-store.md` | Source branch blob `6b37c91033fda21f072e2a3bde6f274663b1e76e` | `2e10e23f651f1f6cb03247f01727f2b7ff5342f1` | `3ddbdeff332f3646dabde1fd3509543efa0b99e5` | Removing the inserted AID-2026-089 notice and its surrounding blank lines reconstructs the 17,387-byte source blob exactly. |
+| EN mirror `docs/en/03-memory-brain/canonical-memory-store.md` | Prior main blob `414fe03fd40fb8ad46061d2d8c7d29ba2667f252` | `8b225da74f42ccaec7418d56ea1f350bbfc19d16` | `5d21c22bfadde921fb6c02c88de723a18e12d416` | Restored full English mirror with the same authority notice; translated prose is not byte-identical to the Chinese source. |
+| ZH-CN mirror `docs/zh-CN/03-memory-brain/canonical-memory-store.md` | Prior main blob `34e0755a079f085df65c2a180cc59b6aaea7ea78` | `09c16c7be5fbf1e2fb780ba5a3c52382baae9e41` | `04bd00583972c03d6933eb9d0445f203fb96b28f` | Existing translation aligned to the 18-section structure; same authority-conflict notice translated. |
 
-The frontmatter SHA values above are Git blob SHAs of the exact added YAML frontmatter blocks (including delimiters). The source file's unmodified body, as a Git blob, hashes to `6b37c91033fda21f072e2a3bde6f274663b1e76e`, identical to the source branch blob.
+The frontmatter SHA values above are Git blob SHAs of the exact current YAML frontmatter blocks (including delimiters), recalculated after the AID-242 reference update. The canonical body reconstruction was compared byte-for-byte with the original source blob and matched exactly.
 
 
 ### 4.2 Executed prompt snapshots
@@ -125,3 +125,12 @@ The frontmatter SHA values above are Git blob SHAs of the exact added YAML front
 - The fetched main at `788fbc011877a14976fc0a974ffe2e013dd9991b` already contains `03-memory-brain/canonical-memory-store.md`, with AID-150 provenance and `canonical_status: Canonical`; this PR therefore does not claim that the path is absent at the current baseline. Its substantive correction is the permanent AID-2026-089 authority-conflict notice, demotion to `Candidate` / `Informative`, and restoration of the EN/ZH-CN mirrors from the historical source.
 - Main already registers `03-memory-brain` and `09-security-governance` in both the GOV-DOC-002 governed-root registry and the bilingual checker's `NORMATIVE_ROOTS`. The branch's two root additions are therefore already satisfied; the current main checker implementation is retained in full, including UTF-8 Git-output decoding, full-history checks and designated-Chinese-side pairing.
 - Attribution for this delegated continuation: `user-authorized operator (delegated by account owner)`, 2026-11-27. This is not a natural-person Owner signature or domain acceptance.
+
+
+## 8. Local validation (2026-11-27)
+
+- `python` is not installed as a command in the execution environment (`/bin/bash: python: command not found`); equivalent commands were run with `python3`.
+- `python3 scripts/test_check_bilingual_docs.py`: `Ran 27 tests`; `OK`; exit 0. The invalid-base test emitted its expected Git fatal diagnostic and still passed.
+- `BASE_SHA=788fbc011877a14976fc0a974ffe2e013dd9991b HEAD_SHA=2a0bbb23dc4837864efab85b4031481550d81ba5 PR_BODY='... BILINGUAL-MANIFEST: COMPLETE' python3 scripts/check_bilingual_docs.py`: `bilingual baseline: 77 frozen, 0 new gaps`; `Bilingual documentation and prompt-library gate: PASS (9 changed paths inspected)`; exit 0.
+- `python3 scripts/check_document_management.py --require-changed 788fbc011877a14976fc0a974ffe2e013dd9991b`: `PASS (incremental): no GOV-DOC-002 violations`; exit 0. The global inventory still reports 371 unclassified documents, which are outside this incremental verdict and this work item's scope.
+- The full non-incremental `check_document_management.py` reports `INCOMPLETE` for the repository-wide 371-document backlog (exit 2); this is not a violation in the changed set.
