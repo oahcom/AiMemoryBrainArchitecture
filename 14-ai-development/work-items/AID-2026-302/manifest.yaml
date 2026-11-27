@@ -20,7 +20,7 @@ date: "2026-11-27"
 repository:
   name: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: cb5b3dcd23ff86e10a354bb27b668dce19e95f62
+base_commit_sha: 981397d99b76123678382bcbdd298333a72176c9
 scope:
   objective: >-
     Give every one of the 93 declarations named by the Owner ruling a terminal

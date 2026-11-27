@@ -55,8 +55,10 @@ git rev-parse    <commit>:<path>       # Git blob identity for *_blob fields
 
 No value was read from a working tree. The base for every `CANDIDATE_TREE`
 row is `cb5b3dcd23ff86e10a354bb27b668dce19e95f62` (the `origin/main` the branch
-was cut from); after the rebase the same rows were re-verified at the rebased
-head, whose checker output is pasted in §6.
+was cut from). The branch was then rebased onto
+`981397d99b76123678382bcbdd298333a72176c9` (§6.1) and every value re-measured
+there: the 40 digests, the 9 blobs and the 2 `PATH_MISSING` were unchanged, so
+the rows below still resolve at both commits.
 
 Scope is decided per declaration, never borrowed from another field:
 
@@ -286,7 +288,99 @@ baseline can no longer absorb. Both runs are pasted in §6.
 
 ## 6. Checker output, before and after
 
-<!-- OUTPUTS -->
+### 6.1 Before — base `981397d99b76123678382bcbdd298333a72176c9`
+
+The branch was first cut from `cb5b3dcd…`; the Owner ruling required a rebase
+onto the then-current `origin/main`, 60 commits later. The same 93
+declarations were re-measured at the new base **before** any repair was
+replayed, and no failure outside the original set appeared:
+
+```
+$ python scripts/ci/check_manifest_blob_pins.py --commit 981397d99b76123678382bcbdd298333a72176c9
+main=981397d99b76123678382bcbdd298333a72176c9 manifests=136 pins=230 ok=139 mismatch=89 path_missing=2 incomplete=0
+$ echo $?
+1
+```
+
+`89 + 2 + 139 = 230`. The 89 mismatches decompose as 80 prompt digest/byte
+pins + 6 nested authored-index pins + 3 related-evidence blobs; the 2
+`PATH_MISSING` are the `AID-2026-261` sentinel pair. The shape tally of that
+run is 68/4/2/2/2/2 `session_evidence[i]` lines (the 40 entries, each
+producing a digest and a byte line), 6 `authored_indexes[...]`, 3
+`related_evidence[0]`, and 2 `AID-2026-261`. **No mismatch outside the Owner's
+93 appeared at the new base**, so nothing was added to the repair scope.
+
+### 6.2 After — head `ccc7405597b0e24c0196e51dafadc32f6d0dd4ff`
+
+```
+$ python scripts/ci/check_manifest_blob_pins.py --commit HEAD
+main=ccc7405597b0e24c0196e51dafadc32f6d0dd4ff manifests=137 pins=227 ok=227 mismatch=0 path_missing=0 incomplete=0
+$ echo $?
+0
+```
+
+`pins` moves 230 → 227 for two mechanical reasons: −5 for the five retired
+declarations (three `authored_indexes[1]` blob claims and the two `AID-2026-261`
+sentinel values, which no longer exist to be counted) and +2 for this work
+item's own `session_evidence` digest/byte pair. `manifests` 136 → 137 is
+`AID-2026-302` itself. Every remaining pin verifies, and no declaration is
+left in an `INCOMPLETE` or unresolved state.
+
+### 6.3 Negative control — one flipped nibble
+
+Temporary branch `tmp/negative-control-2`, commit `979ba190`, flipping the
+last hexadecimal digit of `AID-2026-061` `session_evidence[0].executed_prompt_sha256`
+(`…e3cc` → `…e3cd`):
+
+```
+$ git log --oneline -1
+979ba190 test(aid-2026-302): negative control, one flipped digest nibble
+$ python scripts/ci/check_manifest_blob_pins.py --commit HEAD
+main=979ba190d5ed9f4ee8acbf250505778cca74c86a manifests=137 pins=227 ok=226 mismatch=1 path_missing=0 incomplete=0
+MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-061/prompt-v1.md declared=6c0a9cc7e47f2e30505f8b765d08663b1c032cda128f7fb79a148152cff6e3cc actual=6c0a9cc7e47f2e30505f8b765d08663b1c032cda128f7fb79a148152cff6e3cd
+$ echo $?
+1
+```
+
+Restored to the fix branch (the temporary branch was deleted, not pushed):
+
+```
+$ python scripts/ci/check_manifest_blob_pins.py --commit HEAD
+main=ccc7405597b0e24c0196e51dafadc32f6d0dd4ff manifests=137 pins=227 ok=227 mismatch=0 path_missing=0 incomplete=0
+$ echo $?
+0
+```
+
+The step in `repository-hygiene.yml` runs exactly this command, so its exit
+status is the gate: `1` here, not a baseline comparison that could absorb it.
+
+### 6.4 The other three gates, at the same head
+
+```
+$ python scripts/check_traceability.py --index-only
+PASS TRACEABILITY: 0 requirements / 136 work items / 0 errors / 119 warnings
+$ echo $?
+0
+
+$ python scripts/ci/check_repository_hygiene.py --base 981397d99b76123678382bcbdd298333a72176c9 --head ccc7405597b0e24c0196e51dafadc32f6d0dd4ff
+Work-item index membership version=2026-11-27.2 directories=147 linked=147
+Work-item manifest consistency version=2026-11-27.2 manifests=136 in_scope=121 excluded_by_record_type=5 unrecognized=10 violations=0
+Repository new-file admission version=2026-11-27.2 base=981397d99b76123678382bcbdd298333a72176c9 head=ccc7405597b0e24c0196e51dafadc32f6d0dd4ff merge_base=981397d99b76123678382bcbdd298333a72176c9
+Repository new-file admission passed: 4 new path(s) checked.
+$ echo $?
+0
+
+$ python scripts/check_bilingual_docs.py      # BASE_SHA / HEAD_SHA as above
+bilingual baseline: 77 frozen, 0 new gaps
+exemptions: 21
+Bilingual documentation and prompt-library gate: PASS (43 changed paths inspected).
+$ echo $?
+0
+```
+
+The outputs above are captured at `ccc74055`; the only later commit on this
+branch adds this paste, and the pull request body carries the re-run at the
+final merge-candidate head.
 
 ## 7. Negative control — the gate can fail
 
