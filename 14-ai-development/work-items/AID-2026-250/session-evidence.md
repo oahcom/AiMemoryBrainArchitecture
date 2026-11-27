@@ -97,3 +97,11 @@ The branch `rework/aid-250-doc-signatures` was created from live `main` `46dac1b
 
 署名：user-authorized operator (delegated by account owner)
 日期：2026-11-27
+
+ 
+## Rework 2026-11-27 — AI-visible output (verification update)
+
+PR #1424 was opened with the required Related issue, AI-assisted work, and session-evidence reference declarations. The first head query returned zero Actions runs, so a recovery comment was recorded and the PR was closed/reopened; the PR description was then corrected to include the required per-Issue mapping table and reopened to dispatch the validator. The Session Evidence Gate subsequently passed on the updated head. The Architecture document management gate passed. The existing `Schema non-empty audit (hard gate)` job passed the four-document checker, all eight unit tests, and the 12/12 deletion mutation check. Exact mutation output and its run URL are in the appended evidence section. Remaining all-context verification and branch-protection setting verification are pending.
+
+署名：user-authorized operator (delegated by account owner)
+日期：2026-11-27
