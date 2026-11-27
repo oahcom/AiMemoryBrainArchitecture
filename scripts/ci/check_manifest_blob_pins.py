@@ -1,6 +1,17 @@
 #!/usr/bin/env python3
 """Verify every declared manifest blob pin against committed Git objects.
 
+Applicable pin shapes:
+- Explicit path/digest pairs (root_blob, evidence_blob, blob, mirror blobs).
+- Explicit SHA-256/path pairs and byte-count/path pairs.
+- Cross-commit source blob declarations.
+
+The keys ``*_blob_sha256_<variant>`` without a sibling path binding
+are measurement values, not pins, and are intentionally excluded.
+In particular, model_blob_sha256_lf, model_blob_sha256_crlf,
+tests_blob_sha256_lf and tests_blob_sha256_crlf under
+AID-2026-001.measurement_basis are not checked.
+
 Exit status: 0 PASS, 1 VIOLATION, 2 INCOMPLETE (including unreadable Git data).
 """
 from __future__ import annotations
@@ -164,6 +175,12 @@ def verify(root: Path, commit: str, verbose: bool = True):
         # it is never silently replaced by the candidate commit.
         for i, item in enumerate(doc.get("gate_a_reconstruction", []) or []):
             if not isinstance(item, dict):
+                incomplete += 1
+                problems.append(
+                    f"INCOMPLETE manifest={manifest_path} "
+                    f"field=gate_a_reconstruction index={i}: "
+                    "array item is not a mapping"
+                )
                 continue
             if "reconstructed_root_blob" in item:
                 source = item.get("source_commit") or item.get("commit")
@@ -179,6 +196,12 @@ def verify(root: Path, commit: str, verbose: bool = True):
         authored_indexes = source_evidence.get("authored_indexes", doc.get("authored_indexes", []))
         for i, item in enumerate(authored_indexes or []):
             if not isinstance(item, dict):
+                incomplete += 1
+                problems.append(
+                    f"INCOMPLETE manifest={manifest_path} "
+                    f"field=authored_indexes index={i}: "
+                    "array item is not a mapping"
+                )
                 continue
             for path_key, digest_key in (
                 ("root", "root_blob"),
@@ -192,6 +215,12 @@ def verify(root: Path, commit: str, verbose: bool = True):
         # C. related_evidence[].path/blob and language mirrors.
         for i, item in enumerate(doc.get("related_evidence", []) or []):
             if not isinstance(item, dict):
+                incomplete += 1
+                problems.append(
+                    f"INCOMPLETE manifest={manifest_path} "
+                    f"field=related_evidence index={i}: "
+                    "array item is not a mapping"
+                )
                 continue
             for path_key, digest_key in (
                 ("path", "blob"),
@@ -236,6 +265,12 @@ def verify(root: Path, commit: str, verbose: bool = True):
                   "prompt.prompt_file", "bytes")
         for i, item in enumerate(doc.get("session_evidence", []) or []):
             if not isinstance(item, dict):
+                incomplete += 1
+                problems.append(
+                    f"INCOMPLETE manifest={manifest_path} "
+                    f"field=session_evidence index={i}: "
+                    "array item is not a mapping"
+                )
                 continue
             path_key = "executed_prompt_snapshot_file"
             sha_key = "executed_prompt_sha256"

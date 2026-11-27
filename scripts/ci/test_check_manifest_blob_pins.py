@@ -143,6 +143,59 @@ class BlobPinsTest(unittest.TestCase):
         self.assertEqual(code, 0, out + err)
         self.assertIn("pins=2 ok=2 mismatch=0", out)
 
+    def test_unbound_blob_sha256_measurements_are_not_pins(self):
+        # Mutation: deleting the exclusion ruling turns this red.
+        # Scan basis: 4 occurrences of blob_sha256 across the repository
+        # (YAML/Markdown), all under AID-2026-001.measurement_basis, none
+        # with a sibling path, so no deterministic path binding exists.
+        commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                ("measurement_basis:\n"
+                 "  model_blob_sha256_lf: " + "a" * 64 + "\n"
+                 "  model_blob_sha256_crlf: " + "b" * 64 + "\n"
+                 "  tests_blob_sha256_lf: " + "c" * 64 + "\n"
+                 "  tests_blob_sha256_crlf: " + "d" * 64 + "\n"),
+        })
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 0, out + err)
+        self.assertIn(
+            "pins=0 ok=0 mismatch=0 path_missing=0 incomplete=0", out
+        )
+
+    def test_non_mapping_array_items_are_incomplete(self):
+        # Mutation: deleting any one fail-closed branch turns the matching
+        # subTest assertion red.
+        manifest_path = (
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml"
+        )
+        commit_tree(self.root, {
+            manifest_path:
+                ("gate_a_reconstruction:\n"
+                 "  - malformed\n"
+                 "baseline_and_source_evidence:\n"
+                 "  authored_indexes:\n"
+                 "    - malformed\n"
+                 "related_evidence:\n"
+                 "  - malformed\n"
+                 "session_evidence:\n"
+                 "  - malformed\n"),
+        })
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 2, out + err)
+
+        for field in (
+            "gate_a_reconstruction",
+            "authored_indexes",
+            "related_evidence",
+            "session_evidence",
+        ):
+            with self.subTest(field=field):
+                self.assertIn(
+                    f"INCOMPLETE manifest={manifest_path} "
+                    f"field={field} index=0",
+                    out,
+                )
+
     def test_empty_tree_is_incomplete(self):
         code, out, err = self.run_gate()
         self.assertEqual(code, 2)
