@@ -97,8 +97,8 @@ session_evidence:
     issue_refs:
     implementing_ai_session: a955
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-064/prompt-v1.md
-    executed_prompt_sha256: 57decec9de8752e099d6a72588fcdd00904bffbe4cecb614ddf9c34a441fdbb8
-    executed_prompt_bytes: 7188
+    executed_prompt_sha256: 24ae1fe53429cc310513c215f203797a4887498b8fbca227347e27c735663eda
+    executed_prompt_bytes: 7167
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-064/session-evidence-955.md

@@ -263,7 +263,7 @@ fields:
 
   steward:
     kind: string
-    required: false
+    required: true
 
 # Derived fields: a hand-written value is a claim the gate cannot verify (DM-08).
 # 派生字段：手写即无法验证的声明（DM-08）。

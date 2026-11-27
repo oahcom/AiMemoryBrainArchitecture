@@ -11,8 +11,8 @@ prompt_id: AID-2026-062-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-062/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 96358a3a9af4452d0b51b13f3483f319d93b38eb2ac414eb39d674a0a61c6c42
-prompt_bytes: 2869
+prompt_sha256: 3e6cd3db339814e9b848491d34d48adb07033679b394d97e23ebe788904028ab
+prompt_bytes: 2906
 
 # ---------------------------------------------------------------------------
 # Stage B of WO-01, split from AID-2026-061 by an Owner close ruling on pull
@@ -71,8 +71,8 @@ session_evidence:
     issue_refs:
     implementing_ai_session: session-req01-r34
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-062/prompt-v1.md
-    executed_prompt_sha256: 3f57662579cfe90c230585b7ab7ff87c10e0074df167ac1d6c79e5fe8b9766de
-    executed_prompt_bytes: 2927
+    executed_prompt_sha256: 3e6cd3db339814e9b848491d34d48adb07033679b394d97e23ebe788904028ab
+    executed_prompt_bytes: 2906
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-062/session-evidence-wo01b.md
