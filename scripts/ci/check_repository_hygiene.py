@@ -100,6 +100,11 @@ MANIFEST_SCHEMA_REGISTRY_RE = re.compile(
     r"14-ai-development/work-items/manifest-schema-registry\.yaml"
 )
 
+# AID-2026-251: the one normative Work Item manifest schema file.
+WORK_ITEM_MANIFEST_SCHEMA_RE = re.compile(
+    r"14-ai-development/work-items/work-item-manifest\.schema\.yaml"
+)
+
 # D7: one explicitly approved nested conformance dependency pin.
 # Do not merge this into REQUIREMENTS_FILE_RE: that rule remains root-only.
 CONFORMANCE_PROVIDER_REQUIREMENTS_RE = re.compile(
@@ -290,6 +295,9 @@ def is_allowed_new_path(path):
         return True
 
     if MANIFEST_SCHEMA_REGISTRY_RE.fullmatch(path):
+        return True
+
+    if WORK_ITEM_MANIFEST_SCHEMA_RE.fullmatch(path):
         return True
 
     if CONFORMANCE_PROVIDER_REQUIREMENTS_RE.fullmatch(path):

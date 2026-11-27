@@ -33,7 +33,7 @@ session_evidence:
   - role: "IMPLEMENTATION_SESSION"
     issue_refs:
       - "#266"
-    implementing_ai_session: "ChatGPT GPT-6"
+    implementing_ai_session: "ChatGPT-GPT-6"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-251/prompt-v1.md"
     executed_prompt_sha256: "7af81c2a44d55aa720183090197703d3f022d6ee354b9f0313cfb661d9701427"
     executed_prompt_bytes: 921
