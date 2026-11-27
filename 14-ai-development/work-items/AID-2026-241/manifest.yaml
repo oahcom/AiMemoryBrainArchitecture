@@ -29,8 +29,8 @@ prompt_id: AID-2026-241-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-241/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 6d00802519f99412119dc879ee64c5a89598ad5ff5d915d7aa5207cec2e825e2
-prompt_bytes: 7096
+prompt_sha256: 2bcdadfaa7a7ed85e6080058e3eefbacd77cc0347037089c3d814adfe0b4927d
+prompt_bytes: 7105
 
 authorization:
   implementation_write: >-
@@ -217,8 +217,8 @@ session_evidence:
       - "#1247"
     implementing_ai_session: w3-session-2026-11-27-not-independently-verified
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-241/prompt-w3-v1.md
-    executed_prompt_sha256: 14b79d7666a954102ffccc7239f82ae516dd145304e4f034842c6936d57f0352
-    executed_prompt_bytes: 2613
+    executed_prompt_sha256: 76cdb77e334fcd507f7b6adf546eed33a4043898b38aafc14be1d2c3b2dc6569
+    executed_prompt_bytes: 2680
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-241/session-evidence.md
@@ -226,6 +226,6 @@ session_evidence:
 renumbering:
   previous_work_item_id: AID-2026-082
   assigned_work_item_id: AID-2026-241
-  prompt_digest_recalculation: "Recomputed after renumbering and path updates; digest covers prompt-v1.md bytes only."
+  prompt_digest_recalculation: "Recomputed after renumbering, path updates, and required steward metadata; each digest covers the corresponding prompt file bytes only."
   previous_prompt_sha256: 5c8f02062568720bb9132b27bdb3d6a4c9ac9fbb603d0c42a4818f6c2105002a
-  current_prompt_sha256: f8e6b062120893ee6da10c325f1ea026782b220c640c717fc31829508feffeda
+  current_prompt_sha256: 2bcdadfaa7a7ed85e6080058e3eefbacd77cc0347037089c3d814adfe0b4927d

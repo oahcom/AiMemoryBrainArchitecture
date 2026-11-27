@@ -1,5 +1,6 @@
 ---
 document_metadata:
+  steward: "user-authorized operator (delegated by account owner)"
   domain: ai-development
   role: work-record
   lifecycle:
