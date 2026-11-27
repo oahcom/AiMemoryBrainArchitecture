@@ -1,0 +1,44 @@
+work_item_id: AID-2026-253
+title: "W10 AC3 conflict register closure and AC4 mature implementation dispositions"
+class: DOC/GOVERNANCE
+risk: R1
+status: DISPATCHED
+id_status: PROVISIONAL
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository: "oahcom/AiMemoryBrainArchitecture"
+base_branch: "main"
+base_commit_sha: "f18adc9fa1d06837433a09498f5297bf13b35756"
+issue_refs:
+  - "#265"
+evidence:
+  record: "14-ai-development/work-items/AID-2026-253/evidence.md"
+  session_evidence: "14-ai-development/work-items/AID-2026-253/session-evidence.md"
+  decision_record_en: "docs/en/13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
+  decision_record_zh: "docs/zh-CN/13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
+scope:
+  files_to_create:
+    - "14-ai-development/work-items/AID-2026-253/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-253/evidence.md"
+    - "14-ai-development/work-items/AID-2026-253/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-253/session-evidence.md"
+    - "docs/en/13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
+    - "docs/zh-CN/13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
+  files_to_modify:
+    - "docs/architecture-convergence/ARCH-CONVERGENCE-001-CONFLICT-REGISTER.md"
+  files_out_of_scope:
+    - "Issue #265 body"
+    - "Owner branches"
+    - "production code and schemas"
+    - "branch protection"
+carrier:
+  branch: "docs/w10-ac3-ac4-aid-2026-253"
+  pull_request: "PENDING"
+  merge_sha: "PENDING"
+  merge_method: "merge"
+  required_contexts: "PENDING"
+review:
+  natural_person_owner_acceptance: "NOT_RECORDED"
+  proxy_ruling: "代理裁决，非自然人 Owner 签署"
+acceptance:
+  gate: "PENDING_CI"
