@@ -332,3 +332,16 @@ $ git rev-parse HEAD:ATTRIBUTION.md
 $ git rev-parse HEAD:14-ai-development/reports/2026-11-27-wb-line01-closeout.md
 <见 PR 描述中的最终回读>
 ```
+
+---
+
+## 12. 写后并发修改观测
+
+本记录写入的 AC2 句子之后，Issue #262 正文又被另一执行会话追加了两处「代理记录」注记（L285 `Owner confirms requirement scope` 行尾、L292 `Owner reviews the resulting assessment` 行尾）。
+
+| 时刻 (UTC) | body chars | sha256 | 说明 |
+|---|---|---|---|
+| 2026-11-27T04:37:55Z | 16630 | `3071cc37642f550384e67e5f0196594e5c6448f71ab270f827d16461626759b8` | 本会话写入后回读，与计划字节一致 |
+| 2026-11-27T05:31:09Z | 16913 | `f6a216927447dad0a5d7c301c8d81562e368e080e55718577a369687a4017b2c` | 另一会话追加两处注记；**本会话的 AC2 句子仍在 L301**，行数仍为 347 |
+
+处理：不覆盖他人写入，不重写正文；仅登记该并发事实。Issue 状态未变（`open` / `reopened`）。

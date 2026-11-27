@@ -331,3 +331,16 @@ $ git rev-parse HEAD:ATTRIBUTION.md
 $ git rev-parse HEAD:14-ai-development/reports/2026-11-27-wb-line01-closeout.md
 <see final readback in the PR description>
 ```
+
+---
+
+## 12. Post-write concurrent modification observed
+
+After this session's AC2 sentence was written, another execution session appended two proxy-record annotations to the Issue #262 body (end of L285 `Owner confirms requirement scope`, end of L292 `Owner reviews the resulting assessment`).
+
+| Time (UTC) | body chars | sha256 | Note |
+|---|---|---|---|
+| 2026-11-27T04:37:55Z | 16630 | `3071cc37642f550384e67e5f0196594e5c6448f71ab270f827d16461626759b8` | readback right after this session's write; byte-identical to plan |
+| 2026-11-27T05:31:09Z | 16913 | `f6a216927447dad0a5d7c301c8d81562e368e080e55718577a369687a4017b2c` | another session added two annotations; **this session's AC2 sentence is still at L301**, line count still 347 |
+
+Action: no other writer's text was overwritten and the body was not rewritten; only the concurrency fact is recorded. Issue state unchanged (`open` / `reopened`).
