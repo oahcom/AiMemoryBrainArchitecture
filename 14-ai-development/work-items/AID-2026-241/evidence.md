@@ -12,8 +12,6 @@ document_metadata:
         value: null
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "AID-2026-241/evidence.md"
@@ -203,4 +201,4 @@ first work item that reaches `REVIEWED`, not damage already done.
 
 ## Renumbering evidence
 
-This work item was originally stored under `AID-2026-082`, which collided with a distinct item already present on `main`. The assigned replacement is `AID-2026-241`. The original `prompt-v1.md` bytes were 6,983 bytes with SHA-256 `5c8f02062568720bb9132b27bdb3d6a4c9ac9fbb603d0c42a4818f6c2105002a`. After changing the work-item identifier and all self-referential paths, the current `prompt-v1.md` is 7,096 bytes with SHA-256 `6d00802519f99412119dc879ee64c5a89598ad5ff5d915d7aa5207cec2e825e2`. This digest was recomputed over the complete current file bytes; it is not a digest of the directory name or Git blob.
+This work item was originally stored under `AID-2026-082`, which collided with a distinct item already present on `main`. The assigned replacement is `AID-2026-241`. The original `prompt-v1.md` bytes were 6,983 bytes with SHA-256 `5c8f02062568720bb9132b27bdb3d6a4c9ac9fbb603d0c42a4818f6c2105002a`. After changing the work-item identifier and all self-referential paths, the current `prompt-v1.md` is 7,038 bytes with SHA-256 `f8e6b062120893ee6da10c325f1ea026782b220c640c717fc31829508feffeda`. This digest was recomputed over the complete current file bytes; it is not a digest of the directory name or Git blob.

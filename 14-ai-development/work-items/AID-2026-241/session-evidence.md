@@ -12,8 +12,6 @@ document_metadata:
         value: null
       approval_scope:
         type: Full-document
-        included_sections: []
-        included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "AID-2026-241/evidence.md"
@@ -61,7 +59,7 @@ The user-provided W3 task instruction requires: preserve PR #1325's substantive 
 
 ## AI-visible output
 
-The session verified `origin/main` at `788fbc011877a14976fc0a974ffe2e013dd9991b` and the original PR head at `0f7dfbc96e1a3c3ac58d387c8ada6cff51eb7188`. The original prompt digest was independently recomputed as `5c8f02062568720bb9132b27bdb3d6a4c9ac9fbb603d0c42a4818f6c2105002a` (6,983 bytes). The renamed prompt's digest after path/identifier edits is `6d00802519f99412119dc879ee64c5a89598ad5ff5d915d7aa5207cec2e825e2` (7,096 bytes). The exact conflict-resolution diff, final head, check results, merge SHA, and post-merge blob verification will be appended after those operations complete; no merge or CI pass is claimed by this preliminary record.
+The session verified `origin/main` initially at `788fbc011877a14976fc0a974ffe2e013dd9991b`, then refreshed and merged the advanced main `4fa75e7809a9319db2ab04489cc8f2f9e17fbd79`. The original PR head was `0f7dfbc96e1a3c3ac58d387c8ada6cff51eb7188`. The original prompt digest was independently recomputed as `5c8f02062568720bb9132b27bdb3d6a4c9ac9fbb603d0c42a4818f6c2105002a` (6,983 bytes); it is preserved byte-for-byte as `prompt-v1-original.txt`. The renamed current `prompt-v1.md` digest after identifier/path and metadata corrections is `f8e6b062120893ee6da10c325f1ea026782b220c640c717fc31829508feffeda` (7,038 bytes). The W3 task-input summary is separately pinned as `prompt-w3-v1.txt`, SHA-256 `b9b277a45796548565415400f6089263b70a3f3a51ae8f3dbebe4db6c4d3752b` (1,433 bytes). The original three-way conflict set reduced to one remaining sidecar conflict after directory renumbering; the sidecar now records final source/test blobs `6d4417b34a53a21c9013bf14b7f1e1cbbca9f2dd` and `ccd9cf9ae4d1bdaf8442f4553b775ac946956b17`, with commit-message anchor `8a16a1c7aef952beaa295d684738e16f181baf40460f04a38df06bc39a6f105d`. The merge commit is `bfd7489262f05831d0aec19403de56229e8ee6fe`, and local `test_status_migration` is 31/31 OK. The first exact-head Session Evidence runs exposed a missing per-Issue mapping table; the PR body now contains the required three-column table and `AI-assisted work: YES` declaration. GOV-DOC-002 exposed six metadata errors in the three renamed Markdown files (`approval_scope.included_sections` / `included_assets` unsupported by the subset schema); those unsupported keys have been removed. The next pushed head must be rechecked; no merge to main or 16/16 CI pass is claimed.
 
 ---
 
