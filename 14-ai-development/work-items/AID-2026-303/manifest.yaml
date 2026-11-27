@@ -1,0 +1,102 @@
+work_item_id: AID-2026-303
+title: "Repair source revision pointers and ratchet the two unresolved canonical-source debts"
+class: GATE/TEST
+risk: R2
+risk_rationale: >-
+  Repairs twelve measured source revision pointer failures using supplied,
+  verified Git blob IDs and wires the unchanged fail-closed scanner into the
+  existing required Repository hygiene job through an exact two-item ratchet.
+  The scanner decision logic, matching rules, and exit codes remain unchanged.
+  Two documented orphan mirrors remain explicitly failing and cannot be
+  silently added to or removed from the baseline. No new workflow or required
+  check context is created.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-26"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 7ecf2a8e7d1e40a13f6af6d4335a6766a222194f
+scope:
+  objective: >-
+    Repair the eight measured STALE pointers and four repairable NON_BLOB
+    pointers, preserve the two ORPHAN_MIRROR_PENDING_DECISION records as
+    exact ratchet debt, and integrate source revision pointer verification
+    into the existing Repository hygiene required job without modifying
+    scanner decision logic or creating a new required context.
+  files_to_modify:
+    - docs/en/00-governance/design-principles.md
+    - docs/en/01-system-architecture/responsibility-matrix.md
+    - docs/en/01-system-architecture/system-architecture-specification.md
+    - docs/en/01-system-architecture/system-boundaries.md
+    - docs/zh-CN/00-governance/design-principles.md
+    - docs/zh-CN/01-system-architecture/responsibility-matrix.md
+    - docs/zh-CN/01-system-architecture/system-architecture-specification.md
+    - docs/zh-CN/01-system-architecture/system-boundaries.md
+    - docs/en/01-system-architecture/forget-fence-and-completion-contract.md
+    - docs/zh-CN/01-system-architecture/forget-fence-and-completion-contract.md
+    - docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md
+    - docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate.md
+    - .github/workflows/repository-hygiene.yml
+    - scripts/ci/baselines/gate-wiring.txt
+    - 14-ai-development/work-items/INDEX.md
+  files_to_create:
+    - scripts/ci/baselines/source-revision-pointers.txt
+    - 14-ai-development/work-items/AID-2026-303/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-303/evidence.md
+    - 14-ai-development/work-items/AID-2026-303/session-evidence.md
+evidence: "14-ai-development/work-items/AID-2026-303/evidence.md"
+documentation:
+  - path: "scripts/check_source_revision_pointers.py"
+    relationship: implementation
+  - path: "scripts/ci/gate_ratchet.py"
+    relationship: implementation
+  - path: "scripts/ci/baselines/source-revision-pointers.txt"
+    relationship: reference
+  - path: ".github/workflows/repository-hygiene.yml"
+    relationship: implementation
+  - path: "14-ai-development/work-items/AID-2026-303/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-303/session-evidence.md"
+    relationship: evidence
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1267"
+    implementing_ai_session: "ChatGPT-GPT-6"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-303/session-evidence.md"
+implementation:
+  status: IN_PROGRESS
+  summary: >-
+    Exact implementation package prepared. Twelve pointer repairs, two-item
+    source-revision ratchet, existing workflow wiring, and gate-wiring cleanup
+    are specified. No repository write, CI run, or merge is claimed by this
+    session.
+  files_changed:
+    - docs/en/00-governance/design-principles.md
+    - docs/en/01-system-architecture/responsibility-matrix.md
+    - docs/en/01-system-architecture/system-architecture-specification.md
+    - docs/en/01-system-architecture/system-boundaries.md
+    - docs/zh-CN/00-governance/design-principles.md
+    - docs/zh-CN/01-system-architecture/responsibility-matrix.md
+    - docs/zh-CN/01-system-architecture/system-architecture-specification.md
+    - docs/zh-CN/01-system-architecture/system-boundaries.md
+    - docs/en/01-system-architecture/forget-fence-and-completion-contract.md
+    - docs/zh-CN/01-system-architecture/forget-fence-and-completion-contract.md
+    - docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md
+    - docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate.md
+    - .github/workflows/repository-hygiene.yml
+    - scripts/ci/baselines/gate-wiring.txt
+    - scripts/ci/baselines/source-revision-pointers.txt
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - "python3 scripts/test_check_source_revision_pointers.py"
+    - "python3 scripts/check_source_revision_pointers.py"
+    - "python3 scripts/ci/gate_ratchet.py --baseline scripts/ci/baselines/source-revision-pointers.txt --format schema --command <workflow command>"
+    - "python3 scripts/ci/check_test_reachability.py"
+    - "python3 scripts/ci/test_check_test_reachability.py"
+    - "python3 scripts/ci/check_manifest_parse.py"
+    - "python3 scripts/check_traceability.py --index-only"

@@ -34,7 +34,7 @@ document_metadata:
 - 文档 ID：SYS-BOUNDARIES-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../01-system-architecture/system-boundaries.md)
-- 源版本：ad9ea5ce00e74dba89d325601677270a50f30926
+- 源版本：bf20b204688bf51a1df76968db7e52ee0dd597c1
 - 对应英文：[System Boundaries](../../en/01-system-architecture/system-boundaries.md)
 - 状态：明确标记的部分为 DECIDED；CANDIDATE/OPEN 项仍不具规范约束力
 

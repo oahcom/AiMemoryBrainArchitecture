@@ -49,9 +49,9 @@ document_metadata:
 - Document ID: D-FORGET-CONTRACT-001
 - Version: 1.0
 - Source branch: main
-- Source revision: canonical root restored by AID-2026-089; exact Blob is recorded on the Draft PR Head.
+- Source revision: b3562da378c5dcc54cbdba71f759288a0fe36142
 - Historical source branch head: 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3 (provenance only)
-- Canonical source: [01-system-architecture/forget-fence-and-completion-contract.md](../../../01-system-architecture/forget-fence-and-completion-contract.md); this English file and the Chinese counterpart are mirrors.
+- Source: [01-system-architecture/forget-fence-and-completion-contract.md](../../../01-system-architecture/forget-fence-and-completion-contract.md); this English file and the Chinese counterpart are mirrors.
 - Chinese counterpart: [Canonical Forget Fence 与完成契约](../../zh-CN/01-system-architecture/forget-fence-and-completion-contract.md)
 - Owner: Session D — Memory Brain Principal Architect
 - Status: D canonical-domain semantics DECIDED; cross-module execution and global completion policy OPEN / I-owned

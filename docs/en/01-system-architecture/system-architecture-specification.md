@@ -3,7 +3,7 @@
 - Document ID: SYS-ARCH-001
 - Version: 1.0
 - Source: [Normative source specification](../../../01-system-architecture/system-overview.md)
-- Source revision: 995a1c5a3815d7e7b81b8d7f2ccc546c91d4c256
+- Source revision: c3707831777feb14aedd7aea0eca1c162bf59fc6
 - Chinese counterpart: [系统架构规范](../../zh-CN/01-system-architecture/system-architecture-specification.md)
 - Status: DECIDED baseline with explicitly marked candidates and validation items
 
