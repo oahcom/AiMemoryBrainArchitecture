@@ -1,7 +1,7 @@
 ---
 document_metadata:
   domain: ai-development
-  role: decision-record
+  role: work-record
   lifecycle:
     approval:
       decision_status: Draft
@@ -18,7 +18,7 @@ document_metadata:
       last_verified_date: "2026-11-27"
       last_verification_note: "GitHub API source readback; this is a delegated proxy adjudication, not natural-person Owner signature."
     usage_status: Active
-    modification_status: Draft
+    modification_status: Modified
     supersession:
       supersedes: []
       supersession_reason: null
@@ -30,8 +30,8 @@ document_metadata:
   steward: "user-authorized operator (delegated by account owner)"
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "One-time proxy adjudication record for the AC8 EXIT-1/EXIT-2 carrier conflict; does not exercise reserved Owner authority."
-    canonical_scope_id: "ai-development/req-04-ac8-conflict-adjudication"
+    canonical_scope: null
+    canonical_scope_id: null
     canonical_scope_keywords:
       - "req-04"
       - "ac8"
