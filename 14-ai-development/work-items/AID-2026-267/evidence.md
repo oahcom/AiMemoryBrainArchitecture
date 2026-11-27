@@ -48,7 +48,7 @@ document_metadata:
 
 - Repository: `oahcom/AiMemoryBrainArchitecture`
 - Issue: #134 (remains OPEN)
-- Base: `main` at `a7a252eb670b31066a0ffea35dc28cbe6ef5b836`
+- Original PR base: `a7a252eb670b31066a0ffea35dc28cbe6ef5b836`; refresh target: `a588cd9914949c2c9db7b2c5704d906fd3f05b70`
 - Branch: `fix/aid-267-required-declared-produced-r2`
 - Work Item: `AID-2026-267`, provisional allocation
 - Attribution: `user-authorized operator (delegated by account owner)`
@@ -86,6 +86,28 @@ checker and its unittest module; neither invocation is warn-only.
 - 16 required contexts: PENDING exact-Head refresh.
 - Independent review: NOT ASSIGNED / NOT RECORDED.
 - Merge: NOT AUTHORIZED by this task; stop before merge.
+
+## L3 amendment
+
+Independent review ID `6083410132` returned APPROVE WITH AMENDMENTS. The reviewer identified a priority defect: an unproduced declared context could cause exit 1 before the required platform payload was fetched, even when that payload was unavailable.
+
+The checker now fetches and validates `protection.required_status_checks.contexts` before classifying local unproduced or duplicate declarations. A missing, malformed, exception or None required payload therefore returns 2 before local violations are considered.
+
+Added combination tests:
+- `test_incomplete_precedes_local_violation_when_fetch_raises`
+- `test_incomplete_precedes_local_violation_when_fetch_returns_none`
+
+Added standalone raw transcript probes in `scripts/probe_declared_check_contexts.py` and actual source-mutation verification in `scripts/run_declared_check_contexts_mutation_tests.py`. Both scripts are invoked as hard-failing steps in the existing Repository hygiene job.
+
+The first CI attempt exposed a metadata issue in three new work-item records; all three now declare `document_metadata.steward: USER-PRINCIPAL-DELEGATED`. A subsequent stale-base GOV-DOC-002 run also reported unrelated files introduced on main after the original PR base as newly added; the branch must be refreshed to the current main before that gate can be considered final.
+
+## Current verification status
+
+- Priority-fix combination tests: awaiting refreshed exact-head CI.
+- Three standalone raw probes: awaiting refreshed exact-head CI.
+- Both mutation tests: awaiting refreshed exact-head CI; no mutation result is claimed before the runner logs are inspected.
+- Live checker output and all 16 required contexts: awaiting refreshed exact-head CI.
+- Merge: not performed. Issue #134 remains OPEN.
 
 ## Unresolved
 
