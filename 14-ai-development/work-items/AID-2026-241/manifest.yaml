@@ -1,0 +1,72 @@
+work_item_id: AID-2026-241
+base_commit_sha: 788fbc011877a14976fc0a974ffe2e013dd9991b
+
+title: "Document management claims, canonical status consistency, and source revision pointer debt"
+
+scope:
+  objective: >
+    Correct demonstrably inaccurate document-management claims and
+    canonical-status descriptions without weakening validation logic.
+    Preserve honest source-revision semantics and explicitly register
+    unresolved pointer and verification-status debt.
+  in_scope:
+    - scripts/check_document_management.py
+    - docs/en/09-security-governance/README.md
+    - docs/zh-CN/09-security-governance/README.md
+    - 14-ai-development/work-items/AID-2026-241/evidence.md
+    - docs/en/00-governance/design-principles.md
+    - docs/zh-CN/00-governance/design-principles.md
+    - docs/en/01-system-architecture/responsibility-matrix.md
+    - docs/zh-CN/01-system-architecture/responsibility-matrix.md
+    - docs/en/01-system-architecture/system-architecture-specification.md
+    - docs/zh-CN/01-system-architecture/system-architecture-specification.md
+    - docs/en/01-system-architecture/system-boundaries.md
+    - docs/zh-CN/01-system-architecture/system-boundaries.md
+    - docs/en/01-system-architecture/forget-fence-and-completion-contract.md
+    - docs/zh-CN/01-system-architecture/forget-fence-and-completion-contract.md
+    - docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md
+    - docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate.md
+    - docs/en/03-memory-brain/memory-brain-guide.md
+    - docs/zh-CN/03-memory-brain/memory-brain-guide.md
+    - 14-ai-development/work-items/AID-2026-113/restore-evidence.md
+    - TODO_AID_2026_113_EN_MIRROR_PATH
+    - TODO_AID_2026_113_ZH_MIRROR_PATH
+  out_of_scope:
+    - Changing source revision pointer checker logic
+    - Connecting the pointer checker to any workflow
+    - Declaring unsynchronized translations synchronized
+    - Inventing or inferring blob identities
+    - Changing unrelated governance decisions
+    - TODO_OUT_OF_SCOPE_DETAILS
+
+declared_exceptions:
+  - "The source revision pointer checker remains unwired."
+  - "Eight stale EN/ZH mirror pointers remain explicitly registered as debt."
+  - "Six non-blob source revision references remain explicitly registered as debt."
+  - "AID-2026-113 requires synchronized correction of verification status and Correction wording."
+  - TODO_ADDITIONAL_EXCEPTIONS
+
+prohibitions:
+  - "Do not relax source revision pointer validation."
+  - "Do not fabricate blob identities."
+  - "Do not equate source-body blobs with canonical-root blobs."
+  - "Do not claim translation synchronization without evidence."
+  - "Do not claim an approval exists merely because a record has Approved status."
+  - "Do not modify policy tables independently of their generating source."
+  - "Do not claim repository operations were performed without execution evidence."
+  - TODO_ADDITIONAL_PROHIBITIONS
+
+status: TODO_STATUS
+owner: TODO_OWNER
+created_at: TODO_CREATED_AT
+updated_at: TODO_UPDATED_AT
+verification_status: TODO_VERIFICATION_STATUS
+acceptance_criteria:
+  - TODO_ACCEPTANCE_CRITERION_1
+  - TODO_ACCEPTANCE_CRITERION_2
+  - TODO_ACCEPTANCE_CRITERION_3
+verification:
+  commands:
+    - TODO_VERIFICATION_COMMAND_1
+    - TODO_VERIFICATION_COMMAND_2
+  results: TODO_VERIFICATION_RESULTS

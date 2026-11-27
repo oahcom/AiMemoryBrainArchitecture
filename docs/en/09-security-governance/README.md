@@ -52,7 +52,7 @@ This is the bounded canonical entry point for the restored I-domain source set.
 
 AID-2026-109 restores only five policy/contract documents selected against the I-root blockers in F4, F6 and F7 of the 2026-11-26 A–I + Storage composition review. It does **not** import the historical `session-i-security-governance-2026-11-16` tree wholesale. That branch contains 91 files under this domain; the other files are not restored by this work item.
 
-The five documents remain **Candidate / Informative**. Their presence makes the source material discoverable on main; it does not ratify Phase 3.x decisions, approve a production policy, or establish implementation/conformance evidence.
+The five documents have `canonical_status: Canonical` in their respective frontmatter. Each document's own frontmatter is the sole authority for its `canonical_status`; this README is an informational guide, not a normative source for document status. Their presence does not ratify Phase 3.x decisions, approve a production policy, or establish implementation/conformance evidence.
 
 ## Canonical I documents
 
