@@ -45,7 +45,7 @@ class BlobPinsTest(unittest.TestCase):
 
     def manifest(self, path, digest):
         return ("work_item_id: AID-2026-900\n"
-                f"root: {path}\nroot_blob: {digest}\n")
+                f"root: {path}\nroot_blob: \"{digest}\"\n")
 
     @staticmethod
     def blob_sha(data):
