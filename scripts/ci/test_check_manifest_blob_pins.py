@@ -49,7 +49,7 @@ class BlobPinsTest(unittest.TestCase):
 
     @staticmethod
     def blob_sha(data):
-        return hashlib.sha1(b"blob " + str(len(data)).encode() + b"\\0" + data).hexdigest()
+        return hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
 
     def test_valid_pin_is_silent_about_individual_pin(self):
         data = b"committed bytes\n"
