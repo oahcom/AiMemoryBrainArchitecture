@@ -51,7 +51,7 @@ document_metadata:
 **Record type:** development-baseline audit record. Non-normative, informative. It changes no validator, gate, workflow, runtime, API, schema, wire semantic, work item, INDEX row, manifest or ledger entry.
 **Status:** `PARTIAL` — every row carries a reproducible command and raw output; the items that could not be settled are enumerated in §6 and are not papered over.
 **Base of this record:** `5670357db7a836d4f26838dbaf99494af41e2b65` (`Merge pull request #1423 from oahcom/governance/2026-11-27-merge-authorization-1325`). Branch `docs/wb-line03-closeout-final`, cut from that SHA.
-**Written:** 2026-11-27T15:0x (+08). Per-row timestamps below are the moment the command in that row was executed.
+**Written:** 2026-11-27T15:05 (+08), revised 2026-11-27T15:20. Per-row timestamps below are the moment the command in that row was executed.
 **Host:** opencode 2.4.2 on Windows, PowerShell; `git` CLI; GitHub GraphQL. Authenticated REST core quota was `0/5000`, so no REST read is used for evidence except the unauthenticated probe bucket.
 
 > **Evidence grades.** `VERIFIED` = the command and its raw output are in this record and the output settles the claim. `UNVERIFIED` = measured, but the measurement cannot settle the claim. `NOT_REPRODUCED` = the claim was tested and did not reproduce. `NOT_RECORDED` = no carrier exists anywhere. `NOT_VERIFIED` = not tested in this round.
@@ -72,7 +72,7 @@ document_metadata:
 | 1.1.4 | **This record's base** | `origin/main` at branch cut | `5670357db7a836d4f26838dbaf99494af41e2b65` | — | — | `git log -1 --format=%s 5670357d` | `Merge pull request #1423 from oahcom/governance/2026-11-27-merge-authorization-1325` | 2026-11-27T14:56:26 | VERIFIED | All blob SHAs and line numbers in this record are pinned here. |
 | 1.1.5 | Distance from the order's baseline | `788fbc01..5670357d` | — | — | — | `git rev-list --count 788fbc01..5670357d` | `520` | 2026-11-27T14:56:26 | VERIFIED | The order's SHA is 520 commits behind. No order-supplied line number was reused without re-derivation. |
 | 1.1.6 | `main` moved again **after** this branch was cut | GraphQL `repository.defaultBranchRef` | `7fc4ddabe1ea3b216b4536c0f5cb0a0c84306f19` | — | — | GraphQL `{repository{defaultBranchRef{target{...on Commit{oid}}}}}` | `main_oid 7fc4ddabe1ea3b216b4536c0f5cb0a0c84306f19` | 2026-11-27T14:58:25 | VERIFIED | Recorded as drift, not corrected for. This record deliberately does **not** chase `main`. |
-| 1.1.7 | Repository visibility | GraphQL | — | — | — | GraphQL `{repository{isPrivate visibility}}` | `isPrivate=false`, `visibility=PUBLIC` | 2026-11-27T14:38 | VERIFIED | Public since 2026-11-25; this is what makes unauthenticated run reads possible (§2.5). |
+| 1.1.7 | Repository visibility | GraphQL | — | — | — | GraphQL `{repository{isPrivate visibility}}` | `isPrivate=false`, `visibility=PUBLIC` | 2026-11-27T14:38 | VERIFIED | Public since 2026-11-25. This is why some historical CI facts are readable without a token; it is **not** used to infer anything about review. |
 | 1.1.8 | Authenticated REST core quota | `GET /rate_limit` | — | — | — | (read at audit start) | `core 0/5000`; `graphql 4983/5000` | 2026-11-27T11:47 | VERIFIED | Consequence: every GitHub read below is GraphQL or unauthenticated. No REST-authenticated claim is made anywhere in this record. |
 
 ### 1.2 What this record is allowed to assert
