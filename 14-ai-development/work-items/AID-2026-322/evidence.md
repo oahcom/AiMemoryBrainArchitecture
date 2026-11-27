@@ -349,7 +349,11 @@ The operator is responsible for:
 1. Applying the exact patches.
 2. Running the repository's required gates.
 3. Measuring the final committed prompt snapshot bytes.
-4. Replacing the two manifest placeholders with the measured prompt SHA-256 and byte count.
+4. Measuring the committed prompt file and writing its SHA-256 digest and byte count into the manifest.
 5. Confirming that the final manifest pins match the committed bytes.
+
+## 9. Ratchet baseline edit
+
+The operator removed 80 lines from `scripts/ci/baselines/manifest-blob-pins.txt`: the 40 SHA-256 and 40 byte-count `MISMATCH session_evidence[...].executed_prompt_snapshot_file` entries resolved by this work item. The seven-line header was replaced by a six-line header recording the removal and the eleven surviving entries: 3 AID-2026-100 related-evidence pins, 6 authored-index pins, and 2 AID-2026-261 `PATH_MISSING` entries. The edit is required because `gate_ratchet` requires every entry to remain failing; a fixed entry is stale/red. The measured local result was `violations=0` and `Repository new-file admission passed`.
 
 No test count, CI result, merge, or independent verification is claimed here.

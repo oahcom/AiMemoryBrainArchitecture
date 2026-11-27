@@ -57,6 +57,7 @@ scope:
     - 14-ai-development/work-items/AID-2026-322/evidence.md
     - 14-ai-development/work-items/AID-2026-322/session-evidence.md
   files_to_modify:
+    - scripts/ci/baselines/manifest-blob-pins.txt
     - 14-ai-development/work-items/INDEX.md
     - 14-ai-development/work-items/AID-2026-059/manifest.yaml
     - 14-ai-development/work-items/AID-2026-061/manifest.yaml
@@ -175,6 +176,7 @@ implementation:
     - 14-ai-development/work-items/AID-2026-322/prompt-v1.md
     - 14-ai-development/work-items/AID-2026-322/evidence.md
     - 14-ai-development/work-items/AID-2026-322/session-evidence.md
+    - scripts/ci/baselines/manifest-blob-pins.txt
     - 14-ai-development/work-items/INDEX.md
   tests:
     - "python scripts/ci/check_work_item_manifest_schema.py"
