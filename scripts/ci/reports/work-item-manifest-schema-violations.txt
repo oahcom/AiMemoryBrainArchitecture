@@ -1,0 +1,15 @@
+# Work Item manifest schema v1 — violation baseline
+
+- Repository: oahcom/AiMemoryBrainArchitecture
+- Validated head: 6c841df4638157c6838185ea24064cf70c770b44
+- Workflow: Existing gates, run 45935429555
+- Checker: scripts/ci/check_work_item_manifest_schema.py
+- Total manifests: 110
+- Compliant: 0
+- Violations: 0
+
+This is the exact per-file output captured from the successful checker job.
+Existing manifests were not rewritten. Remaining migration gap = 0
+manifest files.
+
+
