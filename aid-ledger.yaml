@@ -5,7 +5,7 @@
 # One AID maps to exactly one work_item_id.
 
 schema: 1
-updated_at_utc: "2026-11-27T03:25:00Z"
+updated_at_utc: "2026-11-27T03:22:00Z"
 entries:
   - id: AID-2026-082
     state: MERGED
@@ -56,7 +56,39 @@ entries:
   - id: AID-2026-100
     state: MERGED
     carrier: "PR #1220"
-    note: "merged at 788fbc01 after a draft-state fight; landed the three 03-memory-brain roots (README, memory-brain-overview, memory-lifecycle-manager) closing three orphan mirror pairs, the 05-memory-runtime README trio, and the six AID-2026-100 records. The four 04-memory-compiler E roots and the source-restore-matrix trio were excluded by Owner ruling (prompts 43/44) and remain with the external restoration line."
+    note: |
+      merged at 788fbc01 after a draft-state fight; landed the three 03-memory-brain roots (README, memory-brain-overview, memory-lifecycle-manager) closing three orphan mirror pairs, the 05-memory-runtime README trio, and the six AID-2026-100 records. The four 04-memory-compiler E roots and the source-restore-matrix trio were excluded by Owner ruling (prompts 43/44) and remain with the external restoration line.
+
+      Scope disposition: the four 04-memory-compiler root documents and the
+      three source-restore-matrix files were excluded under the prior
+      authorization decisions. They are not authorized for restoration by AID-2026-100.
+
+      Known gap, verified against origin/main 788fbc01:
+      All seven excluded paths are absent from main and from all nine checked
+      open PRs. No in-flight carrier was found.
+
+      Content snapshot:
+      The four root documents and three source-restore-matrix files are present
+      at b3ec4c64 (077f492f^). The matrix does not name or enumerate the four
+      root documents.
+
+      Orphan mirror findings:
+      DELETED_ROOTS:
+        Four root documents were deleted by 077f492f. Their English and
+        zh-CN mirrors remain without corresponding roots:
+        - compiler-stage-contract.md
+        - consolidation-and-conflict-resolution.md
+        - event-ingestion-engine.md
+        - evidence-and-provenance.md
+        Snapshot: b3ec4c64.
+
+      NEVER_HAD_ROOT:
+        These two documents have English and zh-CN mirrors but no root
+        document; neither root existed in b3ec4c64:
+        - forget-fence-and-derived-registration-part1.md
+        - memory-compiler-guide.md
+
+      updated_at_utc: "2026-11-27T03:21:59Z"
   - id: AID-2026-101
     state: MERGED
     carrier: "PR #1248"
