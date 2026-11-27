@@ -53,7 +53,7 @@ PIN_FIELD_REGISTRY = (
     ("source_blobs[].sha", "source_blobs[].path", "base_commit/baseline_commit", "Git blob SHA-1"),
     ("source.selected_source_files[].source_blob_sha", "path", "source.head_sha", "Git blob SHA-1"),
     ("source.selected_source_files[].restored_blob_sha", "path", "candidate commit", "Git blob SHA-1"),
-    ("source.selected_source_files[].frontmatter_blob_sha", "frontmatter_path/frontmatter_file", "declared source commit/candidate", "Git blob SHA-1; unresolved without locator"),
+    ("source.selected_source_files[].frontmatter_blob_sha", "frontmatter_path/frontmatter_file or unique blob-OID path in source tree", "source.head_sha", "Git blob SHA-1; UNRESOLVED if no unique locator"),
     ("source.files[].blob", "source.files[].path", "source.head", "Git blob SHA-1"),
     ("prompt_file_blob_sha", "prompt_file", "prompt_file_commit_sha", "Git blob SHA-1"),
     ("execution_boundary_extension.owner_contracts.sha256_or_blob_sha", "path", "commit_before_manifest_update", "Git blob SHA-1"),
@@ -224,6 +224,40 @@ def verify(root: Path, commit: str, verbose: bool = True):
     def pair(mapping, path_key, digest_key, source_commit, kind, algorithm="git"):
         if digest_key in mapping:
             check(mapping.get(path_key), mapping.get(digest_key), source_commit, kind, algorithm)
+
+    def check_blob_oid(source_commits, declared, kind):
+        nonlocal pins, incomplete
+        if isinstance(source_commits, str):
+            source_commits = [source_commits]
+        if not isinstance(declared, str) or not HEX40.fullmatch(declared):
+            pins += 1
+            incomplete += 1
+            problems.append(f"INCOMPLETE {kind}: invalid Git blob SHA-1 declaration {declared!r}")
+            return
+        for source_commit in source_commits:
+            if not nonempty(source_commit):
+                continue
+            try:
+                matches = git.paths_by_blob_oid(source_commit, declared, kind)
+            except Incomplete:
+                continue
+            if len(matches) == 1:
+                check(matches[0], declared, source_commit, kind)
+                return
+            if len(matches) > 1:
+                pins += 1
+                incomplete += 1
+                problems.append(
+                    f"INCOMPLETE UNRESOLVED({kind} blob locator ambiguous): "
+                    f"commit={source_commit} blob={declared} paths={matches!r}"
+                )
+                return
+        pins += 1
+        incomplete += 1
+        problems.append(
+            f"INCOMPLETE UNRESOLVED({kind} blob locator): "
+            f"blob={declared} not found in declared commit tree(s)"
+        )
 
     handled = set()
     resolved_locators = {}
@@ -411,15 +445,17 @@ def verify(root: Path, commit: str, verbose: bool = True):
 
         source = as_mapping(doc.get("source"))
         if "source_blob_sha" in source:
+            source_locator_commit = source.get("head_sha") or source.get("head")
             if nonempty(source.get("path")):
-                pair(source, "path", "source_blob_sha", source.get("head_sha") or source.get("head"),
-                     "source.source_blob_sha")
+                pair(source, "path", "source_blob_sha", source_locator_commit, "source.source_blob_sha")
+            elif nonempty(source_locator_commit):
+                check_blob_oid(source_locator_commit, source.get("source_blob_sha"), "source.source_blob_sha")
             else:
                 pins += 1
                 incomplete += 1
                 problems.append(
                     f"INCOMPLETE UNRESOLVED(source.source_blob_sha): "
-                    f"manifest={manifest_path} no sibling path locator"
+                    f"manifest={manifest_path} no sibling path or commit locator"
                 )
             mark(source, "source_blob_sha")
         selected = source.get("selected_source_files", [])
@@ -441,14 +477,13 @@ def verify(root: Path, commit: str, verbose: bool = True):
                     mark(item, "restored_blob_sha")
                     if "frontmatter_blob_sha" in item:
                         front_path = item.get("frontmatter_path") or item.get("frontmatter_file")
-                        if not nonempty(front_path):
-                            pins += 1
-                            incomplete += 1
-                            problems.append(f"INCOMPLETE UNRESOLVED({prefix}.frontmatter_blob_sha): no frontmatter_path/frontmatter_file locator")
-                        else:
+                        if nonempty(front_path):
                             locator_key = "frontmatter_path" if "frontmatter_path" in item else "frontmatter_file"
                             pair(item, locator_key, "frontmatter_blob_sha", source_commit or commit,
                                  prefix + ".frontmatter_blob_sha")
+                        else:
+                            check_blob_oid(source_commit or commit, item.get("frontmatter_blob_sha"),
+                                           prefix + ".frontmatter_blob_sha")
                         mark(item, "frontmatter_blob_sha")
 
         files = source.get("files", [])
@@ -486,9 +521,22 @@ def verify(root: Path, commit: str, verbose: bool = True):
                       f"reconciliation.pointers_changed[{i}].after_blob.target")
                 mark(item, "after_blob")
 
-        # AID-2026-001's older reconciliation records contain explicit
-        # blob identities whose locators are recorded in the same manifest section.
+        # Historical reference-model pins carry an explicit baseline commit.
         if doc.get("work_item_id") == "AID-2026-001":
+            dev = as_mapping(doc.get("dev_baseline_integration"))
+            target_commit = dev.get("target_commit")
+            ref_validation = as_mapping(doc.get("reference_model_validation"))
+            for section_name in ("model", "tests"):
+                section = as_mapping(ref_validation.get(section_name))
+                if "git_blob_sha" in section:
+                    check(section.get("file"), section.get("git_blob_sha"), target_commit,
+                          f"reference_model_validation.{section_name}.git_blob_sha")
+                    mark(section, "git_blob_sha")
+            execution_record = as_mapping(ref_validation.get("execution_record"))
+            if "git_blob_sha" in execution_record:
+                check_blob_oid(target_commit, execution_record.get("git_blob_sha"),
+                               "reference_model_validation.execution_record.git_blob_sha")
+                mark(execution_record, "git_blob_sha")
             post_merge = as_mapping(doc.get("post_merge_manifest_validation"))
             observed_head = post_merge.get("observed_main_head") or commit
             current_blobs = as_mapping(doc.get("current_main_blobs"))
@@ -524,17 +572,17 @@ def verify(root: Path, commit: str, verbose: bool = True):
                     problems.append(f"INCOMPLETE UNRESOLVED(current_main_blobs.{key}): no path mapping")
                 mark(current_blobs, key)
 
-            dev = as_mapping(doc.get("dev_baseline_integration"))
-            for key, path_value in (
-                ("model_blob", "14-ai-development/work-items/AID-2026-001/reference-model/r3_contract_model.py"),
-                ("tests_blob", "14-ai-development/work-items/AID-2026-001/reference-model/test_r3_contract.py"),
+            for key, path_value, source_ref in (
+                ("model_blob", "14-ai-development/work-items/AID-2026-001/reference-model/r3_contract_model.py",
+                 dev.get("target_commit")),
+                ("tests_blob", "14-ai-development/work-items/AID-2026-001/reference-model/test_r3_contract.py",
+                 as_mapping(dev.get("mainline_integration")).get("pre_update_branch_head")),
             ):
                 if key in dev:
-                    check(path_value, dev.get(key), dev.get("target_commit"),
-                          f"dev_baseline_integration.{key}")
+                    check(path_value, dev.get(key), source_ref, f"dev_baseline_integration.{key}")
                     mark(dev, key)
 
-            integration = as_mapping(doc.get("mainline_integration"))
+            integration = as_mapping(dev.get("mainline_integration"))
             merged_head = integration.get("merged_main_head") or integration.get("merge_commit")
             for key, path_value in (
                 ("forget_model_blob", "14-ai-development/work-items/AID-2026-001/reference-model/forget_model.py"),
@@ -571,6 +619,43 @@ def verify(root: Path, commit: str, verbose: bool = True):
             for key in ("model_blob_sha256_crlf", "tests_blob_sha256_crlf"):
                 if key in measurement:
                     mark(measurement, key)
+
+        source_baseline = as_mapping(doc.get("source_baseline"))
+        if source_baseline:
+            baseline_commit = source_baseline.get("main")
+            for key, value in source_baseline.items():
+                if isinstance(key, str) and (key.endswith("_blob") or key.endswith("_blob_sha")):
+                    check_blob_oid(baseline_commit, value, f"source_baseline.{key}")
+                    mark(source_baseline, key)
+
+        source_pins = as_mapping(doc.get("source_pins"))
+        if source_pins:
+            pins_commit = doc.get("latest_sync_main_commit_sha")
+            for key, value in source_pins.items():
+                if isinstance(key, str) and (key.endswith("_blob") or key.endswith("_blob_sha")):
+                    check_blob_oid(pins_commit, value, f"source_pins.{key}")
+                    mark(source_pins, key)
+
+        post_merge_validation = as_mapping(as_mapping(doc.get("impl2_scope_adjudication")).get("post_merge_validation"))
+        if post_merge_validation:
+            post_merge_commit = post_merge_validation.get("merge_commit_sha") or post_merge_validation.get("final_pr_head")
+            for key in ("canonical_evidence_blob", "en_evidence_blob", "zh_cn_evidence_blob"):
+                if key in post_merge_validation:
+                    check_blob_oid(post_merge_commit, post_merge_validation.get(key),
+                                   f"impl2_scope_adjudication.post_merge_validation.{key}")
+                    mark(post_merge_validation, key)
+
+        # AID-2026-093 records source blob identities but omits their path fields.
+        # Resolve only against the explicitly recorded reconciliation commits.
+        if doc.get("latest_main_sha") or doc.get("latest_main_merge_sha"):
+            candidate_commits = [doc.get("latest_main_sha"), doc.get("latest_main_merge_sha"),
+                                 doc.get("post_merge_main_sha")]
+            for key in ("latest_invariant_source_blob", "prior_invariant_source_blob",
+                        "latest_forget_fence_contract_blob", "latest_system_boundaries_blob",
+                        "latest_context_version_blob", "latest_applied_evidence_blob"):
+                if key in doc:
+                    check_blob_oid(candidate_commits, doc.get(key), key)
+                    mark(doc, key)
 
         renumbering = as_mapping(doc.get("renumbering"))
         if "current_prompt_sha256" in renumbering:
@@ -633,12 +718,20 @@ def verify(root: Path, commit: str, verbose: bool = True):
                             preferred_paths = ["superseded_artifact"]
                         elif key_text in {"before_blob", "after_blob"}:
                             preferred_paths = ["document"]
+                        elif key_text in {"snapshot_git_blob_sha", "snapshot_sha256"}:
+                            preferred_paths = ["snapshot_file"]
+                        elif key_text == "prompt_file_blob_sha":
+                            preferred_paths = ["prompt_file"]
+                        elif key_text == "prompt_original_payload_sha256":
+                            preferred_paths = ["prompt_original_payload_file", "prompt_file"]
                         elif key_text == "current_prompt_sha256":
                             preferred_paths = ["current_prompt_file", "prompt_file"]
                         elif key_text == "previous_prompt_sha256":
                             preferred_paths = ["previous_prompt_file"]
                         selected_path = next((candidate for candidate in preferred_paths
                                                if candidate in node and nonempty(node.get(candidate))), None)
+                        if selected_path is None and base_name in node and nonempty(node.get(base_name)):
+                            selected_path = base_name
                         commit_keys = (
                             "source_commit_sha", "translation_commit_sha", "prompt_file_commit_sha",
                             "source_commit", "commit", "head_sha", "head", "base_commit",
@@ -652,6 +745,11 @@ def verify(root: Path, commit: str, verbose: bool = True):
                                                if isinstance(name, str) and
                                                ("_commit_" in name or name.endswith("_commit"))
                                                and nonempty(value)), commit)
+                        if isinstance(source_ref, str) and (
+                            "NOT_SEPARATELY_COMMITTED" in source_ref or
+                            "same commit as registration package" in source_ref
+                        ):
+                            source_ref = commit
                         if where.startswith("manifest.source_baseline."):
                             source_ref = as_mapping(doc.get("source_baseline")).get("main") or source_ref
                         elif where.startswith("manifest.source_pins."):
@@ -659,6 +757,10 @@ def verify(root: Path, commit: str, verbose: bool = True):
                         locator_key = selected_path or (path_keys[0] if len(path_keys) == 1 else None)
                         if locator_key and nonempty(node.get(locator_key)):
                             path_value = node[locator_key]
+                            if isinstance(path_value, str) and "/" not in path_value and locator_key in {
+                                "prompt_file", "snapshot_file", "prompt_original_payload_file", "file"
+                            }:
+                                path_value = str(PurePosixPath(manifest_path).parent / path_value)
                             algorithm = ("sha256" if key_text.endswith("_sha256")
                                          and not key_text.endswith("_blob_sha256") else "git")
                             check(path_value, value, source_ref,
