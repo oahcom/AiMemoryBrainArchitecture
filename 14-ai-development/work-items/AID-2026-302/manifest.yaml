@@ -51,8 +51,10 @@ session_evidence:
       - "#1246"
     prompt_id: AID-2026-302-PROMPT
     prompt_version: 1
-    executed_prompt_sha256: 6907cc7a0e5ad4c1f43e4978be3589673a61f46654ec3101172b0589df884575
-    executed_prompt_bytes: 4817
+    executed_prompt_sha256: e551f793b2a2638af8d4998b307e6ded832cdd9bfa69ce9514a0362d3864d810
+    executed_prompt_bytes: 6021
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
     implementing_ai_session: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-302/session-evidence.md
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-302/prompt-v1.md
