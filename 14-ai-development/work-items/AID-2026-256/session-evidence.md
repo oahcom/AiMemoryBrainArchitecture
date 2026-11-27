@@ -56,7 +56,7 @@ The platform conversation identifier is not exposed in this session context; no 
 
 ## Actual AI input
 
-The executed instruction is recorded verbatim in the prompt snapshot `14-ai-development/work-items/AID-2026-256/prompt-v1.md` (SHA-256 `d01f67bcd609da00eb91cd82b8cd046b6c2097a8ad88cdb2f1b8cf37d8ee3b0e`, 1742 bytes), which carries two Owner rulings of 2026-11-27:
+The executed instruction is recorded verbatim in the prompt snapshot `14-ai-development/work-items/AID-2026-256/prompt-v1.md` (SHA-256 `e496b5a0ad2c920d387978b3d03c9f956915126ff29f8825b014b9df6d544ce4`, 3113 bytes), which carries two Owner rulings of 2026-11-27:
 
 - Repair only the registration layer: register as `MERGED` only the 19 AIDs that have a GitHub merge fact behind them, do not rewrite other manifests, and do not add a top-level `status` field to the 13 manifests that do not have one.
 - Cell shape: keep the separator and the trailing note, replacing only the `DRAFT PR` / `DISPATCHED` prefix with `MERGED`.
