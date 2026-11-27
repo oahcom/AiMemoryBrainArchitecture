@@ -50,13 +50,12 @@ The transition from baseline to repository-wide completion is closed only when a
 
 Final exact-head test results, Actions contexts, merge SHA, and post-merge blob identities are recorded only after direct readback. No CI result, merge, Owner approval, or acceptance is claimed here.
 
-## Observed validation — PR #1365 head 496629f3f47666a51490e97bf89e5e92bb5580a3
+## Observed validation — PR #1365 head f3e4a2eb884d28005850d154e0da2cd653386c31
 
 - GOV-DOC-002 self-check: 372/372 passed, including all three DM-15 regression cases.
-- Incremental GOV-DOC-002 verdict: PASS; 650 classified, 371 unclassified; no violations in the changed set.
-- Repository-wide adoption census: 646 classified governed documents missing a non-empty steward. This is the measured legacy baseline; it is not the same population as the 424-file normative_status grep cited in Issue #266.
-- Session Evidence Gate: success. The validator reported AI-SESSION-EVIDENCE: NOT_APPLICABLE because linked Issue #266 predates the 2026-12-01 declaration-policy effective date; PR-level AI declaration and session evidence passed.
-- Required contexts: repository hygiene confirmed 16 declared contexts, all required on main; all 16 succeeded on this head. The additional Work Item manifest schema read-only check also succeeded.
-- Branch freshness: compare main...branch reports behind_by=0. The current main at integration was bc741bdce7b47d3695d85fa9649fe9506f23c595; merge commit 496629f3f47666a51490e97bf89e5e92bb5580a3 preserves concurrent main changes.
+- Incremental GOV-DOC-002 verdict: PASS; 645 classified, 371 unclassified; no violations in the changed set.
+- Repository-wide adoption census: 641 classified governed documents missing a non-empty steward. This is the measured legacy baseline; it is not the same population as the 424-file normative_status grep cited in Issue #266.
+- Session Evidence Gate: success. The validator reported AI-SESSION-EVIDENCE: NOT_APPLICABLE because linked Issue #266 predates the 2026-12-01 declaration-policy effective date; the PR-level AI declaration and session evidence passed.
+- Required contexts: 16/16 success on this head. The branch-freshness context passed and compare main...branch reports behind_by=0.
 - Branch-protection readback: GitHub returned HTTP 403 "Resource not accessible by integration" for /branches/main/protection and its required_status_checks and enforce_admins subresources. The connection can verify that 16 declared contexts are required on main, but cannot verify strict=true or enforce_admins=true.
 - Merge is intentionally BLOCKED pending an authorized branch-protection readback. No merge, post-merge blob verification, or Issue #266 comment has been performed. Issue #266 remains open and unchanged.

@@ -72,9 +72,8 @@ implementation:
     - "scripts/check_document_management.py"
     - "scripts/test_check_document_management.py"
   tests:
-    - "GOV-DOC-002 self-check: 372/372 passed on PR head 496629f3f47666a51490e97bf89e5e92bb5580a3."
+    - "GOV-DOC-002 self-check: 372/372 passed on PR head f3e4a2eb884d28005850d154e0da2cd653386c31."
     - "DM-15: new document without steward fails; new document with steward passes; legacy modification remains non-blocking."
-    - "Work Item manifest schema read-only validation: passed."
 
 session_evidence:
   - role: "IMPLEMENTATION_SESSION"
