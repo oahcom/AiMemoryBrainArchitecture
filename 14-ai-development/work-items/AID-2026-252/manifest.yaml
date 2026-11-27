@@ -61,3 +61,27 @@ session_evidence:
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-252/session-evidence.md"
+
+documentation:
+  - path: "00-governance/architecture-document-management-policy.md"
+    relationship: normative
+  - path: "00-governance/templates/document-metadata-template.md"
+    relationship: design
+  - path: "14-ai-development/work-items/AID-2026-252/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-252/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-252/prompt-v1.md"
+    relationship: reference
+implementation:
+  status: IMPLEMENTED
+  summary: "Adds optional steward metadata for legacy compatibility, incremental enforcement for newly added governed documents, a repository-wide missing-steward census, and regression tests."
+  files_changed:
+    - "00-governance/architecture-document-metadata.schema.yaml"
+    - "00-governance/architecture-document-management-policy.md"
+    - "00-governance/templates/document-metadata-template.md"
+    - "scripts/check_document_management.py"
+    - "scripts/test_check_document_management.py"
+  tests:
+    - "GOV-DOC-002 self-check: 372/372 passed on PR head f3e4a2eb884d28005850d154e0da2cd653386c31."
+    - "DM-15: new document without steward fails; new document with steward passes; legacy modification remains non-blocking."
