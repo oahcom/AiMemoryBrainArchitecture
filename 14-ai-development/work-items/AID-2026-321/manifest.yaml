@@ -9,6 +9,7 @@ risk_rationale: >-
   No executable code, test behavior, gate, workflow, branch protection or acceptance
   authority is changed.
 status: DISPATCHED
+id_status: PROVISIONAL
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
 acceptance_authority: NOT_ASSIGNED
@@ -19,13 +20,6 @@ repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
 base_commit_sha: "229c0a6b51f4c761ed969337f6ddf7d0bbbb7d0c"
 tracking_issue: "#1269"
-
-prompt_id: AID-2026-321-PROMPT
-prompt_version: 1
-prompt_file: 14-ai-development/work-items/AID-2026-321/prompt-v1.md
-prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: d587f3178bb90287c05313937e9364d1efe93dd6a9666cbf85cfaf52df71864f
-prompt_bytes: 7957
 
 scope:
   objective: >-
@@ -98,8 +92,10 @@ documentation:
   - path: 14-ai-development/work-items/AID-2026-321/session-evidence.md
     relationship: evidence
 
+evidence: 14-ai-development/work-items/AID-2026-321/evidence.md
+
 implementation:
-  status: DOCUMENTATION_AUTHORED
+  status: IMPLEMENTED
   summary: >-
     Proposed documentation-only correction authored for operator application.
     The AC1 and AC5 measurement replacements preserve the two platform totals
