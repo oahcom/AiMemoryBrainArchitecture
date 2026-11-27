@@ -1,0 +1,111 @@
+work_item_id: AID-2026-284
+title: "Make manifest blob-pin negative assertion and base binding fail-closed"
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  The change makes the manifest blob-pin workflow reject a negative fixture
+  that is incorrectly accepted and binds the base scan to the appropriate
+  event commit. It preserves the existing required job and does not modify
+  the baseline or branch protection.
+status: DRAFT
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner acceptance not recorded"
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "7fc4ddabe1ea3b216b4536c0f5cb0a0c84306f19"
+
+scope:
+  objective: >-
+    Make the manifest blob-pin negative sample fail the workflow when the
+    checker incorrectly accepts it, and resolve the base commit from the
+    event context so pull-request scans use the merge candidate's first
+    parent rather than a potentially stale event-time base.
+  issues:
+    - "#1349"
+    - "#1350"
+  constraints:
+    - Preserve the existing repository-hygiene job ID and job name.
+    - Do not add a new job, required status context, or dependency.
+    - Do not change branch protection.
+    - Do not modify scripts/ci/baselines/manifest-blob-pins.txt.
+    - For pull_request events, validate the merge-candidate ref and SHA, require a two-parent merge candidate, and select its first parent.
+    - For push events, use the validated event before SHA supplied to the resolver.
+    - Unsupported events and invalid or unavailable inputs must fail closed.
+    - Tie the candidate scan and ratchet invocation to GITHUB_SHA.
+    - Keep this work item's manifest free of blob, digest, and byte-count pin fields.
+
+evidence: 14-ai-development/work-items/AID-2026-284/evidence.md
+
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-284/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-284/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-284/session-evidence.md
+    relationship: evidence
+
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1349"
+      - "#1350"
+    implementing_ai_session: "ChatGPT-GPT-6"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-284/session-evidence.md
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-284/prompt-v1.md
+    executed_prompt_provenance: STRUCTURED_TASK_CAPTURE
+    session_reference_status: "RECORDED_NOT_FROZEN"
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    The fix adds event-aware, fail-closed base resolution and an assertion
+    that verifies the immutable negative fixture is rejected with the
+    expected evidence. The workflow measurement step uses the resolved base,
+    scans the candidate at GITHUB_SHA, and fails if the negative fixture is
+    not rejected. The ratchet invocation is also bound to GITHUB_SHA.
+    Local resolver, negative assertion, and existing checker test suites
+    passed. Offline workflow-step and base-selection proofs passed. The
+    baseline was verified unchanged. The local gate_ratchet wrapper was not
+    reproduced successfully on Windows; CI execution, pull-request review,
+    and Owner acceptance remain pending.
+  branch: fix/aid268-negative-assertion
+  commit: ccb22465
+  commit_subject: "fix(ci): make the blob-pin negative sample and base binding able to fail (AID-2026-284)"
+  files_changed:
+    - .github/workflows/repository-hygiene.yml
+    - scripts/ci/resolve_manifest_blob_pin_base.py
+    - scripts/ci/assert_manifest_blob_pin_negative.py
+    - scripts/ci/test_resolve_manifest_blob_pin_base.py
+    - scripts/ci/test_assert_manifest_blob_pin_negative.py
+  tests:
+    - "python3 scripts/ci/test_resolve_manifest_blob_pin_base.py"
+    - "python3 scripts/ci/test_assert_manifest_blob_pin_negative.py"
+    - "python3 scripts/ci/test_check_manifest_blob_pins.py"
+    - "Offline workflow-step proof: extracted pre-fix and delivered run steps, substituted a silent successful checker, and verified pre-fix exit 0 versus delivered exit 1."
+    - "Offline base-selection proof: compared event-time-base selection with merge-candidate-first-parent selection using a two-parent synthetic pull-request merge."
+    - "git diff --exit-code -- scripts/ci/baselines/manifest-blob-pins.txt"
+  workflow:
+    path: .github/workflows/repository-hygiene.yml
+    job_id: repository-hygiene
+    job_name: "Repository hygiene (hard gate)"
+    new_job: false
+    required_context_changed: false
+    dependency_changed: false
+    branch_protection_changed: false
+  baseline:
+    path: scripts/ci/baselines/manifest-blob-pins.txt
+    modified: false
+  verification:
+    local_unit_suites: PASS
+    offline_workflow_step_proof: PASS
+    offline_base_selection_proof: PASS
+    baseline_unchanged: PASS
+    local_gate_ratchet: NOT_REPRODUCED
+    github_actions: PENDING
+    pull_request: NOT_OPENED
+    independent_review: PENDING
+    owner_acceptance: PENDING
