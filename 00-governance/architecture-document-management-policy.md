@@ -117,6 +117,34 @@ memory-context, agent-integration, protocol, security-governance,
 storage-index, consistency-recovery, testing-acceptance, ai-development
 ```
 
+### 3.3 Document stewardship / 文档归属责任
+
+Every newly added governed Markdown document MUST declare a non-empty top-level
+document_metadata.steward identifying the accountable role or team that maintains
+the document and receives maintenance questions. This is a responsibility assignment,
+not an approval or authorship claim. The checker enforces it for newly added governed
+documents in incremental runs and prints the number of already-classified documents
+that still lack a steward as an adoption baseline. Existing documents are not
+retroactively blocked. The baseline closes only when a whole-tree census reports
+zero classified governed documents missing a non-empty steward; until then, the
+count remains visible and non-blocking.
+
+每份新增加的受治理 Markdown 文档 MUST 在顶层声明非空的
+document_metadata.steward，标明负责维护该文档并接收维护问题的责任角色或团队。
+该字段表示维护责任，不代表审批或作者身份。检查器在增量运行中强制检查新增加的
+受治理文档，并打印现有已分类文档中尚未填写 steward 的数量作为迁移基线。既有文档
+不会被追溯性阻断。只有当全树统计显示缺少非空 steward 的已分类受治理文档为零时，
+迁移基线才算收口；在此之前，该数量持续可见但不阻断合并。
+
+The field is named steward, not owner. The policy already uses “Consumer owners”
+for external consumers in M-08; reusing owner for document maintenance would conflate
+two different responsibility domains. Steward means document-maintenance
+accountability; M-08 continues to mean downstream-consumer accountability.
+
+字段命名为 steward 而非 owner。M-08 已使用 “Consumer owners” 指外部消费者；
+将 owner 再用于文档维护会混淆两个不同责任域。steward 专指文档维护责任，
+M-08 则继续表示下游消费者责任。
+
 ### 3.2 Independence constraint / 独立性约束
 
 No dimension may be derived from another. CI MUST NOT infer `usage_status` from `decision_status`, or `canonical_status` from `role`.

@@ -175,7 +175,7 @@ SCOPE_TYPES = {"Full-document"}
 VERSION_SCHEMES = {"git", "content-hash"}
 
 # Unknown keys are errors. A misspelled governance field is otherwise invisible.
-TOP_KEYS = {"domain", "role", "lifecycle", "authority", "bilingual_counterpart"}
+TOP_KEYS = {"domain", "role", "lifecycle", "authority", "bilingual_counterpart", "steward"}
 LIFECYCLE_KEYS = {
     "approval", "evidence_verification", "usage_status",
     "modification_status", "supersession", "archival",
@@ -2231,6 +2231,28 @@ def changed_paths(root: Path, ref: str) -> tuple[set[str], set[str]]:
     return all_changed, requirable
 
 
+def added_paths(root: Path, ref: str) -> set[str]:
+    """Paths introduced by this increment (including copies and untracked files)."""
+    resolved = git(
+        root, "rev-parse", "--verify", "--end-of-options", f"{ref}^{{commit}}"
+    )
+    if resolved is None:
+        raise ValueError(f"{ref!r} does not resolve to a commit")
+    diff = git(
+        root, "diff", "--name-only", "-z", "--diff-filter=AC",
+        f"{resolved}...HEAD", nul=True,
+    )
+    if diff is None:
+        raise ValueError(f"cannot compute added paths for {resolved}...HEAD")
+    added = {p for p in diff.split("\0") if p}
+    untracked = git(
+        root, "ls-files", "-z", "--others", "--exclude-standard", nul=True
+    )
+    if untracked is None:
+        raise ValueError("cannot enumerate untracked paths")
+    added.update(p for p in untracked.split("\0") if p)
+    return added
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", default=".", help="repository root")
@@ -2282,6 +2304,7 @@ def main() -> int:
         all_changed, required = (
             changed_paths(root, args.require_changed) if incremental else (set(), set())
         )
+        newly_added = added_paths(root, args.require_changed) if incremental else set()
     except GitOutputDecodeError as exc:
         # Paths we cannot read are not paths that did not change: incomplete, 2.
         print(f"::error::{exc}", file=sys.stderr)
@@ -2344,6 +2367,11 @@ def main() -> int:
             continue
         file_errors, meta = check_document(path, text, root)
         errors.extend(f"{rel}: {err}" for err in file_errors)
+        if (rel in newly_added and meta is not None
+                and not str(meta.get("steward") or "").strip()):
+            errors.append(
+                f"{rel}: DM-15 new governed document must declare a non-empty steward"
+            )
 
         bucket = per_root.setdefault(rel.split("/")[0] if "/" in rel else rel, [0, 0])
         bucket[1] += 1
@@ -2393,6 +2421,14 @@ def main() -> int:
             revocations[rev_id] = rel
 
     total = len(targets)
+    steward_missing = sorted(
+        rel for rel, meta in docs.items()
+        if not str(meta.get("steward") or "").strip()
+    )
+    print(
+        f"DM-15 steward adoption baseline: {len(steward_missing)} classified "
+        f"document(s) missing steward"
+    )
     print(
         f"GOV-DOC-002: {total} governed documents, {len(docs)} classified, "
         f"{len(unclassified)} unclassified"

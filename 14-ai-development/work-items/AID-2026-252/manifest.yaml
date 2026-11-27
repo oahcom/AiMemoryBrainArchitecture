@@ -1,0 +1,52 @@
+work_item_id: AID-2026-252
+title: "Add enforceable document stewardship metadata for newly added governed documents"
+class: GATE/TEST + DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Adds one optional schema field for legacy compatibility, enforces a non-empty
+  steward only on newly added governed Markdown documents, and reports the
+  repository-wide adoption gap without blocking existing documents.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: user-authorized operator (delegated by account owner)
+accountable_owner: user-authorized operator (delegated by account owner)
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: f18adc9fa1d06837433a09498f5297bf13b35756
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: f18adc9fa1d06837433a09498f5297bf13b35756
+  assigned_id: AID-2026-252
+  allocation_rule: "Explicitly assigned by the task owner; no INDEX max+1 allocation was used."
+  recheck_rule: "Recheck all-state PRs and branch refs immediately before PR creation; if occupied, stop and request a permitted replacement number."
+scope:
+  objective: "Add an enforceable steward field without retroactively blocking the existing governed corpus."
+  changes:
+    - path: "00-governance/architecture-document-metadata.schema.yaml"
+      detail: "Declare optional top-level steward string, preserving compatibility for the existing corpus."
+    - path: "scripts/check_document_management.py"
+      detail: "Recognize steward, require it on newly added governed documents, and print the missing-steward adoption baseline."
+    - path: "scripts/test_check_document_management.py"
+      detail: "Cover missing steward on new files, valid new steward, and non-blocking legacy updates."
+    - path: "00-governance/templates/document-metadata-template.md"
+      detail: "Show steward in the template and explain the new-document rule."
+    - path: "00-governance/architecture-document-management-policy.md"
+      detail: "Document DM-15, the adoption baseline and the reason for the steward name."
+    - path: "14-ai-development/work-items/AID-2026-252/"
+      detail: "Record implementation evidence and session evidence."
+  untouched:
+    - "Existing document metadata values and the historical corpus"
+    - "Issue #266 body and state"
+    - "branch protection, workflows and required contexts"
+non_goals:
+  - "Retroactively requiring steward on all existing documents in this PR"
+  - "Using owner as the field name"
+  - "Claiming natural-person Owner approval or acceptance"
+evidence:
+  record: 14-ai-development/work-items/AID-2026-252/evidence.md
+  session: 14-ai-development/work-items/AID-2026-252/session-evidence.md
