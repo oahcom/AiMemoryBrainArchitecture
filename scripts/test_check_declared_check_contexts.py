@@ -181,6 +181,43 @@ class DeclaredCheckContextsTest(unittest.TestCase):
         self.assertIn("branches/main.protection.required_status_checks.contexts", errors.getvalue())
         self.assertIn("returned None", errors.getvalue())
 
+    def test_incomplete_precedes_local_violation_when_fetch_raises(self):
+        self.write(DOC, DOC_TEXT)
+        self.write(
+            ".github/workflows/gates.yml",
+            WORKFLOW.replace("Rust format (hard gate)", "Rust format (renamed)"),
+        )
+
+        def unreachable(**_kwargs):
+            raise OSError("connection refused")
+
+        original = checker.fetch_protected_contexts
+        checker.fetch_protected_contexts = unreachable
+        self.addCleanup(setattr, checker, "fetch_protected_contexts", original)
+        errors = io.StringIO()
+        with redirect_stdout(io.StringIO()), redirect_stderr(errors):
+            self.assertEqual(checker.main(self.root), 2)
+        output = errors.getvalue()
+        self.assertIn("OSError: connection refused", output)
+        self.assertNotIn("declares required check context", output)
+
+    def test_incomplete_precedes_local_violation_when_fetch_returns_none(self):
+        self.write(DOC, DOC_TEXT)
+        self.write(
+            ".github/workflows/gates.yml",
+            WORKFLOW.replace("Rust format (hard gate)", "Rust format (renamed)"),
+        )
+
+        original = checker.fetch_protected_contexts
+        checker.fetch_protected_contexts = lambda **_kwargs: None
+        self.addCleanup(setattr, checker, "fetch_protected_contexts", original)
+        errors = io.StringIO()
+        with redirect_stdout(io.StringIO()), redirect_stderr(errors):
+            self.assertEqual(checker.main(self.root), 2)
+        output = errors.getvalue()
+        self.assertIn("returned None", output)
+        self.assertNotIn("declares required check context", output)
+
     def test_incomplete_when_the_payload_has_no_contexts(self):
         self.write(DOC, DOC_TEXT)
         self.write(".github/workflows/gates.yml", WORKFLOW)
