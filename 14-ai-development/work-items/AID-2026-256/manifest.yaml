@@ -67,10 +67,10 @@ acceptance_criteria:
   - id: AC5
     criterion: "check_document_management.py reports no new rule violations attributable to this change."
 implementation:
-  status: "DRAFT_PR"
+  status: "MERGED"
   branch: "work-item/aid-2026-256-governance-registration-reconciliation"
   pull_request: 1380
-  merge_commit_sha: "PENDING"
+  merge_commit_sha: "46dac1b1e198c8d88daff5a34faf759ecb075869"
 review:
   status: "NOT_ASSIGNED"
 acceptance:
