@@ -85,6 +85,19 @@ def read_path_at_commit(root, commit, path):
     return p.stdout if p.returncode == 0 else None
 
 
+def classify_primary(digest_present, implementation_present, any_pin, pinned_ok, commit_reachable):
+    # Do not reorder: the order is part of the audit contract.
+    if not digest_present or not implementation_present:
+        return "NO_TRACE"
+    if not any_pin:
+        return "DIGEST_UNPINNED"
+    if not pinned_ok:
+        return "DIGEST_MISMATCH"
+    if not commit_reachable:
+        return "COMMIT_UNREACHABLE"
+    return "TRACEABLE"
+
+
 def audit(root, ref, base):
     rows = []
     base_sha = resolve_commit(root, base)
@@ -164,16 +177,8 @@ def audit(root, ref, base):
                 if not ancestor:
                     findings.append("commit_unreachable")
 
-        if not real(digest) or not real(impl):
-            primary = "NO_TRACE"
-        elif not has_any_pin:
-            primary = "DIGEST_UNPINNED"
-        elif not pinned_ok:
-            primary = "DIGEST_MISMATCH"
-        elif cdim != "REACHABLE":
-            primary = "COMMIT_UNREACHABLE"
-        else:
-            primary = "TRACEABLE"
+        primary = classify_primary(real(digest), real(impl), has_any_pin,
+                                   pinned_ok, cdim == "REACHABLE")
 
         if not real(digest):
             pdim = "ABSENT"
