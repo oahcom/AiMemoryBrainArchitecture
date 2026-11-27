@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from scripts.ci.check_prompt_commit_trace import (
-    ROOT, audit, classify_primary, resolve_commit, summarize,
+    ROOT, audit, classify_primary, is_ancestor, resolve_commit, summarize,
 )
 
 
@@ -18,6 +18,19 @@ class PrimaryDecisionOrderTests(unittest.TestCase):
         self.assertEqual(classify_primary(True, True, True, False, False), "DIGEST_MISMATCH")
         self.assertEqual(classify_primary(True, True, True, True, False), "COMMIT_UNREACHABLE")
         self.assertEqual(classify_primary(True, True, True, True, True), "TRACEABLE")
+
+
+class BaselinePinAncestryTests(unittest.TestCase):
+    def test_baseline_pin_must_be_an_ancestor_of_comparison_base(self):
+        head = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ).strip()
+        parent = subprocess.check_output(
+            ["git", "rev-parse", "HEAD^"], cwd=ROOT, text=True
+        ).strip()
+        self.assertTrue(is_ancestor(ROOT, parent, head))
+        self.assertFalse(is_ancestor(ROOT, head, parent))
+        self.assertFalse(is_ancestor(ROOT, "", head))
 
 
 class RepositoryRegressionTests(unittest.TestCase):
