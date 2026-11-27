@@ -208,6 +208,46 @@ class BlobPinsTest(unittest.TestCase):
         self.assertEqual(code, 2, out + err)
         self.assertIn("UNRESOLVED(commit locator)", out)
 
+    def test_generic_blob_field_uses_sibling_path_and_source_commit(self):
+        data = b"generic pinned bytes\\n"
+        source = commit_tree(self.root, {"generic.md": data})
+        candidate = commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                ("generic_evidence:\\n"
+                 "  path: generic.md\\n"
+                 f"  evidence_blob_sha: {self.blob_sha(data)}\\n"
+                 f"  source_commit_sha: {source}\\n"),
+        })
+        code, out, err = self.run_gate(candidate)
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=1 ok=1", out)
+
+    def test_nested_gate_a_reconstruction_mirror_pins_are_checked(self):
+        data = b"nested mirror\\n"
+        source = commit_tree(self.root, {"mirror.md": data})
+        wrong = "0" * 40
+        candidate = commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                ("baseline_and_source_evidence:\\n"
+                 "  gate_a_reconstruction:\\n"
+                 "    - source_commit: " + source + "\\n"
+                 "      en_mirror: mirror.md\\n"
+                 f"      en_mirror_blob: {wrong}\\n"),
+        })
+        code, out, err = self.run_gate(candidate)
+        self.assertEqual(code, 1, out + err)
+        self.assertIn("MISMATCH gate_a_reconstruction[0].en_mirror", out)
+
+    def test_empty_declared_digest_is_not_dropped(self):
+        commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                "root: README.md\\nroot_blob: ''\\n",
+        })
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 2, out + err)
+        self.assertIn("pins=1", out)
+        self.assertIn("invalid Git blob SHA-1 declaration", out)
+
     def test_empty_tree_is_incomplete(self):
         code, out, err = self.run_gate()
         self.assertEqual(code, 2)

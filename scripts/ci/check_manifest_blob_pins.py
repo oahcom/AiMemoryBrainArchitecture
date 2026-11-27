@@ -63,6 +63,11 @@ class Git:
         return p.stdout
 
     def resolve_commit(self, commit: str, field: str) -> str:
+        if field == "--commit" and commit == "HEAD":
+            resolved = self.run("rev-parse", "--verify", "HEAD^{commit}").decode().strip()
+            if not HEX40.fullmatch(resolved):
+                raise Incomplete("UNRESOLVED(commit did not resolve uniquely): HEAD")
+            return resolved
         if not isinstance(commit, str) or not re.fullmatch(r"[0-9a-fA-F]{7,40}", commit):
             raise Incomplete(f"UNRESOLVED(commit locator): {field}={commit!r}")
         try:
@@ -132,7 +137,12 @@ def verify(root: Path, commit: str, verbose: bool = True):
             problems.append(f"PATH_MISSING {kind} path=<not-declared> declared={declared}")
             return
         try:
-            data = git.object_bytes(source_commit, path, kind)
+            resolved_commit = git.resolve_commit(source_commit, kind)
+            data = git.object_bytes(resolved_commit, path, kind)
+            if algorithm == "git":
+                resolved_locators.setdefault(str(declared).lower(), set()).add(
+                    (resolved_commit, PurePosixPath(path).as_posix())
+                )
         except Violation as exc:
             missing += 1
             problems.append(f"{exc}; declared={declared}")
@@ -165,6 +175,7 @@ def verify(root: Path, commit: str, verbose: bool = True):
             check(mapping.get(path_key), mapping.get(digest_key), source_commit, kind, algorithm)
 
     handled = set()
+    resolved_locators = {}
     def mark(mapping, key):
         handled.add((id(mapping), key))
 
@@ -186,7 +197,11 @@ def verify(root: Path, commit: str, verbose: bool = True):
             pair(doc, path_key, digest_key, commit, f"index.{path_key}")
             mark(doc, digest_key)
 
-        for i, item in enumerate(doc.get("gate_a_reconstruction", []) or []):
+        source_evidence = as_mapping(doc.get("baseline_and_source_evidence"))
+        reconstruction = doc.get("gate_a_reconstruction")
+        if reconstruction is None:
+            reconstruction = source_evidence.get("gate_a_reconstruction", [])
+        for i, item in enumerate(reconstruction or []):
             if not isinstance(item, dict):
                 incomplete += 1
                 problems.append(f"INCOMPLETE manifest={manifest_path}: gate_a_reconstruction[{i}] is not a mapping")
@@ -199,8 +214,12 @@ def verify(root: Path, commit: str, verbose: bool = True):
                 pair(item, "root", "reconstructed_root_blob", source_commit,
                      f"gate_a_reconstruction[{i}].root")
                 mark(item, "reconstructed_root_blob")
+            for path_key, digest_key in (("en_mirror", "en_mirror_blob"),
+                                         ("zh_cn_mirror", "zh_cn_mirror_blob")):
+                pair(item, path_key, digest_key, item.get("source_commit") or item.get("commit") or commit,
+                     f"gate_a_reconstruction[{i}].{path_key}")
+                mark(item, digest_key)
 
-        source_evidence = as_mapping(doc.get("baseline_and_source_evidence"))
         authored = source_evidence.get("authored_indexes", doc.get("authored_indexes", []))
         for i, item in enumerate(authored or []):
             if not isinstance(item, dict):
@@ -285,7 +304,13 @@ def verify(root: Path, commit: str, verbose: bool = True):
                 pair(item, "translation_path", "translation_sha256", item.get("translation_commit_sha"),
                      prefix + ".translation_path", "sha256")
                 mark(item, "translation_sha256")
-                reverify_commit = item.get("reverification_commit_sha") or item.get("reverified_at_commit") or commit
+                reverify_commit = (item.get("reverification_commit_sha") or
+                                   item.get("reverified_at_commit"))
+                if not reverify_commit and nonempty(item.get("reverification_note")):
+                    note_commit = re.search(r"\bat\s+([0-9a-fA-F]{7,40})\b",
+                                             item["reverification_note"])
+                    reverify_commit = note_commit.group(1) if note_commit else None
+                reverify_commit = reverify_commit or commit
                 for path_key, digest_key in (("source_path", "reverified_source_blob_sha"),
                                              ("translation_path", "reverified_translation_blob_sha")):
                     pair(item, path_key, digest_key, reverify_commit, prefix + "." + digest_key)
@@ -358,20 +383,52 @@ def verify(root: Path, commit: str, verbose: bool = True):
                 for key, value in node.items():
                     key_text = str(key)
                     digest_shaped = (
-                        key_text in {"blob", "sha"} or key_text.endswith("_blob") or
+                        key_text == "blob" or key_text.endswith("_blob") or
                         key_text.endswith("_blob_sha") or key_text.endswith("_blob_sha256") or
-                        key_text.endswith("_sha256")
+                        (key_text.endswith("_sha256") and key_text != "stdout_sha256")
                     )
                     commit_reference = "commit" in key_text.lower() or key_text in {
                         "head_sha", "base_sha", "merge_sha"
                     }
-                    if digest_shaped and not commit_reference and (id(node), key) not in handled:
-                        pins += 1
-                        incomplete += 1
-                        problems.append(
-                            f"INCOMPLETE UNRESOLVED(unregistered digest field): "
-                            f"manifest={manifest_path} field={where}.{key_text} value={value!r}"
+                    scalar_digest = isinstance(value, (str, int)) and not isinstance(value, bool)
+                    if (digest_shaped and scalar_digest and not commit_reference
+                            and (id(node), key) not in handled):
+                        path_keys = [
+                            candidate for candidate in node
+                            if isinstance(candidate, str) and (
+                                candidate in {"path", "file", "prompt_file", "snapshot_file",
+                                              "source_path", "translation_path", "frontmatter_path",
+                                              "frontmatter_file"}
+                                or candidate.endswith("_path") or candidate.endswith("_file")
+                            )
+                        ]
+                        commit_keys = (
+                            "source_commit_sha", "translation_commit_sha", "source_commit",
+                            "commit", "head_sha", "head", "base_commit", "base_commit_sha",
+                            "baseline_commit", "reverification_commit_sha"
                         )
+                        source_ref = next((node.get(candidate) for candidate in commit_keys
+                                           if nonempty(node.get(candidate))), commit)
+                        if len(path_keys) == 1 and nonempty(node.get(path_keys[0])):
+                            path_value = node[path_keys[0]]
+                            algorithm = ("sha256" if key_text.endswith("_sha256")
+                                         and not key_text.endswith("_blob_sha256") else "git")
+                            check(path_value, value, source_ref,
+                                  f"discovered.{where}.{key_text}", algorithm)
+                        else:
+                            matching = resolved_locators.get(str(value).lower(), set())
+                            if len(matching) == 1 and key_text.endswith("_blob"):
+                                matched_commit, matched_path = next(iter(matching))
+                                check(matched_path, value, matched_commit,
+                                      f"discovered.{where}.{key_text}")
+                            else:
+                                pins += 1
+                                incomplete += 1
+                                problems.append(
+                                    f"INCOMPLETE UNRESOLVED(unregistered digest field): "
+                                    f"manifest={manifest_path} field={where}.{key_text} value={value!r}"
+                                )
+                        mark(node, key)
                     discover_unregistered(value, f"{where}.{key_text}")
             elif isinstance(node, list):
                 for i, value in enumerate(node):
