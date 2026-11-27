@@ -58,6 +58,22 @@ ALLOWED_SKIPS = {
         "symlink creation unavailable on this platform",
     "T42 governed file reached through a symlinked parent is rejected":
         "symlink creation unavailable on this platform",
+    "T49 symlinked backlog root is named in the diagnostic":
+        "symlink creation unavailable on this platform",
+    "T50 symlinked directory inside a backlog root is reported":
+        "symlink creation unavailable on this platform",
+    "T51 symlinked markdown file inside a backlog root is reported":
+        "symlink creation unavailable on this platform",
+    "T51b symlinked bilingual mirror directory is refused by name":
+        "symlink creation unavailable on this platform",
+    "T58 symlinked subdirectory in a normative root is reported":
+        "symlink creation unavailable on this platform",
+    "T59 top-level symlink is reported and does not satisfy the registry":
+        "symlink creation unavailable on this platform",
+    "T60 declared directory that is only a symlink is reported":
+        "symlink creation unavailable on this platform",
+    "T128 DM-14 a symlinked mirror directory is named":
+        "symlink creation unavailable on this platform",
 }
 
 
@@ -3071,11 +3087,18 @@ def run_scan_boundary() -> None:
         for i in range(3):
             (outside / f"f{i}.md").write_text("# x\n", encoding="utf-8")
         shutil.rmtree(root / "docs")
-        (root / "docs").symlink_to(outside, target_is_directory=True)
-        code, out = run(root)
-        record("T49 symlinked backlog root is named in the diagnostic",
-               code != 0 and "docs is a symbolic link" in out,
-               f"  exit {code}, output {out[:200]}")
+        try:
+            (root / "docs").symlink_to(outside, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            skip(
+                "T49 symlinked backlog root is named in the diagnostic",
+                "symlink creation unavailable on this platform",
+            )
+        else:
+            code, out = run(root)
+            record("T49 symlinked backlog root is named in the diagnostic",
+                   code != 0 and "docs is a symbolic link" in out,
+                   f"  exit {code}, output {out[:200]}")
 
     # T50: a symlinked directory inside a backlog root is reported by path.
     with tempfile.TemporaryDirectory() as tmp:
@@ -3083,22 +3106,38 @@ def run_scan_boundary() -> None:
         outside = Path(tmp) / "outside-sub-t50"
         outside.mkdir(exist_ok=True)
         (outside / "external.md").write_text("# ext\n", encoding="utf-8")
-        (root / "docs" / "linked").symlink_to(outside, target_is_directory=True)
-        code, out = run(root)
-        record("T50 symlinked directory inside a backlog root is reported",
-               code != 0 and "docs/linked is a symbolic link" in out,
-               f"  exit {code}, output {out[:200]}")
+        try:
+            (root / "docs" / "linked").symlink_to(
+                outside, target_is_directory=True
+            )
+        except (OSError, NotImplementedError):
+            skip(
+                "T50 symlinked directory inside a backlog root is reported",
+                "symlink creation unavailable on this platform",
+            )
+        else:
+            code, out = run(root)
+            record("T50 symlinked directory inside a backlog root is reported",
+                   code != 0 and "docs/linked is a symbolic link" in out,
+                   f"  exit {code}, output {out[:200]}")
 
     # T51: a symlinked .md inside a backlog root is reported by path.
     with tempfile.TemporaryDirectory() as tmp:
         root = _repo(tmp)
         outside = Path(tmp) / "outside-file-t51.md"
         outside.write_text("# ext\n", encoding="utf-8")
-        (root / "docs" / "linked.md").symlink_to(outside)
-        code, out = run(root)
-        record("T51 symlinked markdown file inside a backlog root is reported",
-               code != 0 and "docs/linked.md is a symbolic link" in out,
-               f"  exit {code}, output {out[:200]}")
+        try:
+            (root / "docs" / "linked.md").symlink_to(outside)
+        except (OSError, NotImplementedError):
+            skip(
+                "T51 symlinked markdown file inside a backlog root is reported",
+                "symlink creation unavailable on this platform",
+            )
+        else:
+            code, out = run(root)
+            record("T51 symlinked markdown file inside a backlog root is reported",
+                   code != 0 and "docs/linked.md is a symbolic link" in out,
+                   f"  exit {code}, output {out[:200]}")
 
     # T51b: a bilingual mirror directory that is a symlink is refused by name.
     #
@@ -3114,15 +3153,24 @@ def run_scan_boundary() -> None:
         outside.mkdir()
         (outside / "leaked.md").write_text(doc(BASE), encoding="utf-8")
         shutil.rmtree(root / "docs" / "en")
-        (root / "docs" / "en").symlink_to(outside, target_is_directory=True)
-        (root / "docs" / "zh-CN").mkdir(parents=True, exist_ok=True)
-        code, out = run(root)
-        record("T51b symlinked bilingual mirror directory is refused by name",
-               code != 0
-               and "bilingual mirror directory docs/en is a symbolic link" in out
-               and "a mirror must be real content of this repository" in out
-               and "bilingual mirror directory docs/en is missing" not in out,
-               f"  exit {code}, output {out[:240]}")
+        try:
+            (root / "docs" / "en").symlink_to(
+                outside, target_is_directory=True
+            )
+        except (OSError, NotImplementedError):
+            skip(
+                "T51b symlinked bilingual mirror directory is refused by name",
+                "symlink creation unavailable on this platform",
+            )
+        else:
+            (root / "docs" / "zh-CN").mkdir(parents=True, exist_ok=True)
+            code, out = run(root)
+            record("T51b symlinked bilingual mirror directory is refused by name",
+                   code != 0
+                   and "bilingual mirror directory docs/en is a symbolic link" in out
+                   and "a mirror must be real content of this repository" in out
+                   and "bilingual mirror directory docs/en is missing" not in out,
+                   f"  exit {code}, output {out[:240]}")
 
     # T52: the counter and the scanner see the same files.
     #
@@ -3133,8 +3181,8 @@ def run_scan_boundary() -> None:
         for i in range(4):
             (root / "docs" / f"extra{i}.md").write_text("# x\n", encoding="utf-8")
         counts, problems = gate.backlog_counts(root)
-        skip = gate.governed_prefixes()
-        scanned, _ = gate.scan_root(root, "docs", skip)
+        prefixes = gate.governed_prefixes()
+        scanned, _ = gate.scan_root(root, "docs", prefixes)
         record("T52 backlog count equals the number of files the scan returns",
                counts.get("docs") == len(scanned) and not problems,
                f"  count {counts.get('docs')} vs scanned {len(scanned)}, "
@@ -3272,11 +3320,20 @@ def run_unified_scan() -> None:
         outside = Path(tmp) / "outside-norm-t58"
         outside.mkdir(exist_ok=True)
         (outside / "leak.md").write_text("# leak\n", encoding="utf-8")
-        (root / "00-governance" / "linked").symlink_to(outside, target_is_directory=True)
-        code, out = run(root)
-        record("T58 symlinked subdirectory in a normative root is reported",
-               code != 0 and "00-governance/linked is a symbolic link" in out,
-               f"  exit {code}, output {out[:200]}")
+        try:
+            (root / "00-governance" / "linked").symlink_to(
+                outside, target_is_directory=True
+            )
+        except (OSError, NotImplementedError):
+            skip(
+                "T58 symlinked subdirectory in a normative root is reported",
+                "symlink creation unavailable on this platform",
+            )
+        else:
+            code, out = run(root)
+            record("T58 symlinked subdirectory in a normative root is reported",
+                   code != 0 and "00-governance/linked is a symbolic link" in out,
+                   f"  exit {code}, output {out[:200]}")
 
     # T59: a top-level symlink to a directory is not an accounted directory.
     #
@@ -3286,11 +3343,18 @@ def run_unified_scan() -> None:
         root = _repo(tmp)
         outside = Path(tmp) / "outside-top-t59"
         outside.mkdir(exist_ok=True)
-        (root / "ghost").symlink_to(outside, target_is_directory=True)
-        code, out = run(root)
-        record("T59 top-level symlink is reported and does not satisfy the registry",
-               code != 0 and "symbolic links at the repository root" in out,
-               f"  exit {code}, output {out[:200]}")
+        try:
+            (root / "ghost").symlink_to(outside, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            skip(
+                "T59 top-level symlink is reported and does not satisfy the registry",
+                "symlink creation unavailable on this platform",
+            )
+        else:
+            code, out = run(root)
+            record("T59 top-level symlink is reported and does not satisfy the registry",
+                   code != 0 and "symbolic links at the repository root" in out,
+                   f"  exit {code}, output {out[:200]}")
 
     # T60: a declared directory that is only a symlink counts as missing.
     with tempfile.TemporaryDirectory() as tmp:
@@ -3299,11 +3363,18 @@ def run_unified_scan() -> None:
         outside.mkdir(exist_ok=True)
         # `tools` is declared as excluded by the fixture registry.
         shutil.rmtree(root / "tools")
-        (root / "tools").symlink_to(outside, target_is_directory=True)
-        code, out = run(root)
-        record("T60 declared directory that is only a symlink is reported",
-               code != 0 and ("do not exist" in out or "symbolic links" in out),
-               f"  exit {code}, output {out[:200]}")
+        try:
+            (root / "tools").symlink_to(outside, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            skip(
+                "T60 declared directory that is only a symlink is reported",
+                "symlink creation unavailable on this platform",
+            )
+        else:
+            code, out = run(root)
+            record("T60 declared directory that is only a symlink is reported",
+                   code != 0 and ("do not exist" in out or "symbolic links" in out),
+                   f"  exit {code}, output {out[:200]}")
 
     # T61: DM-08 names the path it was given, not a same-named key elsewhere.
     body = (
@@ -5027,9 +5098,9 @@ def run_unbound_emissions() -> None:
         try:
             target.symlink_to(Path(outside), target_is_directory=True)
         except (OSError, NotImplementedError):
-            record(
-                "T128 DM-14 a symlinked mirror directory is named", False,
-                "  symlinks unavailable on this platform; the case could not run",
+            skip(
+                "T128 DM-14 a symlinked mirror directory is named",
+                "symlink creation unavailable on this platform",
             )
         else:
             _bind(
@@ -5188,6 +5259,84 @@ def run_security_readme_canonical_status() -> None:
     )
 
 
+def run_symlink_unavailable_self_check() -> None:
+    """T129: unavailable symlinks skip only dependent cases and preserve others."""
+    from unittest.mock import patch
+
+    result_start = len(RESULTS)
+    skipped_start = len(SKIPPED)
+    unexpected_start = len(UNEXPECTED_SKIPS)
+    names_before = dict(RESULTS_BY_NAME)
+
+    expected_skips = [
+        "T36 directory symlink is rejected as a governed root",
+        "T37 governed_files does not descend into a symlinked root",
+        "T41 symlinked governed file is rejected",
+        "T42 governed file reached through a symlinked parent is rejected",
+        "T49 symlinked backlog root is named in the diagnostic",
+        "T50 symlinked directory inside a backlog root is reported",
+        "T51 symlinked markdown file inside a backlog root is reported",
+        "T51b symlinked bilingual mirror directory is refused by name",
+        "T58 symlinked subdirectory in a normative root is reported",
+        "T59 top-level symlink is reported and does not satisfy the registry",
+        "T60 declared directory that is only a symlink is reported",
+        "T128 DM-14 a symlinked mirror directory is named",
+    ]
+    independent = [
+        "T43 hidden top-level directory must be accounted for",
+        "T44 .git is structurally exempt from the registry",
+        "T45 backlog count disagreeing with the disk is an error",
+        "T46 backlog count that is not an integer is an error",
+        "T47 backlog documents are actually scanned",
+        "T52 backlog count equals the number of files the scan returns",
+        "T61 a same-named key elsewhere is not reported as the forbidden path",
+    ]
+
+    try:
+        with redirect_stdout(io.StringIO()):
+            with patch.object(
+                Path, "symlink_to",
+                side_effect=OSError(1314, "symlink creation unavailable"),
+            ):
+                run_symlink_boundary()
+                run_scan_boundary()
+                run_unified_scan()
+                run_unbound_emissions()
+
+        new_results = RESULTS[result_start:]
+        new_skips = SKIPPED[skipped_start:]
+        new_unexpected = UNEXPECTED_SKIPS[unexpected_start:]
+        result_names = set(RESULTS_BY_NAME) - set(names_before)
+        ok = (
+            new_skips == expected_skips
+            and len(new_results) > 0
+            and not new_unexpected
+            and not (set(expected_skips) & result_names)
+            and all(RESULTS_BY_NAME.get(name) is True for name in independent)
+            and all(name not in result_names for name in expected_skips)
+        )
+        detail = (
+            f"  skips={new_skips}; unexpected={new_unexpected}; "
+            f"dependent_results={sorted(set(expected_skips) & result_names)}; "
+            f"independent={[RESULTS_BY_NAME.get(name) for name in independent]}"
+        )
+    except Exception as exc:
+        ok = False
+        detail = f"  self-check raised {type(exc).__name__}: {exc}"
+    finally:
+        del RESULTS[result_start:]
+        del SKIPPED[skipped_start:]
+        del UNEXPECTED_SKIPS[unexpected_start:]
+        RESULTS_BY_NAME.clear()
+        RESULTS_BY_NAME.update(names_before)
+
+    record(
+        "T129 symlink-unavailable cases skip without erasing independent cases",
+        ok,
+        detail,
+    )
+
+
 def main() -> int:
     print("check_document_management self-check")
     run_parser()
@@ -5230,6 +5379,7 @@ def main() -> int:
     run_fault_injection()
     run_unbound_emissions()
     run_schema_agreement()
+    run_symlink_unavailable_self_check()
     passed, total = sum(RESULTS), len(RESULTS)
     print(f"{passed}/{total} passed")
     if SKIPPED:

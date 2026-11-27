@@ -1,0 +1,107 @@
+work_item_id: AID-2026-292
+title: "Complete symlink-unavailable skip accounting and suite self-check for Issue #1268"
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  This change corrects test-runner accounting for symlink-dependent cases
+  on platforms where symlink creation is unavailable, and moves the
+  unavailable-platform self-check into the test suite. Production gate
+  behavior, CI jobs, branch protection and required contexts are unchanged.
+status: IN_PROGRESS
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner acceptance not recorded"
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "168f66a6fb2f7eb19a87af6159d3b6a19db1f9ab"
+
+scope:
+  objective: >-
+    Complete the seven symlink creation sites and T128 accounting left
+    uncovered by AID-2026-290, register each unavailable-platform skip,
+    and make the unavailable-symlink behavior an executable test-suite
+    self-check rather than relying on a standalone script.
+  affected_cases:
+    - T49
+    - T50
+    - T51
+    - T51b
+    - T58
+    - T59
+    - T60
+    - T128
+    - T129
+  skip_reason: "symlink creation unavailable on this platform"
+  constraints:
+    - Supplement AID-2026-290; do not replace or alter its completed work.
+    - Preserve the existing T36, T37, T41 and T42 skip behavior and registry entries.
+    - Register T49, T50, T51, T51b, T58, T59, T60 and T128 exactly once.
+    - A failed symlink creation records a skip and never records a pass or failure result for that dependent case.
+    - A failed symlink creation must not return from or abort the enclosing test function.
+    - Preserve each successful symlink-capable test path, including the T128 _bind path.
+    - Add a suite-registered T129 self-check for unavailable symlink creation.
+    - Verify independent T43-T47, T52 and T61 cases still execute under forced symlink failure.
+    - Do not change check_document_management.py.
+    - Do not change CI jobs, branch protection or the 16 required contexts.
+    - Do not add third-party dependencies.
+  untouched:
+    - "AID-2026-290 completed T36: directory symlink is rejected as a governed root."
+    - "AID-2026-290 completed T37: governed_files does not descend into a symlinked root."
+    - "AID-2026-290 completed T41: symlinked governed file is rejected."
+    - "AID-2026-290 completed T42: governed file reached through a symlinked parent is rejected."
+  notes:
+    - "补 AID-2026-290 未覆盖范围，不改其已修部分"
+    - "AID-2026-290 remains a complementary predecessor, not a superseded work item."
+    - "base_commit_sha and identifier_allocation.observed_main are coordinator-owned values and must be filled from the actual fork point."
+
+evidence: 14-ai-development/work-items/AID-2026-292/evidence.md
+
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-292/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-292/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-292/session-evidence.md
+    relationship: evidence
+
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1268"
+    implementing_ai_session: "6b0908a3-dd04-83ec-937a-fc0416e9322d"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-292/session-evidence.md
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-292/prompt-v1.md
+    executed_prompt_sha256: "3b996115d32157e279d1c014a502a6516115b65fe7dea1854bed283fff416866"
+    executed_prompt_bytes: 4059
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: "RECORDED"
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    The seven remaining unprotected symlink creation sites (T49, T50, T51,
+    T51b, T58, T59, T60) and T128 now record a registered skip instead of
+    aborting the run or reporting a hard failure, and T129 asserts from
+    inside the suite that all twelve symlink-dependent cases skip without
+    erasing the independent cases. Operator execution rejected the first
+    delivery for two defects: a local variable named skip shadowed the
+    module-level function inside run_scan_boundary(), so the four new calls
+    there raised UnboundLocalError, and the T129 independent-case list named
+    T61 with a string no case records. Both are fixed in this commit.
+  files_changed:
+    - scripts/test_check_document_management.py
+    - 14-ai-development/work-items/AID-2026-292/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-292/evidence.md
+    - 14-ai-development/work-items/AID-2026-292/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-292/session-evidence.md
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - "python scripts/test_check_document_management.py -> 372/372 passed, 1 skipped (T68c), exit 0 on this symlink-capable platform."
+    - "Force Path.symlink_to to raise OSError(1314) for the whole of main() -> exit 0, 360/360 passed, 13 skipped, 13 registered of 13 allowed, UNEXPECTED_SKIPS empty."
+    - "In that forced-failure run, T43, T44, T45, T46, T47, T52, T61 and T129 each executed and recorded True."
+    - "In that forced-failure run, no skipped name appeared in RESULTS_BY_NAME (double-record set empty)."
+    - "Pop T49 from ALLOWED_SKIPS under forced failure -> exit 1, RESULTS 359/360, FAIL line 'unregistered skip(s): T49 ...' naming T49."
+    - "Mutation: replace T49's skip(...) with record(..., True) -> T129 recorded False, exit 1, 360/361 passed. Source restored and sha256 verified byte-identical."
