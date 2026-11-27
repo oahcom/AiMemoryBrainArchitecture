@@ -297,7 +297,7 @@ acceptance_criteria:
     table or in the corrections block.
 
 implementation:
-  status: MERGED
+  status: IMPLEMENTED
   branch: gov/aid-116-pin-and-attribution
   pull_request: 1321
   merge_commit_sha: a7cf5256e975ff25fd2f75b3b5051b16d8d77d36

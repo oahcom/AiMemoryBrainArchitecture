@@ -72,7 +72,7 @@ session_evidence:
     session_reference_status: NOT_RECORDED
     session_evidence_ref: "14-ai-development/work-items/AID-2026-250/session-evidence.md"
 implementation:
-  status: MERGED
+  status: IMPLEMENTED
   summary: "Four Issue #262 assessment comments received append-only metadata; the read-only GitHub API checker and tests run in the existing required Schema non-empty audit job."
   files_changed:
     - scripts/ci/check_req_assessment_signatures.py

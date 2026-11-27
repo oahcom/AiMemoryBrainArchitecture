@@ -150,7 +150,7 @@ findings:
       AID-2026-079 is registered here; the body now says so instead of repeating the argument.
 
 implementation:
-  status: MERGED
+  status: IMPLEMENTED
   branch: test/T92-fault-injection
   pull_request: 1078
   merge_commit_sha: 6314a65bd8be48c1a4bb0768e9960c4c808110ab

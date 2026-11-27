@@ -114,7 +114,7 @@ findings:
     evidence: Issue #1208 acceptance criterion 6 and delegated split comment 7183824141.
 
 implementation:
-  status: MERGED
+  status: IMPLEMENTED
   branch: docs/aid-2026-082-governance-traceability-checks
   pull_request: "#1265"
   merge_commit_sha: 71548b7b9d8efae4ee605a0fb4c9d1d97236138c
