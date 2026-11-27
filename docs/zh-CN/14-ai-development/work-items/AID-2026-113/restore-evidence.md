@@ -17,7 +17,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-26"
-      last_verification_note: "Source and mirror blob identities, Owner replacement ruling, and bounded language correspondence observations recorded."
+      last_verification_note: "Verified 仅覆盖既有源文件与镜像文件身份列、Owner 替换裁决以及有界的语言对应关系观察。两张表中的新 Blob 身份列明确不属于本次 Verified 覆盖范围，因为这些身份目前无法验证。"
     usage_status: Active
     modification_status: Unchanged
     supersession:

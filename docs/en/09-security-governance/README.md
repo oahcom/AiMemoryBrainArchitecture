@@ -74,3 +74,17 @@ Each of the five documents declares `canonical_status: Canonical` in its own fro
 Original source branch: `session-i-security-governance-2026-11-16` @ `8abddf814467b271344a9814613a6b7ca6a446c6`.
 
 Restoration and source/new blob comparisons are recorded in [AID-2026-109](../14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md).
+
+## Status of the Chinese side
+
+Although the following five documents carry the metadata `canonical_status: Canonical`, their current zh-CN mirrors do not constitute Chinese normative texts. Their bodies remain predominantly in English, with only limited Chinese headings or notes. They are not complete Chinese translations and must not be treated as Chinese normative documentation.
+
+Affected documents:
+
+- `forget-retention-backup-and-erasure-policy.md`
+- `global-forget-target-inventory-and-completion-evidence.md`
+- `principal-actor-and-authorization-contract.md`
+- `scope-and-revocation-policy.md`
+- `security-and-identity-overview.md`
+
+Readers should consult the corresponding Canonical source documents when interpreting or citing normative requirements. This notice does not change Canonical status, document authority, or existing mirror relationships.
