@@ -41,7 +41,6 @@ documentation:
     relationship: reference
 session_evidence:
   - role: implementation
-    issue_refs: []
     implementing_ai_session: current-chatgpt-implementation-session
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-301/prompt-snapshot.md
     executed_prompt_sha256: 3388ce500e977187e1748e904aefd81e2a8dc314a0f2b62468207767b50977a0
