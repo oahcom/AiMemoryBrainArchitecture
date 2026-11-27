@@ -33,6 +33,7 @@ def invoke(repo: Path, base: str | None, head: str) -> subprocess.CompletedProce
     args = ["python3", str(SCRIPT), "--head", head]
     if base is not None:
         args += ["--base", base]
+    print("$ " + " ".join(args), flush=True)
     result = subprocess.run(args, cwd=repo, capture_output=True, text=True)
     print(result.stdout.strip())
     if result.stderr.strip():
