@@ -90,6 +90,58 @@ def invoke(
     return result
 
 
+def legacy_merge_base_counts(repo: Path, base: str, head: str) -> tuple[int, int]:
+    """Reproduce the former merge-base introduction/occupancy calculation.
+
+    Kept only to prove that the previous algorithm reports a false PASS on the
+    Update-branch and merge-queue graphs asserted below.
+    """
+    merge_base = git(repo, "merge-base", base, head)
+    added = git(
+        repo,
+        "diff",
+        "--diff-filter=A",
+        "--name-only",
+        "--no-renames",
+        merge_base,
+        head,
+        "--",
+        "14-ai-development/work-items",
+    ).splitlines()
+
+    introduced = set()
+
+    for name in added:
+        parts = name.split("/")
+        if len(parts) < 4 or not parts[2].startswith("AID-"):
+            continue
+
+        directory = "/".join(parts[:3])
+        present = subprocess.run(
+            ["git", "cat-file", "-e", f"{merge_base}:{directory}"],
+            cwd=repo,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        ).returncode == 0
+
+        if not present:
+            introduced.add(directory)
+
+    occupied = sum(
+        subprocess.run(
+            ["git", "cat-file", "-e", f"{base}:{directory}"],
+            cwd=repo,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        ).returncode == 0
+        for directory in introduced
+    )
+
+    return len(introduced), occupied
+
+
 class WorkItemUniquenessTests(unittest.TestCase):
 
     def test_new_unoccupied_directory_passes(self):
@@ -367,6 +419,193 @@ class WorkItemUniquenessTests(unittest.TestCase):
                 "- name: Enforce work-item uniqueness against the current target base"
             ),
         )
+
+
+    # Claim identity: an Update-branch merge moves the merge-base past the
+    # candidate's claim commit. The legacy merge-base algorithm then reports
+    # introduced=0 occupied=0 (false PASS); the first-parent claim identity
+    # still sees B's original commit and rejects the duplicate ID.
+    def test_update_branch_keeps_original_claim_and_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            repo, old_base = init_repo(Path(temp))
+
+            git(repo, "branch", "candidate-a", old_base)
+            git(repo, "branch", "candidate-b", old_base)
+
+            git(repo, "checkout", "candidate-a")
+            head_a = commit_file(repo, f"{ITEM}/a.txt", "A\n", "candidate A")
+
+            git(repo, "checkout", "candidate-b")
+            head_b = commit_file(repo, f"{ITEM}/b.txt", "B\n", "candidate B")
+
+            # A lands first; the target base now owns AID-2026-311.
+            git(repo, "checkout", "-b", "main-after-a", head_a)
+            latest_base = git(repo, "rev-parse", "HEAD")
+
+            # B presses "Update branch": the advanced target is merged into B.
+            git(repo, "checkout", "candidate-b")
+            git(
+                repo,
+                "merge",
+                "--no-ff",
+                "-m",
+                "Update branch from main-after-a",
+                "main-after-a",
+            )
+            updated_b = git(repo, "rev-parse", "HEAD")
+
+            self.assertEqual(
+                git(repo, "merge-base", latest_base, updated_b),
+                latest_base,
+            )
+
+            legacy = legacy_merge_base_counts(repo, latest_base, updated_b)
+            print(
+                "LEGACY MERGE-BASE RESULT: "
+                f"introduced={legacy[0]} occupied={legacy[1]} (false PASS)"
+            )
+            self.assertEqual(legacy, (0, 0))
+
+            self.assertIn(
+                f"{ITEM}/a.txt",
+                git(repo, "ls-tree", "-r", "--name-only", updated_b),
+            )
+            self.assertIn(
+                f"{ITEM}/b.txt",
+                git(repo, "ls-tree", "-r", "--name-only", updated_b),
+            )
+
+            result = invoke(repo, latest_base, updated_b)
+
+            self.assertEqual(
+                result.returncode,
+                1,
+                result.stdout + result.stderr,
+            )
+            self.assertIn("VIOLATION", result.stdout)
+            self.assertIn(head_b, result.stdout)
+            self.assertIn("introduced=1 occupied=1", result.stdout)
+
+    # The same identity must hold for a merge-queue candidate: the queue
+    # reconstructs the candidate as a merge of the advanced base with the
+    # original head, so the original claim commit is again not the first
+    # parent of anything.
+    def test_merge_group_reconstruction_rejects_second_candidate(self):
+        with tempfile.TemporaryDirectory() as temp:
+            repo, old_base = init_repo(Path(temp))
+
+            git(repo, "branch", "candidate-a", old_base)
+            git(repo, "branch", "candidate-b", old_base)
+
+            git(repo, "checkout", "candidate-a")
+            head_a = commit_file(repo, f"{ITEM}/a.txt", "A\n", "candidate A")
+
+            git(repo, "checkout", "candidate-b")
+            commit_file(repo, f"{ITEM}/b.txt", "B\n", "candidate B")
+
+            git(repo, "checkout", "-b", "main-after-a", head_a)
+            latest_base = git(repo, "rev-parse", "HEAD")
+
+            git(repo, "checkout", "main-after-a")
+            git(
+                repo,
+                "merge",
+                "--no-ff",
+                "-m",
+                "merge_group candidate B",
+                "candidate-b",
+            )
+            queue_candidate = git(repo, "rev-parse", "HEAD")
+
+            self.assertEqual(
+                git(repo, "merge-base", latest_base, queue_candidate),
+                latest_base,
+            )
+
+            legacy = legacy_merge_base_counts(repo, latest_base, queue_candidate)
+            print(
+                "LEGACY MERGE-GROUP RESULT: "
+                f"introduced={legacy[0]} occupied={legacy[1]} (false PASS)"
+            )
+            self.assertEqual(legacy, (0, 0))
+
+            result = invoke(repo, latest_base, queue_candidate)
+
+            self.assertEqual(
+                result.returncode,
+                1,
+                result.stdout + result.stderr,
+            )
+            self.assertIn("VIOLATION", result.stdout)
+
+    # An Update branch that does not collide must stay green: only a claim on
+    # an ID the base already owns (or a duplicated claim) is a violation.
+    def test_update_branch_with_unoccupied_claim_still_passes(self):
+        with tempfile.TemporaryDirectory() as temp:
+            repo, old_base = init_repo(Path(temp))
+
+            git(repo, "checkout", "-b", "candidate-b")
+            commit_file(repo, f"{ITEM}/manifest.yaml", "new\n", "claim")
+
+            git(repo, "checkout", "-b", "main-advance", old_base)
+            latest_base = commit_file(
+                repo, "unrelated.txt", "advance\n", "advance base"
+            )
+
+            git(repo, "checkout", "candidate-b")
+            git(repo, "merge", "--no-ff", "-m", "Update branch", "main-advance")
+            updated = git(repo, "rev-parse", "HEAD")
+
+            result = invoke(repo, latest_base, updated)
+
+            self.assertEqual(
+                result.returncode,
+                0,
+                result.stdout + result.stderr,
+            )
+            self.assertIn("introduced=1 occupied=0", result.stdout)
+
+    # Two candidate-only commits that each create the same ID are a duplicate
+    # claim even when the base does not own the directory yet.
+    def test_two_candidate_only_claims_for_one_id_are_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            repo, base = init_repo(Path(temp))
+
+            first = commit_file(repo, f"{ITEM}/first.txt", "one\n", "claim one")
+
+            git(repo, "checkout", "-b", "side", base)
+            second = commit_file(repo, f"{ITEM}/second.txt", "two\n", "claim two")
+
+            git(repo, "checkout", "-b", "both", first)
+            git(repo, "merge", "--no-ff", "-m", "merge side", "side")
+            merged = git(repo, "rev-parse", "HEAD")
+
+            self.assertIn(
+                f"{ITEM}/second.txt",
+                git(repo, "ls-tree", "-r", "--name-only", merged),
+            )
+
+            result = invoke(repo, base, merged)
+
+            self.assertEqual(
+                result.returncode,
+                1,
+                result.stdout + result.stderr,
+            )
+            self.assertIn("duplicate_claims=1", result.stdout)
+            self.assertIn(second, result.stdout)
+
+    def test_repeated_invocation_is_deterministic(self):
+        with tempfile.TemporaryDirectory() as temp:
+            repo, base = init_repo(Path(temp))
+            head = commit_file(repo, f"{ITEM}/manifest.yaml", "new\n", "claim")
+
+            first = invoke(repo, base, head)
+            retry = invoke(repo, base, head)
+
+            self.assertEqual(first.returncode, 0)
+            self.assertEqual(first.returncode, retry.returncode)
+            self.assertEqual(first.stdout, retry.stdout)
 
 
 if __name__ == "__main__":
