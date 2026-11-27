@@ -323,7 +323,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          printf '%s\\n' '{"baseline_tree":"46dac1b1e198c8d88daff5a34faf759ecb075869","cohort_tree":"e47dd6f0"}' > "$RUNNER_TEMP/work-item-manifest-baseline.json"
+          printf '%s\n' '{"baseline_tree":"46dac1b1e198c8d88daff5a34faf759ecb075869","cohort_tree":"e47dd6f0"}' > "$RUNNER_TEMP/work-item-manifest-baseline.json"
       - name: Enforce manifest schema and legacy ratchet
         run: python scripts/ci/check_work_item_manifest_schema.py --tree HEAD --baseline "$RUNNER_TEMP/work-item-manifest-baseline.json"
       - name: Report all four historical cohort migration batches
