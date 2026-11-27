@@ -1,0 +1,58 @@
+work_item_id: AID-2026-254
+title: "Measure work-item root fan-out as an attention and context-switching cost proxy"
+class: GATE/MEASUREMENT
+risk: R1
+risk_rationale: "Adds one standard-library-only read-only measurement script and evidence. It reads committed Git objects and does not alter repository files, manifests, workflows, baselines, or branch protection."
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: a7a252eb670b31066a0ffea35dc28cbe6ef5b836
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: DISPATCHED_TASK_FILE
+scope:
+  objective: "Establish a reproducible measure of work-item attention/context-switching burden from declared cross-root scope, record an exact baseline, and define soft/hard thresholds with overrun handling."
+  files_changed:
+    - "scripts/measure_attention_context_cost.py"
+    - "14-ai-development/work-items/AID-2026-254/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-254/evidence.md"
+    - "14-ai-development/work-items/AID-2026-254/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-254/prompt-v1.md"
+    - "14-ai-development/work-items/INDEX.md"
+evidence: "14-ai-development/work-items/AID-2026-254/evidence.md"
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-254/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-254/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-254/prompt-v1.md"
+    relationship: reference
+session_evidence:
+  - role: "IMPLEMENTATION_AND_MEASUREMENT_SESSION"
+    issue_refs:
+      - "#265"
+    implementing_ai_session: "ChatGPT-GPT-6"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-254/prompt-v1.md"
+    executed_prompt_sha256: "7ecdfb66f6a6b4639054f0928ec0ea292a46f0083a05469df2d1f8318e812a34"
+    executed_prompt_bytes: 2565
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-254/session-evidence.md"
+implementation:
+  status: IMPLEMENTED
+  summary: "Read-only standard-library script, exact-base cohort measurement, evidence record, and INDEX registration are authored; no repository policy or Issue body is changed."
+  files_changed:
+    - "scripts/measure_attention_context_cost.py"
+    - "14-ai-development/work-items/AID-2026-254/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-254/evidence.md"
+    - "14-ai-development/work-items/AID-2026-254/session-evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "API-side reproduction from Git Trees and ten manifest Contents blobs at a7a252eb670b31066a0ffea35dc28cbe6ef5b836: 10 items, 29 distinct root memberships, mean 2.90, maximum 5."
+    - "The committed script's reproducible invocation is python3 scripts/measure_attention_context_cost.py --ref a7a252eb670b31066a0ffea35dc28cbe6ef5b836 --limit 10; direct shell execution was not performed in the API-only session."

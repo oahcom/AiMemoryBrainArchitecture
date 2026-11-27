@@ -1015,6 +1015,16 @@ class RepositoryHygieneTests(unittest.TestCase):
 
         self.assert_admission_fails(base, head, path)
 
+    # AID-2026-251: the schema is admitted at one exact path; the rule
+    # must not admit arbitrary YAML alongside the manifest registry.
+    def test_work_item_manifest_schema_exact_path_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/work-items/work-item-manifest.schema.yaml":
+                "schema_version: \"1\"\\n",
+        })
+        self.assert_admission_passes(base, head)
+
     # M28: the ID segment is not an arbitrary alnum run. A directory the
     # registry cannot allocate must not carry a manifest through this rule,
     # or the index step gets an entry it cannot resolve.
