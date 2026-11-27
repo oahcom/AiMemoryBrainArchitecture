@@ -290,42 +290,50 @@ test_same_id_after_the_first_merge_is_rejected ... ok
 test_additive_file_under_existing_directory_is_accepted ... ok
 test_conflicting_candidates_yield_no_merge_candidate ... ok
 
-Ran 11 tests in 6.926s
+Ran 11 tests in 7.464s
 
 OK
 ```
 
 ```
-$ python scripts/ci/check_work_item_uniqueness.py --base HEAD --head HEAD
-WORK-ITEM UNIQUENESS: PASS (base=386d8f57b02d8e3c511ff0e3980b9ce0af8b3028 candidate=386d8f57b02d8e3c511ff0e3980b9ce0af8b3028 introduced=0 occupied=0)
-```
-
-```
-$ python scripts/ci/audit_runner_admission.py
-GitHub-hosted runner policy: 29 job(s) audited, 0 violation(s)
-```
-
-```
-$ python scripts/ci/check_test_reachability.py
-Test reachability: 68 test files, 68 reachable, 0 unreachable
-Gate wiring: 20 gate scripts, 3 unwired, 3 baselined
-```
-
-```
 $ python scripts/check_traceability.py --index-only
-PASS TRACEABILITY: 0 requirements / 115 work items / 0 errors / 108 warnings
+PASS TRACEABILITY: 0 requirements / 119 work items / 0 errors / 110 warnings
 ```
 
 ```
-$ python scripts/ci/check_repository_hygiene.py --base <base> --head <head>
-Work-item index membership version=2026-11-27.2 directories=126 linked=126
-Work-item manifest consistency version=2026-11-27.2 manifests=115 in_scope=101 excluded_by_record_type=5 unrecognized=9 violations=0
+$ python scripts/ci/check_repository_hygiene.py --base 756e1e25d735f526254fc3241b47880fef527b24 --head 9b4d45d72c14114682c23663d5cb09999aa8b241
+Work-item index membership version=2026-11-27.2 directories=130 linked=130
+Work-item manifest consistency version=2026-11-27.2 manifests=119 in_scope=105 excluded_by_record_type=5 unrecognized=9 violations=0
 Repository new-file admission passed: 6 new path(s) checked.
 ```
 
 ```
-$ python scripts/check_document_management.py --require-changed <base>
-PASS (incremental): no GOV-DOC-002 violations; 667 classified, 371 unclassified
+$ python scripts/ci/check_test_reachability.py
+Test reachability: 69 test files, 69 reachable, 0 unreachable
+Gate wiring: 21 gate scripts, 3 unwired, 3 baselined
+```
+
+```
+$ python scripts/check_document_management.py --require-changed 756e1e25
+PASS (incremental): no GOV-DOC-002 violations; 684 classified, 370 unclassified
+```
+
+```
+$ python scripts/ci/check_manifest_blob_pins.py
+main=9b4d45d7 manifests=120 pins=196 ok=105 mismatch=89 path_missing=2 incomplete=0
+(no AID-2026-263 line; the 89 mismatches are the pre-existing set that
+ scripts/ci/baselines/manifest-blob-pins.txt records as measured on main at
+ 6f597e2d. The gate exits 1 on this count wherever it runs, main included.)
+```
+
+```
+$ python scripts/ci/check_work_item_uniqueness.py --base HEAD --head HEAD
+WORK-ITEM UNIQUENESS: PASS (base=9b4d45d72c14114682c23663d5cb09999aa8b241 candidate=9b4d45d72c14114682c23663d5cb09999aa8b241 introduced=0 occupied=0)
+```
+
+```
+$ python scripts/ci/audit_runner_admission.py
+GitHub-hosted runner policy: 27 job(s) audited, 0 violation(s)
 ```
 
 ```
@@ -334,6 +342,51 @@ exit=0
 $ shellcheck -S warning <broker run block>
 SC2148 only: no shebang in a `run:` block, which is expected
 ```
+
+## 9. Identifier history and the AIDSCAN evidence
+
+This work item was first authored under `AID-2026-262`. That number was a local,
+unpublished placeholder: it existed only as a commit in a worktree, with no ref
+pointing at it. AIDSCAN's five-scope scan (2829 commits of `main` history, 2349
+ref tips deduplicated to 1317 unique trees, 21 ledger versions, 280 worktrees,
+PR refs excluded) judged that occupation non-authoritative, and `aid-ledger`
+recorded the correction in branch `ledger/2026-11-27-aid-263`, commit
+`384a3057`, whose message is "chore(aid): cancel 262, reserve 263 for #1341,
+record 261 conflict and 7 missing rows". The ledger entry reads:
+
+```yaml
+  - id: AID-2026-263
+    state: RESERVED
+    carrier: "Issue #1341 (serialized merge-time work-item uniqueness gate)"
+```
+
+Re-verified in this session, not taken on trust:
+
+- `git grep` for `AID-2026-263` under `14-ai-development/work-items` across all
+  2495 local refs: no hit.
+- `git log --all -S"AID-2026-263"`: no commit.
+- `git ls-remote --heads origin` filtered for branch names containing `263`: no
+  hit.
+
+### 9.1 AID-2026-262 is retired, and its content did exist
+
+The 262 placeholder did reach the remote before the renumber, and this record
+does not pretend otherwise:
+
+| Fact | Value |
+|---|---|
+| Branch | `work-item/aid-2026-262-merge-broker` |
+| Head SHA | `8908bb166c589acf3005a722c455ac9981715a7d` |
+| Commit subject | `feat(ci): serialized merge-time work-item uniqueness broker (AID-2026-262)` |
+| Commit time | `2026-11-27T12:45:11+08:00` (`2026-11-27T04:45:11Z`) |
+| Local worktree commit | `2b63b8ba` (same title, different SHA) |
+| Content | The broker workflow and its tests, now carried by this work item under `AID-2026-263` |
+
+That branch is retired: its content is merged into
+`work-item/aid-2026-263-merge-broker`, and the remote branch is deleted so that
+262 does not become a second carrier for this work item — the same
+double-carrier shape that #1341 reports for 261. Deletion output and the
+verification read are recorded in `session-evidence.md`.
 
 ## 8. Not claimed
 
