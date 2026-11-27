@@ -56,7 +56,8 @@ scope:
     - 14-ai-development/work-items/AID-2026-268
 session_evidence:
   - role: implementation
-    issue_refs: "1350"
+    issue_refs:
+      - "#1350"
     implementing_ai_session: S6-B
     session_evidence_ref: 14-ai-development/work-items/AID-2026-255/session-evidence.md
 acceptance:
