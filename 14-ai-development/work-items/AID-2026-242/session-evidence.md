@@ -92,3 +92,12 @@ The original D scope remains one path: `03-memory-brain/canonical-memory-store.m
 - The AID-2026-242 manifest now satisfies the new Work Item manifest schema. The read-only repository inventory reports AID-2026-242 as COMPLIANT (1 compliant, 110 legacy violations).
 - Local schema check: `python3 scripts/ci/check_work_item_manifest_schema.py`; exit 0; AID-2026-242 appears under `COMPLIANT`.
 - Exact-head CI and final compare must be refreshed after this schema-compliant manifest update is pushed.
+
+
+## Local validation after main synchronization (2026-11-27)
+
+- Base `bc741bdce7b47d3695d85fa9649fe9506f23c595`, tested head `0df6ff549386ea0ba2cbb41700f62f7a20683ca9`.
+- `python3 scripts/test_check_bilingual_docs.py`: 27 tests, `OK`, exit 0.
+- `python3 scripts/check_bilingual_docs.py` with exact base/head and required PR body declarations: PASS; 9 changed paths; 0 new gaps; exit 0.
+- `python3 scripts/check_document_management.py --require-changed bc741bdce7b47d3695d85fa9649fe9506f23c595`: PASS; no GOV-DOC-002 violations in changed paths; exit 0.
+- `python3 scripts/ci/check_work_item_manifest_schema.py`: AID-2026-242 is COMPLIANT; repository-wide inventory has 110 pre-existing legacy violations; exit 0.

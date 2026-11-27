@@ -161,3 +161,13 @@ The frontmatter SHA values above are Git blob SHAs of the exact current YAML fro
 - The new AID-2026-251 schema requires top-level `class`, `risk`, `risk_rationale`, `status`, `sponsor`, `accountable_owner`, `acceptance_authority`, `repository`, `base_branch`, `base_commit_sha`, `scope`, `evidence`, `documentation`, `session_evidence` and `implementation`. AID-2026-242 manifest was migrated to that structure without changing the GOV-DOC-002 document frontmatter.
 - `python3 scripts/ci/check_work_item_manifest_schema.py`: `Manifest schema v1: total=111 compliant=1 violations=110`; AID-2026-242 is the single COMPLIANT manifest. The 110 legacy violations predate this work and are outside scope; the read-only validator exits 0.
 - AID-2026-242 remains absent from the fetched main tree `bc741bdce7b47d3695d85fa9649fe9506f23c595`; its explicitly assigned ID is preserved. Behind count immediately after this merge: `0`.
+
+
+## 12. Local validation after the third main merge (2026-11-27)
+
+Tested merge-synchronized head `0df6ff549386ea0ba2cbb41700f62f7a20683ca9` against base `bc741bdce7b47d3695d85fa9649fe9506f23c595`:
+
+- `python3 scripts/test_check_bilingual_docs.py`: 27 tests, `OK`, exit 0.
+- `BASE_SHA=bc741bdce7b47d3695d85fa9649fe9506f23c595 HEAD_SHA=0df6ff549386ea0ba2cbb41700f62f7a20683ca9 PR_BODY='Work Item ID: AID-2026-242; Related issue(s): #1212; AI-assisted work: YES; Session evidence reference(s): 14-ai-development/work-items/AID-2026-242/session-evidence.md; BILINGUAL-MANIFEST: COMPLETE' python3 scripts/check_bilingual_docs.py`: PASS; 9 changed paths inspected; 0 new gaps; exit 0.
+- `python3 scripts/check_document_management.py --require-changed bc741bdce7b47d3695d85fa9649fe9506f23c595`: PASS (incremental); no GOV-DOC-002 violations in changed paths; exit 0.
+- `python3 scripts/ci/check_work_item_manifest_schema.py`: `Manifest schema v1: total=111 compliant=1 violations=110`; AID-2026-242 appears under COMPLIANT; exit 0. The 110 legacy violations are pre-existing and outside this task.

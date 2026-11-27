@@ -128,5 +128,5 @@ implementation:
   tests:
     - "python3 scripts/test_check_bilingual_docs.py: 27 tests passed"
     - "python3 scripts/check_bilingual_docs.py: PASS; 9 changed paths inspected; 0 new bilingual gaps"
-    - "python3 scripts/check_document_management.py --require-changed REF: PASS; no GOV-DOC-002 violations in changed paths"
-    - "python3 scripts/ci/check_work_item_manifest_schema.py: read-only schema validation"
+    - "python3 scripts/check_document_management.py --require-changed bc741bdce7b47d3695d85fa9649fe9506f23c595: PASS; no GOV-DOC-002 violations in changed paths"
+    - "python3 scripts/ci/check_work_item_manifest_schema.py: AID-2026-242 COMPLIANT; 110 pre-existing legacy violations remain in the repository-wide inventory"
