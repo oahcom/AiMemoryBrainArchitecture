@@ -3,6 +3,8 @@
 - 评估角色：X — 首席架构复杂度评估负责人
 - 仓库：`oahcom/AiMemoryBrainArchitecture`
 - 精确基线：`main@b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- assessed_version: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- evidence_baseline: `main@b372b62c640a2b656e54b6db62a4ee67d7d8c001` (historical baseline named by source report; not a claim of contemporaneous session signature)
 - 评估日期：2026-11-17
 - 类型：基于可读取仓库证据的静态架构复杂度评估
 - 状态：**PROVISIONAL — NOT PROVEN**
