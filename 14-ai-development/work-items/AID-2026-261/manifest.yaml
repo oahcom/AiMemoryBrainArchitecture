@@ -62,7 +62,7 @@ evidence:
     negative_checker_output: "temp repo neg261: candidate=1407392f276e1c2cafde40cdb73885fc6bf97d0c target=8b6bfdc7694d518b9e69fe48f82f11dfddc76c14 merge_base=a36dc1b80e4715498cb976fedf3a68c3a782a274; CANDIDATE_NEW_DIRECTORIES=1 TARGET_OCCUPIED_NEW_DIRECTORIES=1 ACCEPTED_NEW_DIRECTORIES=0 EXISTING_DIRECTORIES=1 BAD=1; ERROR WU-01 duplicate work-item directory AID-2026-261: candidate introduces this ID, but the latest target already contains it; exit 1"
     race_checker_output: "temp repo race261: step 1 (PR A against unoccupied main) TARGET_OCCUPIED_NEW_DIRECTORIES=0 BAD=0 PASS WORK ITEM UNIQUENESS exit 0; after main was advanced to PR A head, step 2 (PR B) TARGET_OCCUPIED_NEW_DIRECTORIES=1 BAD=1 ERROR WU-01 duplicate work-item directory AID-2026-262: candidate introduces this ID, but the latest target already contains it; exit 1"
     implementation_head_sha: "331faf31d115014097c1dc669061724284b5ca3c"
-    pull_request: "<FILL:pr_number>"
+    pull_request: "1397"
     run_date: "2026-11-27T04:40:03Z"
   test_runs:
     - command: >-
@@ -118,7 +118,7 @@ non_goals:
   - Closing Issue #1341 or asserting Owner acceptance.
 carrier:
   branch: fix/2026-11-27-aid261-workitem-uniqueness-gate
-  pull_request: "<FILL:pr_number>"
+  pull_request: "1397"
   merge_sha: PENDING
   merge_method: PENDING
   required_contexts: "PENDING_PLATFORM_VERIFICATION"
