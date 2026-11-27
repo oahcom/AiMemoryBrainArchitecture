@@ -60,4 +60,5 @@ The user supplied the AID-2026-284 task specification, including the exact six-p
 - Read Issue #265 body and Issue #305 comment 7042461592 through GitHub API; these are GitHub-hosted evidence, not offline-recomputable Git blobs.
 - Attempted the prescribed shallow clone. Three attempts failed with the raw GnuTLS handshake error recorded in the operator session; no partial-clone worktree was used.
 - Created only the branch `feat/aid-2026-284-req04-ac1-scope` from the observed main commit. No other PR or Issue comment is created by this session evidence.
+- Updated PR #1440's description with the required three-column per-Issue mapping table after the first Session Evidence run reported: `MISSING: PR description: missing per-Issue mapping table`. A new head commit is used to trigger exact-head validation of the corrected body.
 - No test, merge, required-context success, branch-protection state, or Owner acceptance is claimed here.
