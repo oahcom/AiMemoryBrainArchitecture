@@ -1,0 +1,136 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  steward: "user-authorized operator (delegated by account owner)"
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-016/session-evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "The session reference and reported five successful API deliveries are recorded; prompt snapshot byte-level provenance and independent verification of session inputs and outputs remain unverified."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Informative record of the implementing AI session and its reported inputs and outputs for AID-2026-016."
+    canonical_scope_id: "ai-development/aid-2026-016-session-evidence"
+    canonical_scope_keywords:
+      - "ai-session-provenance"
+      - "implementation-input-output"
+      - "session-evidence"
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    en: null
+    zh-CN: null
+---
+
+# Session Evidence
+
+## Session role / use case
+
+This session records the implementation activity for Issue #1145, `[MEMORY CONTEXT] Verify ContextEntryVersion content_hash against rendered content`.
+
+The implementing AI session was ChatGPT, session reference:
+
+`6b08f8b6-4298-83ec-945c-91fafb7bf422`
+
+Account reference: `acct1`.
+
+The implementing session authored all implementation code. The execution party performed mechanical application of the returned EDIT blocks, created the new file from the returned content, executed tests and validation commands, and reported observed results.
+
+The implementation session received five prompt deliveries through direct API submission using `chatgpt-send.py`. All five submissions returned HTTP 200.
+
+## Actual AI input
+
+The executed prompt snapshot source was:
+
+`D:\code\chatgpt-session-ops\prompts\27-aid241-context-entry-content-hash.md`
+
+The execution party is responsible for placing the GOV-DOC-002 frontmatter before the source prompt body in `prompt-v1.md`; the body after the frontmatter is a byte-for-byte copy of this source file.
+
+The five delivery records are:
+
+1. Delivery 1 — filename: `NOT_PROVIDED`.
+   - Submission result: `SEND -> 200`.
+   - Purpose: Initial implementation patch for the ContextEntryVersion content hash integrity requirement.
+
+2. Delivery 2 — filename: `NOT_PROVIDED`.
+   - Submission result: `SEND -> 200`.
+   - Purpose: Return the implementation after EDIT 7 encountered an indentation mismatch and provide the corrected EDIT material.
+
+3. Delivery 3 — filename: `NOT_PROVIDED`.
+   - Submission result: `SEND -> 200`.
+   - Purpose: Resolve the EDIT 11 non-unique FIND match and supply the corrected implementation application material.
+
+4. Delivery 4 — filename: `NOT_PROVIDED`.
+   - Submission result: `SEND -> 200`.
+   - Purpose: Address the test failure discovered during execution and return the corresponding correction.
+
+5. Delivery 5 — filename: `NOT_PROVIDED`.
+   - Submission result: `SEND -> 200`.
+   - Purpose: Correct the formatting issue in the new integration test file, specifically the import-use line wrapping. The correction introduced no semantic changes.
+
+The five delivery filenames were not included in the verified execution facts. They are therefore recorded as `NOT_PROVIDED` rather than inferred or fabricated.
+
+The final `prompt-v1.md` file's SHA-256 digest and byte count include its GOV-DOC-002 frontmatter and the byte-for-byte source prompt body. Those final-file measurements are recorded in the manifest's `executed_prompt_sha256` and `executed_prompt_bytes` fields.
+
+## AI-visible output
+
+The implementing session produced the following implementation artifacts:
+
+1. Five EDIT application points for modifications to the existing implementation and inline tests.
+2. A NEWFILE artifact for `crates/memory-context/tests/content_hash_integrity.rs`.
+3. The public helper `content_hash_for(rendered_content: &str) -> String`.
+4. The `ContextError::ContentHashMismatch` error variant.
+5. Validation changes to `ContextEntryVersion::validate()`.
+6. Validation changes to `validate_edit_entry()` for the `ContextEntry` path.
+7. Documentation clarifying the validated-entry content hash coverage of `snapshot_hash()` without modifying its FNV-1a 64 algorithm.
+8. Updated inline test fixtures using actual content hashes generated by `content_hash_for()`.
+
+The new integration test file contains six tests:
+
+- `content_hash_is_sha256_prefixed_and_deterministic`
+- `content_hash_covers_exact_utf8_bytes`
+- `content_hash_does_not_normalize_unicode`
+- `commit_rejects_entry_with_wrong_content_hash`
+- `validate_rejects_stale_hash_after_content_edit`
+- `snapshot_hash_changes_when_entry_content_hash_changes`
+
+The implementation and execution correction history was:
+
+- Initial EDIT application encountered an indentation mismatch in EDIT 7.
+- Initial EDIT application encountered a non-unique FIND match in EDIT 11.
+- Both issues were returned to the implementing session and corrected application material was supplied.
+- Test execution exposed a failure that was returned to the implementing session for correction.
+- The first formatting check exited with code 1 because of import-use line wrapping in the new integration test file.
+- The formatting correction was returned through an EDIT block and mechanically applied.
+- The formatting correction did not change implementation semantics.
+
+All five direct API submissions returned HTTP 200.
+
+The resulting implementation HEAD was `731d9d08`.
+
+The execution party reported successful completion of the memory-context, agent-integration, and brain-cli test suites, Clippy, Cargo formatting verification, and the repository formatting/check script. Detailed command results are recorded in `evidence.md`.
+
+This record documents implementation-session activity. It does not constitute independent review, natural-person owner acceptance, merge authorization, or closure of Issue #1145.

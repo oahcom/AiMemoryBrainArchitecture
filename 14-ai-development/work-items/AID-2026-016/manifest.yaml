@@ -1,0 +1,117 @@
+work_item_id: AID-2026-016
+title: "Verify ContextEntryVersion Content Hash Against Rendered Content"
+class: IMPL/TEST
+risk: R1
+risk_rationale: "The change enforces integrity validation of rendered ContextEntryVersion content before ChangeSet operations take effect. It does not change encryption policy, ContextVersion authority, reasoning-boundary evidence authority, or the snapshot hash algorithm."
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: NOT_RECORDED
+accountable_owner: NOT_ASSIGNED
+acceptance_authority: NOT_RECORDED
+attribution:
+  implementation: "ChatGPT session 6b08f8b6-4298-83ec-945c-91fafb7bf422 (acct1)"
+  execution: "Execution party mechanically applied implementation EDIT blocks, ran tests, and performed formatting and validation."
+  code_authorship: "All implementation code was produced by the implementing ChatGPT session."
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: a588cd99
+prompt_status: RECORDED
+prompt_provenance: NOT_VERIFIED
+
+identifier_allocation:
+  observed_main: a588cd99
+  assigned_id: AID-2026-016
+  allocation_rule: "Enumerate AID-2026-NNN identifiers in open PR titles and remote branches, then select the first unoccupied identifier. This round observed 240, 251, and 280 as occupied."
+  allocation_verification: PENDING_PRE_MERGE
+
+scope:
+  objective: "Validate ContextEntryVersion content_hash against the exact UTF-8 bytes of rendered_content during validation, and reject mismatches before any ChangeSet operation takes effect."
+  changes:
+    - "Introduce content_hash_for(rendered_content: &str) -> String as the single source of truth for generating sha256:-prefixed content hashes."
+    - "Recalculate and compare content_hash in ContextEntryVersion::validate()."
+    - "Recalculate and compare content_hash in validate_edit_entry() for the ContextEntry path."
+    - "Introduce ContextError::ContentHashMismatch with entry_id, declared, and actual values."
+    - "Update inline test fixtures to use actual content_hash_for() results."
+    - "Add six integration tests covering deterministic hashing, exact UTF-8 bytes, Unicode normalization differences, incorrect hashes, stale hashes, and snapshot hash changes."
+    - "Document the existing snapshot_hash() coverage of validated entry content hashes without changing its algorithm."
+  untouched:
+    - "Encryption algorithm selection and encryption policy."
+    - "ContextVersion authority in domain G."
+    - "Reasoning-boundary evidence authority in domains C/H."
+    - "FNV-1a 64 snapshot_hash() algorithm."
+    - "Snapshot hash semantics and calculation."
+    - "Documentation bilingual mirror structure."
+
+measurements:
+  implementation_files_changed: "2"
+  implementation_insertions: "+125"
+  implementation_deletions: "-7"
+  integration_tests_added: "6"
+  memory_context_tests: "85 / 10 / 6 / 9 / 19 / 8 / 1 / 2 / 8 / 14 / 21 / 0; 0 failed; exit code 0"
+  agent_integration_tests: "36 / 2 / 19 / 6 / 0; 0 failed; exit code 0"
+  brain_cli_tests: "All passed; 0 failed; exit code 0"
+  clippy: "cargo clippy -p memory-context --all-targets -- -D warnings; Finished dev profile; exit code 0"
+  cargo_fmt: "cargo fmt --all -- --check; empty output; exit code 0"
+  python_fmt_check: "FMT_RESULT=PASS; CHECK_RESULT=PASS; WORKTREE_RESULT=CLEAN; CHECKED_COMMIT_SHA=731d9d08; exit code 0"
+  initial_fmt_failure: "Exit code 1 due to import-use line wrapping in the new integration test file; corrected through a returned EDIT block without semantic changes."
+  implementation_head: "731d9d08"
+  test_failures: 0
+
+evidence:
+  record: "14-ai-development/work-items/AID-2026-016/evidence.md"
+  prompt: "14-ai-development/work-items/AID-2026-016/prompt-v1.md"
+  session: "14-ai-development/work-items/AID-2026-016/session-evidence.md"
+
+non_goals:
+  - "Selecting or authorizing a cryptographic algorithm."
+  - "Changing encryption behavior."
+  - "Changing the FNV-1a 64 snapshot hash implementation."
+  - "Changing ContextVersion ownership or authority."
+  - "Changing reasoning-boundary evidence ownership or authority."
+  - "Changing snapshot hash semantics."
+  - "Creating bilingual documentation mirrors."
+  - "Claiming that Issue #1145 has been closed or accepted."
+
+notes:
+  - "The observed base commit is the short SHA a588cd99. Its full 40-character SHA was not supplied and is intentionally not fabricated."
+  - "The implementation HEAD observed by the execution party is 731d9d08."
+  - "The executed prompt snapshot source is D:\\code\\chatgpt-session-ops\\prompts\\27-aid241-context-entry-content-hash.md."
+  - "prompt-v1.md consists of the GOV-DOC-002 frontmatter followed by the source prompt as a byte-for-byte body copy. executed_prompt_sha256 and executed_prompt_bytes record the measured digest and byte count of the final file, including its frontmatter."
+  - "The prompt provenance remains NOT_VERIFIED until its byte-level provenance has been verified."
+  - "The implementation session made five deliveries. All five SEND operations returned HTTP 200."
+  - "The first delivery produced the initial patch. EDIT 7 had an indentation mismatch and EDIT 11 had a non-unique FIND match; both were returned to the implementing session for correction."
+  - "Subsequent deliveries addressed the missing EDIT material, test failures, and formatting correction. No semantic change was made by the final formatting correction."
+  - "The initial formatting failure and subsequent successful formatting check are both recorded as execution evidence."
+  - "The work item identifier remains provisional until allocation is rechecked against remote branches and open PR titles."
+  - "Issue #1145 remains the originating issue and is not represented as closed or accepted by this work item."
+
+carrier:
+  branch: "fix/2026-11-27-aid-241-context-content-hash"
+  head_commit: "731d9d08"
+  pull_request: PENDING
+  draft: false
+  merge_authorization: "No merge authorization is granted by this manifest. Merge remains subject to independent review, acceptance authority, and the applicable repository gates."
+
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+
+acceptance:
+  gate: PENDING_CI
+  issue_reference: "#1145"
+  issue_status: OPEN
+  acceptance_status: NOT_RECORDED
+
+session_evidence:
+  role: "Implementing AI session; implementation author."
+  issue_refs:
+    - "#1145"
+  implementing_ai_session: "ChatGPT 6b08f8b6-4298-83ec-945c-91fafb7bf422 (acct1)"
+  executed_prompt_snapshot_file: "prompt-v1.md"
+  executed_prompt_sha256: "0aeeb697cfd88b1f972724a46c6385c978069ce3e44e37330ed26dc56d5f80dc"
+  executed_prompt_bytes: 9998
+  executed_prompt_provenance: NOT_VERIFIED
+  session_reference_status: RECORDED
+  session_evidence_ref: "14-ai-development/work-items/AID-2026-016/session-evidence.md"
