@@ -31,6 +31,7 @@ document_metadata:
     source: "01-system-architecture/system-boundaries.md"
     en: null
     zh-CN: "docs/zh-CN/01-system-architecture/system-boundaries.md"
+  steward: "Architecture Governance"
 ---
 # System Boundaries
 
