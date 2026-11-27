@@ -54,7 +54,28 @@ Implement blob-pin integrity checking in the existing required Repository hygien
 
 ## Measurements
 
-The baseline full scan and the #1220 negative scan are pending execution by GitHub Actions on an exact checkout. No scan counts, test results, required-context result, or merge SHA are claimed in this evidence file until the corresponding raw outputs are observed.
+Repository hygiene workflow run: `45939439751`; job `140310147849`; exact workflow checkout merge candidate `b2a2b37cbc5bdd74d7fd5511a5e91dd2662f517e`. The base SHA was `386d8f57b02d8e3c511ff0e3980b9ce0af8b3028` and the PR head was scanned separately.
+
+- Main raw summary: `main=386d8f57b02d8e3c511ff0e3980b9ce0af8b3028 manifests=115 pins=178 ok=95 mismatch=83 path_missing=0 incomplete=0`
+- #1220 raw summary: `main=9a2063ae1fa5d905b3817cd4eddba065a06daa73 manifests=108 pins=162 ok=79 mismatch=83 path_missing=0 incomplete=0`
+- Candidate raw summary: `main=b2a2b37cbc5bdd74d7fd5511a5e91dd2662f517e manifests=116 pins=180 ok=97 mismatch=83 path_missing=0 incomplete=0`
+
+The 83 baseline entries are 40 historical prompt SHA-256 mismatches, 40 prompt byte-count mismatches, and 3 AID-2026-100 related-evidence Git blob mismatches. No missing paths or incomplete commit lookups were observed in these scans. The current-main baseline file contains all 83 raw mismatch lines; the ratchet will reject any new item and any item that stops failing.
+
+### First 10 main mismatch lines (raw)
+
+```text
+MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-059/prompt-v1.md declared=65474e7f0927d2dfeaad33814fdbd7d576635cc8a0e8d2a3a7441e3a65ab7317 actual=4881d6292e96154d5f7364816ae3e9977365e09b88e8475f4dd9d655e3e34a8c
+MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-059/prompt-v1.md declared=3866 actual=3808
+MISMATCH session_evidence[1].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-059/prompt-1015.md declared=245dbfc39ca8b20cec30bba392c4b2f5e0db383b404eb4e8e10a8f7cee899f46 actual=2be1e84c9fc262066e687bf21a57d80a090fed73d3c6765f26fc6fc02d3c0b51
+MISMATCH session_evidence[1].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-059/prompt-1015.md declared=7986 actual=7928
+MISMATCH session_evidence[2].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-059/prompt-1026-v1.md declared=25058389340c796a557746ae5ed90cf73cada98998e62da1692bb5ce4a3e4bd9 actual=8ca8bfc89774fa728e1671808510af4aa9def9b9860a9cc9016c5ca8bba87ea5
+MISMATCH session_evidence[2].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-059/prompt-1026-v1.md declared=4811 actual=4753
+MISMATCH session_evidence[3].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-059/prompt-1042-1048-v1.md declared=ceae6530d70c60803b58ba91a3f5ed28671a525bcc640c32aa8f020d3defaffd actual=8aa0b29ce5ce620c77ac3621531b4b8df908010675f5486672d056345eb76b11
+MISMATCH session_evidence[3].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-059/prompt-1042-1048-v1.md declared=6507 actual=6449
+MISMATCH session_evidence[4].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-059/prompt-1029-1076-v1.md declared=f0a315582ba51212758d82c6dfacedaaa676575f2b0ffcec4170fbded05f229e actual=81e070af08045cec4635201b99861bab00a2ffa7e1caafab3342608d0adde22a
+MISMATCH session_evidence[4].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-059/prompt-1029-1076-v1.md declared=9166 actual=9108
+```
 
 ## Field enumeration
 
