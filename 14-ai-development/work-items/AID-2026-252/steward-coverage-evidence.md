@@ -51,3 +51,10 @@ This mapping is an explicit owner-authorized decision for this rollout. More gra
 ## Current evidence status
 
 The branch contains the initial schema/checker/test/workflow mechanism commits. The exact census, baseline file, test run, Actions contexts, migration batches, PR merge, post-merge blob verification, and Issue #266 comment are pending direct readback and must not be represented as complete until observed.
+
+## Addendum — migration and prompt snapshot integrity
+
+- The AID-2026-001 through AID-2026-099 work-item slice has 127 steward additions across six bounded commits (25, 25, 25, 25, 25, and 2 files).
+- The latest GOV-DOC-002 Actions census before prompt-pin reconciliation reported 526 classified documents missing steward, 1137 governed documents, 767 classified documents, and 370 unclassified documents.
+- For modified prompt snapshots that are declared by work-item manifests, the corresponding SHA-256 and byte-count declarations have been refreshed in the affected manifests. This preserves the prompt-snapshot identity check rather than waiving it.
+- The shrink-only manifest-blob-pins baseline reconciliation and final required-context verification remain pending direct Actions readback.
