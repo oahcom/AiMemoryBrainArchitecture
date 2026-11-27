@@ -70,8 +70,6 @@ The script reads committed Git objects with `git ls-tree` and `git show`; it doe
 
 ## 2. Measured baseline
 
-<text> </text>
-
 ```text
 ref=a7a252eb670b31066a0ffea35dc28cbe6ef5b836 cohort=10
 AID-2026-251 roots=3 [.github, 14-ai-development, scripts]
