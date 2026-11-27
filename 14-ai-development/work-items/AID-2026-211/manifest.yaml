@@ -1,0 +1,62 @@
+work_item_id: AID-2026-211
+title: >-
+  Implement the simpler-gate RC-1/RC-2 ruling: correct M-02 to describe existing behavior,
+  align the security-governance README with authoritative frontmatter, and pin both with tests
+class: GATE/TEST + DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  The gate's manual-control description and one generated policy row are corrected, three
+  README group members are aligned with five existing frontmatter records, and two
+  characterization tests are added. No gate decision logic, exit code, enum, threshold,
+  schema, workflow, required context or branch protection is changed.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 788fbc011877a14976fc0a974ffe2e013dd9991b
+prompt_status: NOT_RECORDED
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: 788fbc011877a14976fc0a974ffe2e013dd9991b
+  assigned_id: AID-2026-211
+  allocation_rule: >-
+    Selected only after enumerating the current 100-entry all-state pull request listing and
+    checking titles and head branch names; the user-supplied occupied list was also excluded.
+  recheck_rule: >-
+    Immediately before opening the pull request, re-read the all-state pull request listing and
+    remote branch names; if AID-2026-211 is occupied, renumber the entire Work Item before PR.
+scope:
+  objective: >-
+    Implement the already-issued simpler-gate RC-1/RC-2 ruling without adding validation:
+    make M-02 describe the actual checks and make README claims agree with the five
+    authoritative security-governance frontmatters.
+  changes:
+    - path: "scripts/check_document_management.py"
+      detail: "Correct only the M-02 description string in MANUAL_CONTROLS."
+    - path: "00-governance/architecture-document-management-policy.md"
+      detail: "Synchronize the generated M-02 row; preserve the manual-control policy intent."
+    - path: "09-security-governance/README.md and docs/{en,zh-CN}/09-security-governance/README.md"
+      detail: "State Canonical from source frontmatter, declare frontmatter as sole authority, and README as guide only; preserve non-approval/non-conformance disclaimer."
+    - path: "scripts/test_check_document_management.py"
+      detail: "Add the optional-approver/date behavior test and the five-frontmatter/README consistency test."
+    - path: "14-ai-development/work-items/AID-2026-211/"
+      detail: "Three documents: manifest.yaml, evidence.md and session-evidence.md."
+    - path: "14-ai-development/work-items/INDEX.md"
+      detail: "One appended Work Item registration row."
+  untouched:
+    - "all checker decision logic, parser behavior, exit codes, enumerations and thresholds"
+    - "schemas, workflows, required contexts, branch protection and Issues"
+    - "the five security-governance source frontmatters"
+non_goals:
+  - "Adding an approver/decision_date requirement or any other new validation"
+  - "Approving Phase 3.x decisions or production policy"
+  - "Claiming implementation conformance or closing #1212"
+evidence:
+  record: 14-ai-development/work-items/AID-2026-211/evidence.md
+  session: 14-ai-development/work-items/AID-2026-211/session-evidence.md
