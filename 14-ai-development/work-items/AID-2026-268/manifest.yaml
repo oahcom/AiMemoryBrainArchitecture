@@ -37,6 +37,7 @@ scope:
   files_to_create:
     - scripts/ci/check_manifest_blob_pins.py
     - scripts/ci/test_check_manifest_blob_pins.py
+    - scripts/ci/baselines/manifest-blob-pins.txt
     - 14-ai-development/work-items/AID-2026-268/manifest.yaml
     - 14-ai-development/work-items/AID-2026-268/evidence.md
     - 14-ai-development/work-items/AID-2026-268/session-evidence.md
