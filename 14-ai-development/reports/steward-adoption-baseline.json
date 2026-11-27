@@ -137,8 +137,6 @@
     "14-ai-development/prompt-authoring-standard.md",
     "14-ai-development/ubuntu-self-hosted-runner-bootstrap.en.md",
     "14-ai-development/ubuntu-self-hosted-runner-bootstrap.zh-CN.md",
-    "14-ai-development/work-items/AID-2026-099/prompt-v1.md",
-    "14-ai-development/work-items/AID-2026-099/session-evidence.md",
     "14-ai-development/work-items/AID-2026-100/evidence-source-restore.md",
     "14-ai-development/work-items/AID-2026-100/evidence.md",
     "14-ai-development/work-items/AID-2026-100/owner-decision-merge-authorization.md",
@@ -532,5 +530,5 @@
     "docs/zh-CN/14-ai-development/work-items/AID-2026-240/evidence.md"
   ],
   "pin": "5e30d49776a2ce75069227a41470fa7e4ae00b2e",
-  "present": 239
+  "present": 241
 }
