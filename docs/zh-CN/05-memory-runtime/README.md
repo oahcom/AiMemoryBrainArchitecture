@@ -56,6 +56,8 @@ document_metadata:
 
 # Memory Runtime — 目录索引
 
+> 本页仅为索引。运行时规范根为 runtime-overview.md（AID-2026-113）。
+
 > **AUTHORED_INDEX — 非恢复的规范文件。** 不存在权威源；本文件为新建索引。它仅盘点 2026-11-26 检查时根目录中存在的文档，不建立规范权威，也不代表 Owner 已验收。
 
 ## 本目录现有文档
