@@ -8,7 +8,8 @@ document_metadata:
       approver: null
       decision_date: null
       approved_version: null
-      approval_scope: null
+      approval_scope:
+        type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference: []
       revocation: null
@@ -35,9 +36,10 @@ document_metadata:
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: AI-DEV-CAPACITY-ALIGNMENT-RULING-001.md
+    source: null
     en: null
     zh-CN: null
+  steward: "user-authorized operator (delegated by account owner)"
 ---
 # AI-DEV-CAPACITY-ALIGNMENT-RULING-001
 # Capacity Alignment Ruling: Why Records Consume the Product
