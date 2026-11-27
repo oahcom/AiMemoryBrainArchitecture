@@ -26,6 +26,7 @@ scope:
     - "docs/zh-CN/13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
   files_to_modify:
     - "docs/architecture-convergence/ARCH-CONVERGENCE-001-CONFLICT-REGISTER.md"
+    - "14-ai-development/work-items/INDEX.md"
   files_out_of_scope:
     - "Issue #265 body"
     - "Owner branches"

@@ -1,6 +1,6 @@
 ---
 document_metadata:
-  domain: architecture-governance
+  domain: ai-development
   role: work-record
   lifecycle:
     approval:
@@ -31,14 +31,9 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "AID-2026-253 AC3/AC4 evidence and bounded delegated dispositions"
-    canonical_scope_id: "architecture-governance/aid-2026-253"
-    canonical_scope_keywords:
-      - "conflict-register"
-      - "mature-implementations"
-      - "AC3"
-      - "AC4"
-      - "evidence"
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative

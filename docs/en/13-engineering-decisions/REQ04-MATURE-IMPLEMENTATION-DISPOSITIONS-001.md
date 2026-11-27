@@ -1,6 +1,6 @@
 ---
 document_metadata:
-  domain: engineering-decisions
+  domain: ai-development
   role: decision-record
   lifecycle:
     approval:
@@ -32,19 +32,14 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "Delegated AC4 maturity dispositions; no production technology freeze"
-    canonical_scope_id: "engineering-decisions/req04-mature-implementation-dispositions"
-    canonical_scope_keywords:
-      - "sqlite"
-      - "postgresql"
-      - "cedar"
-      - "tantivy"
-      - "mature-implementation"
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: null
+    source: "13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
     en: "docs/en/13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
     zh-CN: "docs/zh-CN/13-engineering-decisions/REQ04-MATURE-IMPLEMENTATION-DISPOSITIONS-001.md"
 ---
