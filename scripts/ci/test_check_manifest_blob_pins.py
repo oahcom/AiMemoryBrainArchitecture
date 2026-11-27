@@ -48,7 +48,7 @@ class BlobPinsTest(unittest.TestCase):
         commit = commit_tree(self.root, {
             "README.md": data,
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
-                f"root: README.md\nroot_blob: {sha}\n",
+                f"root: README.md\nroot_blob: \"{sha}\"\n",
         })
         code, out, err = self.run_gate(commit)
         self.assertEqual(code, 0, out + err)
@@ -62,7 +62,7 @@ class BlobPinsTest(unittest.TestCase):
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
                 ("baseline_and_source_evidence:\n  authored_indexes:\n"
                  "    - en_mirror: docs/en/05-memory-runtime/README.md\n"
-                 f"      en_mirror_blob: {wrong}\n"),
+                 f"      en_mirror_blob: \"{wrong}\"\n"),
         })
         code, out, err = self.run_gate()
         self.assertEqual(code, 1, out + err)
@@ -76,7 +76,7 @@ class BlobPinsTest(unittest.TestCase):
         commit_tree(self.root, {
             "README.md": data,
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
-                f"root: README.md\nroot_blob: {wrong}\n",
+                f"root: README.md\nroot_blob: \"{wrong}\"\n",
         })
         code, out, err = self.run_gate()
         self.assertEqual(code, 1, out + err)
@@ -87,7 +87,7 @@ class BlobPinsTest(unittest.TestCase):
     def test_deleted_path_is_rejected_and_named(self):
         commit_tree(self.root, {
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
-                f"root: missing.md\nroot_blob: {'1' * 40}\n",
+                f"root: missing.md\nroot_blob: \"{'1' * 40}\"\n",
         })
         code, out, err = self.run_gate()
         self.assertEqual(code, 1, out + err)
@@ -100,7 +100,7 @@ class BlobPinsTest(unittest.TestCase):
         source = commit_tree(self.root, {"source.md": data})
         candidate = commit_tree(self.root, {
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
-                f"source_blobs:\n  - path: source.md\n    sha: {self.blob_sha(data)}\nbase_commit: {source}\n",
+                f"source_blobs:\n  - path: source.md\n    sha: \"{self.blob_sha(data)}\"\nbase_commit: {source}\n",
         })
         code, out, err = self.run_gate(candidate)
         self.assertEqual(code, 0, out + err)
@@ -108,7 +108,7 @@ class BlobPinsTest(unittest.TestCase):
     def test_unavailable_cross_commit_is_incomplete_not_pass(self):
         commit_tree(self.root, {
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
-                f"source_blobs:\n  - path: source.md\n    sha: {'1' * 40}\nbase_commit: {'f' * 40}\n",
+                f"source_blobs:\n  - path: source.md\n    sha: \"{'1' * 40}\"\nbase_commit: {'f' * 40}\n",
         })
         code, out, err = self.run_gate()
         self.assertEqual(code, 1, out + err)
@@ -122,12 +122,12 @@ class BlobPinsTest(unittest.TestCase):
         commit_tree(self.root, {
             path: data,
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
-                f"prompt_version: v2\nprompt_sha256: {good}\n",
+                f"prompt_version: v2\nprompt_sha256: \"{good}\"\n",
         })
         code, out, err = self.run_gate()
         self.assertEqual(code, 0, out + err)
         manifest = self.root / "14-ai-development/work-items/AID-2026-900/manifest.yaml"
-        manifest.write_text(f"prompt_version: v2\nprompt_sha256: {'0' * 64}\n")
+        manifest.write_text(f"prompt_version: v2\nprompt_sha256: \"{'0' * 64}\"\n")
         git(self.root, "add", ".")
         git(self.root, "-c", "user.name=Test", "-c", "user.email=test@example.invalid",
             "commit", "-m", "mutate top-level prompt pin")
@@ -146,11 +146,11 @@ class BlobPinsTest(unittest.TestCase):
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
                 ("source_translation_pairs:\n"
                  "  - source_path: src.md\n"
-                 f"    source_blob_sha: {self.blob_sha(src)}\n"
-                 f"    source_commit_sha: {source_commit}\n"
+                 f"    source_blob_sha: \"{self.blob_sha(src)}\"\n"
+                 f"    source_commit_sha: \"{source_commit}\"\n"
                  "    translation_path: en.md\n"
-                 f"    translation_blob_sha: {self.blob_sha(trans)}\n"
-                 f"    translation_commit_sha: {translation_commit}\n"),
+                 f"    translation_blob_sha: \"{self.blob_sha(trans)}\"\n"
+                 f"    translation_commit_sha: \"{translation_commit}\"\n"),
         })
         code, out, err = self.run_gate(candidate)
         self.assertEqual(code, 0, out + err)
@@ -161,12 +161,12 @@ class BlobPinsTest(unittest.TestCase):
         candidate = commit_tree(self.root, {
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
                 ("source:\n"
-                 f"  head_sha: {source_commit}\n"
+                 f"  head_sha: \"{source_commit}\"\n"
                  "  selected_source_files:\n"
                  "    - path: file.md\n"
-                 f"      source_blob_sha: {self.blob_sha(data)}\n"
-                 f"      restored_blob_sha: {self.blob_sha(data)}\n"
-                 f"      frontmatter_blob_sha: {self.blob_sha(b'frontmatter')}\n"),
+                 f"      source_blob_sha: \"{self.blob_sha(data)}\"\n"
+                 f"      restored_blob_sha: \"{self.blob_sha(data)}\"\n"
+                 f"      frontmatter_blob_sha: \"{self.blob_sha(b'frontmatter')}\"\n"),
             "file.md": data,
         })
         code, out, err = self.run_gate(candidate)
@@ -190,18 +190,18 @@ class BlobPinsTest(unittest.TestCase):
     def test_unregistered_digest_field_fails_closed(self):
         commit_tree(self.root, {
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
-                f"unregistered_evidence_blob_sha: {'a' * 40}\n",
+                f"unregistered_evidence_blob_sha: \"{'a' * 40}\"\n",
         })
         code, out, err = self.run_gate()
         self.assertEqual(code, 1, out + err)
-        self.assertIn("UNRESOLVED(unregistered digest field)", out)
+        self.assertIn("UNRESOLVED(missing field locator)", out)
 
     def test_missing_source_translation_commit_is_incomplete(self):
         commit_tree(self.root, {
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
                 ("source_translation_pairs:\n"
                  "  - source_path: source.md\n"
-                 f"    source_blob_sha: {'a' * 40}\n"
+                 f"    source_blob_sha: \"{'a' * 40}\"\n"
                  "    source_commit_sha: NOT_RECORDED\n"),
         })
         code, out, err = self.run_gate()
@@ -209,30 +209,30 @@ class BlobPinsTest(unittest.TestCase):
         self.assertIn("UNRESOLVED(commit locator)", out)
 
     def test_generic_blob_field_uses_sibling_path_and_source_commit(self):
-        data = b"generic pinned bytes\\n"
+        data = b"generic pinned bytes\n"
         source = commit_tree(self.root, {"generic.md": data})
         candidate = commit_tree(self.root, {
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
-                ("generic_evidence:\\n"
-                 "  path: generic.md\\n"
-                 f"  evidence_blob_sha: {self.blob_sha(data)}\\n"
-                 f"  source_commit_sha: {source}\\n"),
+                ("generic_evidence:\n"
+                 "  path: generic.md\n"
+                 f"  evidence_blob_sha: \"{self.blob_sha(data)}\"\n"
+                 f"  source_commit_sha: \"{source}\"\n"),
         })
         code, out, err = self.run_gate(candidate)
         self.assertEqual(code, 0, out + err)
         self.assertIn("pins=1 ok=1", out)
 
     def test_nested_gate_a_reconstruction_mirror_pins_are_checked(self):
-        data = b"nested mirror\\n"
+        data = b"nested mirror\n"
         source = commit_tree(self.root, {"mirror.md": data})
         wrong = "0" * 40
         candidate = commit_tree(self.root, {
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
-                ("baseline_and_source_evidence:\\n"
-                 "  gate_a_reconstruction:\\n"
-                 "    - source_commit: " + source + "\\n"
-                 "      en_mirror: mirror.md\\n"
-                 f"      en_mirror_blob: {wrong}\\n"),
+                ("baseline_and_source_evidence:\n"
+                 "  gate_a_reconstruction:\n"
+                 "    - source_commit: " + source + "\n"
+                 "      en_mirror: mirror.md\n"
+                 f"      en_mirror_blob: \"{wrong}\"\n"),
         })
         code, out, err = self.run_gate(candidate)
         self.assertEqual(code, 1, out + err)
@@ -241,7 +241,7 @@ class BlobPinsTest(unittest.TestCase):
     def test_empty_declared_digest_is_not_dropped(self):
         commit_tree(self.root, {
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
-                "root: README.md\\nroot_blob: ''\\n",
+                "root: README.md\nroot_blob: ''\n",
         })
         code, out, err = self.run_gate()
         self.assertEqual(code, 1, out + err)
@@ -249,82 +249,117 @@ class BlobPinsTest(unittest.TestCase):
         self.assertIn("invalid Git blob SHA-1 declaration", out)
 
     def test_nested_d_source_blobs_use_nested_source_commit(self):
-        data = b"nested D source\\n"
+        data = b"nested D source\n"
         source = commit_tree(self.root, {"nested.md": data})
         candidate = commit_tree(self.root, {
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
-                ("baseline_and_source_evidence:\\n"
-                 f"  d_source_commit: {source}\\n"
-                 "  d_source_blobs:\\n"
-                 f"    - 'nested.md: {self.blob_sha(data)}'\\n"),
+                ("baseline_and_source_evidence:\n"
+                 f"  d_source_commit: {source}\n"
+                 "  d_source_blobs:\n"
+                 f"    - 'nested.md: {self.blob_sha(data)}'\n"),
         })
         code, out, err = self.run_gate(candidate)
         self.assertEqual(code, 0, out + err)
         self.assertIn("pins=1 ok=1", out)
 
     def test_owner_ruling_pointer_pins_use_artifact_not_pointer_document(self):
-        old = b"superseded artifact\\n"
-        current = b"current artifact\\n"
+        old = b"superseded artifact\n"
+        current = b"current artifact\n"
         old_sha, current_sha = self.blob_sha(old), self.blob_sha(current)
         commit_tree(self.root, {
             "old.md": old,
             "current.md": current,
-            "pointer.md": b"pointer metadata\\n",
+            "pointer.md": b"pointer metadata\n",
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
-                ("owner_ruling:\\n"
-                 "  superseded_artifact: old.md\\n"
-                 f"  superseded_blob: {old_sha}\\n"
-                 "  current_artifact: current.md\\n"
-                 f"  current_blob: {current_sha}\\n"
-                 "reconciliation:\\n"
-                 "  pointers_changed:\\n"
-                 "    - document: pointer.md\\n"
-                 f"      before_blob: {old_sha}\\n"
-                 f"      after_blob: {current_sha}\\n"),
+                ("owner_ruling:\n"
+                 "  superseded_artifact: old.md\n"
+                 f"  superseded_blob: {old_sha}\n"
+                 "  current_artifact: current.md\n"
+                 f"  current_blob: {current_sha}\n"
+                 "reconciliation:\n"
+                 "  pointers_changed:\n"
+                 "    - document: pointer.md\n"
+                 f"      before_blob: {old_sha}\n"
+                 f"      after_blob: {current_sha}\n"),
         })
         code, out, err = self.run_gate()
         self.assertEqual(code, 0, out + err)
         self.assertIn("pins=4 ok=4 mismatch=0", out)
 
     def test_source_baseline_digest_only_pin_resolves_unique_blob_oid_in_commit_tree(self):
-        data = b"source baseline artifact\\n"
+        data = b"source baseline artifact\n"
         source = commit_tree(self.root, {"baseline.md": data})
         candidate = commit_tree(self.root, {
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
-                ("source_baseline:\\n"
-                 f"  main: {source}\\n"
-                 f"  artifact_blob: {self.blob_sha(data)}\\n"),
+                ("source_baseline:\n"
+                 f"  main: {source}\n"
+                 f"  artifact_blob: {self.blob_sha(data)}\n"),
         })
         code, out, err = self.run_gate(candidate)
         self.assertEqual(code, 0, out + err)
         self.assertIn("pins=1 ok=1", out)
 
     def test_prompt_snapshot_relative_file_locator_is_resolved_from_manifest_directory(self):
-        data = b"prompt snapshot\\n"
+        data = b"prompt snapshot\n"
         sha256 = hashlib.sha256(data).hexdigest()
         manifest_path = "14-ai-development/work-items/AID-2026-900/manifest.yaml"
         prompt_path = "14-ai-development/work-items/AID-2026-900/prompt-v1.md"
         commit_tree(self.root, {
             prompt_path: data,
             manifest_path:
-                ("prompt:\\n"
-                 "  snapshot_file: prompt-v1.md\\n"
-                 f"  snapshot_git_blob_sha: {self.blob_sha(data)}\\n"
-                 f"  snapshot_sha256: {sha256}\\n"),
+                ("prompt:\n"
+                 "  snapshot_file: prompt-v1.md\n"
+                 f"  snapshot_git_blob_sha: \"{self.blob_sha(data)}\"\n"
+                 f"  snapshot_sha256: {sha256}\n"),
         })
         code, out, err = self.run_gate()
         self.assertEqual(code, 0, out + err)
         self.assertIn("pins=2 ok=2", out)
 
+    def test_session_prompt_pin_uses_explicit_historical_commit_not_candidate_tree(self):
+        historical = b"historical prompt bytes\n"
+        current = b"edited prompt bytes\n"
+        historical_commit = commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/prompt-v1.md": historical,
+        })
+        candidate = commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/prompt-v1.md": current,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                ("session_evidence:\n"
+                 "  - executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-900/prompt-v1.md\n"
+                 f"    executed_prompt_sha256: \"{hashlib.sha256(historical).hexdigest()}\"\n"
+                 f"    executed_prompt_commit_sha: \"{historical_commit}\"\n"
+                 f"    executed_prompt_bytes: {len(historical)}\n"),
+        })
+        code, out, err = self.run_gate(candidate)
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=2 ok=2 mismatch=0", out)
+
+    def test_session_prompt_pin_without_commit_uses_candidate_tree_and_rejects_historical_digest(self):
+        historical = b"historical prompt bytes\n"
+        current = b"edited prompt bytes\n"
+        commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/prompt-v1.md": historical,
+        })
+        candidate = commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/prompt-v1.md": current,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                ("session_evidence:\n"
+                 "  - executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-900/prompt-v1.md\n"
+                 f"    executed_prompt_sha256: \"{hashlib.sha256(historical).hexdigest()}\"\n"),
+        })
+        code, out, err = self.run_gate(candidate)
+        self.assertEqual(code, 1, out + err)
+        self.assertIn("MISMATCH session_evidence[0].executed_prompt_snapshot_file", out)
     def test_source_path_branch_head_blob_sha_shape(self):
-        data = b"source path pin\\n"
+        data = b"source path pin\n"
         source = commit_tree(self.root, {"source.md": data})
         candidate = commit_tree(self.root, {
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
-                ("source:\\n"
-                 f"  branch_head: {source}\\n"
-                 "  source_path: source.md\\n"
-                 f"  source_blob_sha: {self.blob_sha(data)}\\n"),
+                ("source:\n"
+                 f"  branch_head: {source}\n"
+                 "  source_path: source.md\n"
+                 f"  source_blob_sha: \"{self.blob_sha(data)}\"\n"),
         })
         code, out, err = self.run_gate(candidate)
         self.assertEqual(code, 0, out + err)
@@ -332,10 +367,10 @@ class BlobPinsTest(unittest.TestCase):
 
     def test_prompt_original_payload_without_dedicated_file_is_unresolved(self):
         commit_tree(self.root, {
-            "14-ai-development/work-items/AID-2026-900/prompt-v2.md": b"ordinary prompt file\\n",
+            "14-ai-development/work-items/AID-2026-900/prompt-v2.md": b"ordinary prompt file\n",
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
-                ("prompt_file: 14-ai-development/work-items/AID-2026-900/prompt-v2.md\\n"
-                 f"prompt_original_payload_sha256: {'a' * 64}\\n"),
+                ("prompt_file: 14-ai-development/work-items/AID-2026-900/prompt-v2.md\n"
+                 f"prompt_original_payload_sha256: {'a' * 64}\n"),
         })
         code, out, err = self.run_gate()
         self.assertEqual(code, 1, out + err)
@@ -344,9 +379,9 @@ class BlobPinsTest(unittest.TestCase):
     def test_identical_incomplete_fields_in_two_manifests_keep_distinct_provenance(self):
         candidate = commit_tree(self.root, {
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
-                "prompt_sha256: NOT_VERIFIED\\n",
+                "prompt_sha256: NOT_VERIFIED\n",
             "14-ai-development/work-items/AID-2026-901/manifest.yaml":
-                "prompt_sha256: NOT_VERIFIED\\n",
+                "prompt_sha256: NOT_VERIFIED\n",
         })
         code, out, err = self.run_gate(candidate)
         self.assertEqual(code, 1, out + err)
@@ -357,6 +392,23 @@ class BlobPinsTest(unittest.TestCase):
         code, out, err = self.run_gate()
         self.assertEqual(code, 2)
         self.assertIn("INCOMPLETE", err)
+
+    def test_unlocated_blob_cannot_borrow_same_digest_from_another_field(self):
+        data = b"shared digest must not confer a locator\n"
+        digest = self.blob_sha(data)
+        commit_tree(self.root, {
+            "file.md": data,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                ("root: file.md\n"
+                 f"root_blob: \"{digest}\"\n"
+                 f"unregistered_source_blob: \"{digest}\"\n"),
+        })
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 1, out + err)
+        self.assertIn("pins=2", out)
+        self.assertIn("ok=1", out)
+        self.assertIn("INCOMPLETE UNRESOLVED(missing field locator)", out)
+        self.assertIn("field=manifest.unregistered_source_blob", out)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
