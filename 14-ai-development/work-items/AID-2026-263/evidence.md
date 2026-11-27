@@ -345,7 +345,7 @@ SC2148 only: no shebang in a `run:` block, which is expected
 
 ## 9. Identifier history and the AIDSCAN evidence
 
-This work item was first authored under `AID-2026-262`. That number was a local,
+This work item was first authored under the 262 placeholder. That number was a local,
 unpublished placeholder: it existed only as a commit in a worktree, with no ref
 pointing at it. AIDSCAN's five-scope scan (2829 commits of `main` history, 2349
 ref tips deduplicated to 1317 unique trees, 21 ledger versions, 280 worktrees,
@@ -368,7 +368,7 @@ Re-verified in this session, not taken on trust:
 - `git ls-remote --heads origin` filtered for branch names containing `263`: no
   hit.
 
-### 9.1 AID-2026-262 is retired, and its content did exist
+### 9.1 The 262 placeholder is retired, and its content did exist
 
 The 262 placeholder did reach the remote before the renumber, and this record
 does not pretend otherwise:
