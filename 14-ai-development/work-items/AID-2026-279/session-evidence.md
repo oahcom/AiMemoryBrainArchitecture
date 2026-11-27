@@ -43,6 +43,7 @@ document_metadata:
     source: null
     en: null
     zh-CN: null
+steward: "user-authorized operator (delegated by account owner)"
 ---
 
 # Session Evidence — AID-2026-279
