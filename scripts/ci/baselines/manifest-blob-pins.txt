@@ -88,12 +88,7 @@ MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-developmen
 MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-101/prompt-v1.md declared=4470 actual=4412
 MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-102/prompt-v1.md declared=df3c53282d858ecc7302ba86b4fb419bf6a31c8030d30cee256b64840b4e4e7a actual=468a1d4fd8f43d81c8ffba081afd46497b54a2b427849838946163785716072d
 MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-102/prompt-v1.md declared=4470 actual=4412
-MISMATCH authored_indexes[0].root path=05-memory-runtime/README.md declared=107c225b631eaa5732bab90bc09144799a542502 actual=13570e9fe2ad87958c387696088f145f6a24103d
 MISMATCH authored_indexes[1].root path=09-security-governance/README.md declared=1046665b0990183b689ed6db88edc9ba1089c83e actual=37b4c8a7f6b807bc22e9f278106972cbe84af8c8
-MISMATCH authored_indexes[0].en_mirror path=docs/en/05-memory-runtime/README.md declared=2fac42740167293c941c1450437ca780d0488b5d actual=ad36c55cf572a94c60557104b3a51652b75668cb
-MISMATCH authored_indexes[0].zh_cn_mirror path=docs/zh-CN/05-memory-runtime/README.md declared=9881fd88fcbfe1b3760154503c8d13e781ad89f0 actual=a5c9e3d9406c31020c1943d03561a7f381a03829
-MISMATCH authored_indexes[1].en_mirror path=docs/en/09-security-governance/README.md declared=7c8b434c7161c47c5e35e0ffcadc736981996c4a actual=d5b9495f2a2461a66546291091a942bef778e9ed
-MISMATCH authored_indexes[1].zh_cn_mirror path=docs/zh-CN/09-security-governance/README.md declared=772025aa9da8afe706af6f607ae47e35c5020522 actual=3d9be0a60a6c53e450d606222ff666add553ce96
 # Exact new failures from AID-2026-301 field discovery; retained as visible debt, never treated as PASS.
 # AID-093: declared source blob OID absent from its explicitly named candidate commit trees; follow up in AID-2026-093.
 # AID-023/AID-026: original-payload SHA has no dedicated file locator; follow up in those owning work items.
@@ -126,3 +121,9 @@ PATH_MISSING reconciliation.pointers_changed[1].after_blob.target path=09-securi
 PATH_MISSING reconciliation.pointers_changed[1].before_blob.target path=09-security-governance/phase-3.8.9-i-p0-allowlists-unified-1.2.13-recoveryjoin-1.0.2.md; declared=5c0e2049513d391dfc118f4f629a5ec95de456d6
 PATH_MISSING session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-261/prompt-v1.md; declared=0
 PATH_MISSING session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-261/prompt-v1.md; declared=0000000000000000000000000000000000000000000000000000000000000000
+
+MISMATCH authored_indexes[0].en_mirror path=docs/en/05-memory-runtime/README.md declared=2fac42740167293c941c1450437ca780d0488b5d actual=8808e9b298c78c2c4c64a9675b27e973c0e996bc
+MISMATCH authored_indexes[0].root path=05-memory-runtime/README.md declared=107c225b631eaa5732bab90bc09144799a542502 actual=216760a45c54386b95c2c985f7bf188d7479f776
+MISMATCH authored_indexes[0].zh_cn_mirror path=docs/zh-CN/05-memory-runtime/README.md declared=9881fd88fcbfe1b3760154503c8d13e781ad89f0 actual=c945394cf4aa667874938d64fc1c2b551d3ad5a9
+MISMATCH authored_indexes[1].en_mirror path=docs/en/09-security-governance/README.md declared=7c8b434c7161c47c5e35e0ffcadc736981996c4a actual=9edb8239b2bc34922a0618f5645ca27c6d8d1eb1
+MISMATCH authored_indexes[1].zh_cn_mirror path=docs/zh-CN/09-security-governance/README.md declared=772025aa9da8afe706af6f607ae47e35c5020522 actual=6b2c25ba19f11cdd58d4ad1558373be8c2026f1d
