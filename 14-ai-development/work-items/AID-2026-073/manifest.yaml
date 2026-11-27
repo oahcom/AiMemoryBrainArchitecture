@@ -11,8 +11,8 @@ prompt_id: AID-2026-073-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-073/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 08eb2369f7f6228adbbb4dfc4df88b6ceaf9381be1a5d4bf90ad61ec32145c1a
-prompt_bytes: 5089
+prompt_sha256: 278e8a975be335e6904af591b7f45367f34204ed4a9d33f81a19d6cfa5b3a7cd
+prompt_bytes: 5031
 
 # ---------------------------------------------------------------------------
 # Tests for the two behavioural fixes in a316ff69, which is the commit that

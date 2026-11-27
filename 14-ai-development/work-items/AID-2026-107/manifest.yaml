@@ -6,7 +6,7 @@ risk_rationale: >-
   Documentation-only rejudgment of an existing architecture matrix. The main risk is
   overclaiming evidence; all 72 Gate A cells remain NOT EVIDENCED and no Gate A PASS,
   Owner acceptance, implementation conformance or production behavior is inferred.
-status: DISPATCHED
+status: MERGED
 id_status: PROVISIONAL
 
 sponsor: USER-PRINCIPAL-DELEGATED
@@ -85,8 +85,8 @@ carrier:
     merge_commit_sha: 92a759ec1a8c748fc4091015a3a3e8aa97ddc3e3
   branch: docs/aid-2026-107-impl2-scope-refresh
   pull_request: 1299
-  draft: true
-  merge_commit_sha: PENDING
+  draft: false
+  merge_commit_sha: b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c
   merge_authorization: only after all 16 required contexts succeed on exact final Head
 
 review:
