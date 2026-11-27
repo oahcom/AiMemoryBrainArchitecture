@@ -43,18 +43,21 @@ document_metadata:
 ---
 AID-2026-255 ratchet-negative evidence
 
-Scan commit: 25b3f2e13e9565cc25b3c0f8da19f7c6789a61cd
-This log is committed after that commit, in a commit that touches only
-evidence files under this work-item directory. The checker reads only
-`14-ai-development/work-items/*/manifest.yaml`, so the scanned item set is
-identical at every later commit. Verify at any head with:
+Scan commit: bf42edb665e2f9da5e7f5988b284c3007ba126fa
 
-  git diff --name-only 25b3f2e13e9565cc25b3c0f8da19f7c6789a61cd..HEAD
+Commits after this one touch only evidence files under this directory: this
+transcript and `independent-review.md`. The checker reads only
+`14-ai-development/work-items/*/manifest.yaml`, and no manifest changes after
+the scan commit, so the 91-item set below is the set at the branch head. Verify
+with:
 
-which must list only `14-ai-development/work-items/AID-2026-255/ratchet-negative.md`
-and `14-ai-development/work-items/AID-2026-255/independent-review.md`. No
-manifest, checker, baseline or workflow file is touched after the scan commit,
-so the 91-item set below is the set at the head that carries this log.
+  git diff --name-only bf42edb665e2f9da5e7f5988b284c3007ba126fa..HEAD -- '14-ai-development/work-items/*/manifest.yaml'
+
+which must print nothing. The path recorded in this preamble was
+`ratchet-negative.log` when Owner A first authorized this file; the new-file
+admission policy refuses `.log`, so the file was renamed to
+`ratchet-negative.md` under a second owner amendment with the transcript
+unchanged.
 
 What this log is: the negative contract of the ratchet that AID-2026-268 landed,
 exercised against the landed checker and the landed baseline.
@@ -79,23 +82,23 @@ Command under test (as wired in .github/workflows/repository-hygiene.yml):
 Transcript:
 
 $ python3 scripts/ci/check_manifest_blob_pins.py --commit HEAD | sed -n '/^MISMATCH /p; /^PATH_MISSING /p; /^INCOMPLETE /p'
-[checker exit 1; 91 items; scan commit 25b3f2e13e9565cc25b3c0f8da19f7c6789a61cd]
+[checker exit 1; 91 items; scan commit bf42edb665e2f9da5e7f5988b284c3007ba126fa]
 
 --- case 1 control: baseline == current failure set ---
-ratchet: C:/Users/ADMINI~1/AppData/Local/Temp/tmpya7krny2/c1.base
+ratchet: C:/Users/ADMINI~1/AppData/Local/Temp/tmpo8ksk9nh/c1.base
 ratchet: baseline=91 current=91 regressions=0 fixed=0
 ratchet: PASS - failure set matches the baseline exactly.
 [exit 0]
 
 --- case 2 regression: baseline omits one reported item ---
-ratchet: C:/Users/ADMINI~1/AppData/Local/Temp/tmpya7krny2/c2.base
+ratchet: C:/Users/ADMINI~1/AppData/Local/Temp/tmpo8ksk9nh/c2.base
 ratchet: baseline=90 current=91 regressions=1 fixed=0
 ::error::ratchet regression (new failure not in baseline): MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-059/prompt-v1.md declared=65474e7f0927d2dfeaad33814fdbd7d576635cc8a0e8d2a3a7441e3a65ab7317 actual=4881d6292e96154d5f7364816ae3e9977365e09b88e8475f4dd9d655e3e34a8c
 ratchet: FAIL - 1 new failure(s) above baseline.
 [exit 1]
 
 --- case 3 stale: baseline carries an item the run no longer reports ---
-ratchet: C:/Users/ADMINI~1/AppData/Local/Temp/tmpya7krny2/c3.base
+ratchet: C:/Users/ADMINI~1/AppData/Local/Temp/tmpo8ksk9nh/c3.base
 ratchet: baseline=92 current=91 regressions=0 fixed=1
 ::error::ratchet baseline is stale (no longer failing): MISMATCH a.b/never-reported path=x declared=0 actual=0
 ratchet: FAIL - lower the baseline by 1 fixed item(s).
