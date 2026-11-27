@@ -61,8 +61,6 @@ Verification state at the time this evidence snapshot was written: PR-head check
 署名：user-authorized operator (delegated by account owner)
 日期：2026-11-27
 
-## Verification / current state
-
 - PR #1388 description now contains the required per-Issue mapping row: `#262 | LEGACY_UNDECLARED | N/A`.
 - The PR body was edited after the first Session Evidence failure; the failed run evaluated the earlier body and must not be treated as evidence against the corrected body.
 - At this snapshot, the required checks are not yet all green. No merge has been attempted.
