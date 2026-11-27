@@ -3,6 +3,7 @@
 from __future__ import annotations
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,8 +42,39 @@ implementation:
   tests: []
 """
 
+def run_cli_fixture(documentation: str, label: str) -> tuple[int, str]:
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        manifest = root / "14-ai-development/work-items/AID-TEST/manifest.yaml"
+        manifest.parent.mkdir(parents=True)
+        manifest.write_text(REQUIRED + documentation, encoding="utf-8")
+        subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+        subprocess.run(["git", "config", "user.email", "fixture@example.invalid"], cwd=root, check=True)
+        subprocess.run(["git", "config", "user.name", "Fixture"], cwd=root, check=True)
+        subprocess.run(["git", "add", "."], cwd=root, check=True)
+        subprocess.run(["git", "commit", "-q", "-m", "fixture"], cwd=root, check=True)
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "scripts/ci/check_work_item_manifest_schema.py"),
+             "--root", str(root), "--tree", "HEAD"],
+            cwd=ROOT, text=True, capture_output=True,
+        )
+        print(f"CHECKER FIXTURE {label}: exit={result.returncode}")
+        print(result.stdout, end="")
+        return result.returncode, result.stdout
+
+
 def main() -> int:
     failures = 0
+    empty_code, empty_output = run_cli_fixture("documentation: []\n", "documentation: []")
+    if empty_code != 1 or "documentation must contain at least one reference" not in empty_output:
+        failures += 1
+    missing_code, missing_output = run_cli_fixture(
+        "documentation:\n  - path: no/such/file.md\n    relationship: reference\n",
+        "path no/such/file.md",
+    )
+    if missing_code != 1 or "documentation[0].path not in git tree: no/such/file.md" not in missing_output:
+        failures += 1
+
     errors = validate_text(REQUIRED + "documentation: []\n", "empty.yaml",
                            {"session-evidence.md", "evidence.md"})
     print("FIXTURE documentation: []")
@@ -77,6 +109,7 @@ def main() -> int:
     else:
         print("AID-2026-251: COMPLIANT")
     return 1 if failures else 0
+
 
 if __name__ == "__main__":
     raise SystemExit(main())
