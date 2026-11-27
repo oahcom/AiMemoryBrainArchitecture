@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-"""Offline regression and mutation tests for the protection ratchet."""
-
-from __future__ import annotations
-
 import contextlib
 import io
 import json
@@ -10,12 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from check_protection_fingerprint import (
-    classify_field,
-    compare_fingerprints,
-    extract_fingerprint,
-    main,
-)
+import check_protection_fingerprint as checker
 
 
 CONTEXTS = [
@@ -37,386 +27,284 @@ CONTEXTS = [
     "rust-workspace-test",
 ]
 
+EXPERIMENT = {
+    "pr": "#1038",
+    "head": "b5cf4f2578de0e9aa2ba3e7e86a110ce1d8f69d9",
+    "run": "138943464904",
+    "date": "2026-11-25",
+}
 
-def fake_payload(
-    *,
-    enabled=True,
-    contexts=None,
-    enforcement_level="everyone",
-):
-    if contexts is None:
-        contexts = list(CONTEXTS)
 
+def payload():
     return {
-        "name": "main",
-        "protection": {
-            "enabled": enabled,
-            "required_status_checks": {
-                "enforcement_level": enforcement_level,
-                "contexts": list(contexts),
-                "checks": [
-                    {
-                        "context": item,
-                        "app_id": 15368,
-                    }
-                    for item in contexts
-                ],
-            },
+        "url": "https://api.github.com/repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection",
+        "required_status_checks": {
+            "strict": True,
+            "contexts": list(CONTEXTS),
+            "checks": [{"context": name, "app_id": 15368} for name in CONTEXTS],
         },
+        "required_signatures": {"enabled": False},
+        "enforce_admins": {"enabled": True},
+        "required_linear_history": {"enabled": False},
+        "allow_force_pushes": {"enabled": False},
+        "allow_deletions": {"enabled": False},
+        "block_creations": {"enabled": False},
+        "required_conversation_resolution": {"enabled": False},
+        "lock_branch": {"enabled": False},
+        "allow_fork_syncing": {"enabled": False},
+        # Key absence is the observed baseline state.
     }
 
 
-def fingerprint(**kwargs):
-    return extract_fingerprint(fake_payload(**kwargs))
+def fingerprint():
+    return checker.extract_fingerprint(payload())
 
 
 class ProtectionFingerprintTests(unittest.TestCase):
-
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory()
-        self.path = Path(self.temp.name) / "fingerprint.json"
+        self.live_payload = payload()
+        self.live = checker.extract_fingerprint(self.live_payload)
+        self.recorded = dict(self.live)
 
-        self.recorded = fingerprint()
-
-        self.write_baseline(self.recorded)
-
-    def tearDown(self):
-        self.temp.cleanup()
-
-    def write_baseline(self, protection):
-        self.path.write_text(
-            json.dumps({
-                "schema_version": 2,
-                "repository": "oahcom/AiMemoryBrainArchitecture",
-                "branch": "main",
-                "protection": protection,
-                "experiment": {
-                    "pr": 1038,
-                    "head": (
-                        "b5cf4f2578de0e9aa2ba3e7e86a110ce1d8f69d9"
-                    ),
-                    "run": 138943464904,
-                    "date": "2026-11-25",
-                    "result": (
-                        "HTTP 405: Required status check "
-                        "rust-workspace-test is failing"
-                    ),
-                },
-            }),
-            encoding="utf-8",
-        )
-
-    def run_checker(self, payload, extra=None):
-        args = [
-            "--repo",
-            "oahcom/AiMemoryBrainArchitecture",
-            "--branch",
-            "main",
-            "--fingerprint",
-            str(self.path),
-        ]
-
-        if extra:
-            args.extend(extra)
-
-        return main(
-            args,
-            payload_fetcher=lambda repo, branch: payload,
-        )
-
-    def test_no_changes_pass(self):
-        output = io.StringIO()
-
-        with contextlib.redirect_stdout(output):
-            result = self.run_checker(fake_payload())
-
-        self.assertEqual(result, 0)
-        self.assertIn(
-            "PROTECTION FINGERPRINT: PASS",
-            output.getvalue(),
-        )
-
-    def test_contexts_removed_is_loosened_violation(self):
-        live = fingerprint(contexts=CONTEXTS[:-1])
-
-        self.assertEqual(
-            classify_field(
-                "contexts",
-                self.recorded["contexts"],
-                live["contexts"],
-            ),
-            "LOOSENED",
-        )
-
-        output = io.StringIO()
-
-        with contextlib.redirect_stdout(output):
-            result = self.run_checker(
-                fake_payload(contexts=CONTEXTS[:-1])
-            )
-
-        self.assertEqual(result, 1)
-        self.assertIn("DIRECTION=LOOSENED", output.getvalue())
-
-    def test_contexts_added_is_tightened(self):
-        contexts = CONTEXTS + ["New required context"]
-
-        output = io.StringIO()
-
-        with contextlib.redirect_stdout(output):
-            result = self.run_checker(
-                fake_payload(contexts=contexts)
-            )
-
-        self.assertEqual(result, 0)
-        self.assertIn("DIRECTION=TIGHTENED", output.getvalue())
-        self.assertIn(
-            "synchronize the committed fingerprint",
-            output.getvalue(),
-        )
-
-    def test_context_replacement_is_loosened(self):
-        contexts = CONTEXTS[:-1] + ["Replacement context"]
-
-        live = fingerprint(contexts=contexts)
-
-        self.assertEqual(
-            classify_field(
-                "contexts",
-                self.recorded["contexts"],
-                live["contexts"],
-            ),
-            "LOOSENED",
-        )
-
-    def test_enforcement_everyone_to_non_admins_is_violation(self):
-        output = io.StringIO()
-
-        with contextlib.redirect_stdout(output):
-            result = self.run_checker(
-                fake_payload(enforcement_level="non_admins")
-            )
-
-        self.assertEqual(result, 1)
-        self.assertIn("DIRECTION=LOOSENED", output.getvalue())
-
-    def test_enforcement_everyone_to_off_is_violation(self):
-        self.assertEqual(
-            self.run_checker(
-                fake_payload(enforcement_level="off")
-            ),
-            1,
-        )
-
-    def test_enforcement_off_to_everyone_is_tightened(self):
-        baseline = fingerprint(enforcement_level="off")
-        self.write_baseline(baseline)
-
-        output = io.StringIO()
-
-        with contextlib.redirect_stdout(output):
-            result = self.run_checker(fake_payload())
-
-        self.assertEqual(result, 0)
-        self.assertIn("DIRECTION=TIGHTENED", output.getvalue())
-
-    def test_protection_enabled_true_to_false_is_violation(self):
-        output = io.StringIO()
-
-        with contextlib.redirect_stdout(output):
-            result = self.run_checker(
-                fake_payload(enabled=False)
-            )
-
-        self.assertEqual(result, 1)
-        self.assertIn("DIRECTION=LOOSENED", output.getvalue())
-
-    def test_protection_enabled_false_to_true_is_tightened(self):
-        baseline = fingerprint(enabled=False)
-        self.write_baseline(baseline)
-
-        output = io.StringIO()
-
-        with contextlib.redirect_stdout(output):
-            result = self.run_checker(fake_payload())
-
-        self.assertEqual(result, 0)
-        self.assertIn("DIRECTION=TIGHTENED", output.getvalue())
-
-    def test_unreadable_payload_is_exit_two(self):
+    def run_main(self, argv, fetcher=None, directory=None):
         output = io.StringIO()
         errors = io.StringIO()
+        fetcher = fetcher or (lambda repo, branch, token: self.live_payload)
+        args = list(argv)
+        if directory is not None:
+            args += ["--fingerprint", str(Path(directory) / "fingerprint.json")]
+        with contextlib.redirect_stdout(output), contextlib.redirect_stderr(errors):
+            code = checker.main(args, payload_fetcher=fetcher, environ={"GITHUB_TOKEN": "test-token"})
+        return code, output.getvalue(), errors.getvalue()
 
-        with (
-            contextlib.redirect_stdout(output),
-            contextlib.redirect_stderr(errors),
-        ):
-            result = self.run_checker({})
+    def test_no_changes_pass(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "fingerprint.json"
+            checker.write_baseline(path, self.recorded, EXPERIMENT)
+            code, out, err = self.run_main(["--fingerprint", str(path)], directory=None)
+        self.assertEqual(code, 0)
+        self.assertIn("0 field(s) changed, 0 loosened, 0 tightened", out)
+        self.assertEqual(err, "")
 
-        self.assertEqual(result, 2)
-        self.assertIn("INCOMPLETE:", errors.getvalue())
+    def test_strict_true_to_false_is_loosened(self):
+        self.recorded["strict"] = True
+        live = dict(self.recorded, strict=False)
+        self.assertEqual(checker.classify_field("strict", self.recorded["strict"], live["strict"]), "LOOSENED")
 
-    def test_missing_protection_enabled_is_exit_two(self):
-        payload = fake_payload()
-        del payload["protection"]["enabled"]
+    def test_enforce_admins_true_to_false_is_loosened(self):
+        self.assertEqual(checker.classify_field("enforce_admins", True, False), "LOOSENED")
 
+    def test_allow_force_pushes_false_to_true_is_loosened(self):
+        self.assertEqual(checker.classify_field("allow_force_pushes", False, True), "LOOSENED")
+
+    def test_allow_deletions_false_to_true_is_loosened(self):
+        self.assertEqual(checker.classify_field("allow_deletions", False, True), "LOOSENED")
+
+    def test_block_creations_true_to_false_is_loosened(self):
+        self.assertEqual(checker.classify_field("block_creations", True, False), "LOOSENED")
+
+    def test_required_reviews_present_to_absent_is_loosened(self):
         self.assertEqual(
-            self.run_checker(payload),
-            2,
+            checker.classify_field("required_pull_request_reviews", {"required_approving_review_count": 1}, None),
+            "LOOSENED",
         )
 
-    def test_missing_enforcement_level_is_exit_two(self):
-        payload = fake_payload()
-        del payload["protection"]["required_status_checks"][
-            "enforcement_level"
-        ]
+    def test_context_removal_is_loosened(self):
+        self.assertEqual(checker.classify_contexts(CONTEXTS, CONTEXTS[:-1]), "LOOSENED")
 
+    def test_context_addition_is_tightened(self):
+        self.assertEqual(checker.classify_contexts(CONTEXTS, CONTEXTS + ["New required check"]), "TIGHTENED")
+
+    def test_context_mixed_addition_and_removal_is_loosened(self):
+        changed = CONTEXTS[:-1] + ["Replacement required check"]
+        self.assertEqual(checker.classify_contexts(CONTEXTS, changed), "LOOSENED")
+
+    def test_required_linear_history_false_to_true_is_tightened(self):
+        self.assertEqual(checker.classify_field("required_linear_history", False, True), "TIGHTENED")
+
+    def test_required_conversation_resolution_false_to_true_is_tightened(self):
+        self.assertEqual(checker.classify_field("required_conversation_resolution", False, True), "TIGHTENED")
+
+    def test_lock_branch_false_to_true_is_tightened(self):
+        self.assertEqual(checker.classify_field("lock_branch", False, True), "TIGHTENED")
+
+    def test_allow_fork_syncing_true_to_false_is_tightened(self):
+        self.assertEqual(checker.classify_field("allow_fork_syncing", True, False), "TIGHTENED")
+
+    def test_required_signatures_false_to_true_is_tightened(self):
+        self.assertEqual(checker.classify_field("required_signatures", False, True), "TIGHTENED")
+
+    def test_required_reviews_absent_to_present_is_tightened(self):
         self.assertEqual(
-            self.run_checker(payload),
-            2,
+            checker.classify_field("required_pull_request_reviews", None, {"required_approving_review_count": 1}),
+            "TIGHTENED",
         )
 
-    def test_unknown_enforcement_level_is_exit_two(self):
+    def test_approving_review_count_increase_is_tightened(self):
         self.assertEqual(
-            self.run_checker(
-                fake_payload(enforcement_level="unknown")
+            checker.classify_reviews(
+                {"required_approving_review_count": 1},
+                {"required_approving_review_count": 2},
             ),
-            2,
+            "TIGHTENED",
         )
 
-    def test_duplicate_contexts_are_exit_two(self):
-        contexts = CONTEXTS + [CONTEXTS[0]]
-
+    def test_approving_review_count_decrease_is_loosened(self):
         self.assertEqual(
-            self.run_checker(
-                fake_payload(contexts=contexts)
+            checker.classify_reviews(
+                {"required_approving_review_count": 2},
+                {"required_approving_review_count": 1},
             ),
-            2,
+            "LOOSENED",
         )
 
-    def test_write_missing_experiment_parameters_exit_two(self):
-        result = main(
-            [
-                "--repo",
-                "oahcom/AiMemoryBrainArchitecture",
-                "--fingerprint",
-                str(self.path),
-                "--write",
-            ],
-            payload_fetcher=lambda repo, branch: fake_payload(),
-        )
+    def test_allow_force_pushes_true_to_false_is_tightened(self):
+        self.assertEqual(checker.classify_field("allow_force_pushes", True, False), "TIGHTENED")
 
-        self.assertEqual(result, 2)
+    def test_allow_deletions_true_to_false_is_tightened(self):
+        self.assertEqual(checker.classify_field("allow_deletions", True, False), "TIGHTENED")
 
-    def test_write_requires_full_sha(self):
-        result = main(
-            [
-                "--repo",
-                "oahcom/AiMemoryBrainArchitecture",
-                "--fingerprint",
-                str(self.path),
-                "--write",
-                "--experiment-pr",
-                "1038",
-                "--experiment-head",
-                "b5cf4f25",
-                "--experiment-run",
-                "138943464904",
-                "--experiment-date",
-                "2026-11-25",
-            ],
-            payload_fetcher=lambda repo, branch: fake_payload(),
-        )
+    def test_strict_false_to_true_is_tightened(self):
+        self.assertEqual(checker.classify_field("strict", False, True), "TIGHTENED")
 
-        self.assertEqual(result, 2)
+    def test_enforce_admins_false_to_true_is_tightened(self):
+        self.assertEqual(checker.classify_field("enforce_admins", False, True), "TIGHTENED")
 
-    def test_write_updates_snapshot_and_experiment_atomically(self):
-        result = main(
-            [
-                "--repo",
-                "oahcom/AiMemoryBrainArchitecture",
-                "--branch",
-                "main",
-                "--fingerprint",
-                str(self.path),
-                "--write",
-                "--experiment-pr",
-                "1038",
-                "--experiment-head",
-                (
-                    "b5cf4f2578de0e9aa2ba3e7e86a110ce1d8f69d9"
-                ),
-                "--experiment-run",
-                "138943464904",
-                "--experiment-date",
-                "2026-11-25",
-            ],
-            payload_fetcher=lambda repo, branch: fake_payload(),
-        )
+    def test_required_linear_history_true_to_false_is_loosened(self):
+        self.assertEqual(checker.classify_field("required_linear_history", True, False), "LOOSENED")
 
-        self.assertEqual(result, 0)
+    def test_block_creations_false_to_true_is_tightened(self):
+        self.assertEqual(checker.classify_field("block_creations", False, True), "TIGHTENED")
 
-        updated = json.loads(
-            self.path.read_text(encoding="utf-8")
-        )
+    def test_required_conversation_resolution_true_to_false_is_loosened(self):
+        self.assertEqual(checker.classify_field("required_conversation_resolution", True, False), "LOOSENED")
 
-        self.assertEqual(updated["schema_version"], 2)
-        self.assertEqual(updated["protection"], self.recorded)
-        self.assertEqual(updated["experiment"]["pr"], 1038)
+    def test_allow_fork_syncing_false_to_true_is_loosened(self):
+        self.assertEqual(checker.classify_field("allow_fork_syncing", False, True), "LOOSENED")
 
-    def test_baseline_wrong_repository_is_exit_two(self):
-        data = json.loads(
-            self.path.read_text(encoding="utf-8")
-        )
-        data["repository"] = "wrong/repository"
+    def test_required_signatures_true_to_false_is_loosened(self):
+        self.assertEqual(checker.classify_field("required_signatures", True, False), "LOOSENED")
 
-        self.path.write_text(json.dumps(data), encoding="utf-8")
+    def test_lock_branch_true_to_false_is_loosened(self):
+        self.assertEqual(checker.classify_field("lock_branch", True, False), "LOOSENED")
 
+    def test_tightening_emits_baseline_sync_notice(self):
+        recorded = dict(self.live)
+        live = dict(self.live)
+        live["required_linear_history"] = True
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            checker.compare(recorded, live)
+        self.assertIn("TIGHTENED", output.getvalue())
+        self.assertIn("synchronize the fingerprint baseline", output.getvalue())
+
+    def test_http_403_is_incomplete_exit_two(self):
+        def forbidden(repo, branch, token):
+            raise checker.ApiError("GitHub protection API HTTP 403: Forbidden")
+        code, out, err = self.run_main(["--fingerprint", "unused.json"], fetcher=forbidden)
+        self.assertEqual(code, 2)
+        self.assertIn("HTTP 403", err)
+        self.assertNotIn("PROTECTION FINGERPRINT:", out)
+
+    def test_http_404_is_incomplete_exit_two(self):
+        def missing(repo, branch, token):
+            raise checker.ApiError("GitHub protection API HTTP 404: Not Found")
+        code, out, err = self.run_main(["--fingerprint", "unused.json"], fetcher=missing)
+        self.assertEqual(code, 2)
+        self.assertIn("HTTP 404", err)
+        self.assertNotIn("PROTECTION FINGERPRINT:", out)
+
+    def test_missing_live_field_is_incomplete_exit_two(self):
+        broken = payload()
+        del broken["lock_branch"]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "fingerprint.json"
+            checker.write_baseline(path, self.live, EXPERIMENT)
+            code, out, err = self.run_main(
+                ["--fingerprint", str(path)],
+                fetcher=lambda repo, branch, token: broken,
+            )
+        self.assertEqual(code, 2)
+        self.assertIn("lock_branch", err)
+        self.assertNotIn("PROTECTION FINGERPRINT:", out)
+
+    def test_wrong_live_field_type_is_incomplete(self):
+        broken = payload()
+        broken["enforce_admins"]["enabled"] = "true"
+        with self.assertRaises(checker.IncompleteError):
+            checker.extract_fingerprint(broken)
+
+    def test_missing_baseline_field_is_incomplete(self):
+        baseline = {
+            "schema_version": 3,
+            "fingerprint": dict(self.live),
+            "experiment": EXPERIMENT,
+        }
+        del baseline["fingerprint"]["allow_fork_syncing"]
+        with self.assertRaises(checker.IncompleteError):
+            checker.validate_baseline(baseline)
+
+    def test_reviews_absent_is_recorded_as_null(self):
+        self.assertIsNone(self.live["required_pull_request_reviews"])
+
+    def test_reviews_present_object_is_stably_extracted(self):
+        current = payload()
+        current["required_pull_request_reviews"] = {
+            "required_approving_review_count": 2,
+            "dismiss_stale_reviews": True,
+        }
+        extracted = checker.extract_fingerprint(current)
         self.assertEqual(
-            self.run_checker(fake_payload()),
-            2,
+            extracted["required_pull_request_reviews"],
+            {"dismiss_stale_reviews": True, "required_approving_review_count": 2},
         )
 
-    def test_removed_loosened_classification_is_detected(self):
-        """Mutation guard: removing LOOSENED must break this test."""
+    def test_reviews_present_null_is_incomplete_not_absent(self):
+        current = payload()
+        current["required_pull_request_reviews"] = None
+        with self.assertRaises(checker.IncompleteError):
+            checker.extract_fingerprint(current)
 
-        original = classify_field(
-            "contexts",
-            self.recorded["contexts"],
-            CONTEXTS[:-1],
+    def test_write_without_experiment_parameters_is_exit_two(self):
+        code, out, err = self.run_main(["--write"])
+        self.assertEqual(code, 2)
+        self.assertIn("--experiment-pr", err)
+        self.assertEqual(out, "")
+
+    def test_write_is_idempotent_byte_for_byte(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "fingerprint.json"
+            args = [
+                "--write",
+                "--fingerprint", str(path),
+                "--experiment-pr", EXPERIMENT["pr"],
+                "--experiment-head", EXPERIMENT["head"],
+                "--experiment-run", EXPERIMENT["run"],
+                "--experiment-date", EXPERIMENT["date"],
+            ]
+            first, _, err1 = self.run_main(args)
+            first_bytes = path.read_bytes()
+            second, _, err2 = self.run_main(args)
+            second_bytes = path.read_bytes()
+        self.assertEqual(first, 0)
+        self.assertEqual(second, 0)
+        self.assertEqual(err1, "")
+        self.assertEqual(err2, "")
+        self.assertEqual(first_bytes, second_bytes)
+
+    def test_missing_token_is_exit_two(self):
+        code = checker.main(
+            ["--fingerprint", "unused.json"],
+            payload_fetcher=lambda repo, branch, token: self.live_payload,
+            environ={},
         )
+        self.assertEqual(code, 2)
 
-        self.assertEqual(original, "LOOSENED")
-
-        differences = compare_fingerprints(
-            self.recorded,
-            fingerprint(contexts=CONTEXTS[:-1]),
-        )
-
-        self.assertEqual(differences[0][3], "LOOSENED")
-
-        self.assertEqual(
-            self.run_checker(
-                fake_payload(contexts=CONTEXTS[:-1])
-            ),
-            1,
-        )
-
-    def test_unreadable_payload_cannot_become_pass(self):
-        """Mutation guard: changing unreadable input to exit 0 breaks this test."""
-
-        result = self.run_checker({
-            "protection": {
-                "enabled": True,
-                "required_status_checks": {
-                    "contexts": CONTEXTS
-                    # enforcement_level deliberately missing
-                },
-            },
-        })
-
-        self.assertEqual(result, 2)
+    def test_live_context_order_does_not_change_fingerprint(self):
+        shuffled = payload()
+        shuffled["required_status_checks"]["contexts"] = list(reversed(CONTEXTS))
+        self.assertEqual(checker.extract_fingerprint(shuffled)["contexts"], sorted(CONTEXTS))
 
 
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    unittest.main()

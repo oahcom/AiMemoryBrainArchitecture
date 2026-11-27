@@ -260,7 +260,7 @@ If the current GitHub plan/visibility does not support required controls for thi
 
 **Measured platform state, `2026-11-25`, from `GET /repos/oahcom/AiMemoryBrainArchitecture` and `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection` (HTTP 200).** This is a dated measurement, not a standing assertion; re-read it before relying on it. The repository reports `private: false`, `visibility: public`, so the plan/visibility limitation above is moot here and is not available as a ground for BLOCKED.
 
-- **Status checks — enforced.** 16 required contexts, `strict: true`, `enforce_admins: {enabled: true}`, `allow_force_pushes: {enabled: false}`, `allow_deletions: {enabled: false}`. A required check that fails or is absent on the exact Head cannot merge through the normal path. The sixteen names are declared below so that each must still be produced by a workflow in this tree:
+- **Status checks — enforced.** 16 platform-required contexts (the governance declaration lists 17 contexts; Protection fingerprint is not yet platform-required), `strict: true`, `enforce_admins: {enabled: true}`, `allow_force_pushes: {enabled: false}`, `allow_deletions: {enabled: false}`. A required check that fails or is absent on the exact Head cannot merge through the normal path. The sixteen names are declared below so that each must still be produced by a workflow in this tree:
 
 <!-- declared-check-contexts: read by scripts/check_declared_check_contexts.py -->
 ```text

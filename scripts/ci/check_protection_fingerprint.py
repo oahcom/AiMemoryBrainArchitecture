@@ -1,616 +1,399 @@
 #!/usr/bin/env python3
-"""Fail-closed protection fingerprint ratchet.
-
-Reads exclusively:
-GET /repos/{owner}/{repo}/branches/{branch}
-
-The fingerprint covers only fields actually exposed by the branch endpoint:
-- protection.enabled
-- protection.required_status_checks.contexts
-- protection.required_status_checks.enforcement_level
-
-It deliberately does not call the /protection endpoint.
-
-Exit codes:
-    0: unchanged or tightened
-    1: protection loosened
-    2: incomplete, unreadable, unauthenticated, or invalid input
-"""
+"""Fail-closed ratchet for the complete GitHub branch-protection endpoint."""
 
 from __future__ import annotations
 
 import argparse
 import json
 import os
-import re
 import sys
 import tempfile
+import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
-DEFAULT_FINGERPRINT = (
-    "scripts/ci/baselines/protection-fingerprint.json"
-)
+SCHEMA_VERSION = 3
+DEFAULT_REPO = "oahcom/AiMemoryBrainArchitecture"
+DEFAULT_BRANCH = "main"
+DEFAULT_FINGERPRINT = "scripts/ci/baselines/protection-fingerprint.json"
 
-DEFAULT_API = "https://api.github.com"
-TIMEOUT_SECONDS = 20
-USER_AGENT = "protection-fingerprint-ratchet"
-SCHEMA_VERSION = 2
-
-# Higher values mean stricter enforcement.
-ENFORCEMENT_LEVELS = {
-    "off": 0,
-    "non_admins": 1,
-    "everyone": 2,
+BOOLEAN_DIRECTIONS = {
+    # True means more protective.
+    "strict": True,
+    "enforce_admins": True,
+    "required_linear_history": True,
+    "block_creations": True,
+    "required_conversation_resolution": True,
+    "lock_branch": True,
+    "required_signatures": True,
+    # False means more protective.
+    "allow_force_pushes": False,
+    "allow_deletions": False,
+    "allow_fork_syncing": False,
 }
 
-EXPERIMENT_FIELDS = (
-    "experiment_pr",
-    "experiment_head",
-    "experiment_run",
-    "experiment_date",
+BOOLEAN_FIELDS = tuple(BOOLEAN_DIRECTIONS)
+FINGERPRINT_FIELDS = (
+    "strict",
+    "contexts",
+    "required_signatures",
+    "enforce_admins",
+    "required_linear_history",
+    "allow_force_pushes",
+    "allow_deletions",
+    "block_creations",
+    "required_conversation_resolution",
+    "lock_branch",
+    "allow_fork_syncing",
+    "required_pull_request_reviews",
 )
 
 
 class IncompleteError(Exception):
-    """The configuration cannot be established reliably."""
+    """The live payload or recorded baseline cannot be safely compared."""
+
+
+class ApiError(Exception):
+    """A GitHub API request failed with a known HTTP status."""
 
 
 def canonical_json(value: Any) -> str:
-    return json.dumps(
-        value,
-        sort_keys=True,
-        ensure_ascii=False,
-        separators=(",", ":"),
-    )
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
 
-def extract_fingerprint(payload: dict[str, Any]) -> dict[str, Any]:
-    """Extract only fields actually present in the branch endpoint."""
+def validate_bool(value: Any, field: str) -> bool:
+    if type(value) is not bool:
+        raise IncompleteError(f"{field} must be a boolean")
+    return value
 
+
+def extract_fingerprint(payload: Any) -> dict[str, Any]:
+    """Extract the schema-v3 fingerprint from the unwrapped /protection payload."""
     if not isinstance(payload, dict):
-        raise IncompleteError("branch response is not an object")
+        raise IncompleteError("live payload must be a JSON object")
 
-    protection = payload.get("protection")
-
-    if not isinstance(protection, dict):
-        raise IncompleteError(
-            "protection is missing or unreadable"
-        )
-
-    enabled = protection.get("enabled")
-
-    if not isinstance(enabled, bool):
-        raise IncompleteError(
-            "protection.enabled is missing or not boolean"
-        )
-
-    checks = protection.get("required_status_checks")
-
+    checks = payload.get("required_status_checks")
     if not isinstance(checks, dict):
-        raise IncompleteError(
-            "protection.required_status_checks is missing or unreadable"
-        )
+        raise IncompleteError("required_status_checks must be an object")
+
+    if "strict" not in checks:
+        raise IncompleteError("required_status_checks.strict is missing")
+    strict = validate_bool(checks["strict"], "required_status_checks.strict")
 
     contexts = checks.get("contexts")
-
-    if (
-        not isinstance(contexts, list)
-        or not all(
-            isinstance(item, str) and item.strip()
-            for item in contexts
-        )
-        or len(contexts) != len(set(contexts))
+    if not isinstance(contexts, list) or any(
+        not isinstance(item, str) or not item for item in contexts
     ):
-        raise IncompleteError(
-            "required_status_checks.contexts must be a list "
-            "of unique nonempty strings"
-        )
+        raise IncompleteError("required_status_checks.contexts must be a list of non-empty strings")
+    if len(contexts) != len(set(contexts)):
+        raise IncompleteError("required_status_checks.contexts contains duplicates")
 
-    enforcement_level = checks.get("enforcement_level")
-
-    if (
-        not isinstance(enforcement_level, str)
-        or enforcement_level not in ENFORCEMENT_LEVELS
-    ):
-        raise IncompleteError(
-            "required_status_checks.enforcement_level is missing "
-            "or has an unsupported value"
-        )
-
-    return {
-        "enabled": enabled,
+    result: dict[str, Any] = {
+        "strict": strict,
         "contexts": sorted(contexts),
-        "enforcement_level": enforcement_level,
     }
 
+    for field in BOOLEAN_FIELDS:
+        if field == "strict":
+            continue
+        value = payload.get(field)
+        if not isinstance(value, dict):
+            raise IncompleteError(f"{field} must be an object")
+        if "enabled" not in value:
+            raise IncompleteError(f"{field}.enabled is missing")
+        result[field] = validate_bool(value["enabled"], f"{field}.enabled")
 
-def fetch_branch_payload(
-    repo: str,
-    branch: str,
-    timeout: int = TIMEOUT_SECONDS,
-) -> dict[str, Any]:
-    """Fetch the GitHub branch object without using /protection."""
+    # Absence is an explicit, fingerprinted state. A present key must contain
+    # an object; null or another type is not equivalent to absence.
+    if "required_pull_request_reviews" not in payload:
+        result["required_pull_request_reviews"] = None
+    else:
+        reviews = payload["required_pull_request_reviews"]
+        if not isinstance(reviews, dict):
+            raise IncompleteError("required_pull_request_reviews must be an object when present")
+        try:
+            # Round-trip to reject non-JSON values and produce a detached,
+            # deterministic JSON-compatible object.
+            result["required_pull_request_reviews"] = json.loads(
+                json.dumps(reviews, sort_keys=True, ensure_ascii=False)
+            )
+        except (TypeError, ValueError) as exc:
+            raise IncompleteError(f"required_pull_request_reviews is not JSON-compatible: {exc}") from exc
 
-    token = os.environ.get("GITHUB_TOKEN")
+    if set(result) != set(FINGERPRINT_FIELDS):
+        raise IncompleteError("internal fingerprint field set is incomplete")
+    return result
 
-    if not token:
-        raise IncompleteError("GITHUB_TOKEN is not set")
 
-    if not re.fullmatch(
-        r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+",
-        repo,
+def validate_baseline(data: Any) -> dict[str, Any]:
+    if not isinstance(data, dict):
+        raise IncompleteError("baseline must be a JSON object")
+    if data.get("schema_version") != SCHEMA_VERSION:
+        raise IncompleteError(f"baseline schema_version must be {SCHEMA_VERSION}")
+
+    fingerprint = data.get("fingerprint")
+    if not isinstance(fingerprint, dict):
+        raise IncompleteError("baseline fingerprint must be an object")
+    if set(fingerprint) != set(FINGERPRINT_FIELDS):
+        missing = sorted(set(FINGERPRINT_FIELDS) - set(fingerprint))
+        extra = sorted(set(fingerprint) - set(FINGERPRINT_FIELDS))
+        raise IncompleteError(f"baseline fingerprint field set invalid; missing={missing}, extra={extra}")
+
+    if type(fingerprint["strict"]) is not bool:
+        raise IncompleteError("baseline strict must be a boolean")
+    if not isinstance(fingerprint["contexts"], list) or any(
+        not isinstance(x, str) or not x for x in fingerprint["contexts"]
     ):
-        raise IncompleteError(
-            f"invalid repository slug: {repo!r}"
-        )
+        raise IncompleteError("baseline contexts must be a list of non-empty strings")
+    if len(fingerprint["contexts"]) != len(set(fingerprint["contexts"])):
+        raise IncompleteError("baseline contexts contains duplicates")
 
-    if not branch or "\n" in branch:
-        raise IncompleteError("invalid branch name")
+    normalized = dict(fingerprint)
+    normalized["contexts"] = sorted(normalized["contexts"])
 
-    api_base = os.environ.get(
-        "GITHUB_API_URL",
-        DEFAULT_API,
-    ).rstrip("/")
+    for field in BOOLEAN_FIELDS:
+        if field == "strict":
+            continue
+        if type(normalized[field]) is not bool:
+            raise IncompleteError(f"baseline {field} must be a boolean")
 
-    encoded_branch = urllib.parse.quote(
-        branch,
-        safe="",
-    )
+    reviews = normalized["required_pull_request_reviews"]
+    if reviews is not None and not isinstance(reviews, dict):
+        raise IncompleteError("baseline required_pull_request_reviews must be null or an object")
 
+    experiment = data.get("experiment")
+    required_experiment = ("pr", "head", "run", "date")
+    if not isinstance(experiment, dict) or any(
+        not isinstance(experiment.get(key), str) or not experiment[key].strip()
+        for key in required_experiment
+    ):
+        raise IncompleteError("baseline experiment metadata is incomplete")
+
+    return normalized
+
+
+def load_baseline(path: str | Path) -> dict[str, Any]:
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise IncompleteError(f"cannot read baseline: {exc}") from exc
+    return validate_baseline(data)
+
+
+def fetch_payload(repo: str, branch: str, token: str) -> dict[str, Any]:
+    owner_repo = repo.split("/", 1)
+    if len(owner_repo) != 2 or not all(owner_repo):
+        raise IncompleteError("--repo must have the form owner/repository")
+
+    owner, name = owner_repo
     url = (
-        f"{api_base}/repos/{repo}/branches/{encoded_branch}"
+        f"https://api.github.com/repos/{owner}/{name}/branches/"
+        f"{urllib.parse.quote(branch, safe='')}/protection"
     )
-
     request = urllib.request.Request(
         url,
         headers={
             "Accept": "application/vnd.github+json",
             "Authorization": f"Bearer {token}",
-            "User-Agent": USER_AGENT,
             "X-GitHub-Api-Version": "2022-11-28",
+            "User-Agent": "protection-fingerprint-ratchet",
         },
     )
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            body = response.read()
+    except urllib.error.HTTPError as exc:
+        raise ApiError(f"GitHub protection API HTTP {exc.code}: {exc.reason}") from exc
+    except urllib.error.URLError as exc:
+        raise ApiError(f"GitHub protection API transport error: {exc.reason}") from exc
 
     try:
-        with urllib.request.urlopen(
-            request,
-            timeout=timeout,
-        ) as response:
-            payload = json.load(response)
-
-    except Exception as error:
-        raise IncompleteError(
-            f"branch API request failed: "
-            f"{type(error).__name__}: {error}"
-        ) from error
-
+        payload = json.loads(body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise IncompleteError(f"GitHub protection API returned invalid JSON: {exc}") from exc
     if not isinstance(payload, dict):
-        raise IncompleteError(
-            "branch API returned a non-object payload"
-        )
-
+        raise IncompleteError("GitHub protection API response must be a JSON object")
     return payload
 
 
-def load_baseline(path: Path) -> dict[str, Any]:
-    try:
-        data = json.loads(
-            path.read_text(encoding="utf-8")
-        )
-    except Exception as error:
-        raise IncompleteError(
-            f"cannot read fingerprint {path}: {error}"
-        ) from error
-
-    if not isinstance(data, dict):
-        raise IncompleteError(
-            "fingerprint root must be an object"
-        )
-
-    if data.get("schema_version") != SCHEMA_VERSION:
-        raise IncompleteError(
-            f"unsupported fingerprint schema_version; "
-            f"expected {SCHEMA_VERSION}"
-        )
-
-    protection = data.get("protection")
-
-    if not isinstance(protection, dict):
-        raise IncompleteError(
-            "fingerprint protection object is missing"
-        )
-
-    try:
-        normalized = extract_fingerprint({
-            "protection": {
-                "enabled": protection.get("enabled"),
-                "required_status_checks": {
-                    "contexts": protection.get("contexts"),
-                    "enforcement_level": protection.get(
-                        "enforcement_level"
-                    ),
-                },
-            }
-        })
-    except IncompleteError as error:
-        raise IncompleteError(
-            f"invalid baseline protection: {error}"
-        ) from error
-
-    experiment = data.get("experiment")
-
-    if not isinstance(experiment, dict):
-        raise IncompleteError(
-            "baseline experiment record is missing"
-        )
-
-    required = {"pr", "head", "run", "date", "result"}
-
-    if not required.issubset(experiment):
-        raise IncompleteError(
-            "baseline experiment record is incomplete"
-        )
-
-    data["protection"] = normalized
-
-    return data
+def classify_boolean(field: str, recorded: bool, live: bool) -> str:
+    """Classify a boolean using its explicit protective polarity."""
+    protective_value = BOOLEAN_DIRECTIONS[field]
+    if recorded == live:
+        return "UNCHANGED"
+    if live == protective_value:
+        return "TIGHTENED"
+    return "LOOSENED"
 
 
-def classify_field(
-    field: str,
-    recorded: Any,
-    live: Any,
-) -> str:
-    """Classify one field as UNCHANGED, TIGHTENED or LOOSENED."""
+def classify_contexts(recorded: list[str], live: list[str]) -> str:
+    old, new = set(recorded), set(live)
+    if old == new:
+        return "UNCHANGED"
+    if old < new:
+        return "TIGHTENED"
+    # Removal alone or additions mixed with removals are both loosening.
+    return "LOOSENED"
 
+
+def classify_reviews(recorded: Any, live: Any) -> str:
+    if recorded is None and live is None:
+        return "UNCHANGED"
+    if recorded is None:
+        return "TIGHTENED"
+    if live is None:
+        return "LOOSENED"
     if canonical_json(recorded) == canonical_json(live):
         return "UNCHANGED"
 
-    if field == "enabled":
-        if not isinstance(recorded, bool) or not isinstance(live, bool):
-            raise IncompleteError(
-                "enabled must be boolean"
-            )
+    # The approving-review count has a clear monotonic direction. Any other
+    # review-policy mutation is conservatively classified as loosening:
+    # this avoids silently accepting an ambiguous reduction in protection.
+    old_count = recorded.get("required_approving_review_count")
+    new_count = live.get("required_approving_review_count")
+    if (
+        type(old_count) is int
+        and type(new_count) is int
+        and old_count != new_count
+    ):
+        if new_count > old_count:
+            return "TIGHTENED"
+        return "LOOSENED"
+    return "LOOSENED"
 
-        return "TIGHTENED" if live else "LOOSENED"
 
+def classify_field(field: str, recorded: Any, live: Any) -> str:
     if field == "contexts":
-        if not isinstance(recorded, list) or not isinstance(live, list):
-            raise IncompleteError(
-                "contexts must be lists"
-            )
-
-        old = set(recorded)
-        new = set(live)
-
-        if old < new:
-            return "TIGHTENED"
-
-        if new < old:
-            return "LOOSENED"
-
-        # Simultaneous additions and removals are not pure tightening.
-        return "LOOSENED"
-
-    if field == "enforcement_level":
-        if (
-            recorded not in ENFORCEMENT_LEVELS
-            or live not in ENFORCEMENT_LEVELS
-        ):
-            raise IncompleteError(
-                "unknown enforcement_level"
-            )
-
-        if (
-            ENFORCEMENT_LEVELS[live]
-            > ENFORCEMENT_LEVELS[recorded]
-        ):
-            return "TIGHTENED"
-
-        return "LOOSENED"
-
-    raise IncompleteError(
-        f"unknown fingerprint field: {field}"
-    )
+        return classify_contexts(recorded, live)
+    if field == "required_pull_request_reviews":
+        return classify_reviews(recorded, live)
+    if field in BOOLEAN_DIRECTIONS:
+        return classify_boolean(field, recorded, live)
+    raise IncompleteError(f"no direction rule for fingerprint field: {field}")
 
 
-def compare_fingerprints(
-    recorded: dict[str, Any],
-    live: dict[str, Any],
-) -> list[tuple[str, Any, Any, str]]:
-    expected_fields = {
-        "enabled",
-        "contexts",
-        "enforcement_level",
+def stable_baseline_bytes(fingerprint: dict[str, Any], experiment: dict[str, str]) -> bytes:
+    document = {
+        "schema_version": SCHEMA_VERSION,
+        "fingerprint": fingerprint,
+        "experiment": experiment,
     }
-
-    if set(recorded) != expected_fields:
-        raise IncompleteError(
-            "baseline does not contain exactly the supported fields"
-        )
-
-    if set(live) != expected_fields:
-        raise IncompleteError(
-            "live fingerprint does not contain exactly "
-            "the supported fields"
-        )
-
-    differences = []
-
-    for field in sorted(expected_fields):
-        direction = classify_field(
-            field,
-            recorded[field],
-            live[field],
-        )
-
-        if direction != "UNCHANGED":
-            differences.append((
-                field,
-                recorded[field],
-                live[field],
-                direction,
-            ))
-
-    return differences
+    return (json.dumps(document, indent=2, sort_keys=True, ensure_ascii=False) + "\n").encode("utf-8")
 
 
-def make_experiment(
-    args: argparse.Namespace,
-) -> dict[str, Any]:
-    values = (
-        args.experiment_pr,
-        args.experiment_head,
-        args.experiment_run,
-        args.experiment_date,
+def write_baseline(path: str | Path, fingerprint: dict[str, Any], experiment: dict[str, str]) -> None:
+    destination = Path(path)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    content = stable_baseline_bytes(fingerprint, experiment)
+    fd, temporary_name = tempfile.mkstemp(
+        prefix=f".{destination.name}.", suffix=".tmp", dir=str(destination.parent)
     )
-
-    if any(value is None for value in values):
-        raise IncompleteError(
-            "--write requires all four parameters: "
-            "--experiment-pr, --experiment-head, "
-            "--experiment-run, --experiment-date"
-        )
-
-    if args.experiment_pr <= 0 or args.experiment_run <= 0:
-        raise IncompleteError(
-            "experiment PR and run must be positive integers"
-        )
-
-    if not re.fullmatch(
-        r"[0-9a-f]{40}",
-        args.experiment_head,
-    ):
-        raise IncompleteError(
-            "experiment-head must be a full lowercase 40-character SHA"
-        )
-
-    if not re.fullmatch(
-        r"\d{4}-\d{2}-\d{2}",
-        args.experiment_date,
-    ):
-        raise IncompleteError(
-            "experiment-date must use YYYY-MM-DD"
-        )
-
-    return {
-        "pr": args.experiment_pr,
-        "head": args.experiment_head,
-        "run": args.experiment_run,
-        "date": args.experiment_date,
-        "result": (
-            "Failing required status check blocked the normal "
-            "pull-request merge API path."
-        ),
-    }
-
-
-def atomic_write(
-    path: Path,
-    data: dict[str, Any],
-) -> None:
-    path.parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    content = (
-        json.dumps(
-            data,
-            ensure_ascii=False,
-            indent=2,
-        )
-        + "\n"
-    )
-
-    temporary = None
-
     try:
-        with tempfile.NamedTemporaryFile(
-            mode="w",
-            encoding="utf-8",
-            dir=path.parent,
-            prefix=path.name + ".",
-            suffix=".tmp",
-            delete=False,
-        ) as stream:
-            temporary = Path(stream.name)
+        with os.fdopen(fd, "wb") as stream:
             stream.write(content)
             stream.flush()
             os.fsync(stream.fileno())
-
-        temporary.replace(path)
-
+        os.replace(temporary_name, destination)
     finally:
-        if temporary is not None and temporary.exists():
-            temporary.unlink()
+        try:
+            os.unlink(temporary_name)
+        except FileNotFoundError:
+            pass
+
+
+def format_value(value: Any) -> str:
+    if value is None:
+        return "null"
+    return canonical_json(value)
+
+
+def compare(recorded: dict[str, Any], live: dict[str, Any]) -> tuple[int, int, int]:
+    changed = loosened = tightened = 0
+    for field in FINGERPRINT_FIELDS:
+        old, new = recorded[field], live[field]
+        direction = classify_field(field, old, new)
+        print(
+            f"FIELD {field}: recorded={format_value(old)} "
+            f"live={format_value(new)} DIRECTION={direction}"
+        )
+        if direction != "UNCHANGED":
+            changed += 1
+        if direction == "LOOSENED":
+            loosened += 1
+        elif direction == "TIGHTENED":
+            tightened += 1
+            print(f"NOTICE: {field} tightened; review and synchronize the fingerprint baseline.")
+    print(
+        f"PROTECTION FINGERPRINT: {changed} field(s) changed, "
+        f"{loosened} loosened, {tightened} tightened"
+    )
+    return changed, loosened, tightened
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description=(
-            "Compare GitHub branch protection with a committed "
-            "protection fingerprint."
-        )
-    )
-
-    parser.add_argument("--repo", required=True)
-    parser.add_argument("--branch", default="main")
-    parser.add_argument(
-        "--fingerprint",
-        default=DEFAULT_FINGERPRINT,
-    )
-
-    parser.add_argument(
-        "--write",
-        action="store_true",
-    )
-
-    parser.add_argument(
-        "--experiment-pr",
-        type=int,
-    )
-    parser.add_argument(
-        "--experiment-head",
-    )
-    parser.add_argument(
-        "--experiment-run",
-        type=int,
-    )
-    parser.add_argument(
-        "--experiment-date",
-    )
-
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repo", default=DEFAULT_REPO)
+    parser.add_argument("--branch", default=DEFAULT_BRANCH)
+    parser.add_argument("--fingerprint", default=DEFAULT_FINGERPRINT)
+    parser.add_argument("--write", action="store_true")
+    parser.add_argument("--experiment-pr")
+    parser.add_argument("--experiment-head")
+    parser.add_argument("--experiment-run")
+    parser.add_argument("--experiment-date")
     return parser
 
 
 def main(
     argv: list[str] | None = None,
-    *,
-    payload_fetcher=None,
+    payload_fetcher: Callable[[str, str, str], dict[str, Any]] = fetch_payload,
+    environ: dict[str, str] | None = None,
 ) -> int:
     args = build_parser().parse_args(argv)
-
-    path = Path(args.fingerprint)
-
-    experiment = None
-
-    if args.write:
-        try:
-            experiment = make_experiment(args)
-        except IncompleteError as error:
-            print(
-                f"INCOMPLETE: {error}",
-                file=sys.stderr,
-            )
-            return 2
-
-    try:
-        payload = (
-            payload_fetcher(args.repo, args.branch)
-            if payload_fetcher is not None
-            else fetch_branch_payload(
-                args.repo,
-                args.branch,
-            )
-        )
-
-        live = extract_fingerprint(payload)
-
-        if args.write:
-            baseline = {
-                "schema_version": SCHEMA_VERSION,
-                "repository": args.repo,
-                "branch": args.branch,
-                "protection": live,
-                "experiment": experiment,
-            }
-
-            atomic_write(path, baseline)
-
-            print(
-                f"PROTECTION FINGERPRINT: UPDATED {path}"
-            )
-            print(
-                "PROTECTION FINGERPRINT: new experiment "
-                "record attached"
-            )
-            return 0
-
-        baseline = load_baseline(path)
-
-        if baseline.get("repository") != args.repo:
-            raise IncompleteError(
-                "baseline repository does not match --repo"
-            )
-
-        if baseline.get("branch") != args.branch:
-            raise IncompleteError(
-                "baseline branch does not match --branch"
-            )
-
-        recorded = baseline["protection"]
-
-        differences = compare_fingerprints(
-            recorded,
-            live,
-        )
-
-    except Exception as error:
-        print(
-            f"INCOMPLETE: protection fingerprint could not "
-            f"be verified: {type(error).__name__}: {error}",
-            file=sys.stderr,
-        )
+    env = os.environ if environ is None else environ
+    token = env.get("GITHUB_TOKEN", "").strip()
+    if not token:
+        print("INCOMPLETE: GITHUB_TOKEN is required", file=sys.stderr)
         return 2
 
-    loosened = 0
-    tightened = 0
+    experiment_values = {
+        "pr": args.experiment_pr,
+        "head": args.experiment_head,
+        "run": args.experiment_run,
+        "date": args.experiment_date,
+    }
+    if args.write and any(not isinstance(value, str) or not value.strip()
+                          for value in experiment_values.values()):
+        print("INCOMPLETE: --write requires --experiment-pr, --experiment-head, "
+              "--experiment-run, and --experiment-date", file=sys.stderr)
+        return 2
 
-    for field, old, new, direction in differences:
-        if direction == "LOOSENED":
-            loosened += 1
-        elif direction == "TIGHTENED":
-            tightened += 1
+    try:
+        payload = payload_fetcher(args.repo, args.branch, token)
+        live = extract_fingerprint(payload)
+        if args.write:
+            write_baseline(args.fingerprint, live, experiment_values)  # type: ignore[arg-type]
+            print(f"PROTECTION FINGERPRINT: baseline written ({args.fingerprint})")
+            return 0
+        recorded = load_baseline(args.fingerprint)
+    except ApiError as exc:
+        print(f"INCOMPLETE: {exc}", file=sys.stderr)
+        return 2
+    except IncompleteError as exc:
+        print(f"INCOMPLETE: {exc}", file=sys.stderr)
+        return 2
+    except Exception as exc:  # fail closed on unexpected runtime/IO errors
+        print(f"INCOMPLETE: unexpected checker error: {exc}", file=sys.stderr)
+        return 2
 
-        print(
-            f"FIELD {field}: "
-            f"recorded={canonical_json(old)} "
-            f"live={canonical_json(new)} "
-            f"DIRECTION={direction}"
-        )
-
-    changed = len(differences)
-
-    print(
-        f"PROTECTION FINGERPRINT: "
-        f"{changed} field(s) changed, "
-        f"{loosened} loosened, "
-        f"{tightened} tightened"
-    )
-
-    if loosened:
-        print(
-            "PROTECTION FINGERPRINT: VIOLATION; "
-            "loosening requires a new failing-head experiment "
-            "and reviewed baseline update",
-            file=sys.stderr,
-        )
-        return 1
-
-    if tightened:
-        print(
-            "NOTICE: protection tightened; synchronize the "
-            "committed fingerprint through a reviewed --write operation"
-        )
-        return 0
-
-    print("PROTECTION FINGERPRINT: PASS")
-    return 0
+    try:
+        _, loosened, _ = compare(recorded, live)
+    except IncompleteError as exc:
+        print(f"INCOMPLETE: {exc}", file=sys.stderr)
+        return 2
+    return 1 if loosened else 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())
