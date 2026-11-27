@@ -159,6 +159,7 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
+          set +e
           root="$(mktemp -d)"
           mkdir -p "$root/reviews/architecture" "$root/reviews/complexity"
           cp reviews/architecture/SYS-RISK-001.*.md "$root/reviews/architecture/"
