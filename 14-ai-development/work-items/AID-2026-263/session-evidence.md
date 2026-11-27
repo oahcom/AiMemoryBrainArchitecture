@@ -145,6 +145,36 @@ $ python scripts/check_document_management.py --require-changed <base>
 (exit 0; no AID-2026-263 finding)
 ```
 
+## Retirement of the 262 carrier
+
+The 262 branch reached the remote before the renumber, so it had to be retired
+rather than ignored; leaving it would create the same double-carrier shape
+recorded for 261.
+
+```
+$ git ls-remote --heads origin work-item/aid-2026-262-merge-broker
+8908bb166c589acf3005a722c455ac9981715a7d	refs/heads/work-item/aid-2026-262-merge-broker
+
+$ git log -1 --format="%H %cI %s" 8908bb16
+8908bb166c589acf3005a722c455ac9981715a7d 2026-11-27T12:45:11+08:00 feat(ci): serialized merge-time work-item uniqueness broker (AID-2026-262)
+
+$ git push origin --delete work-item/aid-2026-262-merge-broker
+ - [deleted]           work-item/aid-2026-262-merge-broker
+
+$ git ls-remote --heads origin | grep 262
+(no output: 0 refs containing "262")
+```
+
+Draft PR #1398 (`head=work-item/aid-2026-262-merge-broker`) was closed by that
+deletion; it was not closed by this session. This work item's carrier is draft
+PR #1405 on `work-item/aid-2026-263-merge-broker`.
+
+`git grep -n "AID-2026-262"` on this branch returns three occurrences, all
+deliberate and all in records the dispatching instructions required: the
+`renumbered_from` field, the allocation rule that explains the renumber, and the
+verbatim commit subject of the retired branch. No directory, `work_item_id`,
+INDEX row, carrier field or cross-reference carries the 262 identifier.
+
 ## What this session did not do, and does not claim
 
 - No CI run, required-context result, merge SHA, or post-merge blob digest.

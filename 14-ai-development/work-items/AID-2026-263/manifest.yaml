@@ -128,7 +128,7 @@ review:
   natural_person_owner_acceptance: NOT_RECORDED
 carrier:
   branch: work-item/aid-2026-263-merge-broker
-  pull_request: PENDING
+  pull_request: 1405
   merge_sha: PENDING
   merge_method: merge
 notes:
