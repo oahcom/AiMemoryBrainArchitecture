@@ -183,3 +183,11 @@ revision_history:
       authorization. No prompt_* fields, review fields, acceptance fields,
       governance fields, top-level status, base_commit_sha, INDEX.md,
       or other files are changed.
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-040/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-040/E1-E8-entry-gate-measurement-2026-11-21.md"
+    relationship: reference

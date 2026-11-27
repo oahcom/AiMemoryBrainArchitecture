@@ -149,3 +149,15 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-109/session-evidence.md
+
+documentation:
+  - path: "09-security-governance/global-forget-target-inventory-and-completion-evidence.md"
+    relationship: reference
+  - path: "09-security-governance/forget-retention-backup-and-erasure-policy.md"
+    relationship: reference
+  - path: "09-security-governance/principal-actor-and-authorization-contract.md"
+    relationship: reference
+  - path: "09-security-governance/scope-and-revocation-policy.md"
+    relationship: reference
+  - path: "09-security-governance/security-and-identity-overview.md"
+    relationship: reference

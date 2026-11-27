@@ -11,7 +11,7 @@ risk_rationale: >-
   registry, baseline or branch-protection entry is touched, no canonical is created, no mirror is
   created, and nothing under 03/04/05/09 is edited. The two documents that receive metadata on the
   root side are classified Non-Canonical / Informative, which adds no canonical authority.
-status: DISPATCHED
+status: MERGED
 id_status: PROVISIONAL
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED

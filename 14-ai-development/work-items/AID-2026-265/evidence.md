@@ -51,7 +51,7 @@ document_metadata:
 **Attribution:** user-authorized operator (delegated by account owner)
 **Date:** 2026-11-27
 **Issue:** none — this is a pre-existing defect on `main` with no tracking issue yet
-**Base observed at implementation start:** a7cf5256e975ff25fd2f75b3b5051b16d8d77d36 (`origin/main`; the defect was also re-confirmed at `756e1e25` before main advanced)
+**Base observed at implementation start:** f64a3f8bd004135e9873aeafc40e50ef10e10a9c (`origin/main`; the defect was also re-confirmed on the earlier bases `b4c1b11d`, `f20fff10`, `7fc4ddab`, `cbdaf783`, `a7cf5256` and `756e1e25`, before main advanced each time)
 
 ## The defect
 
@@ -83,6 +83,20 @@ The change is exactly: delete the line break and restore the missing `v`. The
 repair alone leaves the file's byte length unchanged (one byte removed, one byte
 added); the growth shown in the measurements comes from this work item's own row.
 
+## Re-run on the current main (second pass)
+
+The first attempt (`6c511ad2`, PR #1418) was branched from `46dac1b1`. Main then
+advanced to `cbdaf783` and further to `7fc4ddab`, and GitHub reported the pull
+request as `mergeable_state=dirty` with no check run on its head. Replaying
+`6c511ad2` by cherry-pick onto `cbdaf783` produced a wrong result: the three-way
+merge re-inserted the neighbouring `AID-2026-191` and `AID-2026-199` rows as
+stale `DRAFT` duplicates instead of joining the `AID-2026-190` pair, leaving
+three duplicate work-item rows in the table. That replay was discarded
+(`git reset --hard origin/main`) and the repair was redone by hand — join the
+pair, restore the missing `v`, append this work item's row — then rebased onto
+`7fc4ddab`. The final tree carries exactly one row per AID and no duplicated
+neighbour.
+
 ## Where it came from
 
 | Step | Commit | State of the row |
@@ -112,7 +126,7 @@ defect can be introduced again without anything turning red.
 
 ## Measurements
 
-Measured on `origin/main` = `a7cf5256` against this branch's final tree.
+Measured on `origin/main` = `f64a3f8b` against this branch's final tree.
 
 | Measurement | Before | After |
 |---|---|---|
@@ -121,16 +135,16 @@ Measured on `origin/main` = `a7cf5256` against this branch's final tree.
 | Lines beginning with `erification` | 1 (the continuation line) | 0 |
 | Standalone truncated token (`erification_status` not preceded by `v`) | 1 | 0 |
 | Control characters outside TAB/LF/CR (whole file) | none (`0x0B` count 0, CR count 0) | none |
-| Table lines (lines beginning with a pipe character) | 195 | 196 (this work item's own row added; the joined continuation line was never a table line, so the repair alone does not change the count) |
-| File bytes | 208589 | 209352 |
-| File LF count | 315 | 315 (one line removed by the join, one added by this work item's row) |
+| Table lines (lines beginning with a pipe character) | 205 | 206 (this work item's own row added; the joined continuation line was never a table line, so the repair alone does not change the count) |
+| File bytes | 217086 | 217839 |
+| File LF count | 325 | 325 (one line removed by the join, one added by this work item's row) |
 
 ## Same class of defect found while measuring, deliberately not repaired
 
 | Row | Line | Pipe separators | Shape |
 |---|---|---|---|
-| `AID-2026-071` | 90 | 9 | 8 cells, does not end in a pipe |
-| `P2-T2-MEMORY-SCHEMA` | 272 | 7 | 7 cells in a 9-column table |
+| `AID-2026-071` | 94 | 9 | 8 cells, does not end in a pipe |
+| `P2-T2-MEMORY-SCHEMA` | 277 | 7 | 7 cells in a 9-column table |
 
 Both are pre-existing and out of scope here: repairing them would widen a
 single-purpose change and collide with concurrent INDEX edits. They are recorded
@@ -152,13 +166,14 @@ own blast radius; this work item records the proposal and changes nothing in
 ```
 python scripts/check_traceability.py --index-only
 python scripts/check_document_management.py
-python scripts/ci/check_repository_hygiene.py --base <origin/main> --head <head>
-BASE_SHA=<origin/main> HEAD_SHA=<head> python scripts/check_bilingual_docs.py
+python scripts/ci/check_repository_hygiene.py --base f64a3f8bd004135e9873aeafc40e50ef10e10a9c --head <head>
+python scripts/ci/check_work_item_uniqueness.py --base f64a3f8bd004135e9873aeafc40e50ef10e10a9c --head <head>
+BASE_SHA=f64a3f8bd004135e9873aeafc40e50ef10e10a9c HEAD_SHA=<head> python scripts/check_bilingual_docs.py
 ```
 
-Raw output is attached to the pull request and summarised in
-`session-evidence.md`. No merge, squash, rebase, force-push, or issue closure is
-performed by this work item.
+Raw output is summarised in `session-evidence.md`. No merge, squash, force-push
+or issue closure is performed by this work item; the branch is rebased onto the
+current `main` rather than merged with it.
 
 ## Boundaries
 

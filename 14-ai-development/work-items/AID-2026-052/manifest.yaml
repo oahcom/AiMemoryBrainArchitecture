@@ -112,3 +112,11 @@ findings:
   - id: AID-2026-052-F4
     severity: P2
     feedback_destination: "Delivery PR conversation. The closing condition asks for the serde-bypass test to pass, which this work delivers, and for the group-by-group revalidation, which it also delivers. It does not ask for independent evidence. But an implementation that writes its own acceptance tests and declares them sufficient is the pattern the repository's rulings prohibit elsewhere, so the register stays OPEN after merge on the same reasoning recorded in AID-2026-051-F3."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-052/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/governance-register/GOV-NC-2026-11-22-PROVENANCE-REFERENCE-REVALIDATION-027.md"
+    relationship: reference
+  - path: "14-ai-development/adr/OWNER-DECISION-TYPED-OBJECT-REF-001.md"
+    relationship: reference

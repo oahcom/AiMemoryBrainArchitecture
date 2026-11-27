@@ -6,7 +6,7 @@ risk_rationale: >-
   Documentation-only rejudgment of an existing architecture matrix. The main risk is
   overclaiming evidence; all 72 Gate A cells remain NOT EVIDENCED and no Gate A PASS,
   Owner acceptance, implementation conformance or production behavior is inferred.
-status: DISPATCHED
+status: MERGED
 id_status: PROVISIONAL
 
 sponsor: USER-PRINCIPAL-DELEGATED
@@ -85,8 +85,8 @@ carrier:
     merge_commit_sha: 92a759ec1a8c748fc4091015a3a3e8aa97ddc3e3
   branch: docs/aid-2026-107-impl2-scope-refresh
   pull_request: 1299
-  draft: true
-  merge_commit_sha: PENDING
+  draft: false
+  merge_commit_sha: b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c
   merge_authorization: only after all 16 required contexts succeed on exact final Head
 
 review:
@@ -148,11 +148,20 @@ impl2_scope_adjudication:
     - 05-memory-runtime/README.md
     - 09-security-governance/README.md
   main_entry_rule: HISTORICAL_PHASE_RECORD and UNDECIDED are excluded without Owner ruling; NORMATIVE_ROOT restoration is a separate PR.
+  post_merge_validation:
+    final_pr_head: d40a05c9abc68b2a4a9b007805e3e1c34e4128f9
+    merge_commit_sha: b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c
+    required_contexts: 16
+    successful_contexts: 16
+    canonical_evidence_blob: cce956d97b7a6d969bb3245fe0890905ca6d3979
+    en_evidence_blob: 101dcc3ca2a1d0c8358505a5a5cc221a5aa85cab
+    zh_cn_evidence_blob: 1b478d1114613adb3f7d3bbdcd913d403a78c36f
+  gate_a_item_3: SATISFIED — 16/16 required contexts SUCCESS on exact PR Head d40a05c9abc68b2a4a9b007805e3e1c34e4128f9; merged as b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c
   gate_a_item_5: OPEN — scope adjudicated; 5 roots to restore separately; F/I roots need Owner identification or explicit replacement decision.
 
 acceptance:
   gate_a: PARTIAL / OPEN
-  gate_a_closeout_items_open: [3, 4, 5, 6, 7, 8]
+  gate_a_closeout_items_open: [4, 5, 6, 7, 8]
   gate_a_item_5: OPEN — scope adjudicated; 5 roots to restore separately; F/I roots need Owner identification or explicit replacement decision
   gate_a_item_6: OPEN — contract present, evidence missing
   gate_a_item_7: OPEN — contract present, evidence missing
@@ -179,3 +188,15 @@ constraints:
   validator_semantic_changes: NONE
   documented_only_is_pass: false
   issue_1212_close: NOT_AUTHORIZED
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-107/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-107/prompt-v2.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-107/evidence.md"
+    relationship: reference
+  - path: "docs/en/14-ai-development/work-items/AID-2026-107/evidence.md"
+    relationship: reference
+  - path: "docs/zh-CN/14-ai-development/work-items/AID-2026-107/evidence.md"
+    relationship: reference
+

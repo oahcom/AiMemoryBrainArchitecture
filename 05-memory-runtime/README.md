@@ -56,6 +56,8 @@ document_metadata:
 
 # Memory Runtime — Directory Index
 
+> Index only. The designated runtime root is runtime-overview.md (AID-2026-113).
+
 > **AUTHORED_INDEX — not a restored specification.** 无权威源，本文件为新建索引。 No authoritative source blob for a root `README.md` was located. This file only inventories the documents present in this directory at the 2026-11-26 branch-tree inspection; it does not establish normative authority, resolve conflicts, or grant Owner acceptance.
 
 ## Documents present in this directory

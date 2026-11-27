@@ -122,3 +122,11 @@ cross_tree_collision:
     the branch copy is canonical on that branch; cross-tree references must be tree-qualified.
     Merge-time reconciliation gate: if that branch merges into main, branch-side duplicates
     re-sequence to >= AID-2026-014 with historical notes; history is never rewritten.
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-011/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/PR-GOVERNANCE-001.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference

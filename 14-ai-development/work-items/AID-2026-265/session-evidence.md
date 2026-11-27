@@ -53,25 +53,35 @@ INDEX repair as a standalone pull request.
 (writer-chosen; no in-repo mechanism relates a session string to a process, so
 this is a declaration and not a proof that a distinct context existed).
 **Date:** 2026-11-27
-**Base:** `756e1e25d735f526254fc3241b47880fef527b24` (`origin/main` at branch time)
+**Base:** `f64a3f8bd004135e9873aeafc40e50ef10e10a9c` (`origin/main` at rebase time; the first attempt was
+branched from `46dac1b1`, and main advanced five times — to `cbdaf783`, to
+`7fc4ddab`, to `f20fff10`, to `b4c1b11d` and to `f64a3f8b` — before this head was
+produced)
 
 ## What this session did
 
 1. Re-read `origin/main:14-ai-development/work-items/INDEX.md` before acting.
-   The `AID-2026-190` row was still two lines (`lf-split` 1), so the repair was
-   still needed; the `ALREADY_FIXED_ON_MAIN` stop condition did not apply.
+   The `AID-2026-190` row was still two lines (`lf-split` 1) on every base
+   checked — `a7cf5256`, `cbdaf783`, `7fc4ddab`, `f20fff10`, `b4c1b11d` and `f64a3f8b` — so the repair was still
+   needed and the `ALREADY_FIXED_ON_MAIN` stop condition did not apply.
 2. Checked `AID-2026-265` in three places before using it: the work-item tree on
-   `origin/main` (`git ls-tree origin/main:14-ai-development/work-items`), the
-   ledger on `origin/aid-ledger` (`git grep AID-2026-265 origin/aid-ledger --
-   aid-ledger.yaml`, no match), and remote branch names (`git ls-remote --heads
-   origin`, no branch naming 265). The identifier was free.
-3. Branched from `origin/main` and applied exactly one existing commit,
-   `0b6cde3c`, whose diff is the one-line repair (delete the break, restore the
-   missing `v`). It applied without conflict; no manual redo was needed.
-4. Registered this work item and appended its INDEX row to the same file, so the
-   file's final state is its own self-check.
-5. Ran the four gates listed below and recorded the raw results in the pull
-   request body.
+   `origin/main` (`git ls-tree origin/main:14-ai-development/work-items`, no
+   `AID-2026-265`), the ledger on `origin/aid-ledger` (`git grep AID-2026-265
+   origin/aid-ledger -- aid-ledger.yaml`, no match), and remote branch names
+   (`git ls-remote --heads origin`, no branch naming 265). The identifier was
+   free.
+3. Replayed the first attempt, `6c511ad2`, by cherry-pick onto `cbdaf783`. The
+   three-way merge reported success but produced the wrong tree: it re-inserted
+   the `AID-2026-191` and `AID-2026-199` rows as stale `DRAFT` duplicates and
+   left the `AID-2026-190` pair unjoined. The replay was discarded
+   (`git reset --hard origin/main`) and the repair redone by hand — delete the
+   line break, restore the missing `v`, append this work item's row — then
+   rebased onto `f64a3f8b`.
+4. Registered this work item and inserted its INDEX row directly after the repaired
+   `AID-2026-190` row — not at the tail — so a concurrent tail append on `main`
+   cannot collide with it. The file's final state is its own self-check.
+5. Ran the gates listed below against base `f64a3f8b` and recorded the results
+   here.
 
 ## Prompt digest
 
@@ -89,19 +99,20 @@ amendment belongs in a separate artifact, not in these bytes.
 
 | Command | Result |
 |---|---|
-| `python scripts/check_traceability.py --index-only` | `PASS TRACEABILITY: 0 requirements / 116 work items / 0 errors / N warnings` |
-| `python scripts/check_document_management.py` | see pull-request body; the whole-tree run reports the adoption baseline it always reports and no DM-01..DM-15 violation for the changed files |
-| `python scripts/ci/check_repository_hygiene.py --base <origin/main> --head <head>` | exit 0, `violations=0` |
-| `BASE_SHA=<origin/main> HEAD_SHA=<head> python scripts/check_bilingual_docs.py` | PASS |
-| `python scripts/ci/check_work_item_uniqueness.py --base <origin/main> --head <head>` | PASS: this work item's directory is newly introduced and unoccupied on the base |
+| `python scripts/check_traceability.py --index-only` | `PASS TRACEABILITY: 0 requirements / 131 work items / 0 errors / 118 warnings` (exit 0; the warnings are the pre-existing per-record T-04/T-05/T-06 advisories, including one for this work item's free-text `tracking_issue`) |
+| `python scripts/check_document_management.py` | exit 2 `INCOMPLETE: no rule violations in 766 classified documents, but 370 governed documents are still unclassified` — the same adoption backlog the gate reports on `f64a3f8b` itself (1133 governed / 763 classified / 370 unclassified there; the +3 are this work item's own documents), and zero DM-01..DM-15 violations |
+| `python scripts/ci/check_repository_hygiene.py --base f64a3f8bd004135e9873aeafc40e50ef10e10a9c --head <head>` | exit 0, `violations=0`, `manifests=131 in_scope=116`, `Repository new-file admission passed: 4 new path(s) checked`, index membership `directories=142 linked=142` |
+| `python scripts/ci/check_work_item_uniqueness.py --base f64a3f8bd004135e9873aeafc40e50ef10e10a9c --head <head>` | `PASS ... introduced=1 occupied=0` (exit 0) |
+| `BASE_SHA=f64a3f8bd004135e9873aeafc40e50ef10e10a9c HEAD_SHA=<head> python scripts/check_bilingual_docs.py` | `PASS (5 changed paths inspected)`, `bilingual baseline: 77 frozen, 0 new gaps` (exit 0) |
 
 ## Limits of this record
 
 - `scripts/check_declared_check_contexts.py` cannot run in this environment: the
   local HTTPS egress terminates TLS with a private CA and the script verifies the
-  chain, so it exits 2 INCOMPLETE before comparing anything. The `Existing gates`
+  chain, so it exits 2 `INCOMPLETE` before comparing anything. The `Existing gates`
   workflow covers it.
-- REST quota for the repository was exhausted by concurrent sessions during this
-  work, so post-push CI conclusions were read from workflow runs where available
-  and otherwise left unasserted.
-- No merge, squash, rebase, force-push, or issue closure was performed.
+- CI conclusions for the new head are read from the REST API and recorded on the
+  pull request; nothing here asserts a required context passed unless a check run
+  reported it.
+- No merge, squash, force-push, or issue closure was performed. The branch is
+  rebased onto the current `main`, not merged with it.

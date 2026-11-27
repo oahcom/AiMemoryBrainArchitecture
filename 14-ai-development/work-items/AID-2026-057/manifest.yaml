@@ -306,3 +306,11 @@ findings:
   - id: AID-2026-057-F4
     severity: P2
     feedback_destination: "Delivery PR conversation. D17 is a live inconsistency in the current allowlist, not only a question about these two files: root package.json is admitted and a nested one is not. Whatever the Owner rules, the asymmetry should be stated in the rule's comment so the next reader does not 'fix' it by widening."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-057/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/governance-register/GOV-NC-2026-11-24-MERGE-FORM-DEVIATION-031.md"
+    relationship: reference
+  - path: "00-governance/architecture-document-management-policy.md"
+    relationship: reference
