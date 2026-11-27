@@ -109,7 +109,7 @@ session_evidence:
     executed_prompt_sha256: "NOT_RECORDED"
     executed_prompt_bytes: 0
     executed_prompt_provenance: "NOT_VERIFIED"
-    session_reference_status: "RECORDED_IN_SESSION_EVIDENCE_FILE"
+    session_reference_status: "RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-241/session-evidence.md"
 non_goals:
   - "Changing source revision pointer checker logic"
