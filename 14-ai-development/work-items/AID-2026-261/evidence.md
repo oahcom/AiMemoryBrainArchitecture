@@ -70,13 +70,55 @@ The existing `.github/workflows/bilingual-docs.yml` job is named `GOV-DOC-001 st
 
 The duplicate `.github/workflows/architecture-governance-traceability.yml` was removed. Its two job names were absent from both the live 16-context list and the declared list in `14-ai-development/PR-GOVERNANCE-001.md` §7.
 
-## Fixture evidence
+## Fixture evidence — actual GitHub Actions output
 
-The requested fixture matrix and actual execution output are to be completed from the exact-Head GitHub Actions job logs. No local test execution is claimed because this task is being performed through GitHub API only.
+Observed on PR #1383 head `70a94cfd0da5b27d1c7a50aea530b400b2a4e13f`:
+- Run: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45940185696
+- Job: `GOV-DOC-001 structural checks`, job ID `140312488830`, conclusion `success`.
+- Checker output: `OWNER NAMESPACE: PASS (15 registered documents scanned)`; `GOVERNANCE OPERATION TRACEABILITY: PASS (7 operations x 3 mirrors)`.
+- Owner suite: `Ran 12 tests in 0.001s`; `OK`.
+- Governance suite: `Ran 16 tests in 0.028s`; `OK`.
 
-## Blocking experiment
+Each required fixture's actual verbose unittest line was emitted as `... ok`:
+| # | Test function | Observed output |
+|---|---|---|
+| 1 | `test_bare_a_as_owner_identity_is_rejected` | `... ok` |
+| 2 | `test_explicit_sys_and_owner_a_references_are_accepted` | `... ok` |
+| 3 | `test_owner_crosswalk_table_qualifies_bare_owner_letters` | `... ok` |
+| 4 | `test_sys_and_unqualified_owner_letter_in_same_table_are_rejected` | `... ok` |
+| 5 | `test_forget_operation_with_three_distinct_roles_is_accepted` | `... ok` |
+| 6 | `test_retention_and_legal_hold_operation_is_accepted` | `... ok` |
+| 7 | `test_physical_erasure_operation_is_accepted` | `... ok` |
+| 8 | `test_backup_expiry_operation_is_accepted` | `... ok` |
+| 9 | `test_external_recipient_completion_evidence_is_accepted` | `... ok` |
+| 10 | `test_executor_cannot_stand_in_for_canonical_authority` | `... ok` |
+| 11 | `test_unilateral_global_completion_claim_is_rejected` | `... ok` |
 
-A temporary negative-control branch/run is required to prove that a deliberately failing checker input makes the required `GOV-DOC-001 structural checks` context fail. Record the run URL and revert/remove the temporary branch after capture. Until this experiment and exact-Head required checks pass, blocking proof remains PENDING.
+These are GitHub Actions outputs, not local execution. The final PR Head will be re-run after base synchronization; the above run remains a historical, directly linked measurement.
+
+## Blocking experiment — demonstrated red
+
+Temporary negative-control PR #1386, based on the implementation branch, appended the deliberately invalid line `A owns this subsystem. [temporary negative-control fixture; do not merge]` to the scanned `01-system-architecture/system-boundaries.md`.
+
+- Run: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45940254262
+- Required job: `GOV-DOC-001 structural checks`, job ID `140312696258`, conclusion `failure`.
+- Actual log: `ERROR 01-system-architecture/system-boundaries.md:253: BARE_LETTER_AS_OWNER: A owns this subsystem. [temporary negative-control fixture; do not merge]`
+- The job then exited 1: `Process completed with exit code 1.`
+- The temporary input was reverted on the negative-control branch by commit `8e62f9c7c66abec09c4bc28b1d2512875bee29ce`; PR #1386 was closed unmerged. The injected line is absent from the branch's restored file.
+
+This is direct evidence that the required GOV-DOC-001 context goes red for a real checker violation. The temporary PR was never merged.
+
+## Other observed gates
+
+- GOV-DOC-002 metadata checks: run `45940180469`, job `140312463571`, `success` after adding the required `document_metadata` blocks to this evidence and session-evidence record.
+- Repository hygiene: run `45940180512`, job `140312464159`, `success`.
+- `check_test_reachability.py`: same hygiene log reports `Test reachability: 67 test files, 67 reachable, 0 unreachable`.
+
+The initial Session Evidence failure was corrected in the PR body: because #1237 predates the effective date and has no Issue-level AI-assisted declaration, its mapping is `LEGACY_UNDECLARED` / `N/A`; the PR-level declaration remains `AI-assisted work: YES`. The manifest records the exact prompt snapshot as `NOT_RECORDED` / `NOT_VERIFIED`, with a missing snapshot path and zero-byte sentinel; no prompt hash or verbatim capture is claimed.
+
+## Current merge state
+
+All evidence above is historical to the stated Head/run IDs. The current main advanced after branch creation; the branch must include the latest main and rerun the full 16 required contexts before merge. No merge SHA or post-merge blob identity is claimed yet.
 
 ## Session record
 
