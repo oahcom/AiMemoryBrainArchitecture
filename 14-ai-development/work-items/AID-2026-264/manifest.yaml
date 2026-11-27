@@ -1,0 +1,117 @@
+work_item_id: AID-2026-264
+title: "Carry the delegated merge-authorization record for PR #1325 into the governance tree"
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Documentation and governance-record only. Adds one decision record (source plus en and
+  zh-CN mirrors), one work-item registration with its evidence documents, and one INDEX row.
+  Changes no workflow, no branch-protection setting, no required context, no code path, and
+  no acceptance decision.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 242cf101c8b79007ad2fb8d9c89681224577188d
+prompt_status: RECORDED
+prompt_provenance: TRANSCRIBED_FROM_DISPATCH
+approval_scope:
+  type: Full-document
+evidence_reference:
+  - "14-ai-development/work-items/AID-2026-264/evidence.md"
+supersession:
+  supersedes: []
+  supersession_reason: null
+  effective_date: null
+archival:
+  archived_date: null
+  archival_reason: null
+  archival_reference: null
+canonical_scope_keywords:
+  - "merge-authorization"
+  - "delegated-operator"
+  - "pr-1325"
+scope:
+  objective: >-
+    Publish, as a repository-internal record attributable to the oahcom account, the bounded
+    and revocable merge authorization for PR #1325, and register the work item that carries
+    it so the PR's Session Evidence gate can resolve a manifest entry for its declared
+    evidence reference.
+  files_changed:
+    - "00-governance/decisions/2026-11-27-merge-authorization-pr-1325.md"
+    - "docs/en/00-governance/decisions/2026-11-27-merge-authorization-pr-1325.md"
+    - "docs/zh-CN/00-governance/decisions/2026-11-27-merge-authorization-pr-1325.md"
+    - "14-ai-development/work-items/AID-2026-264/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-264/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-264/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-264/evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+evidence: "14-ai-development/work-items/AID-2026-264/evidence.md"
+documentation:
+  - path: "00-governance/decisions/2026-11-27-merge-authorization-pr-1325.md"
+    relationship: evidence
+  - path: "docs/en/00-governance/decisions/2026-11-27-merge-authorization-pr-1325.md"
+    relationship: reference
+  - path: "docs/zh-CN/00-governance/decisions/2026-11-27-merge-authorization-pr-1325.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-264/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-264/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-264/prompt-v1.md"
+    relationship: reference
+session_evidence:
+  - role: "IMPLEMENTER"
+    issue_refs:
+      - "#1247"
+    implementing_ai_session: "GOVREC-2026-11-27"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-264/prompt-v1.md"
+    executed_prompt_sha256: "9770b64cab9539291cec21310edaba7b216d8044dc03cfd4a455573d9ebfc33e"
+    executed_prompt_bytes: 9311
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-264/session-evidence.md"
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    Published the decision record in three language variants, registered this work item, and
+    added its INDEX row. No code, workflow, branch-protection or acceptance change is claimed.
+  files_changed:
+    - "00-governance/decisions/2026-11-27-merge-authorization-pr-1325.md"
+    - "docs/en/00-governance/decisions/2026-11-27-merge-authorization-pr-1325.md"
+    - "docs/zh-CN/00-governance/decisions/2026-11-27-merge-authorization-pr-1325.md"
+    - "14-ai-development/work-items/AID-2026-264/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-264/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-264/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-264/evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "python scripts/check_document_management.py --require-changed origin/main: PASS (incremental)"
+    - "python scripts/check_bilingual_docs.py: PASS (3 changed paths inspected)"
+    - "python scripts/check_traceability.py --index-only: PASS"
+    - "python scripts/ci/check_repository_hygiene.py --base origin/main --head HEAD: new-file admission passed"
+    - "python scripts/ci/check_work_item_manifest_schema.py: this manifest is schema-compliant (v1)"
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+acceptance:
+  gate: PENDING_OWNER_ACCEPTANCE
+
+# issue_refs names Issue #1247, the Issue PR #1325 implements and the record's merge
+# authorization is about. It is the only Issue this pull request links, and the Session
+# Evidence mapping row for it is LEGACY_UNDECLARED / N/A: the Issue predates the policy and
+# carries no AI-assisted work declaration of its own, so claiming YES for it would be a
+# false attribution. Linking PR #1325 instead was rejected: its body declares YES with a
+# reference to AID-2026-241, which has no manifest in this tree, so that row could not be
+# corroborated.
+#
+# executed_prompt_sha256 and executed_prompt_bytes are the real digest and byte count of
+# prompt-v1.md as committed. executed_prompt_provenance is NOT_VERIFIED because the chat
+# transport payload (platform bytes, session id) was not captured; the text itself was
+# transcribed from the session transcript, not reconstructed after the fact.
