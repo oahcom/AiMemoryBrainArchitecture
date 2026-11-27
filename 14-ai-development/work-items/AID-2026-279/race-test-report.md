@@ -52,7 +52,7 @@ document_metadata:
 **Date:** 2026-11-27
 **Issue:** #1341
 **Local interpreter:** Python 3.12.3 (Windows)
-**Suite:** `scripts/ci/test_work_item_uniqueness.py` — 14 tests, all passing;
+**Suite:** `scripts/ci/test_work_item_uniqueness.py` — 15 tests, all passing;
 `scripts/ci/test_work_item_registry.py` — 15 tests, all passing.
 
 Every case builds a real temporary Git repository. The gate reads trees, so
@@ -66,6 +66,7 @@ object mocks would prove nothing about it.
 | 2 | Same id, conflict resolved on the target side, target branch merged again | `introduced=0` → PASS (wrong) | VIOLATION (exit 1) |
 | 3 | Pull-request base behind the latest target branch, which already has the id | `introduced=1 occupied=0` → PASS (wrong) | VIOLATION (exit 1) |
 | 4 | New file added beneath an id that already exists on the target branch | PASS | PASS (exit 0) |
+| 5 | Candidate behind the target on an inherited record, changing nothing there | PASS | PASS (exit 0) — a freshness failure, not a claim |
 
 The old algorithm asked `merge-base(base, head)` what the candidate had
 introduced. Cases 1 and 2 collapse that set to empty; case 3 compares against a
@@ -76,16 +77,16 @@ a merge base.
 
 ```
 $ python scripts/ci/check_work_item_uniqueness.py --base <target> --head <merge commit>
-VIOLATION: 14-ai-development/work-items/AID-2026-279 has modified or deleted paths; the target branch already owns this work item, so only added files are additive
-WORK-ITEM UNIQUENESS: VIOLATION (base=... candidate_ids=1 target_ids=1 new_ids=0 modified_under_shared=1 registry=base ...)
+VIOLATION: 14-ai-development/work-items/AID-2026-279 modifies or deletes a record the target branch already owns; only added files beneath an inherited record are additive
+WORK-ITEM UNIQUENESS: VIOLATION (base=... candidate_ids=1 target_ids=1 new_ids=0 competing_shared=1 registry=base ...)
 ```
 
 ## Scenario 2 — conflict resolved on the target side, merged again
 
 ```
 $ python scripts/ci/check_work_item_uniqueness.py --base <target> --head <re-merged commit>
-VIOLATION: 14-ai-development/work-items/AID-2026-279 has modified or deleted paths; the target branch already owns this work item, so only added files are additive
-WORK-ITEM UNIQUENESS: VIOLATION (... new_ids=0 modified_under_shared=1 ...)
+VIOLATION: 14-ai-development/work-items/AID-2026-279 modifies or deletes a record the target branch already owns; only added files beneath an inherited record are additive
+WORK-ITEM UNIQUENESS: VIOLATION (... new_ids=0 competing_shared=1 ...)
 ```
 
 Resolving `manifest.yaml` on the target side does not launder the claim: the
@@ -96,15 +97,15 @@ the target branch again does not remove it.
 
 ```
 $ python scripts/ci/check_work_item_uniqueness.py --base <latest target> --head <candidate>
-VIOLATION: 14-ai-development/work-items/AID-2026-279 has modified or deleted paths; the target branch already owns this work item, so only added files are additive
-WORK-ITEM UNIQUENESS: VIOLATION (... new_ids=0 modified_under_shared=1 ...)
+VIOLATION: 14-ai-development/work-items/AID-2026-279 modifies or deletes a record the target branch already owns; only added files beneath an inherited record are additive
+WORK-ITEM UNIQUENESS: VIOLATION (... new_ids=0 competing_shared=1 ...)
 ```
 
 ## Scenario 4 — additive file under an existing id
 
 ```
 $ python scripts/ci/check_work_item_uniqueness.py --base <target> --head <candidate>
-WORK-ITEM UNIQUENESS: PASS (... new_ids=0 modified_under_shared=0 ...)
+WORK-ITEM UNIQUENESS: PASS (... new_ids=0 competing_shared=0 ...)
 ```
 
 ## Registry cases

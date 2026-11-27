@@ -18,9 +18,12 @@ Rules:
   1. ``new_ids = candidate_ids - target_ids``. Every new id must be absent from
      the target tree and must not be CLAIMED or MERGED in the registry by a
      different pull request. Otherwise VIOLATION.
-  2. For ids present on both sides only ADDED paths are additive. A modified or
-     deleted path under a shared id is a competing claim on a record the target
-     branch already owns. Otherwise VIOLATION.
+  2. For ids present on both sides only ADDED paths are additive. A path the
+     candidate itself modified or deleted since the fork point, under a shared
+     id, is a competing claim on a record the target branch already owns.
+     Otherwise VIOLATION. A candidate that is merely behind the target on that
+     record has not claimed anything: that is a freshness failure, and the
+     separate branch-freshness check owns it.
   3. Unreadable refs, unreadable trees, or an unreadable registry are
      INCOMPLETE (exit 2), never PASS.
 
@@ -88,13 +91,69 @@ def tree_ids(commit: str) -> set[str]:
     return _ids_in(git("ls-tree", "-r", "-z", "--name-only", "--full-tree", commit, "--", ROOT))
 
 
-def competing_ids(base: str, head: str) -> set[str]:
-    """Ids with at least one modified or deleted path between base and head."""
+def _id_of(path: str) -> str | None:
+    prefix = ROOT + "/"
+    if not path.startswith(prefix):
+        return None
+    first = path[len(prefix):].split("/", 1)[0]
+    return first if ID_RE.match(first) else None
+
+
+def own_changes(fork: str, head: str) -> dict[str, str]:
+    """Paths the candidate changed since the fork point, with their status."""
     output = git(
-        "diff", "--name-only", "-z", "--no-renames", "--diff-filter=MD",
-        base, head, "--", ROOT,
+        "diff", "--name-status", "-z", "--no-renames", fork, head, "--", ROOT,
     )
-    return _ids_in(output)
+    parts = [part for part in output.split("\0") if part]
+    return {
+        path: status
+        for status, path in zip(parts[0::2], parts[1::2])
+    }
+
+
+def competing_claims(
+    base: str, head: str, shared_ids: set[str], fork: str | None
+) -> dict[str, str]:
+    """Shared ids the candidate claims, with the reason.
+
+    Two distinct situations, and only one of them is additive:
+
+    * The id existed at the fork point, so the candidate inherited the record.
+      Added files beneath it are additive; modifying or deleting a path that
+      existed at the fork point is an edit to a record the target owns.
+    * The id did not exist at the fork point, so the candidate introduced it
+      independently while the target branch introduced the same id. Every path
+      it contributes under that id is a competing claim, including additions.
+
+    A candidate that is merely behind the target is neither: it inherited the
+    record and changed nothing, which is a freshness failure owned by the
+    separate branch-freshness check.
+    """
+    if not shared_ids:
+        return {}
+    if fork is None:
+        # No common ancestor: attribute every difference to the candidate.
+        fork_ids: set[str] = set()
+        changes = own_changes(base, head)
+    else:
+        fork_ids = tree_ids(fork)
+        changes = own_changes(fork, head)
+    reasons: dict[str, str] = {}
+    for path, status in sorted(changes.items()):
+        work_item_id = _id_of(path)
+        if work_item_id is None or work_item_id not in shared_ids:
+            continue
+        if work_item_id not in fork_ids:
+            reasons.setdefault(
+                work_item_id,
+                "introduces an id the target branch already owns",
+            )
+        elif status in ("M", "D", "T", "R", "C"):
+            reasons.setdefault(
+                work_item_id,
+                "modifies or deletes a record the target branch already owns",
+            )
+    return reasons
 
 
 def _blob_at(commit: str, path: str) -> str | None:
@@ -170,7 +229,14 @@ def check(
         candidate_ids = tree_ids(head)
         new_ids = sorted(candidate_ids - target_ids)
         shared_ids = candidate_ids & target_ids
-        competing = competing_ids(base, head) & shared_ids
+        try:
+            fork = git("merge-base", base, head).strip() or None
+        except Incomplete:
+            # No usable common ancestor. Attribution falls back to "everything
+            # the candidate differs on is the candidate's own", which can only
+            # over-report, never pass.
+            fork = None
+        competing = competing_claims(base, head, shared_ids, fork)
         claims, registry_source = load_claims(base, head, registry)
     except Incomplete as exc:
         print(f"WORK-ITEM UNIQUENESS: INCOMPLETE ({exc})")
@@ -198,16 +264,16 @@ def check(
                 f"{path} is already {claim['status']} in the registry by pull request "
                 f"{claim.get('pull_request')} ({claim.get('repository')})"
             )
-    for work_item_id in sorted(competing):
+    for work_item_id, reason in sorted(competing.items()):
         violations.append(
-            f"{ROOT}/{work_item_id} has modified or deleted paths; the target branch "
-            f"already owns this work item, so only added files are additive"
+            f"{ROOT}/{work_item_id} {reason}; only added files beneath an "
+            f"inherited record are additive"
         )
 
     summary = (
         f"base={base} head={head} candidate_ids={len(candidate_ids)} "
         f"target_ids={len(target_ids)} new_ids={len(new_ids)} "
-        f"modified_under_shared={len(competing)} registry={registry_source}"
+        f"competing_shared={len(competing)} registry={registry_source}"
     )
     if violations:
         for violation in violations:

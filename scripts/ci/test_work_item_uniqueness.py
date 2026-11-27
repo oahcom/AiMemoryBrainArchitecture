@@ -106,7 +106,22 @@ class WorkItemUniquenessTests(unittest.TestCase):
             result = invoke(repo, "--base", base, "--head", head)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertIn("new_ids=0", result.stdout)
-            self.assertIn("modified_under_shared=0", result.stdout)
+            self.assertIn("competing_shared=0", result.stdout)
+
+    # A candidate that is merely behind the target on a shared record has not
+    # claimed anything. That is a freshness failure, owned by the separate
+    # branch-freshness check, not a uniqueness violation.
+    def test_candidate_behind_target_on_shared_record_passes(self):
+        with tempfile.TemporaryDirectory() as temp:
+            repo, _ = init_repo(Path(temp))
+            fork = commit_file(repo, f"{ITEM}/manifest.yaml", "v1\n", "record")
+            git(repo, "checkout", "-q", "-b", "candidate")
+            head = commit_file(repo, "README.md", "unrelated\n", "unrelated work")
+            git(repo, "checkout", "-q", "-b", "target", fork)
+            latest = commit_file(repo, f"{ITEM}/manifest.yaml", "v2\n", "record update")
+            result = invoke(repo, "--base", latest, "--head", head)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn("competing_shared=0", result.stdout)
 
     # Regression 1: the candidate merges the target branch, so the directory is
     # present on both sides and the old merge-base algorithm reported
@@ -128,7 +143,7 @@ class WorkItemUniquenessTests(unittest.TestCase):
             result = invoke(repo, "--base", target, "--head", merged)
             self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
             self.assertIn("VIOLATION", result.stdout)
-            self.assertIn("already owns this work item", result.stdout)
+            self.assertIn("already owns", result.stdout)
 
     # Regression 2: the conflict is resolved on the target side for the
     # manifest, yet the candidate's own evidence file still overwrites the
@@ -161,7 +176,7 @@ class WorkItemUniquenessTests(unittest.TestCase):
             merged = git(repo, "rev-parse", "HEAD")
             result = invoke(repo, "--base", target, "--head", merged)
             self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
-            self.assertIn(f"{ITEM} has modified or deleted paths", result.stdout)
+            self.assertIn(f"{ITEM} modifies or deletes a record", result.stdout)
 
     # Regression 3: the pull request base is behind the latest target branch,
     # which already carries the same id.

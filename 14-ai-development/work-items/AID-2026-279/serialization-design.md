@@ -94,9 +94,17 @@ new_ids       = candidate_ids - target_ids
 ```
 
 * `new_ids` must be unoccupied on the target tree and unclaimed in the registry.
-* Ids present on both sides are additive **only for added paths**. A modified or
-  deleted path under a shared id is a competing claim on a record the target
-  branch already owns.
+* For an id present on both sides, the fork point decides only *who moved a
+  path*, never occupancy:
+  * the id existed at the fork point — the candidate inherited the record, so
+    added files are additive and a modified or deleted path is an edit to a
+    record the target owns;
+  * the id did not exist at the fork point — the candidate introduced it
+    independently, so every path it contributes under that id is a competing
+    claim, additions included;
+  * the candidate is behind the target on an inherited record and changed
+    nothing there — not a claim. That is a freshness failure, reported by the
+    separate branch-freshness check.
 
 The old algorithm asked `merge-base(base, head)` what the candidate had
 introduced. After the candidate merged the target branch, that set was empty and
