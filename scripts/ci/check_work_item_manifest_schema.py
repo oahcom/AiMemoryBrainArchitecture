@@ -143,6 +143,7 @@ def main() -> int:
     parser.add_argument("--root", type=Path, default=ROOT)
     parser.add_argument("--tree", default="HEAD", help="Git tree-ish used for path existence checks")
     parser.add_argument("--baseline", type=Path, help="JSON file pinning a legacy baseline tree")
+    parser.add_argument("--batch-report", action="store_true", help="print before/after AC4 counts for the pinned 83-manifest cohort")
     args = parser.parse_args()
     paths = sorted(args.root.glob(GLOB))
     if not paths:
@@ -174,6 +175,44 @@ def main() -> int:
                     baseline_errors[rel] = {"baseline manifest could not be read"}
         except (OSError, ValueError, KeyError, subprocess.CalledProcessError) as exc:
             print(f"ERROR: cannot load baseline: {exc}", file=sys.stderr)
+            return 2
+
+    if args.batch_report:
+        try:
+            cohort_tree = baseline["cohort_tree"]
+            cohort_paths = sorted(
+                p for p in git_tree_paths(args.root, cohort_tree)
+                if p.startswith("14-ai-development/work-items/") and p.endswith("/manifest.yaml")
+            )
+            if len(cohort_paths) != 83:
+                raise ValueError(f"expected 83 cohort manifests, found {len(cohort_paths)}")
+            print("AC4 migration batch comparison (baseline tree -> current tree):")
+            for batch_no, start in enumerate((0, 21, 42, 63), start=1):
+                batch = cohort_paths[start:start + (21 if batch_no < 4 else 20)]
+                before_bad, after_bad = [], []
+                for rel in batch:
+                    before_errors = validate_text(
+                        git_show(args.root, baseline_tree, rel), rel,
+                        git_tree_paths(args.root, cohort_tree)
+                    )
+                    current_file = args.root / rel
+                    after_errors = validate(current_file, tree_paths)
+                    if any(is_ac4(e) for e in before_errors):
+                        before_bad.append(rel)
+                    if any(is_ac4(e) for e in after_errors):
+                        after_bad.append(rel)
+                print(
+                    f"  batch {batch_no}/4: total={len(batch)} "
+                    f"before_AC4_violations={len(before_bad)} "
+                    f"after_AC4_violations={len(after_bad)} "
+                    f"resolved={len(before_bad) - len(after_bad)}"
+                )
+                for rel in before_bad:
+                    print(f"    BEFORE {rel}: missing/invalid documentation reference")
+                for rel in after_bad:
+                    print(f"    AFTER  {rel}: AC4 documentation violation remains")
+        except (KeyError, ValueError, OSError, subprocess.CalledProcessError) as exc:
+            print(f"ERROR: cannot produce batch report: {exc}", file=sys.stderr)
             return 2
 
     compliant, ac4, other, regressions = [], [], [], []

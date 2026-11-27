@@ -1,4 +1,5 @@
 {
   "baseline_tree": "31b305d7c8665d0496cea00d2b0acb6626bde072",
-  "description": "Immutable pre-repair tree; existing errors may only be reduced. New manifests and new errors fail."
+  "description": "Immutable pre-repair tree; existing errors may only be reduced. New manifests and new errors fail.",
+  "cohort_tree": "e47dd6f0"
 }
