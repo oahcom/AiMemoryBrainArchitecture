@@ -59,7 +59,6 @@ on:
 
 permissions:
   contents: read
-  issues: read
 
 jobs:
   protocol-index:
@@ -153,11 +152,37 @@ jobs:
           set -euo pipefail
           python3 08-bmcp-protocol/schemas/test_nonempty_audit.py
       - name: Enforce REQ-01 assessment signature attachment (required gate)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 scripts/ci/check_req_assessment_signatures.py
       - name: Test REQ-01 assessment signature checker
         run: python3 -m unittest scripts.ci.test_check_req_assessment_signatures
+      - name: Mutation check — deleting a signature field must fail the gate
+        shell: bash
+        run: |
+          set -uo pipefail
+          root="$(mktemp -d)"
+          mkdir -p "$root/reviews/architecture" "$root/reviews/complexity"
+          cp reviews/architecture/SYS-RISK-001.*.md "$root/reviews/architecture/"
+          cp reviews/complexity/architecture-complexity-assessment.*.md "$root/reviews/complexity/"
+          python3 scripts/ci/check_req_assessment_signatures.py --root "$root"
+          baseline_exit=$?
+          echo "baseline_exit=$baseline_exit"
+          if [ "$baseline_exit" -ne 0 ]; then exit 1; fi
+          for f in reviews/architecture/SYS-RISK-001.en.md reviews/architecture/SYS-RISK-001.zh-CN.md \
+                   reviews/complexity/architecture-complexity-assessment.en.md \
+                   reviews/complexity/architecture-complexity-assessment.zh-CN.md; do
+            for field in assessor assessed_version evidence_baseline; do
+              rm -rf "$root"
+              mkdir -p "$root/reviews/architecture" "$root/reviews/complexity"
+              cp reviews/architecture/SYS-RISK-001.*.md "$root/reviews/architecture/"
+              cp reviews/complexity/architecture-complexity-assessment.*.md "$root/reviews/complexity/"
+              grep -v "^- $field:" "$root/$f" > "$root/$f.tmp" && mv "$root/$f.tmp" "$root/$f"
+              python3 scripts/ci/check_req_assessment_signatures.py --root "$root" >/dev/null 2>&1
+              code=$?
+              echo "mutation file=$f field=$field exit=$code"
+              if [ "$code" -eq 0 ]; then echo "MUTATION SURVIVED: $f / $field"; exit 1; fi
+            done
+          done
+          echo "MUTATION OK: 12 of 12 deletions rejected"
 
   bilingual:
     name: Bilingual docs coverage (ratchet)
