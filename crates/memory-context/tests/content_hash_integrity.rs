@@ -1,7 +1,10 @@
 use memory_context::{
-    content_hash_for, snapshot_hash, ContextEntryVersion, ContextError, ContextTier, EntryState,
+    commit_change_set, content_hash_for, snapshot_hash, ChangeSet, ChangeSetId, ChangeSetOperation,
+    ChangeSetStatus, ContextBudgetSummary, ContextChangeSet, ContextEntry, ContextEntryVersion,
+    ContextError, ContextHead, ContextOperation, ContextTier, ContextVersionId, EntryState,
+    IdempotencyLog, VersionMetadata,
 };
-use memory_domain::OpaqueId;
+use memory_domain::{ActorRef, OpaqueId};
 
 fn entry(content: &str) -> ContextEntryVersion {
     ContextEntryVersion {
@@ -29,10 +32,63 @@ fn commit_rejects_entry_with_wrong_content_hash() {
     let mut value = entry("A");
     value.content_hash = content_hash_for("B");
 
+    let head = ContextHead {
+        context_id: OpaqueId::new("ctx-test").unwrap(),
+        version: Some(ContextVersionId::new("v1").unwrap()),
+        sequence: 1,
+    };
+
+    let mut change_set = ContextChangeSet {
+        change_set_id: ChangeSetId::new("cs-test").unwrap(),
+        context_id: head.context_id.clone(),
+        base_version: head.version.clone(),
+        target_version: None,
+        operations: vec![ContextOperation::AddEntry {
+            operation_id: "add-entry".into(),
+            entry: value,
+        }],
+        reason: "test".into(),
+        actor_ref: ActorRef {
+            actor_id: OpaqueId::new("actor-test").unwrap(),
+        },
+        created_at: "2026-01-01T00:00:00Z".into(),
+        idempotency_key: "key-test".into(),
+        payload_hash: String::new(),
+        policy_epoch: 7,
+        status: ChangeSetStatus::Prepared,
+        correlation_id: None,
+        causation_id: None,
+        result_ref: None,
+    };
+    change_set.payload_hash = change_set.compute_payload_hash().unwrap();
+
+    let metadata = VersionMetadata {
+        context_version_id: ContextVersionId::new("v2").unwrap(),
+        schema_version: "1".into(),
+        scope_fingerprint: "scope-fp".into(),
+        canonical_watermarks: vec![],
+        policy_epoch: 7,
+        snapshot_ref: "snapshot://v2".into(),
+        snapshot_hash: snapshot_hash(&[]).unwrap(),
+        budget_summary: ContextBudgetSummary {
+            entry_count: 0,
+            rendered_bytes: 0,
+        },
+        committed_at: "2026-01-01T00:00:01Z".into(),
+        actor_ref: ActorRef {
+            actor_id: OpaqueId::new("actor-test").unwrap(),
+        },
+        reason: "test".into(),
+    };
+
+    let mut idempotency = IdempotencyLog::default();
+
     assert!(matches!(
-        value.validate(),
+        commit_change_set(&head, change_set, &[], &mut idempotency, 7, metadata,),
         Err(ContextError::ContentHashMismatch { .. })
     ));
+
+    assert!(idempotency.is_empty());
 }
 
 #[test]
@@ -43,6 +99,50 @@ fn validate_rejects_stale_hash_after_content_edit() {
 
     assert!(matches!(
         value.validate(),
+        Err(ContextError::ContentHashMismatch { .. })
+    ));
+}
+
+#[test]
+fn validate_rejects_empty_content_hash() {
+    let mut value = entry("content");
+    value.content_hash.clear();
+
+    assert!(matches!(
+        value.validate(),
+        Err(ContextError::EmptyField("content_hash"))
+    ));
+}
+
+#[test]
+fn change_set_validate_rejects_edit_entry_with_wrong_content_hash() {
+    let updated = ContextEntry {
+        entry_id: OpaqueId::new("entry-edit-test").unwrap(),
+        memory_id: OpaqueId::new("memory-edit-test").unwrap(),
+        memory_version_id: OpaqueId::new("version-edit-test").unwrap(),
+        tier: ContextTier::P1,
+        priority: 10,
+        activation_reason: "test".into(),
+        rendered_content: "actual rendered content".into(),
+        source_refs: vec![OpaqueId::new("source-edit-test").unwrap()],
+        evidence_refs: vec![],
+        epistemic_qualifiers: vec![],
+        content_hash: content_hash_for("different rendered content"),
+        rendered_bytes: "actual rendered content".len(),
+    };
+
+    let change_set = ChangeSet {
+        base_version: 1,
+        operations: vec![ChangeSetOperation::Update {
+            operation_id: "update-entry".into(),
+            entry_id: updated.entry_id.clone(),
+            updated,
+            reason: "test edit".into(),
+        }],
+    };
+
+    assert!(matches!(
+        change_set.validate(),
         Err(ContextError::ContentHashMismatch { .. })
     ));
 }
@@ -65,6 +165,9 @@ fn content_hash_covers_exact_utf8_bytes() {
     assert_eq!(value.rendered_bytes, content.len());
     assert_eq!(value.content_hash, content_hash_for(content));
     assert_ne!(value.content_hash, content_hash_for("中文内容"));
+
+    assert_ne!(content_hash_for("a "), content_hash_for("a"));
+    assert_ne!(content_hash_for(" a"), content_hash_for("a"));
 }
 
 #[test]
