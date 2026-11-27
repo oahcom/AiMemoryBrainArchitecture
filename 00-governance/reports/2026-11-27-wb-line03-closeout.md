@@ -275,14 +275,77 @@ rollup FAILURE
 
 Each gate is the repository's own script, run from the branch worktree with the same arguments its workflow uses. "Workflow name" is the required check context the job publishes.
 
-| # | Gate (workflow context) | Command | Exit | Raw summary line |
-|---|---|---|---|---|
-| 3.1 | GOV-DOC-002 metadata checks (`document-management.yml`) | `python scripts/check_document_management.py --require-changed 5670357d` | see below | see below |
-| 3.2 | GOV-DOC-001 structural checks (`bilingual-docs.yml`) | `python scripts/check_governance_operation_traceability.py --check` | see below | see below |
-| 3.3 | Bilingual documentation gate (`bilingual-docs.yml`) | `PR_BODY=… python scripts/check_bilingual_docs.py` | see below | see below |
-| 3.4 | Repository hygiene (`repository-hygiene.yml`) | `python scripts/ci/check_repository_hygiene.py --base 5670357d --head HEAD` | see below | see below |
+| # | Gate (workflow context) | Verdict |
+|---|---|---|
+| 3.1 | GOV-DOC-002 metadata checks (`document-management.yml`) | PASS |
+| 3.2 | GOV-DOC-001 structural checks — traceability leg (`bilingual-docs.yml`) | PASS |
+| 3.3 | Bilingual documentation gate (`bilingual-docs.yml` / `Bilingual docs coverage (ratchet)`) | **FAIL** — structural, explained |
+| 3.4 | Repository hygiene (`repository-hygiene.yml`) | PASS |
 
 <!-- GATES_PLACEHOLDER -->
+
+**Raw output, as executed.** The four commands below were run from the branch worktree against commit `5417d49c` — the commit that introduces this file. The only difference between `5417d49c` and the file you are reading is the text of this section, which no gate reads; the same four commands re-run at the PR head give the same four exit codes (§3.5).
+
+### 3.1 GOV-DOC-002 metadata checks — PASS
+
+```
+$ python scripts/check_document_management.py --require-changed 5670357db7a836d4f26838dbaf99494af41e2b65
+…
+manual controls (not machine-verified, policy 9.2): M-01 … M-10
+PASS (incremental): no GOV-DOC-002 violations; 752 classified, 370 unclassified
+  Incremental verdict only: files outside the changed set were not required to be classified.
+exit=0
+```
+
+### 3.2 GOV-DOC-001 structural checks, traceability leg — PASS
+
+```
+$ python scripts/check_governance_operation_traceability.py --check
+GOVERNANCE OPERATION TRACEABILITY: PASS (7 operations x 3 mirrors)
+exit=0
+```
+
+The same workflow context also runs `check_owner_namespace_references.py --check` and `check_bilingual_docs.py`; the latter is 3.3.
+
+### 3.3 Bilingual documentation gate — **FAIL (exit 2)**
+
+```
+$ BASE_SHA=5670357d HEAD_SHA=5417d49c PR_BODY=<the body of this PR> python scripts/check_bilingual_docs.py
+::notice::reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md: 'HISTORICAL — not a gate input'; …
+::notice::reviews/bmcp-architecture-followup/BMCP-ARCH-001.zh-CN.md: 'HISTORICAL — not a gate input'; …
+::error::New bilingual gap outside frozen baseline: 00-governance/reports/2026-11-27-wb-line03-closeout.md
+exit=2
+```
+
+**Why it fails, stated rather than worked around.** `00-governance` is a `NORMATIVE_ROOTS` entry (`scripts/check_bilingual_docs.py`), so a new `.md` there is a bilingual gap until it is either paired with `docs/en/…` + `docs/zh-CN/…` mirrors, registered in `EMBEDDED_BILINGUAL_SOURCES`, or covered by an Owner-approved `BILINGUAL-EXCEPTION` block in the PR body. This record is **one file by order**, and registration is a code edit to a validator — both out of bounds. Neither declaration is asserted in the PR body because neither would be true: there is no Chinese counterpart, and no Owner approval exists.
+
+**Disposition:** `OUT-OF-SCOPE(order)` — the defect is a genuine conflict between the delivery shape and repo policy, not a defect this record may paper over. Remedy: a follow-up PR adding the two mirrors, or an Owner-approved time-bounded exception. This is also why draft #1414's `Bilingual docs coverage (ratchet)` check was red (§2 F-12).
+
+### 3.4 Repository hygiene — PASS
+
+```
+$ python scripts/ci/check_repository_hygiene.py --base 5670357d --head 5417d49c
+Work-item manifest consistency unrecognized shape: 14-ai-development/work-items/AID-2026-096/manifest.yaml
+… (10 such lines, all pre-existing at the base commit)
+Work-item index membership version=2026-11-27.2 directories=138 linked=138
+Work-item manifest consistency version=2026-11-27.2 manifests=127 in_scope=112 excluded_by_record_type=5 unrecognized=10 violations=0
+Repository new-file admission version=2026-11-27.2 base=5670357db7a836d4f26838dbaf99494af41e2b65 head=5417d49cdac7a303b5d388b5e55710e9a3c7fe20 merge_base=5670357db7a836d4f26838dbaf99494af41e2b65
+Repository new-file admission passed: 1 new path(s) checked.
+exit=0
+```
+
+`violations=0` and new-file admission passed on exactly one new path. The ten `unrecognized shape` lines are the base commit's own backlog (`unrecognized=10`), not introduced here.
+
+### 3.5 Gate summary
+
+| Gate | Context | Exit | Verdict |
+|---|---|---|---|
+| Document management | GOV-DOC-002 metadata checks | 0 | PASS |
+| Traceability | GOV-DOC-001 structural checks | 0 | PASS |
+| Repository hygiene | Repository hygiene (hard gate) | 0 | PASS |
+| Bilingual | Bilingual docs coverage / GOV-DOC-001 structural checks | 2 | **FAIL — new gap outside frozen baseline, see 3.3** |
+
+Three of four pass. The fourth fails for a structural reason the order created, and it is reported as a failure rather than converted into a passing run by asserting a declaration that is not true.
 
 ---
 
