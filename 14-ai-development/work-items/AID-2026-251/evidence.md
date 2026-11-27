@@ -29,16 +29,13 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Candidate
-    canonical_scope: "Work Item manifest schema v1 and read-only inventory validation"
-    canonical_scope_id: "ai-development/work-item-manifest-schema-v1"
-    canonical_scope_keywords:
-      - "work-item"
-      - "manifest"
-      - "schema"
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
     canonical_conflict_status: None
     canonical_conflict_resolution: null
-    normative_status: Normative
+    normative_status: Informative
   bilingual_counterpart:
     source: null
     en: null
