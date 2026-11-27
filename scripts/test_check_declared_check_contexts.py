@@ -65,7 +65,7 @@ class DeclaredCheckContextsTest(unittest.TestCase):
         path.write_text(text, encoding="utf-8")
 
     def run_checker(self, protection=None):
-        """Default to the declared set: the tree alone cannot satisfy equality."""
+        """Inject the protected side so the tree cannot supply it implicitly."""
         with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
             return checker.main(self.root, DECLARED if protection is None else protection)
 
