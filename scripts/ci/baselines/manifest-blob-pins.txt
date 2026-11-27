@@ -87,3 +87,7 @@ MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-developmen
 MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-101/prompt-v1.md declared=4470 actual=4412
 MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-102/prompt-v1.md declared=df3c53282d858ecc7302ba86b4fb419bf6a31c8030d30cee256b64840b4e4e7a actual=468a1d4fd8f43d81c8ffba081afd46497b54a2b427849838946163785716072d
 MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-102/prompt-v1.md declared=4470 actual=4412
+MISMATCH authored_indexes[0].en_mirror path=docs/en/05-memory-runtime/README.md declared=2fac42740167293c941c1450437ca780d0488b5d actual=ad36c55cf572a94c60557104b3a51652b75668cb
+MISMATCH authored_indexes[0].zh_cn_mirror path=docs/zh-CN/05-memory-runtime/README.md declared=9881fd88fcbfe1b3760154503c8d13e781ad89f0 actual=a5c9e3d9406c31020c1943d03561a7f381a03829
+MISMATCH authored_indexes[1].en_mirror path=docs/en/09-security-governance/README.md declared=7c8b434c7161c47c5e35e0ffcadc736981996c4a actual=d5b9495f2a2461a66546291091a942bef778e9ed
+MISMATCH authored_indexes[1].zh_cn_mirror path=docs/zh-CN/09-security-governance/README.md declared=772025aa9da8afe706af6f607ae47e35c5020522 actual=3d9be0a60a6c53e450d606222ff666add553ce96
