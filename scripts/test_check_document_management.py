@@ -50,6 +50,14 @@ UNEXPECTED_SKIPS: list[str] = []
 ALLOWED_SKIPS = {
     "T68c a real 0o000 directory is reported by path (integration)":
         "running as root: mode bits cannot deny access",
+    "T36 directory symlink is rejected as a governed root":
+        "symlink creation unavailable on this platform",
+    "T37 governed_files does not descend into a symlinked root":
+        "symlink creation unavailable on this platform",
+    "T41 symlinked governed file is rejected":
+        "symlink creation unavailable on this platform",
+    "T42 governed file reached through a symlinked parent is rejected":
+        "symlink creation unavailable on this platform",
 }
 
 
@@ -144,6 +152,16 @@ def skip(name: str, why: str) -> None:
         UNEXPECTED_SKIPS.append(f"{name} ({why})")
     elif why.strip() != ALLOWED_SKIPS[name]:
         UNEXPECTED_SKIPS.append(f"{name}: skip reason {why!r} is not the registered one")
+
+def create_symlink_or_skip(names, link, target, *, target_is_directory=False):
+    """Create a link or account for every test that depends on that link."""
+    try:
+        link.symlink_to(target, target_is_directory=target_is_directory)
+    except (OSError, NotImplementedError):
+        for name in names:
+            skip(name, "symlink creation unavailable on this platform")
+        return False
+    return True
 
 
 def expect(
@@ -2864,28 +2882,23 @@ def run_symlink_boundary() -> None:
         victim = Path(outside) / "leaked.md"
         victim.write_text(doc(BASE), encoding="utf-8")
         link = root / "15-linked"
-        try:
-            link.symlink_to(Path(outside), target_is_directory=True)
-        except (OSError, NotImplementedError):
-            record("T36 directory symlink is rejected as a governed root", True,
-                   "  (symlinks unavailable on this platform; skipped)")
-            return
-
-        (root / "00-governance" / "document-scope-registry.yaml").write_text(
-            registry_text(ENFORCED_ROOTS + ["15-linked"]), encoding="utf-8"
-        )
-        errors = gate.check_scope_registry(root)
-        record(
+        if create_symlink_or_skip((
             "T36 directory symlink is rejected as a governed root",
-            any("symbolic link" in e or "symlink" in e for e in errors),
-            f"  got {errors}",
-        )
-
-        # And it must not be scanned even if someone names it.
-        scanned = {p.name for p in gate.governed_files(root)}
-        record("T37 governed_files does not descend into a symlinked root",
-               "leaked.md" not in scanned,
-               f"  scanned {sorted(scanned)}")
+            "T37 governed_files does not descend into a symlinked root",
+        ), link, Path(outside), target_is_directory=True):
+            (root / "00-governance" / "document-scope-registry.yaml").write_text(
+                registry_text(ENFORCED_ROOTS + ["15-linked"]), encoding="utf-8"
+            )
+            errors = gate.check_scope_registry(root)
+            record(
+                "T36 directory symlink is rejected as a governed root",
+                any("symbolic link" in e or "symlink" in e for e in errors),
+                f"  got {errors}",
+            )
+            scanned = {p.name for p in gate.governed_files(root)}
+            record("T37 governed_files does not descend into a symlinked root",
+                   "leaked.md" not in scanned,
+                   f"  scanned {sorted(scanned)}")
 
     # R1-01: a governed FILE that is a symlink. The registry check used
     # `is_file()`, which follows links, so it passed; the scanner skipped
@@ -2898,16 +2911,15 @@ def run_symlink_boundary() -> None:
         for rel in gate.GOVERNED_FILES:
             target = root / rel
             target.unlink()
-            try:
-                target.symlink_to(victim)
-            except (OSError, NotImplementedError):
-                record("T41 symlinked governed file is rejected", True,
-                       "  (symlinks unavailable; skipped)")
-                return
-        errors = gate.check_scope_registry(root)
-        record("T41 symlinked governed file is rejected",
-               any("not a regular file inside the repository" in e for e in errors),
-               f"  got {errors}")
+            if not create_symlink_or_skip(
+                ("T41 symlinked governed file is rejected",), target, victim
+            ):
+                break
+        else:
+            errors = gate.check_scope_registry(root)
+            record("T41 symlinked governed file is rejected",
+                   any("not a regular file inside the repository" in e for e in errors),
+                   f"  got {errors}")
 
     # R1-01b: the file is regular, but its PARENT is a link out of the repo.
     # `is_symlink()` on the final component cannot see this; containment is
@@ -2920,16 +2932,13 @@ def run_symlink_boundary() -> None:
         parent = root / "docs" / "governance"
         import shutil
         shutil.rmtree(parent)
-        try:
-            parent.symlink_to(victim_dir, target_is_directory=True)
-        except (OSError, NotImplementedError):
+        if create_symlink_or_skip((
+            "T42 governed file reached through a symlinked parent is rejected",
+        ), parent, victim_dir, target_is_directory=True):
+            errors = gate.check_scope_registry(root)
             record("T42 governed file reached through a symlinked parent is rejected",
-                   True, "  (symlinks unavailable; skipped)")
-            return
-        errors = gate.check_scope_registry(root)
-        record("T42 governed file reached through a symlinked parent is rejected",
-               any("not a regular file inside the repository" in e for e in errors),
-               f"  got {errors}")
+                   any("not a regular file inside the repository" in e for e in errors),
+                   f"  got {errors}")
 
     # R1-02: a hidden top-level directory. Excluding dot-directories from the
     # on-disk set meant `.new-architecture/` was neither governed, excluded,
@@ -2985,6 +2994,53 @@ def run_symlink_boundary() -> None:
         scanned = {p.name for p in gate.governed_files(root)}
         record("T47 backlog documents are actually scanned",
                "backlog.md" in scanned, f"  scanned {sorted(scanned)}")
+
+def run_symlink_unavailable_self_check() -> None:
+    """T129: unavailable symlink creation skips dependent cases, not T43-T47."""
+    from unittest.mock import patch
+
+    result_start = len(RESULTS)
+    skipped_start = len(SKIPPED)
+    unexpected_start = len(UNEXPECTED_SKIPS)
+    names_before = dict(RESULTS_BY_NAME)
+    with redirect_stdout(io.StringIO()):
+        with patch.object(Path, "symlink_to",
+                          side_effect=OSError("symlinks disabled")):
+            run_symlink_boundary()
+
+    new_results = RESULTS[result_start:]
+    new_skips = SKIPPED[skipped_start:]
+    expected_skips = [
+        "T36 directory symlink is rejected as a governed root",
+        "T37 governed_files does not descend into a symlinked root",
+        "T41 symlinked governed file is rejected",
+        "T42 governed file reached through a symlinked parent is rejected",
+    ]
+    independent = [
+        "T43 hidden top-level directory must be accounted for",
+        "T44 .git is structurally exempt from the registry",
+        "T45 backlog count disagreeing with the disk is an error",
+        "T46 backlog count that is not an integer is an error",
+        "T47 backlog documents are actually scanned",
+    ]
+    ok = (
+        new_skips == expected_skips
+        and len(new_results) == 5
+        and all(RESULTS_BY_NAME.get(name) is True for name in independent)
+        and sum(new_results) == 5
+        and not UNEXPECTED_SKIPS[unexpected_start:]
+    )
+    del RESULTS[result_start:]
+    del SKIPPED[skipped_start:]
+    del UNEXPECTED_SKIPS[unexpected_start:]
+    RESULTS_BY_NAME.clear()
+    RESULTS_BY_NAME.update(names_before)
+    record(
+        "T129 symlink-unavailable cases are skipped without erasing independent cases",
+        ok,
+        f"  skips={new_skips}; executed={len(new_results)}; "
+        f"independent={[RESULTS_BY_NAME.get(n) for n in independent]}",
+    )
 
 
 def run_scan_boundary() -> None:
@@ -5159,6 +5215,7 @@ def main() -> int:
     run_golden_corpus()
     run_schema_fail_closed()
     run_symlink_boundary()
+    run_symlink_unavailable_self_check()
     run_scan_boundary()
     run_declared_but_unread()
     run_unified_scan()

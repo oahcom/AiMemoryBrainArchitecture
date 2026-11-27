@@ -1,0 +1,106 @@
+work_item_id: AID-2026-280
+title: "Make symlink-unavailable boundary tests report bounded skips without erasing independent coverage"
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  Corrects test accounting only. Platform-dependent symlink cases become
+  explicitly registered skips when creation is unavailable. Independent
+  cases remain executable. No production gate decision, CI job, or branch
+  protection setting changes.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 242cf101c8b79007ad2fb8d9c89681224577188d
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: 242cf101c8b79007ad2fb8d9c89681224577188d
+  observed_max: 279
+  observed_occupied_count: 131
+  assigned_id: AID-2026-280
+  allocation_rule: "lowest unoccupied number above the observed maximum across all remote refs, verified against main INDEX and open PR bodies"
+  recheck_rule: "re-read all remote refs and the INDEX immediately before opening the pull request; if 280 is occupied at that moment, use the lowest free number in 281-290 and record the substitution here"
+
+scope:
+  objective: >-
+    Correct Issue #1268 so unavailable symlink creation is recorded as
+    bounded skips rather than successful test results, while preserving
+    execution of all independent cases and ensuring the complete suite
+    reaches honest summary accounting.
+  changes:
+    - path: scripts/test_check_document_management.py
+      detail: >-
+        Replace the three false-pass branches in run_symlink_boundary()
+        with registered skips. T36 and T37 share the directory-link
+        prerequisite; T41 and T42 receive independent skip accounting.
+        Preserve T43-T47 execution. Add a monkeypatch-based regression
+        self-check and guard other symlink-dependent fixture creation,
+        including run_scan_boundary(), against unavailable symlink support.
+    - path: 14-ai-development/work-items/AID-2026-280/
+      detail: >-
+        Record the work-item scope, implementation evidence requirements,
+        prompt snapshot, and session evidence.
+    - path: 14-ai-development/work-items/INDEX.md
+      detail: Append one registration row for AID-2026-280 only.
+  untouched:
+    - scripts/check_document_management.py
+    - Existing work-item directories and INDEX rows
+    - CI job definitions and names
+    - Branch protection and all sixteen required contexts
+    - Existing production gate decisions
+
+non_goals:
+  - Change production gate behaviour.
+  - Treat unavailable symlink creation as a passing test.
+  - Skip T43-T47 when symlink creation is unavailable.
+  - Add dependencies.
+  - Claim CI success, independent review, merge, or acceptance.
+
+evidence:
+  record: 14-ai-development/work-items/AID-2026-280/evidence.md
+  prompt: 14-ai-development/work-items/AID-2026-280/prompt-v1.md
+  session: 14-ai-development/work-items/AID-2026-280/session-evidence.md
+
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1268"
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-280/prompt-v1.md"
+    executed_prompt_sha256: 975c341219001f8e94a77f6bd8ce44d2a0fee6d6824c7108ee8741903e80e6eb
+    executed_prompt_bytes: 4632
+    executed_prompt_provenance: "USER_PROVIDED_ORDER; SNAPSHOT IS NOT A BYTE-FOR-BYTE CHAT EXPORT"
+    session_reference_status: "RECORDED_NOT_VERIFIED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-280/session-evidence.md"
+
+notes:
+  - >-
+    Issue-text correction 1: the measured reduction is eight records,
+    not two. The three early returns suppress T36, T37, T41, T42,
+    and T43-T47: nine expected records become one.
+  - >-
+    Issue-text correction 2: forcing symlink creation to fail across the
+    entire suite does not leave the suite green. The unguarded creation
+    at run_scan_boundary():3022 raises OSError after 201 records and
+    prevents the summary from printing. The green-run claim applies only
+    to isolated run_symlink_boundary() execution.
+  - >-
+    Issue-text correction 3: T42 is at line 2926 and T68c at line 3648,
+    a separation of 722 lines, not forty.
+  - >-
+    The three false-pass record calls and the existing bounded skip()
+    mechanism are verified against the supplied baseline. The issue's
+    core defect is valid even though its three quantitative descriptions
+    are inaccurate.
+  - >-
+    executed_prompt_sha256 and executed_prompt_bytes are deliberately
+    left as TO_BE_FILLED_BY_COORDINATOR. They must be computed from the
+    committed prompt-v1.md, not guessed or copied from another work item.
