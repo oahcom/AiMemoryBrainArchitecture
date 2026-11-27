@@ -203,3 +203,7 @@ lifecycle:
     closeout:
       status: NOT_RECORDED
   markers: {}
+
+documentation:
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference

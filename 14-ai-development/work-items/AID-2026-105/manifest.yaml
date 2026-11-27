@@ -76,3 +76,15 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-105/session-evidence.md
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-105/evidence.md"
+    relationship: reference
+  - path: "docs/en/14-ai-development/work-items/AID-2026-105/evidence.md"
+    relationship: reference
+  - path: "docs/zh-CN/14-ai-development/work-items/AID-2026-105/evidence.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-105/session-evidence.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-105/prompt-v1.md"
+    relationship: reference

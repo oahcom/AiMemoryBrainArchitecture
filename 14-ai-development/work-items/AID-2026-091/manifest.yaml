@@ -70,3 +70,15 @@ session_evidence:
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-091/session-evidence.md
     session_reference_reason: "The exact current ChatGPT session identifier is not exposed in this execution context; historical identifiers were not substituted."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-091/prompt-v1.md"
+    relationship: reference
+  - path: "07-agent-integration/applied-evidence-contract.md"
+    relationship: reference
+  - path: "docs/en/07-agent-integration/applied-evidence-contract.md"
+    relationship: reference
+  - path: "docs/zh-CN/07-agent-integration/applied-evidence-contract.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-091/session-evidence.md"
+    relationship: reference
