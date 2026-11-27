@@ -5,7 +5,7 @@
 # One AID maps to exactly one work_item_id.
 
 schema: 1
-updated_at_utc: "2026-11-27T04:05:00Z"
+updated_at_utc: "2026-11-27T05:30:00Z"
 entries:
   - id: AID-2026-082
     state: MERGED
@@ -197,6 +197,10 @@ entries:
     state: RESERVED
     carrier: "Issue #1341 (serialized merge-time work-item uniqueness gate)"
     note: "2026-11-27 重分配：241/242 均已被占用，261 属未 push 的本地 worktree 不可信；262 经 main + 已知分支扫描为空闲"
+  - id: AID-2026-281
+    state: RESERVED
+    carrier: "Issues #1128 #1129 #1136 #1138 #1139 (P0 authorization read boundary)"
+    note: "2026-11-27: main work-items tree occupies up to AID-2026-279; AID-2026-280 was consumed by PR #1384 branch naming; 281 scanned free on the main tree and on all open PR branches. Scope: authorize Memory/Event reads by I authority rather than caller-supplied Scope; partial-Scope readers must not learn hidden membership, aggregate refs or canonical identity."
   - id: AID-2026-117
     state: FREE
     note: "do not trust this row: external numbering is already at 188 in flight. Re-scan main's work-items tree immediately before any reservation push; the next plausibly free number is >= 189."
