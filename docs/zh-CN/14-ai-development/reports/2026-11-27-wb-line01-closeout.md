@@ -91,7 +91,7 @@ document_metadata:
 | 9 | canonical session_evidence | 未知 | 存在且强制 | 记录 | — | `c27b41cf…`（validate.py）、`393be84e…`（schema） | `git rev-parse HEAD:<path>` | 见 §5(a) | 无 |
 | 10 | AID-2026-096 evidence | 传闻「删除后恢复」 | main 全历史**从未存在** `evidence.md` | 记为 never-present | — | 见 §5(b) | `git log --all --diff-filter=D` | 空输出（2782 commits，非 shallow） | 恢复轨迹 `NOT_RECORDED` |
 | 11 | Work Item ID 字段 | 未知 | 096 manifest `work_item_id: AID-2026-096` / `id_status: FINAL`；#1249 用 `NONE` 合法 | 记录，不改 | — | `df16f4ad…` | `git show HEAD:…/AID-2026-096/manifest.yaml` | 见 §5(c) | 无 |
-| 12 | ATTRIBUTION.md | main 上不存在 | 已创建 | 新建 | 本分支提交 | `b97b8497…` | `git hash-object` | `5de608e236450287ac507cfc9e48024a5888bfb8` | 需自然人签署的事项不在本文件内 |
+| 12 | ATTRIBUTION.md | main 上不存在 | 已创建 | 新建 | 本分支提交 | `b97b8497…` | `git hash-object` | `33436d85743fcdee4ebbcc170af8bc9cc9626295` | 需自然人签署的事项不在本文件内 |
 | 13 | 本 closeout | 不存在 | 已创建 | 新建 | 本分支提交 | 见 §6 | `git hash-object` | 见 §6 | — |
 
 ---
@@ -246,7 +246,7 @@ $ git rev-list --count HEAD → 2782 ; .git/shallow 不存在
 
 | 路径 | blob SHA | bytes | 治理状态 |
 |---|---|---|---|
-| `ATTRIBUTION.md`（仓库根） | `5de608e236450287ac507cfc9e48024a5888bfb8` | 2581 | 根目录不在 `document-scope-registry.yaml` 的 `governed:` 内 → 无元数据/配对要求 |
+| `ATTRIBUTION.md`（仓库根） | `33436d85743fcdee4ebbcc170af8bc9cc9626295` | 2581 | 根目录不在 `document-scope-registry.yaml` 的 `governed:` 内 → 无元数据/配对要求 |
 | `14-ai-development/reports/2026-11-27-wb-line01-closeout.md`（本文件） | 见 §11 回读 | — | `14-ai-development` 受治理 → 带 `document_metadata`，并有 EN / ZH-CN 镜像 |
 | `docs/en/14-ai-development/reports/2026-11-27-wb-line01-closeout.md` | 见 §11 | — | EN 镜像 |
 | `docs/zh-CN/14-ai-development/reports/2026-11-27-wb-line01-closeout.md` | 见 §11 | — | ZH-CN 镜像 |
@@ -310,7 +310,7 @@ push 前两次重基，均未改动本记录内容：
 
 | commit | 内容 |
 |---|---|
-| `85c31fb2` | 新增 `ATTRIBUTION.md`（blob `5de608e236450287ac507cfc9e48024a5888bfb8`）与本文件 |
+| `85c31fb2` | 新增 `ATTRIBUTION.md`（blob `33436d85743fcdee4ebbcc170af8bc9cc9626295`）与本文件 |
 | `fbe38095`（amend 前 `b3ce2466`；重基前分别为 `bc3ab59b` / `b3ce2466`） | 本节回读提交（只改 §11，不触碰其他字节） |
 
 ### 门禁与测试（原始输出）
@@ -328,7 +328,7 @@ push 前两次重基，均未改动本记录内容：
 
 ```
 $ git rev-parse HEAD:ATTRIBUTION.md
-5de608e236450287ac507cfc9e48024a5888bfb8
+33436d85743fcdee4ebbcc170af8bc9cc9626295
 $ git rev-parse HEAD:14-ai-development/reports/2026-11-27-wb-line01-closeout.md
 <见 PR 描述中的最终回读>
 ```

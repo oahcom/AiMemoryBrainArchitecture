@@ -90,7 +90,7 @@ Branch: `closeout/line01-dev-baseline`, created in a separate worktree (`D:\code
 | 9 | canonical session_evidence | unknown | present and enforced | recorded | — | `c27b41cf…` (validate.py), `393be84e…` (schema) | `git rev-parse HEAD:<path>` | see §5(a) | none |
 | 10 | AID-2026-096 evidence | reported as "deleted then restored" | `evidence.md` **never existed** in main history | recorded as never-present | — | see §5(b) | `git log --all --diff-filter=D` | empty output (2782 commits, not shallow) | restoration trail `NOT_RECORDED` |
 | 11 | Work Item ID field | unknown | 096 manifest `work_item_id: AID-2026-096` / `id_status: FINAL`; #1249 uses `NONE` lawfully | recorded, unchanged | — | `df16f4ad…` | `git show HEAD:…/AID-2026-096/manifest.yaml` | see §5(c) | none |
-| 12 | ATTRIBUTION.md | absent on main | created | new file | this branch | `b97b8497…` | `git hash-object` | `5de608e236450287ac507cfc9e48024a5888bfb8` | items requiring natural-person signature are excluded |
+| 12 | ATTRIBUTION.md | absent on main | created | new file | this branch | `b97b8497…` | `git hash-object` | `33436d85743fcdee4ebbcc170af8bc9cc9626295` | items requiring natural-person signature are excluded |
 | 13 | This closeout | absent | created | new file | this branch | see §11 | `git hash-object` | see §11 | — |
 
 ---
@@ -245,7 +245,7 @@ Conclusion: the path **never existed** in main history, so no verifiable "delete
 
 | Path | blob SHA | bytes | Governance status |
 |---|---|---|---|
-| `ATTRIBUTION.md` (repository root) | `5de608e236450287ac507cfc9e48024a5888bfb8` | 2581 | root is not in `document-scope-registry.yaml` `governed:` → no metadata/pairing requirement |
+| `ATTRIBUTION.md` (repository root) | `33436d85743fcdee4ebbcc170af8bc9cc9626295` | 2581 | root is not in `document-scope-registry.yaml` `governed:` → no metadata/pairing requirement |
 | `14-ai-development/reports/2026-11-27-wb-line01-closeout.md` (this file) | see §11 readback | — | `14-ai-development` is governed → carries `document_metadata` and EN / ZH-CN mirrors |
 | `docs/en/14-ai-development/reports/2026-11-27-wb-line01-closeout.md` | see §11 | — | EN mirror |
 | `docs/zh-CN/14-ai-development/reports/2026-11-27-wb-line01-closeout.md` | see §11 | — | ZH-CN mirror |
@@ -309,7 +309,7 @@ Two rebases before push, neither changing this record's content:
 
 | commit | content |
 |---|---|
-| `85c31fb2` | adds `ATTRIBUTION.md` (blob `5de608e236450287ac507cfc9e48024a5888bfb8`) and this file |
+| `85c31fb2` | adds `ATTRIBUTION.md` (blob `33436d85743fcdee4ebbcc170af8bc9cc9626295`) and this file |
 | `fbe38095` (pre-amend `b3ce2466`; pre-rebase `bc3ab59b` / `b3ce2466`) | readback commit touching §11 only |
 
 ### Gates and tests (raw output)
@@ -327,7 +327,7 @@ Not run: Rust workspace / clippy / fmt / doctests (no Rust files changed); BMCP 
 
 ```
 $ git rev-parse HEAD:ATTRIBUTION.md
-5de608e236450287ac507cfc9e48024a5888bfb8
+33436d85743fcdee4ebbcc170af8bc9cc9626295
 $ git rev-parse HEAD:14-ai-development/reports/2026-11-27-wb-line01-closeout.md
 <see final readback in the PR description>
 ```
