@@ -1,0 +1,171 @@
+work_item_id: AID-2026-325
+title: "Decision record closing Issue #1247: session-level independent review"
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Documentation-only adjudication of an already merged implementation.
+  No executable behavior, canonical governance clause, schema, or CI workflow
+  is changed. The record explicitly preserves the limitations of
+  writer-declared session identity and the two outstanding implementation
+  residuals.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "5be0d93f305ca0c1790abe41b4eb23cd7c71a6a0"
+tracking_issue: "#1247"
+
+scope:
+  summary: >-
+    Produce the documentation decision record adjudicating the independent
+    review gate discrepancy reported in Issue #1247, recognizing the
+    session-level implementation already merged through PR #1325.
+  in_scope:
+    - "Record the derivation of the retired GitHub-identity criterion and why it fails in this repository."
+    - "Record the three considered paths and their acceptance criteria, costs, and dispositions."
+    - "Record the implementation and verification evidence for PR #1325."
+    - "Record the limitations of writer-declared session identity."
+    - "Record the dead _same_account diagnostic and missing CI wiring as separate unresolved residuals."
+    - "Produce four Markdown work records and this manifest."
+    - "Insert exactly one work-item row into INDEX.md."
+  files_out_of_scope:
+    - "14-ai-development/PR-GOVERNANCE-001.md"
+    - "scripts/governance/status_migration/check_status_gates.py"
+    - "scripts/governance/status_migration/test_status_migration.py"
+  change_boundary: >-
+    This work item is documentation only. It does not modify the canonical
+    governance clause, the executable checker, its tests, or CI workflows.
+    Any change to either identified implementation residual requires a
+    separately authorized carrier and independent acceptance criteria.
+
+evidence:
+  - "14-ai-development/work-items/AID-2026-325/evidence.md"
+  - "14-ai-development/work-items/AID-2026-325/session-evidence.md"
+  - "14-ai-development/work-items/AID-2026-325/prompt-v1.md"
+  - "PR #1325: fix(241): decide independent review by session, not by GitHub account"
+  - "Issue #1247, including independent verification and delivery comments"
+  - "Base commit 5be0d93f305ca0c1790abe41b4eb23cd7c71a6a0"
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-325/decision.md"
+    relationship: design
+  - path: "14-ai-development/work-items/AID-2026-325/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-325/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-325/prompt-v1.md"
+    relationship: reference
+
+
+acceptance_criteria:
+  - id: AC1
+    description: >-
+      The two discriminating independent-review behavioral tests pass:
+      one account with two sessions is independent, and two accounts
+      sharing one session are not independent.
+    measurement: >-
+      cd scripts/governance/status_migration && python -m unittest test_status_migration
+    expected_result: "31 tests pass; includes both discriminating tests."
+  - id: AC2
+    description: >-
+      The status gate checker has no remaining identity-comparison verdict
+      failure in the measured 130-manifest corpus.
+    measurement: "python scripts/governance/status_migration/check_status_gates.py"
+    expected_result: >-
+      130 total, 2 PASS / 128 FAIL; zero failures report
+      REVIEWED reviewer and implementer must be different identities.
+  - id: AC3
+    description: >-
+      The checker remains unwired to GitHub Actions workflows at the
+      measured base commit.
+    measurement: "git grep -l check_status_gates -- .github/workflows"
+    expected_result: "No output."
+  - id: AC4
+    description: >-
+      The current corpus contains no independent_review gate with PASS
+      disposition.
+    measurement: "python scripts/governance/status_migration/check_status_gates.py"
+    expected_result: "0 of 130 manifests carry independent_review status PASS."
+  - id: AC5
+    description: >-
+      The repository's measured direct collaborator permissions identify
+      exactly one account with push permission.
+    measurement: >-
+      GET /repos/oahcom/AiMemoryBrainArchitecture/collaborators?affiliation=direct&per_page=100
+    expected_result: "One entry, login oahcom, with push permission."
+  - id: AC6
+    description: >-
+      The measured recent merged pull request sample has matching author
+      and merger identities.
+    measurement: >-
+      GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/{number}
+      for each of the ten PR numbers listed in evidence.md
+    expected_result: "10 of 10 author=oahcom and merged_by=oahcom."
+  - id: AC7
+    description: >-
+      The decision record identifies the implementation limitations and
+      explicitly excludes both residual fixes from this carrier.
+    measurement: >-
+      Review 14-ai-development/work-items/AID-2026-325/decision.md
+      sections Carrier boundary and Residuals.
+    expected_result: >-
+      Both residuals are individually named, neither is claimed fixed,
+      and each requires its own carrier.
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    No independent reviewer has been assigned to this documentation record.
+    The decision-author session does not review or approve its own work.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: NOT_ASSIGNED
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    Documentation only. Produces manifest.yaml, decision.md, evidence.md,
+    session-evidence.md, and prompt-v1.md, together with exactly one
+    INDEX.md row. Records the already merged PR #1325 implementation.
+    Does not change code, tests, canonical clauses, schemas, or CI gates.
+    No CI success or merge for this documentation work item is claimed.
+  pull_request: 1456
+  merge_commit: ""
+  implementation_commit: "8d1ebd84ceeeb81dd84a02ed4dad4ddbb87ac78f"
+  ci_status: NOT_CLAIMED
+  files_changed:
+    - 14-ai-development/work-items/AID-2026-325/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-325/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-325/decision.md
+    - 14-ai-development/work-items/AID-2026-325/evidence.md
+    - 14-ai-development/work-items/AID-2026-325/session-evidence.md
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - "cd scripts/governance/status_migration && python -m unittest test_status_migration"
+    - "python scripts/governance/status_migration/check_status_gates.py <all 130 manifests>"
+    - "git grep -l check_status_gates -- .github/workflows"
+    - "python scripts/check_document_management.py --require-changed origin/main"
+    - "python scripts/check_traceability.py --index-only"
+    - "python scripts/ci/check_work_item_manifest_schema.py"
+    - "python scripts/ci/check_manifest_parse.py"
+    - "python scripts/ci/check_test_reachability.py"
+    - "python scripts/ci/check_repository_hygiene.py --base <base> --head <head>"
+
+session_evidence:
+  - role: DECISION_AUTHOR
+    issue_refs:
+      - "#1247"
+    implementing_ai_session: 6b0933ae-1874-83ec-b319-d3dc369b6258
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-325/prompt-v1.md
+    executed_prompt_sha256: 1d668da5123f966d207712fdfd8a21c52f48cf328c8895b5b5af9072a54f781e
+    executed_prompt_bytes: 4472
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-325/session-evidence.md

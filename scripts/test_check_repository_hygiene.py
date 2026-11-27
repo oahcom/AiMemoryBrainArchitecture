@@ -188,6 +188,16 @@ class RepositoryHygieneTests(unittest.TestCase):
 
         self.assert_admission_passes(base, head)
 
+    def test_prompt_commit_trace_baseline_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/work-items/AID-2026-291/baseline.json": (
+                '{"schema_version":1,"commit":"0000000000000000000000000000000000000000"}\\n'
+            ),
+        })
+
+        self.assert_admission_passes(base, head)
+
     def test_new_allowed_configuration_file_passes(self):
         base = self.seed_base()
         head = self.commit({
