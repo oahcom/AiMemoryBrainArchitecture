@@ -141,3 +141,14 @@ This review applies each row's existing closure condition literally. It does not
 - Metadata: decision_status=Approved; approved_version=003fa0063e1e359bc91de8c2950366f757bd1210
 - Authority evidence: GET /repos/oahcom/AiMemoryBrainArchitecture/issues/comments/7042461592; comment authored by repository Owner (OWNER association), establishing the delegation instrument.
 - Bounded result: Fact/Claim semantic and identity decision reconciled. Schema, DDL, public API, BMCP wire and runtime implementation remain outside this closure.
+
+
+### CF-010 reproducible evidence anchor
+
+- GET /repos/oahcom/AiMemoryBrainArchitecture/branches/session-c-agent-integration-2026-11-16
+  - commit.sha = 3e7640cbe8a3d5c1dc95b6a0b887a1c41f62916c
+  - commit.commit.tree.sha = db46a6d75cad94040cd5d5be236ce0c68e0964b8
+- GET /repos/oahcom/AiMemoryBrainArchitecture/git/trees/db46a6d75cad94040cd5d5be236ce0c68e0964b8?recursive=1
+  - truncated=false; tree.length=160; blob count=138
+- Compare incident a5dff993e5c2928a28deb777c41023cfe923366f to live C branch head 3e7640cbe8a3d5c1dc95b6a0b887a1c41f62916c
+  - ahead_by=11; behind_by=0; merge_base=incident commit
