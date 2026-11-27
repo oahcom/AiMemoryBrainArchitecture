@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-262/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-263/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -46,7 +46,7 @@ document_metadata:
   steward: "user-authorized operator (delegated by account owner)"
 ---
 
-# Session Evidence — AID-2026-262
+# Session Evidence — AID-2026-263
 
 ## Session role / use case
 
@@ -73,7 +73,7 @@ branch protection.
    `manifest.yaml` in another session's worktree whose branch head
    (`a7a252eb`) is the merge commit of PR #1364 and contains no AID-2026-261
    work. `AID-2026-255` was a mis-allocation by the dispatching session.
-2. `AID-2026-262` is free: `git ls-tree -d origin/main 14-ai-development/work-items/`
+2. `AID-2026-263` is free: `git ls-tree -d origin/main 14-ai-development/work-items/`
    contains no `AID-2026-26*` entry.
 3. **Issue #1341's checker half was already merged** while this branch was being
    prepared: AID-2026-279, `feat(ci): enforce merge-time work-item uniqueness`,
@@ -97,7 +97,7 @@ Authored on branch `work-item/aid-2026-262-merge-broker`:
 - `scripts/ci/test_work_item_merge_broker.py` — 11 tests: 7 structural
   assertions on the workflow text (no YAML dependency) and 4 composition tests
   that drive the merged checker through the two references the broker passes it.
-- `14-ai-development/work-items/AID-2026-262/{manifest.yaml,evidence.md,prompt-v1.md,session-evidence.md}`
+- `14-ai-development/work-items/AID-2026-263/{manifest.yaml,evidence.md,prompt-v1.md,session-evidence.md}`
   and one `INDEX.md` row.
 
 No existing file was deleted or rewritten, no workflow was modified, no required
@@ -142,7 +142,7 @@ Repository new-file admission passed: 6 new path(s) checked.
 
 ```
 $ python scripts/check_document_management.py --require-changed <base>
-(exit 0; no AID-2026-262 finding)
+(exit 0; no AID-2026-263 finding)
 ```
 
 ## What this session did not do, and does not claim

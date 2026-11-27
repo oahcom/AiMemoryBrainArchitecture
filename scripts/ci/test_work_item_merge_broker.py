@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for the serialized merge broker (AID-2026-262, issue #1341).
+"""Tests for the serialized merge broker (AID-2026-263, issue #1341).
 
 Two halves, because the broker has two halves.
 
@@ -29,7 +29,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 WORKFLOW = REPO / ".github" / "workflows" / "work-item-merge-broker.yml"
 GATE = REPO / "scripts" / "ci" / "check_work_item_uniqueness.py"
-ITEM = "14-ai-development/work-items/AID-2026-262"
+ITEM = "14-ai-development/work-items/AID-2026-263"
 ENV = {
     **os.environ,
     "GIT_AUTHOR_NAME": "broker-test",

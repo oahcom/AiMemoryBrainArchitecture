@@ -12,12 +12,12 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-262/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-263/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
       last_verified_date: "2026-11-27"
-      last_verification_note: "Local test runs are recorded verbatim. No CI run, merge SHA, or platform-side branch-protection read is claimed; the serialization boundary is declared unproven rather than asserted."
+      last_verification_note: "Local test runs and one live branch-protection read are recorded verbatim. No CI run or merge SHA is claimed; the race row stays unproven until a live two-pull-request experiment exists."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -46,7 +46,7 @@ document_metadata:
   steward: "user-authorized operator (delegated by account owner)"
 ---
 
-# AID-2026-262 鈥?Evidence
+# AID-2026-263 — Evidence
 
 **Attribution:** user-authorized operator (delegated by account owner)
 **Date:** 2026-11-27
@@ -55,19 +55,20 @@ document_metadata:
 
 ## 1. What this work item is, and what it deliberately is not
 
-Option (d) has two halves. The first 鈥?a checker that decides "is this newly
-introduced work-item directory already occupied on the latest target branch" 鈥?was merged into `main` by AID-2026-279 (`feat(ci): enforce merge-time work-item
-uniqueness`, PR #1372, commit `84790d36`, wiring in
-`.github/workflows/document-management.yml` lines 32-46). The second 鈥?a
-**serialized merge boundary** that evaluates every candidate against the main it
-will land on and merges with the head it judged 鈥?is not on `main`. AID-2026-279
-states the gap itself:
+Option (d) has two halves. The first — a checker that decides "is this newly
+introduced work-item directory already occupied on the latest target branch" —
+was merged into `main` by AID-2026-279 (`feat(ci): enforce merge-time work-item
+uniqueness`, commit `84790d36`, merged by PR #1372 as `386d8f57`), wired into the
+required GOV-DOC-002 job (`.github/workflows/document-management.yml` lines
+32-46). The second — a **serialized merge boundary** that evaluates every
+candidate against the `main` it will land on and merges with the head it judged —
+is not on `main`. AID-2026-279 states the gap itself:
 
 > The branch-protection /protection endpoint returned HTTP 403 to this
 > connection, so strict and enforce_admins are not asserted. Merge serialization
 > through strict freshness remains unverified until those two fields can be
 > independently read.
-> 鈥?`14-ai-development/work-items/AID-2026-279/evidence.md`, section "Serialization mechanism"
+> — `14-ai-development/work-items/AID-2026-279/evidence.md`, section "Serialization mechanism"
 
 This work item therefore adds **no second checker**. A second copy of the same
 rule under a second name is the defect #1331 reports, not a fix for it. It adds
@@ -80,7 +81,7 @@ Source: `https://api.github.com/repos/oahcom/AiMemoryBrainArchitecture/issues/13
 (comment id `3586480262`, author `oahcom`, created `2026-11-26T18:08:33Z`),
 retrieved 2026-11-27 by this session before the REST quota was exhausted.
 
-> ## Owner decision recorded 鈥?Option (d) selected
+> ## Owner decision recorded — Option (d) selected
 >
 > Owner adjudication, 2026-11-27. The mechanism chosen is a fourth option, not one of the three listed above.
 >
@@ -95,10 +96,10 @@ retrieved 2026-11-27 by this session before the REST quota was exhausted.
 >
 > This places uniqueness enforcement at the merge boundary, which is the only point that sees the real base, instead of at branch-local validation, which cannot see a sibling claim.
 >
-> ### Options (a), (b), (c) 鈥?not selected as standalone solutions
+> ### Options (a), (b), (c) — not selected as standalone solutions
 >
 > - **(a) a shared reservation registry**: needs reservation lifecycle and concurrency semantics of its own, so it adds a second source of truth to keep consistent with the branch.
-> - **(b) base-relative validation alone**: without serialization, two PRs can both pass against the same base and then race to merge 鈥?the defect survives.
+> - **(b) base-relative validation alone**: without serialization, two PRs can both pass against the same base and then race to merge — the defect survives.
 > - **(c) post-collision arbitration**: decides who yields after the collision has already happened, which is the current situation and is precisely what this issue reports.
 >
 > ### Status of this issue
@@ -158,7 +159,7 @@ retrieved 2026-11-27 by this session before the REST quota was exhausted.
 |---|---|---|
 | `.github/workflows/work-item-merge-broker.yml` | new | The serialized merge boundary: `labeled`/`workflow_dispatch` trigger, `concurrency: main-work-item-merge-broker`, `cancel-in-progress: false`, re-enumeration of open `merge-ready` pull requests, per-candidate re-read of main/head/checks/merge candidate, `sha=<head>` pinned merge. |
 | `scripts/ci/test_work_item_merge_broker.py` | new | 11 tests: 7 structural assertions on the workflow, 4 composition tests that drive the merged AID-2026-279 checker through the exact two references the broker passes it. |
-| `14-ai-development/work-items/AID-2026-262/*` | new | Registration, prompt snapshot, session evidence, this record. |
+| `14-ai-development/work-items/AID-2026-263/*` | new | Registration, prompt snapshot, session evidence, this record. |
 | `14-ai-development/work-items/INDEX.md` | modified | One row. |
 
 Not changed: `scripts/ci/check_work_item_uniqueness.py`, its tests, any
@@ -173,7 +174,8 @@ tree=$(git merge-tree --write-tree --no-messages "$base_sha" "$head_sha")
 ```
 
 A non-zero exit means the candidate has no tree at all (add/add conflict on the
-same path), and the pull request is rejected without a uniqueness verdict 鈥?there is nothing to judge.
+same path), and the pull request is rejected without a uniqueness verdict —
+there is nothing to judge.
 
 When the candidate does exist, `git merge-tree` guarantees it is the union of
 `main` and the head with no conflict, so the directories the candidate
@@ -184,7 +186,7 @@ would be a lie about what was read. The candidate tree OID is printed in the run
 log next to `base` and `head`, so the association between the verdict and the
 merge that followed is auditable.
 
-## 5. Acceptance evidence 鈥?row by row
+## 5. Acceptance evidence — row by row
 
 Legend: **ACQUIRED** = demonstrated by an artifact in this repository at this
 head. **NOT ACQUIRED** = not demonstrated. Nothing below is marked acquired on
@@ -193,13 +195,13 @@ the strength of a gate that merely ran.
 | # | Evidence | Status | Artifact / reason |
 |---|---|---|---|
 | 1 | Contract | ACQUIRED | Section 2 above is the Owner decision verbatim; section 3 is the implementation issue verbatim. The two cases are implemented by `scripts/ci/check_work_item_uniqueness.py` (`introduced_dirs` filtered by `exists(merge_base, directory)`, occupancy by `exists(base, path)`) and re-stated in the broker's rejection paths. |
-| 2 | Serialization | **NOT ACQUIRED** | `BROKER_SERIALIZATION_UNPROVEN`. The workflow serialises its own runs and re-reads main before every merge, but nothing on the platform restricts `main` to this path. Section 6 records what would close this row. |
+| 2 | Serialization | **NOT ACQUIRED** | `BROKER_SERIALIZATION_UNPROVEN`. The broker serialises its own runs and re-reads main before every merge, but nothing on the platform restricts `main` to this path. A platform mechanism does exist and was measured on 2026-11-27 (`strict: true` plus the required GOV-DOC-002 context); section 6 records what that does and does not prove. |
 | 3 | Positive test | ACQUIRED | `scripts/ci/test_work_item_merge_broker.py::test_unoccupied_new_directory_is_accepted` (exit 0, `introduced=1 occupied=0`) and, from AID-2026-279, `test_new_unoccupied_directory_passes`. Raw output in section 7. |
 | 4 | Negative test | ACQUIRED | `test_same_id_after_the_first_merge_is_rejected` (exit 1, `VIOLATION`) and AID-2026-279's `test_occupied_directory_is_rejected`. |
 | 5 | Additive test | ACQUIRED | `test_additive_file_under_existing_directory_is_accepted` (exit 0, `introduced=0 occupied=0`) and AID-2026-279's `test_additive_file_under_existing_directory_passes`. |
-| 6 | Race test | **PARTIAL** | The gate is shown to reject the second claimant once main has advanced (`test_same_id_after_the_first_merge_is_rejected`, which first shows both candidates passing against the shared base). That is the gate's half. The other half 鈥?that two broker runs cannot interleave 鈥?is not demonstrated: it needs a real run with two `merge-ready` pull requests, and no such run exists. |
+| 6 | Race test | **PARTIAL** | The gate is shown to reject the second claimant once main has advanced (`test_same_id_after_the_first_merge_is_rejected`, which first shows both candidates passing against the shared base). That is the gate's half. The other half — that two broker runs cannot interleave — is not demonstrated: it needs a real run with two `merge-ready` pull requests, and no such run exists. |
 | 7 | Exact-Head test | **PARTIAL** | The broker re-reads the head, aborts when the API head and the fetched head disagree, and passes `sha=<head_sha>` to the merge API so a head that moved is refused rather than merged unevaluated. That is structural: the assertion lives in `test_judges_a_fresh_merge_candidate_and_pins_the_head`, and no live merge has exercised it. |
-| 8 | Regression evidence | **PARTIAL** | `check_traceability.py --index-only` and `check_repository_hygiene.py` were executed locally on this head; raw output in section 7. No CI run is claimed for this head. |
+| 8 | Regression evidence | **PARTIAL** | `check_traceability.py --index-only`, `check_repository_hygiene.py`, `check_test_reachability.py`, `check_document_management.py` and `audit_runner_admission.py` were executed locally on this head; raw output in section 7 and `session-evidence.md`. No CI run is claimed for this head. |
 
 Rows 2, 6, 7, 8 are the reason this pull request is a draft and #1341 stays
 open.
@@ -208,7 +210,7 @@ open.
 
 The requirement is that two concurrent pull requests cannot both validate
 against the same obsolete base. Three things are needed for that, and this
-change supplies only the first:
+change supplies only the first two:
 
 1. **Serialised evaluation.** Supplied: one `concurrency` group with
    `cancel-in-progress: false`, and a re-read of `origin/main` at the top of
@@ -217,39 +219,62 @@ change supplies only the first:
    tree is computed against the `main` that exists at that moment, and the merge
    call names the exact head SHA.
 3. **No other path into `main`.** **Not supplied.** Branch protection would have
-   to require a context produced by this workflow 鈥?and this workflow produces
+   to require a context produced by this workflow — and this workflow produces
    no required context by design (adding one is out of scope for this work
    item). Any actor who can merge a pull request can merge it without the
    broker, after the required contexts pass.
 
-The in-repository record of the protection payload is dated and partial:
-`14-ai-development/PR-GOVERNANCE-001.md` records, measured 2026-11-25, sixteen
-required contexts, `strict: true`, `enforce_admins: {enabled: true}`,
-`allow_force_pushes: {enabled: false}`, `allow_deletions: {enabled: false}`, and
-no `required_pull_request_reviews`. `strict: true` would force a pull request to
-be up to date with `main` before merging, which is a real serialisation
-mechanism 鈥?but it is a *different* mechanism from this broker, it was not read
-by this session (the REST quota was exhausted; `GET /branches/main/protection`
-returned 403), and AID-2026-279 already records that it could not read it either.
-Reading a 2026-11-25 document is not a 2026-11-27 measurement.
+### 6.1 Measured on 2026-11-27T04:47:13Z
 
-What would close row 2, in order of cost:
+`GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection` returned
+HTTP 200 to this session. The earlier 403 was quota exhaustion (`remaining: 0`
+from `/rate_limit`), not a permission boundary; AID-2026-279 recorded the same
+403 and reasonably read it as unreadable. The payload says:
 
-- Require a context produced by this workflow on `main` **and** forbid direct
-  pushes; then a merge that skips the broker fails the required check. This is a
+- `required_status_checks.strict: true`
+- 16 required contexts, unchanged from the 2026-11-25 document, including
+  `GOV-DOC-002 metadata checks` — the job that runs the AID-2026-279 checker
+- `enforce_admins: {enabled: true}`
+- `GET /repos/.../rulesets` returned `[]`: no repository ruleset, so no merge
+  queue and no ruleset-based required workflow
+
+`strict: true` is a real serialisation mechanism, and it is a *different* one
+from this broker. It means a pull request cannot merge unless its head contains
+the current `main` tip. The merge of any other pull request moves `main`, which
+marks every remaining pull request out of date; bringing one back up to date
+creates a new head SHA whose required contexts have not run yet. The uniqueness
+verdict is one of those required contexts, so a verdict computed against an
+older base cannot be the verdict that merges.
+
+That narrows the gap to two claims that are still unproven:
+
+1. That the platform behaves as the flag implies under a real race — two pull
+   requests introducing the same ID, merged one after the other. This needs a
+   live experiment; no such run exists, so the race row stays PARTIAL.
+2. That no actor can merge around it. `enforce_admins: true` is measured and no
+   ruleset exists to bypass, but "no bypass exists" is an absence claim that a
+   single read cannot establish.
+
+So the correct statement is narrower than "serialization is unproven" and
+broader than "serialization is proven": **the platform mechanism is present and
+measured; its behaviour under a real race is not demonstrated, and this broker
+is not the exclusive path into `main`.** Row 2 stays NOT ACQUIRED until a
+two-pull-request race is replayed on the platform and its outcome recorded.
+
+What would close it, in order of cost:
+
+- Replay the race: two branches that both introduce `AID-2026-9xx`, both labelled
+  `merge-ready`, one broker run; record the second merge being refused or the
+  second check failing after the first merge moves `main`.
+- Or require a context produced by this workflow **and** forbid direct pushes;
+  then a merge that skips the broker fails the required check. That is a
   branch-protection change and needs the Owner, not this pull request.
-- Or run the merge through a GitHub merge queue, which is serialised by the
-  platform rather than by a `concurrency` group.
-
-Until one of those exists, the correct reading of a green broker run is "this
-pull request was judged against the main it merged into", not "concurrent
-merges are impossible".
 
 ## 7. Raw local output
 
 Host: Windows, Python 3.12.3, git 2.56.1. `python3` is a Microsoft Store stub on
-this host (exit 9009), so AID-2026-279's own tests cannot run here; they use
-`sys.executable` in this work item's tests instead.
+this host (exit 9009), so AID-2026-279's own tests cannot run here; this work
+item's tests use `sys.executable` for that reason.
 
 ```
 $ python scripts/ci/test_work_item_merge_broker.py
@@ -276,21 +301,46 @@ WORK-ITEM UNIQUENESS: PASS (base=386d8f57b02d8e3c511ff0e3980b9ce0af8b3028 candid
 ```
 
 ```
+$ python scripts/ci/audit_runner_admission.py
+GitHub-hosted runner policy: 29 job(s) audited, 0 violation(s)
+```
+
+```
+$ python scripts/ci/check_test_reachability.py
+Test reachability: 68 test files, 68 reachable, 0 unreachable
+Gate wiring: 20 gate scripts, 3 unwired, 3 baselined
+```
+
+```
+$ python scripts/check_traceability.py --index-only
+PASS TRACEABILITY: 0 requirements / 115 work items / 0 errors / 108 warnings
+```
+
+```
+$ python scripts/ci/check_repository_hygiene.py --base <base> --head <head>
+Work-item index membership version=2026-11-27.2 directories=126 linked=126
+Work-item manifest consistency version=2026-11-27.2 manifests=115 in_scope=101 excluded_by_record_type=5 unrecognized=9 violations=0
+Repository new-file admission passed: 6 new path(s) checked.
+```
+
+```
+$ python scripts/check_document_management.py --require-changed <base>
+PASS (incremental): no GOV-DOC-002 violations; 667 classified, 371 unclassified
+```
+
+```
 $ bash -n <broker run block>            # syntax of the workflow's shell body
 exit=0
 $ shellcheck -S warning <broker run block>
 SC2148 only: no shebang in a `run:` block, which is expected
 ```
 
-Regression checks on this head are recorded in `session-evidence.md`.
-
 ## 8. Not claimed
 
 - No CI run, required-context result, merge SHA or post-merge blob digest is
   claimed for this branch.
-- No live broker execution is claimed: the REST quota was exhausted before any
-  pull request could be created, so no `merge-ready` run exists.
-- No branch-protection read on 2026-11-27 is claimed.
+- No live broker execution is claimed: no pull request carried `merge-ready`
+  while this session ran, so the merge path has never executed.
 - No independent review is claimed.
 - AID-2026-279's tests were not executed on this host (see section 7); the
   merged gate's behaviour is demonstrated here only through the composition

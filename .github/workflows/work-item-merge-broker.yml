@@ -1,6 +1,6 @@
 name: Work-item merge broker
 
-# AID-2026-262 / issue #1341, Option (d) as selected in #1331.
+# AID-2026-263 / issue #1341, Option (d) as selected in #1331.
 #
 # A work-item id is allocated on a branch, so two branches can introduce the
 # same `14-ai-development/work-items/AID-2026-NNN/` directory and only discover
@@ -13,7 +13,7 @@ name: Work-item merge broker
 #   This workflow serialises *its own* runs (`concurrency` below) and re-reads
 #   main before every merge. It cannot make itself the only path into `main`:
 #   that requires branch protection to require this check, and changing branch
-#   protection is out of scope for this change (AID-2026-262 declares
+#   protection is out of scope for this change (AID-2026-263 declares
 #   `branch protection` out of scope). Until a rule requires this context and
 #   forbids the other merge paths, a merge that bypasses the broker is still
 #   possible, so the concurrency-uniqueness guarantee is NOT established by
@@ -21,7 +21,7 @@ name: Work-item merge broker
 #
 #   What the run does establish: every pull request it merges was judged against
 #   the main it was merged into, with the head SHA pinned in the merge call, and
-#   two broker runs cannot overlap. See AID-2026-262/evidence.md for the split
+#   two broker runs cannot overlap. See AID-2026-263/evidence.md for the split
 #   between what was measured and what remains unproven.
 #
 # `pull_request` (not `pull_request_target`): the label is applied by a
