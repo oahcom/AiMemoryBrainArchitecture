@@ -30,10 +30,7 @@ scope:
     - "No change to Issue #265 body or state"
     - "No Owner authority transfer or production adoption approval"
     - "No blanket RECONCILED transition"
-attribution:
-  operator: "user-authorized operator (delegated by account owner)"
-  date: "2026-11-27"
-  decision_note: "代理裁决，非自然人 Owner 签署"
+decision_note: "代理裁决，非自然人 Owner 签署"
 evidence:
   record: "14-ai-development/work-items/AID-2026-253/evidence.md"
   session: "14-ai-development/work-items/AID-2026-253/session-evidence.md"
