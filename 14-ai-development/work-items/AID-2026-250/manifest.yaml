@@ -2,6 +2,7 @@ work_item_id: AID-2026-250
 title: "Enforce version-pinned assessor metadata on the four REQ-01 assessment reports"
 class: GATE/CI/TEST
 risk: R2
+risk_rationale: "The checker is read-only and blocks only when the four scoped reports lack the required assessor metadata."
 status: DISPATCHED
 id_status: PROVISIONAL
 sponsor: USER-PRINCIPAL-DELEGATED
@@ -11,8 +12,8 @@ attribution: "user-authorized operator (delegated by account owner)"
 date: "2026-11-27"
 repository:
   name: oahcom/AiMemoryBrainArchitecture
-  base_branch: main
-  base_commit_sha: 386d8f57b02d8e3c511ff0e3980b9ce0af8b3028
+base_branch: main
+base_commit_sha: 386d8f57b02d8e3c511ff0e3980b9ce0af8b3028
 scope:
   objective: "Add assessor, assessed_version and evidence_baseline to the four established REQ-01 reports and enforce field completeness through the existing required work-item-manifest-schema job."
   files_changed:
@@ -42,6 +43,14 @@ acceptance:
   C8: "Actual checker output is recorded from CI on the exact PR Head."
   C9: "Historical baseline and provenance limits are disclosed; no contemporaneous signature is fabricated."
   C10: "Issue #262 remains open and its body is unchanged."
+evidence: "14-ai-development/work-items/AID-2026-250/evidence.md"
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-250/manifest.yaml"
+    relationship: normative
+  - path: "scripts/ci/check_req_assessment_signatures.py"
+    relationship: implementation
+  - path: "14-ai-development/work-items/AID-2026-250/evidence.md"
+    relationship: evidence
 session_evidence:
   - role: IMPLEMENTER
     issue_refs:
