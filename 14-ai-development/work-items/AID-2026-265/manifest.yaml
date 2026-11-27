@@ -1,0 +1,65 @@
+work_item_id: AID-2026-265
+title: "Repair the split AID-2026-190 row in the work-item INDEX and record that no required gate sees the class"
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: "One table row joined back into one physical line plus this work item's own registration. No checker, workflow, registry, branch-protection setting, or required context is changed, so the class of defect this repairs stays ungated; that gap is recorded as evidence and as a follow-up suggestion rather than fixed here."
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 5e30d49776a2ce75069227a41470fa7e4ae00b2e
+tracking_issue: "none - pre-existing defect on main; no tracking issue exists at the time of this record"
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: DISPATCHED_TASK_FILE
+scope:
+  objective: "Restore the AID-2026-190 row in 14-ai-development/work-items/INDEX.md to one complete nine-cell line, and record the defect, its provenance, its measurements, and the fact that every required context passes over it."
+  changes:
+    - "14-ai-development/work-items/INDEX.md"
+    - "14-ai-development/work-items/AID-2026-265/"
+  non_goals:
+    - "No repair of the other malformed rows found while measuring (AID-2026-071, P2-T2-MEMORY-SCHEMA); they are listed in evidence.md and left for their own change."
+    - "No new checker or workflow: adding a gate for this class is a separate decision with its own blast radius."
+    - "No change to scripts/, .github/workflows/, branch protection, or the 16 required contexts."
+    - "No merge, squash, rebase, force-push, or issue closure."
+evidence:
+  record: "14-ai-development/work-items/AID-2026-265/evidence.md"
+  session: "14-ai-development/work-items/AID-2026-265/session-evidence.md"
+  issue: "none (pre-existing main defect)"
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-265/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-265/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-265/prompt-v1.md"
+    relationship: evidence
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+    implementing_ai_session: "fix-1418-index-split-repair-2026-11-27"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-265/prompt-v1.md"
+    executed_prompt_sha256: "a93f0420bed23486c503256d86af7867b9c3c73b1f3f639e07385af5cdc40766"
+    executed_prompt_bytes: 4581
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-265/session-evidence.md"
+implementation:
+  status: IMPLEMENTED
+  summary: "Joined the two physical lines of the AID-2026-190 row and restored the missing 'v' of verification_status. Measured on origin/main 5e30d497 against the final tree: pipe separators 7+3 to 10, lines beginning with 'erification' 1 to 0, control characters none to none, table lines 206 to 207 (this work item's row; the joined continuation was never a table line), file bytes 218375 to 219128, LF count 326 to 326. The original commit 6c511ad2 was replayed onto cbdaf783 by cherry-pick; the automatic three-way merge duplicated three neighbouring rows instead of joining the pair, so the repair was redone by hand on the new base and the duplicate rows were discarded."
+  files_changed:
+    - "14-ai-development/work-items/INDEX.md"
+    - "14-ai-development/work-items/AID-2026-265/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-265/evidence.md"
+    - "14-ai-development/work-items/AID-2026-265/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-265/prompt-v1.md"
+  tests:
+    - "python scripts/check_traceability.py --index-only - PASS, 0 errors."
+    - "python scripts/check_document_management.py - no DM-01..DM-15 violation for the changed files; adoption baseline reported as before."
+    - "python scripts/ci/check_repository_hygiene.py --base <origin/main> --head <head> - exit 0, violations=0."
+    - "python scripts/ci/check_work_item_uniqueness.py --base <origin/main> --head <head> - PASS, directory newly introduced and unoccupied on the base."
+    - "BASE_SHA=<origin/main> HEAD_SHA=<head> python scripts/check_bilingual_docs.py - PASS."

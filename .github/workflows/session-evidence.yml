@@ -11,6 +11,12 @@ on:
     # (opened, synchronize, reopened) omits `edited`; list all four explicitly
     # so the behaviour is stated rather than inherited.
     types: [opened, synchronize, reopened, edited]
+  # All three jobs in this workflow are required contexts. The queue only
+  # reports checks produced by `merge_group`; a context that only listens to
+  # `pull_request` never appears there and blocks every merge. There is no
+  # `edited` activity in a merge group: its checks are requested once.
+  merge_group:
+    types: [checks_requested]
 
 permissions:
   contents: read
@@ -30,7 +36,9 @@ jobs:
       - name: Checkout trusted base revision
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.base.sha }}
+          # merge_group: the queue base. pull_request: the PR base. The base is
+          # the trusted tree in both cases; a candidate head must never be it.
+          ref: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_sha || github.event.pull_request.base.sha }}
           persist-credentials: false
 
       - name: Self-test the trusted base validator
@@ -69,7 +77,8 @@ jobs:
       - name: Checkout trusted base revision
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.base.sha }}
+          # merge_group: the queue base (see self-test-trusted-base).
+          ref: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_sha || github.event.pull_request.base.sha }}
           persist-credentials: false
 
       - name: Validate session evidence
@@ -80,6 +89,13 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set +e
+          # The merge_group payload carries no pull_request object. The queue
+          # ref is refs/heads/gh-readonly-queue/<base>/pr-<N>-<sha>; the
+          # validator needs that PR number to read the body it judges.
+          if [ -z "$PR_NUMBER" ]; then
+            PR_NUMBER=$(printf '%s' "$GITHUB_REF" | sed -n 's#.*/pr-\([0-9]\+\)-.*#\1#p')
+            export PR_NUMBER
+          fi
           python3 -m scripts.governance.session_evidence.validate
           result=$?
           if [ "$result" -eq 0 ]; then
@@ -124,6 +140,9 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
+          if [ -z "${PR_NUMBER:-}" ]; then
+            PR_NUMBER=$(printf '%s' "$GITHUB_REF" | sed -n 's#.*/pr-\([0-9]\+\)-.*#\1#p')
+          fi
           if ! digest=$(
             curl -sS -f \
               -H "Authorization: Bearer $GITHUB_TOKEN" \

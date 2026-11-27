@@ -53,6 +53,10 @@ concurrency:
 on:
   pull_request:
     branches: [main]
+  # Six required contexts live in this file. The queue only reports checks
+  # produced by `merge_group`, so every job here must also run for it.
+  merge_group:
+    types: [checks_requested]
   push:
     branches: [main]
   workflow_dispatch:
@@ -136,7 +140,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # merge_group: github.sha is the queue candidate head; pull_request:
+          # the PR head. Never the base.
+          ref: ${{ github.event.merge_group.head_sha || github.event.pull_request.head.sha || github.sha }}
 
       # HARD GATE, not a ratchet. GAP-09 is closed: `6897e53c` registered all
       # 5599 constraints across the 32 schemas, and this audit now exits 0 on
@@ -365,12 +371,19 @@ jobs:
           python-version: "3.13"
       - name: Install pinned YAML parser
         run: python -m pip install PyYAML==6.0.2
-      - name: Resolve current main comparison base
+      - name: Resolve comparison base (current main for PR; pre-push main for push)
         shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_BEFORE: ${{ github.event.before }}
         run: |
           set -euo pipefail
-          git fetch --no-tags origin main
-          BASE_SHA="$(git rev-parse FETCH_HEAD)"
+          if [[ "$EVENT_NAME" == "push" && "$EVENT_BEFORE" =~ ^[0-9a-f]{40}$ ]]; then
+            BASE_SHA="$EVENT_BEFORE"
+          else
+            git fetch --no-tags origin main
+            BASE_SHA="$(git rev-parse FETCH_HEAD)"
+          fi
           echo "BASE_SHA=$BASE_SHA" >> "$GITHUB_ENV"
           echo "GITHUB_BASE_SHA=$BASE_SHA" >> "$GITHUB_ENV"
       - name: Run prompt-to-commit trace regression tests

@@ -11,6 +11,10 @@ concurrency:
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+  # `GOV-DOC-002 metadata checks` is required; the queue only reports checks
+  # produced by `merge_group`.
+  merge_group:
+    types: [checks_requested]
   push:
     branches: [main]
 
@@ -45,6 +49,8 @@ jobs:
         env:
           PR_BASE: ${{ github.event.pull_request.base.sha }}
           BASE_REF: ${{ github.event.pull_request.base.ref }}
+          EVENT_NAME: ${{ github.event_name }}
+          MG_BASE: ${{ github.event.merge_group.base_sha }}
           PUSH_BEFORE: ${{ github.event.before }}
           CANDIDATE_SHA: ${{ github.sha }}
         run: |
@@ -54,6 +60,17 @@ jobs:
             git fetch origin "+refs/heads/${BASE_REF}:refs/remotes/origin/${BASE_REF}"
             python3 scripts/ci/check_work_item_uniqueness.py \
               --base "refs/remotes/origin/$BASE_REF" \
+              --head "$CANDIDATE_SHA"
+          elif [ "$EVENT_NAME" = "merge_group" ]; then
+            # A merge group carries its own base. There is no branch ref to
+            # refresh here, and pull_request.base.sha is never a fallback: an
+            # unusable base is INCOMPLETE (2), not a silent pass.
+            if ! [[ "$MG_BASE" =~ ^[0-9a-fA-F]{40}$ ]] || [ "$MG_BASE" = "0000000000000000000000000000000000000000" ]; then
+              echo "::error::merge_group carries no usable base_sha; the uniqueness verdict is INCOMPLETE"
+              exit 2
+            fi
+            python3 scripts/ci/check_work_item_uniqueness.py \
+              --base "$MG_BASE" \
               --head "$CANDIDATE_SHA"
           elif [ -n "$PUSH_BEFORE" ] && [ "$PUSH_BEFORE" != "0000000000000000000000000000000000000000" ]; then
             python3 scripts/ci/check_work_item_uniqueness.py \
@@ -69,7 +86,7 @@ jobs:
       # diffs against github.event.before (GAP-02).
       - name: Validate document metadata (changed files must be classified)
         env:
-          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_BASE: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_sha || github.event.pull_request.base.sha }}
           PUSH_BEFORE: ${{ github.event.before }}
         run: |
           REF=""
