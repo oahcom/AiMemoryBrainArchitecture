@@ -66,6 +66,6 @@ Reuse the existing `Schema non-empty audit (hard gate)` job. No new job/context,
 - This is a normal two-parent merge commit; no rebase, squash or force update was used.
 
 ## Base synchronization and PR traceability
-- Latest observed main incorporated by merge commit: `6f597e2dd8b6e879bf7539aa16b88a39504d9c49`.
-- Merge commit on the work branch: `bec645a11ab7cd206d04e6bb50f8e9d078adb7b1` (two parents; no rebase, squash or force update).
+- Latest observed main incorporated by merge commit: `242cf101c8b79007ad2fb8d9c89681224577188d`.
+- Merge commit on the work branch: `83500c919e19f1ad02df617d7cf07a5aa08f6453` (two parents; no rebase, squash or force update).
 - PR: #1388. The PR description now includes the required per-Issue mapping table for #262.
