@@ -43,7 +43,7 @@ document_metadata:
     source: null
     en: null
     zh-CN: null
-steward: "user-authorized operator (delegated by account owner)"
+  steward: "user-authorized operator (delegated by account owner)"
 ---
 
 # AID-2026-279 Prompt Snapshot
