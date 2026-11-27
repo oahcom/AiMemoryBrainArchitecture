@@ -1,0 +1,65 @@
+work_item_id: AID-2026-267
+title: >-
+  Enforce the live required ⊆ declared ⊆ produced check-context chain with an explicit INCOMPLETE exit
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  The change strengthens an existing CI checker and its self-tests. It reads the
+  public branch endpoint already used by the checker, introduces no secret,
+  snapshot, schedule, workflow job, required context or branch-protection edit.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: f18adc9fa1d06837433a09498f5297bf13b35756
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: f18adc9fa1d06837433a09498f5297bf13b35756
+  assigned_id: AID-2026-267
+  allocation_rule: >-
+    Checked the all-state PR listing (up to 100 entries), the Work Items INDEX,
+    and the requested ID's manifest/evidence paths; AID-2026-267 was not found.
+  recheck_rule: >-
+    Recheck the all-state PR listing, INDEX, and branch names immediately before
+    opening the PR; renumber only within the user-reserved 267-269 range.
+scope:
+  objective: >-
+    Enforce required ⊆ declared ⊆ produced by reading the live main branch
+    protection payload and reporting both relevant set differences. Preserve
+    exit 1 for repository violations and make unavailable payload input exit 2.
+  changes:
+    - path: "scripts/check_declared_check_contexts.py"
+      detail: "Enforce required-not-declared and declared-not-produced; print the three counts and both differences; identify unavailable input and reason with exit 2."
+    - path: "scripts/test_check_declared_check_contexts.py"
+      detail: "Inject a required-only context, transport exception and None payload; assert exact names, input and exit codes."
+    - path: "14-ai-development/work-items/AID-2026-267/"
+      detail: "Record manifest, prompt snapshot, implementation evidence and session evidence."
+    - path: "14-ai-development/work-items/INDEX.md"
+      detail: "Append the AID-2026-267 registration row."
+  untouched:
+    - "branch protection settings and required status-check contexts"
+    - "workflow job names and workflow wiring"
+    - "Issue #134 state and body"
+    - "all other PRs and Issues"
+non_goals:
+  - "Storing a snapshot of required contexts"
+  - "Adding secrets, scheduled tasks, or new workflow jobs"
+  - "Changing the branch-protection configuration"
+evidence:
+  record: 14-ai-development/work-items/AID-2026-267/evidence.md
+  prompt: 14-ai-development/work-items/AID-2026-267/prompt-v1.md
+  session: 14-ai-development/work-items/AID-2026-267/session-evidence.md
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-267/prompt-v1.md"
+    executed_prompt_provenance: "STRUCTURED_SCOPE_SNAPSHOT"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-267/session-evidence.md"
