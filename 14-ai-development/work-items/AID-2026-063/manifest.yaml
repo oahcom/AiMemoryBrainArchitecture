@@ -11,8 +11,8 @@ prompt_id: AID-2026-063-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-063/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 411a0be8d6e73a4953f86740b60418db81bb96da7be3f8696a82bf880781b4b5
-prompt_bytes: 2633
+prompt_sha256: d8241a624a0174a16607a1cfddb1dc81b0a57220fdd8ef4f02fc403ecbef0c31
+prompt_bytes: 2670
 
 # ---------------------------------------------------------------------------
 # Stage C of WO-01. Stages A (#1027) and B (#1033) made the workspace test run
@@ -71,8 +71,8 @@ session_evidence:
     issue_refs:
     implementing_ai_session: session-req01-r35
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-063/prompt-v1.md
-    executed_prompt_sha256: 4cf341c81da42e332e7e352a47f6fa8eb9e82e2b266134dbe2497b874629efd8
-    executed_prompt_bytes: 2691
+    executed_prompt_sha256: d8241a624a0174a16607a1cfddb1dc81b0a57220fdd8ef4f02fc403ecbef0c31
+    executed_prompt_bytes: 2670
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-063/session-evidence-wo01c.md

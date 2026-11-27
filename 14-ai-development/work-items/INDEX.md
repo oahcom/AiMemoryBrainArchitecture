@@ -1,6 +1,7 @@
 ---
 document_metadata:
   domain: ai-development
+  steward: "Architecture Governance"
   role: index
 
   lifecycle:

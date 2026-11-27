@@ -17,8 +17,8 @@ prompt_id: AID-2026-089-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-089/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: e75f603f054dbd8cc433f54c1f125ee31d60b46653caf8f76c63703756409064
-prompt_bytes: 4200
+prompt_sha256: 38bb404a6e5511ec7255c11feb7a759a6b3ad823659463a89836f617ee6b298f
+prompt_bytes: 4237
 authorization:
   authorized_by: "user-authorized operator (delegated by account owner)"
   decision_date: "2026-11-26"
@@ -83,8 +83,8 @@ session_evidence:
       - "#1211"
     implementing_ai_session: NOT_RECORDED
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-089/prompt-v1.md
-    executed_prompt_sha256: 7682d9287605c24109c6502963b0dd73f133a46b608ba495bc0a0da10292a903
-    executed_prompt_bytes: 4258
+    executed_prompt_sha256: 38bb404a6e5511ec7255c11feb7a759a6b3ad823659463a89836f617ee6b298f
+    executed_prompt_bytes: 4237
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_reason: "The exact current ChatGPT session identifier is not exposed in the available execution context; historical identifiers were not substituted."
     session_reference_status: NOT_RECORDED
