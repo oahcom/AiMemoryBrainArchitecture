@@ -185,33 +185,36 @@ class BlobPinsTest(unittest.TestCase):
         )
 
     def test_path_key_identity_uses_en_mirror_path_not_neighbour_file(self):
-        """Kills a resolver that pairs en_mirror_blob with another sibling path."""
-        data_x = b"en mirror file X\n"
-        data_y = b"neighbour file Y\n"
-        digest_x = self.blob_sha(data_x)
-        digest_y = self.blob_sha(data_y)
+        """Kills a resolver that prefers root when resolving en_mirror."""
+        data_root = b"root file bytes\n"
+        data_mirror = b"en mirror file bytes\n"
+        digest_root = self.blob_sha(data_root)
+        digest_mirror = self.blob_sha(data_mirror)
         manifest = (
             "work_item_id: AID-2026-900\n"
             "baseline_and_source_evidence:\n"
             "  authored_indexes:\n"
-            "    - en_mirror: file-x.md\n"
-            f"      en_mirror_blob: \"{digest_y}\"\n"
+            "    - root: file-root.md\n"
+            f"      root_blob: \"{digest_root}\"\n"
+            "      en_mirror: file-en.md\n"
+            f"      en_mirror_blob: \"{digest_root}\"\n"
         )
         commit_tree(self.root, {
-            "file-x.md": data_x,
-            "file-y.md": data_y,
+            "file-root.md": data_root,
+            "file-en.md": data_mirror,
             "14-ai-development/work-items/AID-2026-900/manifest.yaml": manifest,
         })
 
         code, out, err = self.run_gate()
         self.assertEqual(code, 1, out + err)
-        self.assertIn("pins=1 ok=0 mismatch=1 path_missing=0 incomplete=0", out)
+        self.assertIn("pins=2 ok=1 mismatch=1 path_missing=0 incomplete=0", out)
         self.assertIn(
-            f"MISMATCH authored_indexes[0].en_mirror path=file-x.md "
-            f"declared={digest_y} actual={digest_x}",
+            f"MISMATCH authored_indexes[0].en_mirror path=file-en.md "
+            f"declared={digest_root} actual={self.blob_sha(data_mirror)}",
             out,
         )
-        self.assertNotIn("path=file-y.md", out)
+        self.assertNotIn("MISMATCH authored_indexes[0].root", out)
+        self.assertNotIn("path=file-root.md declared=", out)
 
     def test_cross_identity_isolation_reports_only_the_wrong_pin(self):
         """Kills a resolver that reuses one identity's digest while checking another."""
@@ -343,6 +346,41 @@ class BlobPinsTest(unittest.TestCase):
         )
         self.assertNotIn("MISMATCH", out)
         self.assertNotIn("INCOMPLETE", out)
+
+    def test_related_evidence_mirror_pair_substitution_is_named(self):
+        """Kills a resolver that swaps both related-evidence mirror identities."""
+        data_en = b"related English mirror bytes\n"
+        data_zh = b"related Chinese mirror bytes\n"
+        digest_en = self.blob_sha(data_en)
+        digest_zh = self.blob_sha(data_zh)
+        document = {
+            "work_item_id": "AID-2026-900",
+            "related_evidence": [
+                {
+                    "en_mirror": "related-en.md",
+                    "en_mirror_blob": digest_zh,
+                    "zh_cn_mirror": "related-zh.md",
+                    "zh_cn_mirror_blob": digest_zh,
+                }
+            ],
+        }
+        commit_tree(self.root, {
+            "related-en.md": data_en,
+            "related-zh.md": data_zh,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                yaml.safe_dump(document, sort_keys=False),
+        })
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 1, out + err)
+        self.assertIn("pins=2 ok=1 mismatch=1 path_missing=0 incomplete=0", out)
+        self.assertIn(
+            f"MISMATCH related_evidence[0].en_mirror path=related-en.md "
+            f"declared={digest_zh} actual={digest_en}",
+            out,
+        )
+        self.assertNotIn("MISMATCH related_evidence[0].zh_cn_mirror", out)
+        self.assertNotIn("MISMATCH related_evidence[0].en_mirror path=related-zh.md", out)
 
 
 if __name__ == "__main__":
