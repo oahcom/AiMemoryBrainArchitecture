@@ -58,7 +58,7 @@ Repository hygiene workflow run: `45939439751`; job `140310147849`; exact workfl
 
 - Main raw summary: `main=386d8f57b02d8e3c511ff0e3980b9ce0af8b3028 manifests=115 pins=178 ok=95 mismatch=83 path_missing=0 incomplete=0`
 - #1220 raw summary: `main=9a2063ae1fa5d905b3817cd4eddba065a06daa73 manifests=108 pins=162 ok=79 mismatch=83 path_missing=0 incomplete=0`
-- Candidate raw summary: `main=b2a2b37cbc5bdd74d7fd5511a5e91dd2662f517e manifests=116 pins=180 ok=97 mismatch=83 path_missing=0 incomplete=0`
+- Candidate raw summary: `main=8fff15af8c3e4d0138d2fdafd42fa038ee17467b manifests=116 pins=180 ok=97 mismatch=83 path_missing=0 incomplete=0`
 
 The 83 baseline entries are 40 historical prompt SHA-256 mismatches, 40 prompt byte-count mismatches, and 3 AID-2026-100 related-evidence Git blob mismatches. No missing paths or incomplete commit lookups were observed in these scans. The current-main baseline file contains all 83 raw mismatch lines; the ratchet will reject any new item and any item that stops failing.
 
