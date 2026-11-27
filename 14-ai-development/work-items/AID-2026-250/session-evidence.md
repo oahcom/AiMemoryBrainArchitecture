@@ -54,9 +54,15 @@ The user authorized GitHub-connector implementation on `w7/aid-250`: add assesso
 
 # AI-visible output
 
-Current main base: `386d8f57b02d8e3c511ff0e3980b9ce0af8b3028`. Branch `w7/aid-250` created and PR #1388 opened. The four report paths are the SYS-RISK-001 EN/ZH-CN pair and architecture-complexity-assessment EN/ZH-CN pair. Historical provenance limitations are disclosed; no missing session UUID or human identity is invented.
+Initial branch base: `386d8f57b02d8e3c511ff0e3980b9ce0af8b3028`. Before CI validation, latest observed main `a588cd9914949c2c9db7b2c5704d906fd3f05b70` was incorporated by a normal two-parent merge commit `8a6fe56b0a2a10018a6dbda1c546d7002eb3a64a`; PR #1388 targets main at that base. The four report paths are the SYS-RISK-001 EN/ZH-CN pair and architecture-complexity-assessment EN/ZH-CN pair. Historical provenance limitations are disclosed; no missing session UUID or human identity is invented.
 
-Verification state: PR-head checker and tests PENDING; exact-head required checks PENDING; independent exact-Head review PENDING; merge NOT PERFORMED. Issue #262 remains OPEN and its body is unchanged.
+Verification state at the time this evidence snapshot was written: PR-head checker and tests PENDING; exact-head required checks PENDING; independent exact-Head review PENDING; merge NOT PERFORMED. The first Session Evidence workflow run failed because the PR description lacked the required per-Issue mapping table at that run's evaluation time. The PR description was subsequently amended to include the exact three-column mapping table (`Related Issue`, `Issue AI-assisted work`, `Evidence refs for this Issue`); a fresh exact-head run is required to validate the amended body. Issue #262 remains OPEN and its body is unchanged.
 
 署名：user-authorized operator (delegated by account owner)
 日期：2026-11-27
+
+## Verification / current state
+
+- PR #1388 description now contains the required per-Issue mapping row: `#262 | YES | 14-ai-development/work-items/AID-2026-250/session-evidence.md`.
+- The PR body was edited after the first Session Evidence failure; the failed run evaluated the earlier body and must not be treated as evidence against the corrected body.
+- At this snapshot, the required checks are not yet all green. No merge has been attempted.
