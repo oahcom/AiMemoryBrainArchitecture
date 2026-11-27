@@ -99,6 +99,9 @@ The decisive clock is **canonical publication/effectiveness (merge to main)**, n
 
 **No, not on the evidence as written.** A fan-out proxy is relevant to work-scope dispersion and may inform a future consideration, but AID-254's evidence says it is not a claim about elapsed time, cognitive load, or observed human session count. It does not demonstrate that either human engineering attention cost or Agent context-window/token cost was actually assessed against an agreed REQ-04 acceptance boundary. The threshold of 3 roots is derived from the sample mean of 2.90; it is a scope proxy budget, not an empirically validated attention-cost threshold.
 
+**S1 arithmetic finding (accepted, not disputed):** The independently reported rerun of `python3 scripts/measure_attention_context_cost.py --ref a7a252eb670b31066a0ffea35dc28cbe6ef5b836 --limit 10` matches all 15 output lines in AID-2026-254/evidence.md §2, including `mean_roots_per_work_item=2.90 (29/10)`, `max_roots_per_work_item=5`, and `distribution=1:1, 2:2, 3:5, 4:1, 5:1`. This validates EXIT-1's arithmetic and reproducibility. It does not change the construct measured (declared root/domain fan-out), nor does it supply authority to designate that proxy as AC8 acceptance. The ruling is **ABSENT**, not PARTIAL: the proxy does not record the attention/context-switching cost dimension itself.
+
+
 Concrete follow-up required before AC8 can be marked satisfied:
 1. **Define the measurement population and unit:** Work Item / PR / review round; separately record human reviewer context handoffs and Agent context-window/token events. Do not combine unlike units.
 2. **Record actual human transition events** in session evidence using pseudonymous role/session identifiers, ordered timestamp, source context, destination context, handoff reason, and reorientation duration. Do not record personal content.
