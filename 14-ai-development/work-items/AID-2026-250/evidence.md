@@ -64,3 +64,8 @@ Reuse the existing `work-item-manifest-schema` job. No new job/context, branch-p
 ## Base synchronization
 - A merge commit incorporated latest observed main `a588cd9914949c2c9db7b2c5704d906fd3f05b70` into the work branch before exact-Head verification: `8a6fe56b0a2a10018a6dbda1c546d7002eb3a64a`.
 - This is a normal two-parent merge commit; no rebase, squash or force update was used.
+
+## Base synchronization and PR traceability
+- Latest observed main incorporated by merge commit: `6f597e2dd8b6e879bf7539aa16b88a39504d9c49`.
+- Merge commit on the work branch: `bec645a11ab7cd206d04e6bb50f8e9d078adb7b1` (two parents; no rebase, squash or force update).
+- PR: #1388. The PR description now includes the required per-Issue mapping table for #262.
