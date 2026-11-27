@@ -40,6 +40,7 @@ document_metadata:
     source: null
     en: null
     zh-CN: null
+  steward: "user-authorized operator (delegated by account owner)"
 ---
 # 裁决 R5 · 编号改为 AID-2026-291，立即执行，不要再问
 
