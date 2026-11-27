@@ -46,7 +46,7 @@ document_metadata:
 
 ## Scope and baseline
 - Repository: `oahcom/AiMemoryBrainArchitecture`
-- Base: `386d8f57b02d8e3c511ff0e3980b9ce0af8b3028`
+- Initial base: `386d8f57b02d8e3c511ff0e3980b9ce0af8b3028`
 - Branch: `w7/aid-250`
 - PR: #1388
 - Related Issue: #262
@@ -61,6 +61,10 @@ document_metadata:
 | [#7149369280](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/262#issuecomment-7149369280) | Round 29 final investigation assessment | REQ-01 Risk Assessment Owner — session `6b0633de-b128-83ec-b601-d6931b084344` | `a33b482e5da5f78c4144e85dd9aef0f3f2e54fbf` | `main@a33b482e5da5f78c4144e85dd9aef0f3f2e54fbf` |
 
 The four comment bodies were updated by appending a dedicated metadata block. Existing assessment text, findings, severity, disposition, and historical author declarations were retained. The two later comments (R26/R29) were selected as the final assessment reports; AC8 independent review comment #7153382475 and Owner adjudication #7153880925 are review/adjudication records, not assessment outputs.
+
+## Branch synchronization
+- Latest main synchronized: `756e1e25d735f526254fc3241b47880fef527b24`.
+- Work-branch merge commit: `b6680b461c0f096d342b7b9855f84b3c0283146f` (two parents; no rebase, squash, or force update).
 
 ## Historical provenance boundary
 The metadata is a retrospective attachment derived from the author/session and baseline already recorded in each original comment. It does not claim that the three fields were present at publication time, does not create a contemporaneous signature, and does not constitute risk acceptance or approval.
