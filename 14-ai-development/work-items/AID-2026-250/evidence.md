@@ -16,9 +16,9 @@ document_metadata:
         - "14-ai-development/work-items/AID-2026-250/manifest.yaml"
       revocation: null
     evidence_verification:
-      verification_status: Unverified
-      last_verified_date: null
-      last_verification_note: "CI and post-merge verification pending."
+      verification_status: Verified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "Exact PR-head checker and tests passed on d2fe8598bb4d140f62f23060c644845f72ebec36; post-merge blob verification pending."
     usage_status: Active
     modification_status: Active-Modified
     supersession:
@@ -56,7 +56,21 @@ All four reports identify historical baseline `b372b62c640a2b656e54b6db62a4ee67d
 
 ## Checker evidence
 - Checker and tests: `scripts/ci/check_req_assessment_signatures.py`, `scripts/ci/test_check_req_assessment_signatures.py`.
-- Exact PR Head execution and output: PENDING CI; no unexecuted result is represented as PASS.
+- Exact PR Head: `d2fe8598bb4d140f62f23060c644845f72ebec36`.
+- Workflow: Existing gates, run 1969 / run ID `45942503331`; job `Schema non-empty audit (hard gate)`, job ID `140319749141`.
+- Checkout log explicitly records `ref: d2fe8598bb4d140f62f23060c644845f72ebec36`, not the synthetic PR merge ref.
+- Checker output:
+```text
+PASS reviews/architecture/SYS-RISK-001.en.md: assessor, assessed_version, evidence_baseline
+PASS reviews/architecture/SYS-RISK-001.zh-CN.md: assessor, assessed_version, evidence_baseline
+PASS reviews/complexity/architecture-complexity-assessment.en.md: assessor, assessed_version, evidence_baseline
+PASS reviews/complexity/architecture-complexity-assessment.zh-CN.md: assessor, assessed_version, evidence_baseline
+SUMMARY records=4 failures=0
+```
+- Regression tests: `Ran 5 tests in 0.008s`; `OK`.
+- Schema audit in the same job: `OK: 32 schemas; 5599 registered constraints; no unregistered or stale entries.`
+- Job URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/45942503331/job/140319749141
+- This is a CI observation on the exact PR Head above; the subsequent evidence-only commit will be rechecked on its own exact PR Head. Post-merge blob verification remains pending.
 
 ## Integration
 Reuse the existing `Schema non-empty audit (hard gate)` job. No new job/context, branch-protection mutation, Issue body change, or Issue closure.
