@@ -57,7 +57,7 @@ session_evidence:
     issue_refs:
       - "#1212"
     implementing_ai_session: NOT_RECORDED
-    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-186/prompt-v1.md"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-186/prompt-v1-executed.snapshot.txt"
     executed_prompt_sha256: "a421889d3654e49e2247b7207faef0113c188c0e28c7dd0caeea91127c21d67e"
     executed_prompt_bytes: 2285
     executed_prompt_provenance: NOT_VERIFIED
