@@ -50,6 +50,14 @@ UNEXPECTED_SKIPS: list[str] = []
 ALLOWED_SKIPS = {
     "T68c a real 0o000 directory is reported by path (integration)":
         "running as root: mode bits cannot deny access",
+    "T36 directory symlink is rejected as a governed root":
+        "symlink creation is unavailable on this platform",
+    "T37 governed_files does not descend into a symlinked root":
+        "symlink creation is unavailable on this platform",
+    "T41 symlinked governed file is rejected":
+        "symlink creation is unavailable on this platform",
+    "T42 governed file reached through a symlinked parent is rejected":
+        "symlink creation is unavailable on this platform",
 }
 
 
@@ -2864,28 +2872,33 @@ def run_symlink_boundary() -> None:
         victim = Path(outside) / "leaked.md"
         victim.write_text(doc(BASE), encoding="utf-8")
         link = root / "15-linked"
+        link_created = True
         try:
             link.symlink_to(Path(outside), target_is_directory=True)
         except (OSError, NotImplementedError):
-            record("T36 directory symlink is rejected as a governed root", True,
-                   "  (symlinks unavailable on this platform; skipped)")
-            return
+            link_created = False
+            skip("T36 directory symlink is rejected as a governed root",
+                 "symlink creation is unavailable on this platform")
 
-        (root / "00-governance" / "document-scope-registry.yaml").write_text(
-            registry_text(ENFORCED_ROOTS + ["15-linked"]), encoding="utf-8"
-        )
-        errors = gate.check_scope_registry(root)
-        record(
-            "T36 directory symlink is rejected as a governed root",
-            any("symbolic link" in e or "symlink" in e for e in errors),
-            f"  got {errors}",
-        )
+        if link_created:
+            (root / "00-governance" / "document-scope-registry.yaml").write_text(
+                registry_text(ENFORCED_ROOTS + ["15-linked"]), encoding="utf-8"
+            )
+            errors = gate.check_scope_registry(root)
+            record(
+                "T36 directory symlink is rejected as a governed root",
+                any("symbolic link" in e or "symlink" in e for e in errors),
+                f"  got {errors}",
+            )
 
-        # And it must not be scanned even if someone names it.
-        scanned = {p.name for p in gate.governed_files(root)}
-        record("T37 governed_files does not descend into a symlinked root",
-               "leaked.md" not in scanned,
-               f"  scanned {sorted(scanned)}")
+            # And it must not be scanned even if someone names it.
+            scanned = {p.name for p in gate.governed_files(root)}
+            record("T37 governed_files does not descend into a symlinked root",
+                   "leaked.md" not in scanned,
+                   f"  scanned {sorted(scanned)}")
+        else:
+            skip("T37 governed_files does not descend into a symlinked root",
+                 "symlink creation is unavailable on this platform")
 
     # R1-01: a governed FILE that is a symlink. The registry check used
     # `is_file()`, which follows links, so it passed; the scanner skipped
@@ -2895,19 +2908,24 @@ def run_symlink_boundary() -> None:
         root = _repo(tmp)
         victim = Path(outside) / "gaps.md"
         victim.write_text(doc(BASE), encoding="utf-8")
+        links_created = True
         for rel in gate.GOVERNED_FILES:
             target = root / rel
             target.unlink()
             try:
                 target.symlink_to(victim)
             except (OSError, NotImplementedError):
-                record("T41 symlinked governed file is rejected", True,
-                       "  (symlinks unavailable; skipped)")
-                return
-        errors = gate.check_scope_registry(root)
-        record("T41 symlinked governed file is rejected",
-               any("not a regular file inside the repository" in e for e in errors),
-               f"  got {errors}")
+                links_created = False
+                break
+
+        if links_created:
+            errors = gate.check_scope_registry(root)
+            record("T41 symlinked governed file is rejected",
+                   any("not a regular file inside the repository" in e for e in errors),
+                   f"  got {errors}")
+        else:
+            skip("T41 symlinked governed file is rejected",
+                 "symlink creation is unavailable on this platform")
 
     # R1-01b: the file is regular, but its PARENT is a link out of the repo.
     # `is_symlink()` on the final component cannot see this; containment is
@@ -2923,13 +2941,13 @@ def run_symlink_boundary() -> None:
         try:
             parent.symlink_to(victim_dir, target_is_directory=True)
         except (OSError, NotImplementedError):
+            skip("T42 governed file reached through a symlinked parent is rejected",
+                 "symlink creation is unavailable on this platform")
+        else:
+            errors = gate.check_scope_registry(root)
             record("T42 governed file reached through a symlinked parent is rejected",
-                   True, "  (symlinks unavailable; skipped)")
-            return
-        errors = gate.check_scope_registry(root)
-        record("T42 governed file reached through a symlinked parent is rejected",
-               any("not a regular file inside the repository" in e for e in errors),
-               f"  got {errors}")
+                   any("not a regular file inside the repository" in e for e in errors),
+                   f"  got {errors}")
 
     # R1-02: a hidden top-level directory. Excluding dot-directories from the
     # on-disk set meant `.new-architecture/` was neither governed, excluded,
