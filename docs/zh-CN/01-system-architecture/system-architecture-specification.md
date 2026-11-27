@@ -3,7 +3,7 @@
 - 文档 ID：SYS-ARCH-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../01-system-architecture/system-overview.md)
-- 源版本：995a1c5a3815d7e7b81b8d7f2ccc546c91d4c256
+- 源版本：c3707831777feb14aedd7aea0eca1c162bf59fc6
 - 对应英文：[System Architecture Specification](../../en/01-system-architecture/system-architecture-specification.md)
 - 状态：DECIDED（已决议基线），其中明确标记的候选项和验证项除外
 

@@ -53,7 +53,7 @@ document_metadata:
 - Document ID: GOV-PRINCIPLES-001
 - Version: 1.0
 - Source: [Normative source specification](../../../00-governance/design-principles.md)
-- Source revision: 9792e189d63fbbc3694ab891fc4aeba5143b3b1c
+- Source revision: 9fb729a4bd6ebcfa9576e5318804a65e2a95abe2
 - Chinese counterpart: [设计原则](../../zh-CN/00-governance/design-principles.md)
 - Status: APPROVED / Normative — new approval event dated 2026-11-26. This does not certify implementation conformity with P-01 through P-16.
 
