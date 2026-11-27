@@ -14,7 +14,7 @@ risk_rationale: >-
   whoever writes the manifest, so the corrected check must be described as verifying a
   declaration, not an event, and the code comment is part of the deliverable rather than
   commentary on it.
-status: DISPATCHED
+status: MERGED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -179,10 +179,11 @@ findings:
       described as verifying a declaration.
 
 implementation:
-  status: IMPLEMENTED_IN_BRANCH
+  status: MERGED
   branch: req05/aid-082-session-independence
   pull_request: "#1325"
-  merge_commit_sha: NOT_MERGED
+  merge_commit_sha: 3daebd2cad699b5ecccd7ffa7df86029dfbecec6
+  merged_at: "2026-11-27T04:38:42Z"
   note: >-
     Registration only at the time this file was written. The prompt snapshot is the executed
     input and its digest pins those bytes; an amendment, if one is needed, goes in a separate
