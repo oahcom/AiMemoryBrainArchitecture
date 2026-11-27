@@ -91,7 +91,14 @@ def verify(root: Path, commit: str, verbose: bool = True):
     def check(path, declared, source_commit, kind, algorithm="git"):
         nonlocal ok, mismatch, missing, incomplete, pins
         pins += 1
-        if not nonempty(declared):
+        if algorithm == "bytes":
+            if isinstance(declared, bool) or not isinstance(declared, (int, str)) or str(declared).strip() == "":
+                incomplete += 1
+                problems.append(f"INCOMPLETE {kind}: invalid byte-count declaration {declared!r}")
+                return
+        elif not isinstance(declared, str) or not declared.strip():
+            incomplete += 1
+            problems.append(f"INCOMPLETE {kind}: invalid digest declaration {declared!r}")
             return
         if not nonempty(path):
             missing += 1
