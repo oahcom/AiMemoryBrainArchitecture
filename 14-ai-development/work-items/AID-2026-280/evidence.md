@@ -44,7 +44,7 @@ All measurements below must be performed by the coordinating session against the
 | 5 | No regression | Run `python3 scripts/test_check_document_management.py` on a symlink-capable Linux or Windows host. Compare the executed-case count against the pre-change baseline. No new skip may appear. |
 | 6 | Mutation | Remove the new symlink-unavailable handling or restore the former false-pass branch. Repeat the forced-failure self-check. It must fail because the affected cases are recorded as passes or the independent cases disappear. |
 | 7 | Exact head | Record the final PR head SHA before running the evidence suite. Attach the exact SHA, command, exit status, stdout/stderr and results to this evidence record. Re-run after any subsequent commit. |
-| 8 | Complete suite and scan-boundary resilience | Force symlink creation to raise during the entire suite, including `run_scan_boundary()`. Confirm no unhandled `OSError`, no false-pass result, and a final summary with registered skips. Independently verify each guarded scan-boundary case. |
+| 8 | Complete suite and scan-boundary resilience | Protect all eight additional symlink creation sites (T49, T50, T51, T51b, T58, T59, T60 and T128) with registered skips when creation raises `OSError` or `NotImplementedError`; T128 must skip rather than record a failure. Force symlink creation to fail throughout the full suite and confirm execution continues through independent cases, with no unhandled `OSError`, no false-pass result, and a final summary reporting registered skips. Independently verify each guarded scan-boundary case. |
 
 ## Required baseline comparison
 
