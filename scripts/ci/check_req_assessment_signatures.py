@@ -22,7 +22,7 @@ EXPECTED = {
         "assessed_version": "d61f813cac6780b6bcc5c09536a8e9bee96cc362",
     },
     7143927480: {
-        "assessor_session": "6b05b478-39e0-83ec-8bf0-3ff7eb53ce5e",
+        "assessor_session": "6b05b478-39e0-83ec-8bff-03ff7eb53ce5",
         "assessed_version": "aeebcbeefae874aabdf85c44f74dffd6d8fc0a1e",
     },
     7149369280: {
