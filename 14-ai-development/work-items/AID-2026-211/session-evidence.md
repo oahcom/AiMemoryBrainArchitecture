@@ -59,6 +59,6 @@ No separate prompt snapshot file or platform session identifier was supplied; ne
 2. Replaced the M-02 string in `MANUAL_CONTROLS` and synchronized the generated M-02 row in `00-governance/architecture-document-management-policy.md`. No rule implementation was edited.
 3. Updated the root security-governance README and both language mirrors; the README now explicitly defers to each source frontmatter for `canonical_status`.
 4. Added `run_m02_optional_approval_identity_fields()` and `run_security_readme_canonical_status()` with named assertions and registered both in the self-check runner.
-5. Created the AID-2026-211 registration and recorded the exact tests, CI contexts, merge SHA and blob readbacks in `evidence.md` after they become available.
+5. Created the AID-2026-211 registration. The baseline self-check was 367/367; after the two tests, the committed head self-check was 369/369, with both new tests PASS. GOV-DOC-002 incremental, bilingual structural gate (with `BILINGUAL-MANIFEST: COMPLETE` in the planned PR body), repository hygiene/new-file admission and line-ending checks all passed locally. GitHub's 16 required PR contexts, merge SHA and post-merge blob readbacks remain unobserved at this point and are not claimed here.
 
 This section describes the work performed by the AI session; it does not assert a human Owner signature, an approval decision, or successful CI/merge before those results are observed.

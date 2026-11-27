@@ -78,9 +78,14 @@ The root README and its EN/ZH-CN mirrors now state that each of the five linked 
 
 ## Tests and gate evidence
 
-Baseline self-check on the unchanged base: `367/367 passed`. New tests are run on the PR head; their exact result and all required CI contexts will be recorded after execution.
+Baseline self-check on the unchanged base: `367/367 passed`. After adding the two feature tests, the committed head self-check is `369/369 passed`; both named feature tests passed:
 
-The DM-side test constructs a document containing both optional fields and then removes `approver` and `decision_date`; `check_document()` must return zero errors. Its docstring quotes the revised M-02 description. The README-side test rejects the old Candidate/Informative wording in all three README group members and compares all five source frontmatters against the README declaration, while checking that the non-approval/non-conformance disclaimer remains.
+- `M-02 does not require approver or decision_date` — PASS.
+- `09-security-governance README matches five Canonical frontmatters` — PASS.
+
+Additional exact-head local results: GOV-DOC-002 incremental `--require-changed` — PASS (641 classified, 371 unclassified; 0 rule violations in the changed set); bilingual structural gate with `PR_BODY=BILINGUAL-MANIFEST: COMPLETE` — PASS (10 changed Markdown paths inspected, baseline 77 frozen / 0 new gaps); repository hygiene — PASS (119 work-item directories / 119 index links, 3 new paths admitted, 0 violations); line endings — 1715 files inspected, 0 violations. The bilingual gate explicitly reports that it is structural only; semantic parity is not claimed. The 16 required PR contexts are not yet available before PR creation and will be reported only from GitHub's exact-head results.
+
+The DM-side test constructs a document containing both optional fields and then removes `approver` and `decision_date`; `check_document()` returns zero errors. Its docstring quotes the revised M-02 description. The README-side test rejects the old Candidate/Informative wording in all three README group members and compares all five source frontmatters against the README declaration, while checking that the non-approval/non-conformance disclaimer remains.
 
 **No new validation:** the `git diff` for `scripts/check_document_management.py` changes only the M-02 string literal inside `MANUAL_CONTROLS`; no condition, branch, parser, rule function, return value, exit code, enum, threshold or workflow is changed. The two added tests characterize existing behavior and README consistency; they do not add gate checks.
 
