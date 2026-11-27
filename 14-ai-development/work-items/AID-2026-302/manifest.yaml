@@ -1,0 +1,100 @@
+work_item_id: AID-2026-302
+title: "Repair 93 declared manifest pin fields by shape and gate blob pins on the checker status"
+class: GATE/CI/TEST
+risk: R2
+risk_rationale: >-
+  Rewrites 93 already-declared pin values in 35 work-item manifests from
+  committed bytes, removes one all-zero sentinel pair, retires three
+  superseded authored-index claims, re-anchors one historical note, and
+  replaces the blob-pin ratchet wrapper with the checker's own exit status.
+  No checker logic, schema, branch protection, required context or prompt
+  digest is changed; four declarations are left in place with a recorded
+  terminal state instead of a guess.
+status: IMPLEMENTATION_IN_PROGRESS
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: cb5b3dcd23ff86e10a354bb27b668dce19e95f62
+scope:
+  objective: >-
+    Give every one of the 93 declarations named by the Owner ruling a terminal
+    state: 86 FIXED, 1 RESOLVED_VALID_PIN, 5 FORMALLY_RETIRED, 1 BLOCKED.
+    Resolve each value at the scope the declaration itself supports
+    (CANDIDATE_TREE, PINNED_COMMIT or UNRESOLVED_SCOPE), never at a commit
+    borrowed from elsewhere in the manifest. Then remove the stale ratchet
+    baseline so the gate fails on any mismatch or missing path.
+  files_changed:
+    - ".github/workflows/repository-hygiene.yml"
+    - "scripts/ci/baselines/manifest-blob-pins.txt"
+    - "14-ai-development/work-items/AID-2026-100/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-170/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-261/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-302/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-302/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-302/evidence.md"
+    - "14-ai-development/work-items/AID-2026-302/session-evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+  files_out_of_scope:
+    - "scripts/ci/check_manifest_blob_pins.py (checker logic unchanged)"
+    - "top-level prompt_sha256 / prompt_bytes of any manifest"
+    - "work-item identifiers and any declaration not named by the Owner ruling"
+    - "the legacy top-level duplicate of the session digest fields in AID-2026-059 and AID-2026-107"
+    - "AID-2026-170 owner_ruling.current_blob (kept at its declared value, BLOCKED)"
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-302/manifest.yaml"
+    relationship: implementation
+  - path: "14-ai-development/work-items/AID-2026-302/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-302/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-302/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
+evidence:
+  record: "14-ai-development/work-items/AID-2026-302/evidence.md"
+  session: "14-ai-development/work-items/AID-2026-302/session-evidence.md"
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1350"
+    implementing_ai_session: "opencode-2.4 subagent / 9router_hermes"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-302/prompt-v1.md"
+    executed_prompt_sha256: "5771c25c5dbc299bd6ed7cc4ffe0a05dd810a820929d35daca39a62f9d03318a"
+    executed_prompt_bytes: 9114
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-302/session-evidence.md"
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    Repaired the 40 session digest/byte pairs from committed bytes, repinned
+    three authored-index and three related-evidence blob declarations, retired
+    three superseded authored-index blob claims and the AID-2026-261 all-zero
+    sentinel pair, re-anchored the AID-2026-100 gate_a note to the commit that
+    actually holds its blob, and left AID-2026-170 at BLOCKED/UNRESOLVED_SCOPE.
+    Replaced the blob-pin ratchet step with a direct checker invocation and
+    deleted its baseline file.
+  files_changed:
+    - ".github/workflows/repository-hygiene.yml"
+    - "scripts/ci/baselines/manifest-blob-pins.txt"
+    - "14-ai-development/work-items/AID-2026-100/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-170/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-261/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-302/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-302/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-302/evidence.md"
+    - "14-ai-development/work-items/AID-2026-302/session-evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "python scripts/ci/check_manifest_blob_pins.py --commit HEAD"
+    - "python scripts/check_traceability.py --index-only"
+    - "python scripts/ci/check_repository_hygiene.py --base cb5b3dcd23ff86e10a354bb27b668dce19e95f62 --head HEAD"
+    - "python scripts/check_bilingual_docs.py"
+    - "negative control on a temporary branch: one flipped digest nibble -> exit 1"
