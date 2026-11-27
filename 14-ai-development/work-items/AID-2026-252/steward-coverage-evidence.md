@@ -73,3 +73,10 @@ The branch contains the initial schema/checker/test/workflow mechanism commits. 
 - Actions census after merging this main revision: governed=1147, classified=777, unclassified=370, present=252, missing=525.
 - The count remains 525: the three newly governed/classified documents in this main revision were already steward-present.
 - Cumulative steward assignments remain 128; no further migration batch was added.
+
+## Prompt snapshot integrity correction
+
+- Historical prompt snapshots were restored byte-for-byte from current main rather than rewritten to carry steward metadata.
+- Their corresponding manifest files were also restored from current main so the prompt-to-commit trace ratchet remains authoritative.
+- This leaves 84 actual steward assignments in the branch (83 work-item documents plus the work-items index); the 44 prompt snapshots are not counted as migrated.
+- The post-restoration Actions census is governed=1147, classified=777, unclassified=370, present=208, missing=569, pinned to main 460f437eb3496e10737b9ef20f4b816e34d155c4.
