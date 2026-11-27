@@ -15,7 +15,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-285/evidence.md"
+        - "14-ai-development/work-items/AID-2026-286/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -36,7 +36,7 @@ document_metadata:
     canonical_scope: null
     canonical_scope_id: null
     canonical_scope_keywords:
-      - "AID-2026-285"
+      - "AID-2026-286"
       - "evidence"
       - "§5(3)"
     canonical_conflict_status: None
@@ -48,7 +48,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# Evidence — AID-2026-285
+# Evidence — AID-2026-286
 
 ## 1. Purpose
 
@@ -116,7 +116,7 @@ The four assessment changes were carried by PR #1424.
 - Branch protection behind count: 0.
 - Blob comparison: 11/11 files matched.
 
-These are supplied historical measurements, not fresh measurements performed by AID-2026-285.
+These are supplied historical measurements, not fresh measurements performed by AID-2026-286.
 
 ### 2.5 Historical comment integrity
 
@@ -155,7 +155,7 @@ No natural-person Owner signature is claimed.
 
 ## 4. Measurements and limitations
 
-| Measurement | Supplied result | Repeated in AID-2026-285 |
+| Measurement | Supplied result | Repeated in AID-2026-286 |
 |---|---|---|
 | Baseline checker | `SUMMARY files=4 failures=0` | No |
 | Signature-field deletion mutations | 12/12 exit code 1 | No |
@@ -169,7 +169,7 @@ The following items are explicitly `NOT_MEASURED` in this work item:
 1. Re-execution of the 12 mutation tests.
 2. Independent re-opening and verification of all 16 required-context run URLs.
 3. Re-execution of the 11-file blob comparison.
-4. The final merge commit and per-file blob identity of AID-2026-285.
+4. The final merge commit and per-file blob identity of AID-2026-286.
 5. Natural-person Owner signature or subsequent ratification.
 
 No CI success, merge, or Owner acceptance is claimed by this evidence document.

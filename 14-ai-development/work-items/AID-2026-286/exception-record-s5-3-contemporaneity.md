@@ -15,7 +15,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-285/evidence.md"
+        - "14-ai-development/work-items/AID-2026-286/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -54,8 +54,8 @@ document_metadata:
 
 | Field | Value |
 |---|---|
-| Exception ID | EX-AID-2026-285-S5-3-CONTEMPORANEITY |
-| Work Item / carrier | AID-2026-285; single carrier PR, number to be recorded after creation |
+| Exception ID | EX-AID-2026-286-S5-3-CONTEMPORANEITY |
+| Work Item / carrier | AID-2026-286; single carrier PR, number to be recorded after creation |
 | Rule | `14-ai-development/PR-GOVERNANCE-001.md` §5(3) |
 | Exception type | Retrospective exception to contemporaneity |
 | Decision status | Accepted — delegated adjudication |
@@ -248,7 +248,7 @@ The original contemporaneity requirement remains factually unmet for the four hi
 
 ## 9. Provenance and authorship
 
-Work item: `AID-2026-285`
+Work item: `AID-2026-286`
 
 Attribution: `user-authorized operator (delegated by account owner)`
 

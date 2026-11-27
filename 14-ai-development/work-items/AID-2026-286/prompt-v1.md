@@ -15,7 +15,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-285/evidence.md"
+        - "14-ai-development/work-items/AID-2026-286/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -36,7 +36,7 @@ document_metadata:
     canonical_scope: null
     canonical_scope_id: null
     canonical_scope_keywords:
-      - "AID-2026-285"
+      - "AID-2026-286"
       - "prompt provenance"
       - "§5(3)"
     canonical_conflict_status: None
@@ -48,13 +48,13 @@ document_metadata:
     zh-CN: null
 ---
 
-# Prompt snapshot — AID-2026-285
+# Prompt snapshot — AID-2026-286
 
 ## Provenance
 
 - `prompt_provenance: DISPATCHED_TASK_FILE`
 - `prompt_status: NOT_RECORDED`
-- Work item: `AID-2026-285`
+- Work item: `AID-2026-286`
 - Repository: `oahcom/AiMemoryBrainArchitecture`
 - Base branch: `main`
 - Supplied base commit: `f20fff10307f512d3c299b6371f172c85f941e30`
@@ -80,7 +80,7 @@ The record must identify four historical assessments, define the exact retrospec
 8. The supplied validation results include 12 successful failure-detecting deletion mutations, 16/16 successful required contexts, zero behind count, and 11/11 matching blobs.
 9. The historical comments and their timestamps were supplied as evidence of non-rewriting.
 10. Issue #305 comment `7042461592` supplies the delegated-authority boundary.
-11. The assigned work-item identifier is AID-2026-285.
+11. The assigned work-item identifier is AID-2026-286.
 12. The supplied base commit is `f20fff10307f512d3c299b6371f172c85f941e30`.
 
 ## Constraints

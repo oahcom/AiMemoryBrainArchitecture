@@ -15,7 +15,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-285/evidence.md"
+        - "14-ai-development/work-items/AID-2026-286/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -36,7 +36,7 @@ document_metadata:
     canonical_scope: null
     canonical_scope_id: null
     canonical_scope_keywords:
-      - "AID-2026-285"
+      - "AID-2026-286"
       - "session evidence"
       - "delegated adjudication"
     canonical_conflict_status: None
@@ -50,7 +50,7 @@ document_metadata:
 
 # Session role / use case
 
-This session is the authoring session for AID-2026-285, a documentation-only governance work item in `oahcom/AiMemoryBrainArchitecture`.
+This session is the authoring session for AID-2026-286, a documentation-only governance work item in `oahcom/AiMemoryBrainArchitecture`.
 
 The task is to produce a single, narrowly scoped retrospective exception record for §5(3), together with its work-item manifest, evidence record, session provenance, prompt snapshot, one INDEX registration row, a PR-body template, and one post-merge Issue #262 comment template.
 
@@ -134,7 +134,7 @@ The task supplied:
 - Rework trace comment `7211285798`.
 - Terminal adjudication comment `7211718343`.
 
-The task explicitly prohibited presenting these as fresh measurements by AID-2026-285.
+The task explicitly prohibited presenting these as fresh measurements by AID-2026-286.
 
 ## Delegated authority
 
@@ -148,7 +148,7 @@ The session was required to identify the decision as delegated adjudication and 
 
 ## Allocation and carrier constraints
 
-The input assigned AID-2026-285.
+The input assigned AID-2026-286.
 
 The supplied scan identified:
 
@@ -167,11 +167,11 @@ The supplied baseline was:
 
 The AI-authored output consists of the following textual materials:
 
-1. `14-ai-development/work-items/AID-2026-285/exception-record-s5-3-contemporaneity.md`
-2. `14-ai-development/work-items/AID-2026-285/manifest.yaml`
-3. `14-ai-development/work-items/AID-2026-285/evidence.md`
-4. `14-ai-development/work-items/AID-2026-285/session-evidence.md`
-5. `14-ai-development/work-items/AID-2026-285/prompt-v1.md`
+1. `14-ai-development/work-items/AID-2026-286/exception-record-s5-3-contemporaneity.md`
+2. `14-ai-development/work-items/AID-2026-286/manifest.yaml`
+3. `14-ai-development/work-items/AID-2026-286/evidence.md`
+4. `14-ai-development/work-items/AID-2026-286/session-evidence.md`
+5. `14-ai-development/work-items/AID-2026-286/prompt-v1.md`
 6. One proposed registration row for `14-ai-development/work-items/INDEX.md`.
 7. One PR-body template.
 8. One post-merge Issue #262 comment template.
