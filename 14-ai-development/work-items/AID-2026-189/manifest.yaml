@@ -10,7 +10,7 @@ risk_rationale: >-
   superseded runs of workflows that already existed. No job is added, renamed, merged or
   removed, no required context is deleted, no checker semantics change, and the two defects
   that would need such a change are recorded as DEFERRED_TO_OWNER instead of repaired.
-status: DISPATCHED
+status: MERGED
 id_status: PROVISIONAL
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED

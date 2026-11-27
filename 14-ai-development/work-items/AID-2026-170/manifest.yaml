@@ -6,7 +6,7 @@ risk_rationale: >-
   One table cell in a non-normative review report is re-pinned. The two blobs it
   chooses between are the same allowlist one version string apart, so the risk is
   a mis-pinned blob or an unintended second edit, not a change of contract.
-status: DISPATCHED
+status: MERGED
 id_status: PROVISIONAL
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
