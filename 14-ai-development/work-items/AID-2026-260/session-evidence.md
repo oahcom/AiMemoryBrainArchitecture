@@ -60,7 +60,7 @@ The user supplied the repository and branch baseline rule; assigned work-item nu
 4. Created branch `ai/AID-2026-260/req04-scope-confirmation` from the observed main SHA.
 5. Authored the scope determination, this session evidence, the manifest, and an evidence record. No source architecture implementation, test, workflow, branch protection, or Issue acceptance checkbox was changed.
 6. Opened a PR with `Related issue(s): #265`, `AI-assisted work: YES`, and the exact session-evidence reference. Subsequent Actions, required-context, protection, merge, and post-merge readbacks are recorded only after they are actually observed.
-7. Created `prompt-v1.md` as a structured scope snapshot of the user-authorized task input (not a byte-for-byte transcript); SHA-256 `a7ece5dcf0f34d47930f77d6ccbbc4cdf30d249be71fbb02f59d49e7c2fb50a5`, 3057 bytes, provenance `NOT_VERIFIED`.
+7. Created `prompt-v1.md` as a structured scope snapshot of the user-authorized task input (not a byte-for-byte transcript); SHA-256 `ef6ed3526df796da122e9c0dc168f2c370da1c3b359aca12938fa69f08352fcf`, 3124 bytes, provenance `NOT_VERIFIED`.
 8. Platform conversation ID is not exposed in this session context; no conversation identifier is invented. Session role is the stable identifier used in this record.
 
 This record distinguishes actions already performed from later GitHub outcomes. It does not claim successful checks, merge, or AC9 acceptance before those outcomes are observed.
