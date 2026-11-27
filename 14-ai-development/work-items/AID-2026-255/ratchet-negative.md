@@ -43,7 +43,7 @@ document_metadata:
 ---
 AID-2026-255 ratchet-negative evidence
 
-Scan commit: fda69aa803f9e9505231ccb333b44b151a823de3
+Scan commit: 6f4bf983e7b1455841b8a28748a6d651f2272ad2
 
 Commits after this one touch only evidence files under this directory: this
 transcript and `independent-review.md`. The checker reads only
@@ -51,7 +51,7 @@ transcript and `independent-review.md`. The checker reads only
 the scan commit, so the 91-item set below is the set at the branch head. Verify
 with:
 
-  git diff --name-only fda69aa803f9e9505231ccb333b44b151a823de3..HEAD -- '14-ai-development/work-items/*/manifest.yaml'
+  git diff --name-only 6f4bf983e7b1455841b8a28748a6d651f2272ad2..HEAD -- '14-ai-development/work-items/*/manifest.yaml'
 
 which must print nothing. The path recorded in this preamble was
 `ratchet-negative.log` when Owner A first authorized this file; the new-file
@@ -82,23 +82,23 @@ Command under test (as wired in .github/workflows/repository-hygiene.yml):
 Transcript:
 
 $ python3 scripts/ci/check_manifest_blob_pins.py --commit HEAD | sed -n '/^MISMATCH /p; /^PATH_MISSING /p; /^INCOMPLETE /p'
-[checker exit 1; 91 items; scan commit fda69aa803f9e9505231ccb333b44b151a823de3]
+[checker exit 1; 91 items; scan commit 6f4bf983e7b1455841b8a28748a6d651f2272ad2]
 
 --- case 1 control: baseline == current failure set ---
-ratchet: C:/Users/ADMINI~1/AppData/Local/Temp/tmpv4jcoxvn/c1.base
+ratchet: C:/Users/ADMINI~1/AppData/Local/Temp/tmpbujzev3_/c1.base
 ratchet: baseline=91 current=91 regressions=0 fixed=0
 ratchet: PASS - failure set matches the baseline exactly.
 [exit 0]
 
 --- case 2 regression: baseline omits one reported item ---
-ratchet: C:/Users/ADMINI~1/AppData/Local/Temp/tmpv4jcoxvn/c2.base
+ratchet: C:/Users/ADMINI~1/AppData/Local/Temp/tmpbujzev3_/c2.base
 ratchet: baseline=90 current=91 regressions=1 fixed=0
 ::error::ratchet regression (new failure not in baseline): MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-059/prompt-v1.md declared=65474e7f0927d2dfeaad33814fdbd7d576635cc8a0e8d2a3a7441e3a65ab7317 actual=4881d6292e96154d5f7364816ae3e9977365e09b88e8475f4dd9d655e3e34a8c
 ratchet: FAIL - 1 new failure(s) above baseline.
 [exit 1]
 
 --- case 3 stale: baseline carries an item the run no longer reports ---
-ratchet: C:/Users/ADMINI~1/AppData/Local/Temp/tmpv4jcoxvn/c3.base
+ratchet: C:/Users/ADMINI~1/AppData/Local/Temp/tmpbujzev3_/c3.base
 ratchet: baseline=92 current=91 regressions=0 fixed=1
 ::error::ratchet baseline is stale (no longer failing): MISMATCH a.b/never-reported path=x declared=0 actual=0
 ratchet: FAIL - lower the baseline by 1 fixed item(s).
