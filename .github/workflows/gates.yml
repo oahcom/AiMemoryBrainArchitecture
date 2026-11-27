@@ -134,6 +134,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       # HARD GATE, not a ratchet. GAP-09 is closed: `6897e53c` registered all
       # 5599 constraints across the 32 schemas, and this audit now exits 0 on
