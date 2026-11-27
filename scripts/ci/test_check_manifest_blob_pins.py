@@ -123,6 +123,20 @@ class Fixture:
             check=False,
         )
 
+    def reference(self, identity):
+        matches = [
+            item for item in self.references
+            if item["identity"] == identity
+        ]
+        if len(matches) != 1:
+            raise AssertionError(f"Expected one fixture reference for {identity}")
+        return matches[0]
+
+    def document_for(self, manifest):
+        return self.documents[
+            "100" if "AID-2026-100" in manifest else "150"
+        ]
+
     def close(self):
         self.temp.cleanup()
 
@@ -135,9 +149,6 @@ class ClosedAuthorizationTests(unittest.TestCase):
         self.fx.close()
 
     def test_authorization_table_contains_exactly_twelve_identities(self):
-        self.assertEqual(len(checker.AUTHORIZED_PINS), 12)
-        self.assertEqual(len(set(checker.AUTHORIZED_PINS)), 12)
-
         expected = {
             ("14-ai-development/work-items/AID-2026-100/manifest.yaml",
              "baseline_and_source_evidence.authored_indexes[0].root_blob"),
@@ -170,14 +181,18 @@ class ClosedAuthorizationTests(unittest.TestCase):
             for manifest, field_path, _ in checker.AUTHORIZED_PINS
         }
         self.assertEqual(actual, expected)
+        self.assertEqual(len(checker.AUTHORIZED_PINS), 12)
+        self.assertEqual(len(actual), 12)
+
+        allowed_path_keys = {"root", "en_mirror", "zh_cn_mirror", "path"}
+        for manifest, field_path, path_key in checker.AUTHORIZED_PINS:
+            with self.subTest(identity=(manifest, field_path)):
+                self.assertIn(path_key, allowed_path_keys)
 
     def test_main_equivalent_fixture_produces_exactly_twelve_items(self):
         for reference in self.fx.references:
             parent, digest_key = checker.locate_parent(
-                self.fx.documents[
-                    "100" if "AID-2026-100" in reference["identity"][0]
-                    else "150"
-                ],
+                self.fx.document_for(reference["identity"][0]),
                 reference["identity"][1],
             )
             parent[digest_key] = "0" * 40
@@ -242,10 +257,7 @@ class ClosedAuthorizationTests(unittest.TestCase):
 
         proc = self.fx.run()
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
-        self.assertEqual(
-            proc.stdout.count("::error::"),
-            0,
-        )
+        self.assertEqual(proc.stdout.count("::error::"), 0)
 
     def test_one_byte_mutation_inside_authorized_pin_is_caught(self):
         reference = self.fx.references[0]
@@ -268,8 +280,6 @@ class ClosedAuthorizationTests(unittest.TestCase):
         self.assertEqual(len(matching), 1, proc.stdout)
         self.assertIn(f"declared={reference['declared']}", matching[0])
         self.assertIn(f"actual={blob_id(mutated)}", matching[0])
-
-        # The other eleven identities remain independently represented.
         self.assertEqual(proc.stdout.count("::error::"), 1)
 
     def test_deleted_authorized_path_is_caught_as_missing(self):
@@ -287,8 +297,8 @@ class ClosedAuthorizationTests(unittest.TestCase):
 
     def test_missing_required_manifest_exits_two(self):
         self.fx.write_manifests()
-        self.manifest_path = self.fx.manifest_paths["150"]
-        self.manifest_path.unlink()
+        manifest_path = self.fx.manifest_paths["150"]
+        manifest_path.unlink()
         git(self.fx.root, "add", "-A")
         git(self.fx.root, "commit", "-qm", "Remove required manifest")
 
@@ -308,6 +318,170 @@ class ClosedAuthorizationTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
         self.assertEqual(proc.stdout.count("::error::"), 1)
         self.assertIn("actual=MISSING", proc.stdout)
+
+    def test_authorized_digest_key_is_not_replaced_by_neighbouring_digest(self):
+        """Kill resolvers that read a neighbouring digest key for the target."""
+        cases = (
+            (
+                "baseline_and_source_evidence.authored_indexes[0].root_blob",
+                "baseline_and_source_evidence.authored_indexes[0].en_mirror_blob",
+            ),
+            (
+                "baseline_and_source_evidence.authored_indexes[0].en_mirror_blob",
+                "baseline_and_source_evidence.authored_indexes[0].root_blob",
+            ),
+            (
+                "baseline_and_source_evidence.authored_indexes[0].zh_cn_mirror_blob",
+                "baseline_and_source_evidence.authored_indexes[0].en_mirror_blob",
+            ),
+        )
+        manifest = (
+            "14-ai-development/work-items/AID-2026-100/manifest.yaml"
+        )
+
+        for target_field, neighbour_field in cases:
+            with self.subTest(target_field=target_field):
+                fx = Fixture()
+                try:
+                    target = fx.reference((manifest, target_field))
+                    document = fx.document_for(manifest)
+                    target_parent, target_digest_key = checker.locate_parent(
+                        document, target_field
+                    )
+                    neighbour_parent, _ = checker.locate_parent(
+                        document, neighbour_field
+                    )
+                    self.assertIs(target_parent, neighbour_parent)
+
+                    # Keep every neighbour identity correct for its own file.
+                    # Only the target digest is wrong. If the resolver reads
+                    # the neighbour's digest instead, it compares that
+                    # neighbour digest to the target file's bytes and still
+                    # fails; the diagnostic's declared value also exposes
+                    # the wrong-key read.
+                    target_parent[target_digest_key] = "0" * 40
+
+                    fx.commit()
+                    proc = fx.run()
+
+                    self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+                    failures = [
+                        line for line in proc.stdout.splitlines()
+                        if line.startswith("::error::")
+                    ]
+                    self.assertEqual(len(failures), 1, proc.stdout)
+                    self.assertTrue(
+                        failures[0].startswith(
+                            f"::error::{manifest}#{target_field} -> "
+                        ),
+                        proc.stdout,
+                    )
+                    self.assertIn(f"declared={'0' * 40}", failures[0])
+                    self.assertIn(target["path"], failures[0])
+                finally:
+                    fx.close()
+
+    def test_authorized_path_key_selects_its_own_sibling_path(self):
+        cases = (
+            (
+                "baseline_and_source_evidence.authored_indexes[0].root_blob",
+                "baseline_and_source_evidence.authored_indexes[0].en_mirror_blob",
+            ),
+            (
+                "baseline_and_source_evidence.authored_indexes[0].en_mirror_blob",
+                "baseline_and_source_evidence.authored_indexes[0].root_blob",
+            ),
+            (
+                "baseline_and_source_evidence.authored_indexes[0].zh_cn_mirror_blob",
+                "baseline_and_source_evidence.authored_indexes[0].en_mirror_blob",
+            ),
+        )
+        manifest = (
+            "14-ai-development/work-items/AID-2026-100/manifest.yaml"
+        )
+
+        for target_field, neighbour_field in cases:
+            with self.subTest(target_field=target_field):
+                fx = Fixture()
+                try:
+                    target = fx.reference((manifest, target_field))
+                    neighbour = fx.reference((manifest, neighbour_field))
+                    document = fx.document_for(manifest)
+                    target_parent, target_digest_key = checker.locate_parent(
+                        document, target_field
+                    )
+                    neighbour_parent, _ = checker.locate_parent(
+                        document, neighbour_field
+                    )
+                    self.assertIs(target_parent, neighbour_parent)
+
+                    # The target path is A; the neighbour path is B.
+                    # The target digest matches B, not A. All other identities
+                    # retain their original correct path/digest associations.
+                    target_parent[target["path_key"]] = target["path"]
+                    target_parent[neighbour["path_key"]] = neighbour["path"]
+                    target_parent[target_digest_key] = blob_id(neighbour["data"])
+
+                    fx.commit()
+                    proc = fx.run()
+
+                    self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+                    failures = [
+                        line for line in proc.stdout.splitlines()
+                        if line.startswith("::error::")
+                    ]
+                    self.assertEqual(len(failures), 1, proc.stdout)
+                    self.assertTrue(
+                        failures[0].startswith(
+                            f"::error::{manifest}#{target_field} -> "
+                        ),
+                        proc.stdout,
+                    )
+                    self.assertIn(f" -> {target['path']} ", failures[0])
+                    self.assertNotIn(
+                        f" -> {neighbour['path']} ",
+                        failures[0],
+                    )
+                finally:
+                    fx.close()
+
+    def test_one_wrong_identity_is_reported_without_cross_identity_leakage(self):
+        correct_identity = (
+            "14-ai-development/work-items/AID-2026-100/manifest.yaml",
+            "baseline_and_source_evidence.authored_indexes[0].root_blob",
+        )
+        wrong_identity = (
+            "14-ai-development/work-items/AID-2026-150/manifest.yaml",
+            "source.files[0].blob",
+        )
+        wrong_reference = self.fx.reference(wrong_identity)
+
+        parent, digest_key = checker.locate_parent(
+            self.fx.document_for(wrong_identity[0]),
+            wrong_identity[1],
+        )
+        parent[digest_key] = "0" * 40
+
+        self.fx.commit()
+        proc = self.fx.run()
+
+        self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+        failures = [
+            line for line in proc.stdout.splitlines()
+            if line.startswith("::error::")
+        ]
+        self.assertEqual(len(failures), 1, proc.stdout)
+        self.assertTrue(
+            failures[0].startswith(
+                f"::error::{wrong_identity[0]}#{wrong_identity[1]} -> "
+            ),
+            proc.stdout,
+        )
+        self.assertIn(wrong_reference["path"], failures[0])
+        self.assertNotIn(
+            f"{correct_identity[0]}#{correct_identity[1]}",
+            failures[0],
+        )
 
 
 if __name__ == "__main__":
