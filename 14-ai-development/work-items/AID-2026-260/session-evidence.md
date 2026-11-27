@@ -19,7 +19,7 @@ document_metadata:
       last_verified_date: "2026-11-27"
       last_verification_note: "Session record for the delegated REQ-04 scope determination; does not assert human signature or independent acceptance."
     usage_status: Active
-    modification_status: New
+    modification_status: Active-Modified
     supersession:
       supersedes: []
       supersession_reason: null
