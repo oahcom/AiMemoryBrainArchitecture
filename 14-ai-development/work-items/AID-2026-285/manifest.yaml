@@ -1,0 +1,201 @@
+work_item_id: AID-2026-285
+title: "Explicit retrospective exception record for §5(3) assessment contemporaneity"
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: "The work records a narrowly scoped retrospective exception for four existing assessments. It does not modify assessment contents, signature validation logic, workflow enforcement, or future signature obligations. The principal risk is accidental interpretation as a general waiver; explicit scope and non-waivable residual obligations mitigate that risk."
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: f20fff10307f512d3c299b6371f172c85f941e30
+
+identifier_allocation:
+  observed_main: f20fff10307f512d3c299b6371f172c85f941e30
+  assigned_id: AID-2026-285
+  allocation_rule: "Explicitly assigned by the task. No self-allocation or substitution is permitted."
+  observed_occupied:
+    main_directories:
+      - AID-2026-280
+      - AID-2026-281
+      - AID-2026-284
+      - AID-2026-290
+    remote_branches:
+      - fix/aid-283-update-branch-uniqueness
+    open_pull_request_numbers:
+      - 283
+      - 290
+      - 301
+      - 302
+      - 311
+    open_pull_request_associated_work_items:
+      - AID-2026-283
+      - AID-2026-290
+      - AID-2026-301
+      - AID-2026-302
+      - AID-2026-311
+    unoccupied_assigned_range:
+      - AID-2026-286
+      - AID-2026-287
+      - AID-2026-288
+  recheck_rule: "Before creating the single carrier PR, rescan the current main tree, all open PRs, and remote branches. If AID-2026-285 is occupied or another carrier exists for this AID, stop without creating another PR."
+  collision_record: "AID-2026-284 was the first candidate. It was displaced before any commit existed: origin/main advanced to f20fff10 (merge of PR #1440, branch feat/aid-2026-284-req04-ac1-scope) and 14-ai-development/work-items/AID-2026-284 appeared on main. The identifier was reassigned to 285 by the same task-level allocation rule; no carrier was created under 284."
+
+scope:
+  included:
+    - "Create one explicit retrospective exception record naming §5(3)."
+    - "Identify the four historical assessment documents by exact repository path."
+    - "Record the retrospective attachment facts and the narrow contemporaneity exception."
+    - "Preserve the future contemporaneous-signing obligation."
+    - "Add one INDEX.md registration row."
+    - "Record evidence, session provenance, and prompt provenance."
+  excluded:
+    - "Modify any of the four assessment documents."
+    - "Modify PR-GOVERNANCE-001.md."
+    - "Modify scripts/ci/check_req_assessment_signatures.py."
+    - "Modify CI workflows or branch protection."
+    - "Modify the Issue #262 body."
+    - "Modify historical GitHub comments."
+    - "Create documentation mirrors."
+    - "Create any additional PR or secondary carrier."
+    - "Claim that contemporaneity has been satisfied."
+    - "Claim natural-person Owner approval or signature."
+
+evidence:
+  source_issue: 262
+  terminal_adjudication:
+    status: PARTIAL
+    comment_id: 7211718343
+    timestamp: "2026-11-27T06:38:55Z"
+    residual_gap: "Owner explicitly names the §5(3) exception record; NOT_STARTED at the time of terminal adjudication."
+  governing_rule:
+    document: 14-ai-development/PR-GOVERNANCE-001.md
+    section: "§5(3)"
+    english_line: 142
+    chinese_line: 147
+    exception_instruction_line: 138
+  assessments:
+    - path: reviews/architecture/SYS-RISK-001.en.md
+      signature_attachment_line: 15
+      line_range: "L12-L15"
+      lines_before: 964
+      lines_after: 968
+      insertion_lines: 4
+      signature_attached: "2026-11-27 by the AID-2026-250 rework — retrospective attachment, not a contemporaneous signature"
+    - path: reviews/architecture/SYS-RISK-001.zh-CN.md
+      signature_attachment_line: 15
+      line_range: "L12-L15"
+      lines_before: 963
+      lines_after: 967
+      insertion_lines: 4
+      signature_attached: "2026-11-27，AID-2026-250 返工补录——事后附加，不冒充同期签署"
+    - path: reviews/complexity/architecture-complexity-assessment.en.md
+      signature_attachment_line: 13
+      line_range: "L10-L13"
+      lines_before: 317
+      lines_after: 321
+      insertion_lines: 4
+      signature_attached: "2026-11-27 by the AID-2026-250 rework — retrospective attachment, not a contemporaneous signature"
+    - path: reviews/complexity/architecture-complexity-assessment.zh-CN.md
+      signature_attachment_line: 13
+      line_range: "L10-L13"
+      lines_before: 317
+      lines_after: 321
+      insertion_lines: 4
+      signature_attached: "2026-11-27，AID-2026-250 返工补录——事后附加，不冒充同期签署"
+  assessed_version: b372b62c640a2b656e54b6db62a4ee67d7d8c001
+  evidence_baseline: "main@b372b62c...:<assessment path>"
+  carrier_pr_1424:
+    pull_request: 1424
+    merge_commit_sha: 101ea55e021d6c3a819f66fc588c76b1e99a77fe
+    merge_type: true_two_parent_merge
+    parents:
+      - af2660d5
+      - e17c0e9a
+  measurements:
+    baseline_signature_checker: "SUMMARY files=4 failures=0"
+    mutation_testing:
+      mutation_count: 12
+      description: "Three signature-field deletion mutations for each of four documents."
+      expected_exit_code: 1
+      observed_exit_code: 1
+      count_of_mutations_exiting_one: 12
+    required_contexts:
+      successful: 16
+      total: 16
+    branch_protection:
+      behind: 0
+    blob_comparison:
+      matching_files: 11
+      total_files: 11
+    historical_comments:
+      unchanged_comment_ids:
+        - 7011312621
+        - 7014315135
+        - 7143927480
+        - 7149369280
+      updated_at_window: "2026-11-27T04:54–05:03Z"
+      rework_trace_comment: 7211285798
+      rework_trace_created_and_updated: "2026-11-27T06:10:38Z"
+    terminal_adjudication_comment: 7211718343
+    terminal_adjudication_timestamp: "2026-11-27T06:38:55Z"
+  unmeasured_in_this_work_item:
+    - "The 12 deletion mutations were not rerun during AID-2026-285."
+    - "The 16 required-context run URLs were not independently re-opened or re-verified during AID-2026-285."
+    - "The 11-file blob comparison was not independently repeated during AID-2026-285."
+    - "The merge state and final blob identity of this AID-2026-285 carrier are not yet measured."
+    - "Natural-person Owner signature or subsequent ratification is NOT_MEASURED."
+
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-285/exception-record-s5-3-contemporaneity.md
+    relationship: normative
+  - path: 14-ai-development/work-items/AID-2026-285/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-285/session-evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-285/prompt-v1.md
+    relationship: reference
+
+session_evidence:
+  - role: "Authoring session for the delegated §5(3) retrospective exception record"
+    issue_refs:
+      - 262
+      - 305
+    implementing_ai_session: "AID-2026-285 authoring session"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-285/session-evidence.md
+
+implementation:
+  status: NOT_STARTED
+  summary: "Textual work-item materials authored for mechanical application by the designated execution session. No repository write, CI execution, PR creation, or merge is claimed."
+  files_changed:
+    - 14-ai-development/work-items/AID-2026-285/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-285/exception-record-s5-3-contemporaneity.md
+    - 14-ai-development/work-items/AID-2026-285/evidence.md
+    - 14-ai-development/work-items/AID-2026-285/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-285/prompt-v1.md
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - "NOT_RUN: check_work_item_manifest_schema.py"
+    - "NOT_RUN: check_document_management.py"
+    - "NOT_RUN: check_bilingual_docs.py"
+    - "NOT_RUN: check_session_evidence.py"
+    - "NOT_RUN: check_work_item_index.py"
+    - "NOT_RUN: repository CI"
+  pull_request: PENDING
+  merge_commit_sha: NOT_MERGED
+
+carrier:
+  branch: NOT_RECORDED
+  pull_request: null
+  merge_sha: null
+  required_contexts: "NOT_RECORDED; no required-context claim is made"
+
+review:
+  status: NOT_ASSIGNED
+
+acceptance:
+  gate: PENDING
