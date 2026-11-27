@@ -8,7 +8,7 @@ identical at every later commit. Verify at any head with:
 
   git diff --name-only 25b3f2e13e9565cc25b3c0f8da19f7c6789a61cd..HEAD
 
-which must list only `14-ai-development/work-items/AID-2026-255/ratchet-negative.log`
+which must list only `14-ai-development/work-items/AID-2026-255/ratchet-negative.md`
 and `14-ai-development/work-items/AID-2026-255/independent-review.md`. No
 manifest, checker, baseline or workflow file is touched after the scan commit,
 so the 91-item set below is the set at the head that carries this log.

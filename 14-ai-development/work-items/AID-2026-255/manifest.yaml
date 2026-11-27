@@ -36,7 +36,7 @@ documentation:
     relationship: evidence
   - path: 14-ai-development/work-items/AID-2026-255/session-evidence.md
     relationship: evidence
-  - path: 14-ai-development/work-items/AID-2026-255/ratchet-negative.log
+  - path: 14-ai-development/work-items/AID-2026-255/ratchet-negative.md
     relationship: evidence
 evidence: 14-ai-development/work-items/AID-2026-255/evidence.md
 scope:
@@ -45,7 +45,7 @@ scope:
     - 14-ai-development/work-items/AID-2026-255/evidence.md
     - 14-ai-development/work-items/AID-2026-255/session-evidence.md
     - 14-ai-development/work-items/AID-2026-255/independent-review.md
-    - 14-ai-development/work-items/AID-2026-255/ratchet-negative.log
+    - 14-ai-development/work-items/AID-2026-255/ratchet-negative.md
   files_to_modify:
     - scripts/ci/test_check_manifest_blob_pins.py
     - 14-ai-development/work-items/INDEX.md
