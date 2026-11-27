@@ -1,7 +1,7 @@
 ---
 document_metadata:
   domain: ai-development
-  role: session-evidence
+  role: work-record
   lifecycle:
     approval:
       decision_status: Draft
@@ -18,7 +18,7 @@ document_metadata:
       last_verified_date: "2026-11-27"
       last_verification_note: "Records actual AI input/output and GitHub API-only actions; no local execution claimed."
     usage_status: Active
-    modification_status: Draft
+    modification_status: Modified
     supersession:
       supersedes: []
       supersession_reason: null
@@ -30,8 +30,8 @@ document_metadata:
   steward: "user-authorized operator (delegated by account owner)"
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "Session provenance for AID-2026-280"
-    canonical_scope_id: "ai-development/aid-2026-280-session-evidence"
+    canonical_scope: null
+    canonical_scope_id: null
     canonical_scope_keywords:
       - "session-evidence"
       - "req-04"
