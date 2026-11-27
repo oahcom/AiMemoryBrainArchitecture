@@ -17,7 +17,7 @@ date: 2026-11-27
 repository:
   name: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: a7a252eb670b31066a0ffea35dc28cbe6ef5b836
+base_commit_sha: a588cd9914949c2c9db7b2c5704d906fd3f05b70
 prompt_status: RECORDED_NOT_FROZEN
 prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
 identifier_allocation:
@@ -39,7 +39,13 @@ scope:
     - path: "scripts/check_declared_check_contexts.py"
       detail: "Enforce required-not-declared and declared-not-produced; print the three counts and both differences; identify unavailable input and reason with exit 2."
     - path: "scripts/test_check_declared_check_contexts.py"
-      detail: "Inject a required-only context, transport exception and None payload; assert exact names, input and exit codes."
+      detail: "Inject required-only, exception and None payloads; verify rc=1/2 and verify unreadable payload outranks simultaneous local unproduced-context violations."
+    - path: "scripts/probe_declared_check_contexts.py"
+      detail: "Emit independent raw rc/stderr transcripts for required-only, exception and None probes."
+    - path: "scripts/run_declared_check_contexts_mutation_tests.py"
+      detail: "Execute two source mutations against targeted tests; baseline must pass and each mutant must fail."
+    - path: ".github/workflows/repository-hygiene.yml"
+      detail: "Run the independent probes and mutation harness as hard-failing steps in the existing job."
     - path: "14-ai-development/work-items/AID-2026-267/"
       detail: "Record manifest, prompt snapshot, implementation evidence and session evidence."
     - path: "14-ai-development/work-items/INDEX.md"
@@ -77,10 +83,13 @@ session_evidence:
     session_evidence_ref: "14-ai-development/work-items/AID-2026-267/session-evidence.md"
 implementation:
   status: IN_PROGRESS
-  summary: "Checker and deterministic probes updated; exact-Head CI is pending."
+  summary: "Priority fixed: required payload is fetched and validated before local violations; combination tests, raw probes and mutation harness added; refreshed exact-Head CI pending."
   files_changed:
     - "scripts/check_declared_check_contexts.py"
     - "scripts/test_check_declared_check_contexts.py"
+    - "scripts/probe_declared_check_contexts.py"
+    - "scripts/run_declared_check_contexts_mutation_tests.py"
+    - ".github/workflows/repository-hygiene.yml"
     - "14-ai-development/work-items/AID-2026-267/"
     - "14-ai-development/work-items/INDEX.md"
   tests:
