@@ -608,3 +608,15 @@ dev_baseline_integration:
     - enforced production verifier
     - concurrent linearization proof (DFI-013)
     - WAL / crash durability (DFI-021)
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-001/execution-record-001.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-001/r3-contract-test-matrix.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-001/r3-specialist-review-owner-i-prompt.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-001/r3-specialist-review-owner-d-prompt.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-001/integration-review-prompt.md"
+    relationship: reference

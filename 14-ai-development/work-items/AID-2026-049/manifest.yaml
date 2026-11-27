@@ -118,3 +118,13 @@ findings:
   - id: AID-2026-049-F4
     severity: P3
     feedback_destination: "Delivery PR conversation. A python3 -c one-liner used to append the lib.rs re-export silently rewrote 4458 lines because the shell quoting corrupted the replacement text. Caught by checking git diff --numstat before committing (4458/4451 instead of 6/0) and reverted. The append was redone from a script file and re-verified at 6 insertions, 0 deletions."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-049/prompt-v1.md"
+    relationship: reference
+  - path: "06-memory-context/context-budget-and-sufficiency.md"
+    relationship: reference
+  - path: "06-memory-context/context-implementation-coverage.md"
+    relationship: reference
+  - path: "06-memory-context/context-implementation-coverage.zh-CN.md"
+    relationship: reference

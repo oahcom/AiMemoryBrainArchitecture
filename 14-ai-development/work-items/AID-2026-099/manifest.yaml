@@ -83,3 +83,15 @@ session_evidence:
     executed_prompt_provenance: "RECORDED_SNAPSHOT; SESSION_ID_NOT_AVAILABLE"
     session_reference_status: NOT_RECORDED
     session_evidence_ref: "14-ai-development/work-items/AID-2026-099/session-evidence.md"
+
+documentation:
+  - path: "08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md"
+    relationship: reference
+  - path: "docs/en/08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md"
+    relationship: reference
+  - path: "docs/zh-CN/08-bmcp-protocol/h-idempotency-namespace-and-replay-boundary-contract.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-099/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-099/session-evidence.md"
+    relationship: reference

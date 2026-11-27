@@ -151,3 +151,15 @@ acceptance:
       - PR #270 comment 7000639090: five-condition DEV-BASELINE registration framework.
       - PR #270 comment 7001139728: exact-Head acceptance and closure record.
       - PR #270 comment 7001158232: final-head registration condition and merge/read-back evidence.
+
+documentation:
+  - path: "14-ai-development/ai-development-standard.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
+  - path: "prompts/README.md"
+    relationship: reference
+  - path: "prompts/00-setup/TEMPLATE-v2.md"
+    relationship: reference
+  - path: "prompts/00-setup/TEMPLATE-v2.zh-CN.md"
+    relationship: reference
