@@ -142,3 +142,13 @@ The frontmatter SHA values above are Git blob SHAs of the exact current YAML fro
 - A second real `git merge --no-ff origin/main` completed without conflicts. Merge commit: `51ac5e254293242c1112f97579608bd89a66fb51`; behind count after merge: `0`.
 - The AID-2026-109 I work item remains unchanged; AID-2026-242 remains absent from `origin/main` and is carried only by this PR.
 - Final local validation against base `f18adc9fa1d06837433a09498f5297bf13b35756` and head `51ac5e254293242c1112f97579608bd89a66fb51`: 27 bilingual checker tests passed; bilingual gate PASS with 9 changed paths and 0 new gaps; GOV-DOC-002 incremental check PASS with no violations.
+
+
+## 10. Exact-head GitHub checks and protection read (2026-11-27)
+
+- Pushed PR head measured: `7f71f083aad6b14eefad804e23e66b963a169eb3`; PR #1297 base: `f18adc9fa1d06837433a09498f5297bf13b35756`.
+- `GET /actions/runs?head_sha=7f71f083aad6b14eefad804e23e66b963a169eb3`: `total_count=10` (including the initial run and the two workflow reruns triggered by the corrected PR description).
+- `GET /commits/7f71f083aad6b14eefad804e23e66b963a169eb3/check-runs`: 20 records across attempts; 16 distinct latest context names, all `completed/success`: `audit`; `GOV-DOC-002 metadata checks`; `Session Evidence`; `Session Evidence self-test (base)`; `Branch freshness vs base`; `Rust clippy (hard gate)`; `rust-workspace-test`; `Rust format (hard gate)`; `Bilingual docs coverage (ratchet)`; `Schema non-empty audit (hard gate)`; `Rust doctests (hard gate)`; `GOV-DOC-001 structural checks`; `Session Evidence self-test (head)`; `BMCP protocol index (hard gate)`; `Repository hygiene (hard gate)`; `BMCP conformance suite (hard gate)`.
+- The first Session Evidence attempt failed because the PR body decorated the Work Item ID with explanatory text; the validator requires the ID line to contain only `AID-2026-242`. The PR body was corrected to `Work Item ID: AID-2026-242`; the rerun's Session Evidence job completed successfully.
+- `GET /compare/main...docs/2026-11-26-aid-2026-109-d-memory-brain-root-restore`: `ahead_by=21`, `behind_by=0`, merge base equals current main `f18adc9fa1d06837433a09498f5297bf13b35756`.
+- `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection` returned HTTP 403 `Resource not accessible by integration`. `GET /repos/oahcom/AiMemoryBrainArchitecture/rulesets` returned an empty list. Therefore `strict` and `enforce_admins` could not be independently read through the available GitHub connection. No merge is claimed or attempted without that required protection verification.
