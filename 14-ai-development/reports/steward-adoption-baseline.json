@@ -1,6 +1,6 @@
 {
-  "classified": 774,
-  "governed": 1144,
+  "classified": 777,
+  "governed": 1147,
   "missing": [
     "00-governance/architecture-document-management-policy.md",
     "00-governance/architecture-invariants.md",
@@ -528,6 +528,6 @@
     "docs/zh-CN/14-ai-development/work-items/AID-2026-210/evidence.md",
     "docs/zh-CN/14-ai-development/work-items/AID-2026-240/evidence.md"
   ],
-  "pin": "6482901cbc55e98d4a53f2203e6864b34a888b26",
-  "present": 249
+  "pin": "460f437eb3496e10737b9ef20f4b816e34d155c4",
+  "present": 252
 }

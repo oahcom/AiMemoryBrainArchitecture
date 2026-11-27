@@ -66,3 +66,10 @@ The branch contains the initial schema/checker/test/workflow mechanism commits. 
 - The latest DM-15/GOV-DOC-002 lines are recorded by Architecture document management gate run 45966438510 (job 140396112780); changed-file validation succeeded.
 - Cumulative steward assignments in this branch: 128 files (127 work-item files in AID-2026-001 through AID-2026-099 plus the modified work-items index).
 - Repository hygiene was reconciled using its observed output: 76 stale manifest-blob-pin baseline entries removed and the one new AID-2026-059 prompt SHA mismatch corrected; no failure was added to the ratchet.
+
+## Latest-main refresh
+
+- Main pin: 460f437eb3496e10737b9ef20f4b816e34d155c4
+- Actions census after merging this main revision: governed=1147, classified=777, unclassified=370, present=252, missing=525.
+- The count remains 525: the three newly governed/classified documents in this main revision were already steward-present.
+- Cumulative steward assignments remain 128; no further migration batch was added.
