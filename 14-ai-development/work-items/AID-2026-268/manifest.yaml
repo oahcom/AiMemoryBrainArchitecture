@@ -18,7 +18,7 @@ attribution: user-authorized operator (delegated by account owner)
 date: 2026-11-27
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: 40195e8bf96b9cc6aa254066b9b72968f29ac361
+base_commit_sha: 10d33b3f6c012e1c0d5649a5279cadb6d27b1a2f
 approval_scope:
   type: Full-document
 evidence_reference:
