@@ -7,6 +7,10 @@
 - 类型：基于可读取仓库证据的静态架构复杂度评估
 - 状态：**PROVISIONAL — NOT PROVEN**
 - 范围限制：本报告不批准架构、不替代 Owner 决策、不证明实现/性能/安全性，也不代表全部 Owner 分支已完整审查。
+- assessor: X — 首席架构复杂度评估负责人
+- assessed_version: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- evidence_baseline: `main@b372b62c640a2b656e54b6db62a4ee67d7d8c001:reviews/complexity/architecture-complexity-assessment.zh-CN.md`
+- signature_attached: 2026-11-27，AID-2026-250 返工补录——事后附加，不冒充同期签署
 
 ## 0. 执行结论
 

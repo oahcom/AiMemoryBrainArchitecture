@@ -1,0 +1,149 @@
+work_item_id: AID-2026-281
+title: >-
+  Add memory-runtime navigation entries, narrow AID-2026-113 verification coverage,
+  and register the work item and unresolved source-revision debt
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Documentation and metadata registration only. No source revision checker logic is changed,
+  no workflow is modified, no required context is added, and no claim is made that unresolved
+  translation pointers are accurate. Existing validation semantics are preserved.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 788fbc011877a14976fc0a974ffe2e013dd9991b
+prompt_status: NOT_RECORDED
+prompt_provenance: DISPATCHED_TASK_FILE
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: 788fbc011877a14976fc0a974ffe2e013dd9991b
+  assigned_id: AID-2026-281
+  allocation_rule: >-
+    The work-item identifier was explicitly assigned by the task instructions. No allocation
+    or availability claim beyond that assignment is made.
+  observed_occupied: []
+  recheck_rule: >-
+    Recheck the main tree, open pull requests and remote branch names immediately before merge.
+    If the identifier is occupied, stop and obtain a new authorized identifier before proceeding.
+scope:
+  objective: >-
+    Register the actual branch changes: equivalent navigation-only entries in the three
+    memory-runtime README files, a narrower verification-scope note for AID-2026-113, and
+    work-item evidence and index records. Preserve honest source-revision provenance and
+    unresolved pointer debt without weakening checkers or claiming unperformed validation.
+  changes:
+
+    - path: "05-memory-runtime/README.md"
+      detail: "Adds an index-only navigation line; it does not assert normative status."
+    - path: "docs/en/05-memory-runtime/README.md"
+      detail: "Adds the equivalent English navigation line."
+    - path: "docs/zh-CN/05-memory-runtime/README.md"
+      detail: "Adds the equivalent Chinese navigation line."
+    - path: "14-ai-development/work-items/AID-2026-113/restore-evidence.md"
+      detail: >-
+        Retains verification_status: Verified and narrows last_verification_note to exclude
+        the unverified new-blob identity columns.
+    - path: "docs/en/14-ai-development/work-items/AID-2026-113/restore-evidence.md"
+      detail: "Applies the equivalent English verification-scope clarification."
+    - path: "docs/zh-CN/14-ai-development/work-items/AID-2026-113/restore-evidence.md"
+      detail: "Applies the equivalent Chinese verification-scope clarification."
+    - path: "14-ai-development/work-items/AID-2026-281/evidence.md"
+      detail: "Records the supplied baseline measurements, adjudications, scope and limitations."
+    - path: "14-ai-development/work-items/AID-2026-281/evidence-05-index.md"
+      detail: "Records the work-record role comparison, indexing adjudication and deletion-proof observations."
+    - path: "14-ai-development/work-items/AID-2026-281/session-evidence.md"
+      detail: "Records the AI session role, actual input and AI-visible output."
+    - path: "14-ai-development/work-items/INDEX.md"
+      detail: "Adds the AID-2026-281 work-item registry row."
+  untouched:
+    - "scripts/check_source_revision_pointers.py and its strict failure semantics"
+    - "all workflow files, including repository-hygiene.yml"
+    - "scripts/ci/baselines/source-revision-pointers.txt (not introduced)"
+    - "scripts/ci/baselines/gate-wiring.txt"
+    - "all 14 source revision pointer declarations identified as debt"
+    - "all policy tables generated from MANUAL_CONTROLS"
+evidence:
+  record: 14-ai-development/work-items/AID-2026-281/evidence.md
+  mirrors: []
+  measured_at: 40195e8b
+  measured_at_note: >-
+    Final local measurements were run on the merged tree with origin/main at 40195e8b.
+    These are local command results only: no CI result or independently recorded merge SHA
+    is claimed by this evidence record.
+  measurements:
+    document_management_require_changed: "exit 0; PASS (incremental): no GOV-DOC-002 violations; 657 classified, 371 unclassified"
+    bilingual_docs: "exit 0; PASS (11 changed paths inspected); baseline 77 frozen, 0 new gaps; BASE_SHA=origin/main, HEAD_SHA=HEAD, PR body contains BILINGUAL-MANIFEST: COMPLETE"
+    repository_hygiene_head_tree_only: "exit 0; directories=121 linked=121; manifests=110 in_scope=96 excluded_by_record_type=5 unrecognized=9 violations=0"
+    source_revision_pointers: "50 pointers; 16 accurate; 8 stale; 26 dereferenced; 0 bad dereferences; 6 non-blob references; 14 BAD; exit 1"
+    branch_head: "ce3d7cb8"
+    base_commit: "788fbc011877a14976fc0a974ffe2e013dd9991b"
+  local_runs:
+    - command: "python scripts/check_document_management.py --require-changed origin/main"
+      result: "Exit 1; DM-01 missing document_metadata blocks in the two AID-2026-281 evidence records."
+    - command: "python scripts/check_bilingual_docs.py"
+      result: "Exit 1; missing BILINGUAL-MANIFEST: COMPLETE or fully documented approved exception for 05-memory-runtime/README.md; 77 frozen, 0 new gaps."
+    - command: "python scripts/check_source_revision_pointers.py"
+      result: "POINTERS=50 ACCURATE=16 STALE=8 DEREFERENCED=26 BAD_DEREFERENCE=0 NON_BLOB_REFERENCE=6 BAD=14; exit 1."
+  not_measured:
+    - "No CI result is claimed."
+    - "No PR check result is claimed."
+    - "No merge SHA is claimed."
+    - "No post-merge verification is claimed."
+    - "No workflow integration or required-context change is claimed."
+implementation:
+  status: NOT_STARTED
+  pull_request: PENDING
+  merge_commit_sha: NOT_MERGED
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1212"
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-281/prompt-v1.md"
+    executed_prompt_sha256: "75bdd87dce126f849e973d2968be1aca41264b9514faca88c3d73767ed5420ac"
+    executed_prompt_bytes: 20296
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-281/session-evidence.md"
+non_goals:
+  - "Changing source revision pointer checker logic"
+  - "Connecting source revision pointer checking to any workflow"
+  - "Adding a source revision pointer baseline or ratchet"
+  - "Declaring unsynchronized translations synchronized"
+  - "Inventing or inferring blob identities"
+  - "Changing unrelated governance decisions"
+  - "Claiming CI, PR, merge or post-merge success without evidence"
+notes:
+  - >-
+    The source revision pointer checker reports 14 BAD findings in the supplied working tree.
+    The adjudication is to preserve its strict behavior and leave it unwired. The eight stale
+    mirror pointers and six non-blob references remain explicit unresolved debt; no declared
+    revision is rewritten to manufacture synchronization provenance.
+  - >-
+    AID-2026-113 retains verification_status: Verified. Its last_verification_note is narrowed
+    to exclude the two tables' new-blob identity columns, whose status remains
+    NEW_BLOB_IDENTITIES_NOT_VERIFIABLE.
+  - >-
+    The three 05-memory-runtime README files receive equivalent navigation-only additions.
+    They are not asserted to be normative documents by those additions.
+carrier:
+  branch: NOT_RECORDED
+  pull_request: null
+  merge_sha: null
+  merge_method: NOT_RECORDED
+  required_contexts: "NOT_RECORDED; no required-context claim is made"
+  merge_authorization: >-
+    Only after all required contexts succeed on the exact final PR head and branch freshness
+    is rechecked. No merge authorization is asserted by this manifest.
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+acceptance:
+  gate: PENDING
