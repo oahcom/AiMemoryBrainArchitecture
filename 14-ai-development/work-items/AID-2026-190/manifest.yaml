@@ -10,7 +10,7 @@ risk_rationale: >-
   `verification_status` value is edited. The residual risk is that a later reader treats
   the appended section as a rewrite of the record, so both corrections state explicitly
   that the original declaration is left in place and that it does not hold.
-status: DISPATCHED
+status: MERGED
 id_status: PROVISIONAL
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED

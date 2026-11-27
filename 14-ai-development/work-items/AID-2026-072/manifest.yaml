@@ -68,7 +68,7 @@ implementation:
     while the correcting branch still held the identifier AID-2026-090; that number belongs to the
     ContextVersion immutability work item, which merged as PR #1241 and never mentions this file.
     The abandoned number is kept here rather than deleted, so a reader who has already followed the
-    wrong pointer learns why it was wrong. Corrected by AID-2026-187.
+    wrong pointer learns why it was wrong. Corrected by AID-2026-116.
 
 review:
   status: NOT_ASSIGNED

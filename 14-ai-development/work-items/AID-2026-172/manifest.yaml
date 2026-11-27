@@ -6,7 +6,7 @@ risk_rationale: >-
   One comparison inside an existing gate, one refusal inside an existing writer,
   and unit tests. No document pairing rule, baseline entry, or existing gate
   outcome changes while the two copies agree, which they do on main.
-status: DISPATCHED
+status: MERGED
 id_status: PROVISIONAL
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED

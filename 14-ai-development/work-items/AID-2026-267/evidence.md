@@ -1,0 +1,157 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  steward: USER-PRINCIPAL-DELEGATED
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "AID-2026-267/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "Implementation evidence is provisional until exact-Head CI and independent review are recorded."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Execution evidence for Issue #134 required/declaration/production gate closure"
+    canonical_scope_id: "ai-development/aid-2026-267-required-declared-produced"
+    canonical_scope_keywords:
+      - "required-contexts"
+      - "declared-contexts"
+      - "produced-contexts"
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+---
+
+# AID-2026-267 — Implementation evidence
+
+## Attribution and authority
+
+- Repository: `oahcom/AiMemoryBrainArchitecture`
+- Issue: #134 (remains OPEN)
+- Original PR base: `a7a252eb670b31066a0ffea35dc28cbe6ef5b836`; refresh target: `242cf101c8b79007ad2fb8d9c89681224577188d`
+- Branch: `fix/aid-267-required-declared-produced-r2`
+- Work Item: `AID-2026-267`, provisional allocation
+- Attribution: `user-authorized operator (delegated by account owner)`
+- Date: 2026-11-27
+- This implements the Owner's existing ruling; it is not a new Owner adjudication or natural-person Owner signature.
+
+## Existing state discovered at base
+
+The checker already read the public `/branches/main` payload and compared
+declared/protected sets, but it required equality and did not emit the exact
+three-count/two-difference closeout record. Its tests already injected a
+required-only context and an exception, but did not assert the unavailable
+input/reason or the None return. The existing workflow directly runs the
+checker and its unittest module; neither invocation is warn-only.
+
+## Implementation
+
+- The semantic contract is now the inclusion chain `required ⊆ declared ⊆ produced`.
+- The checker reports `required_not_declared` and `declared_not_produced`.
+- A required-only injected context is a named exit-1 violation.
+- An exception or None payload is an exit-2 INCOMPLETE result naming
+  `branches/main.protection.required_status_checks.contexts` and the cause.
+- Success reports declared, required and produced counts, both empty differences,
+  and the required notice format.
+- The live API endpoint remains `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main`;
+  no snapshot or new credential is introduced.
+
+## Verification status
+
+Exact refreshed PR head: `75c9f61b325611d28be0d2c858336f8570b3f728`.
+The branch was refreshed by a non-ff merge commit whose main parent was
+`242cf101c8b79007ad2fb8d9c89681224577188d`. At verification time,
+`main...fix/aid-267-required-declared-produced-r2` reported ahead=32 / behind=0.
+
+Repository hygiene hard-gate job `140318947231` completed SUCCESS on the exact
+head and recorded:
+
+```text
+CONTEXT COUNTS: declared=16 required=16 produced=46
+required_not_declared=[]
+declared_not_produced=[]
+::notice::16 declared, 16 required, all produced
+DECLARED CHECK CONTEXTS: PASS
+```
+
+The same job ran the verbose self-test (`Ran 19 tests ... OK`), the three
+standalone probes, and the two source mutations as ordinary hard-failing steps.
+Both combination tests passed:
+- `test_incomplete_precedes_local_violation_when_fetch_raises`
+- `test_incomplete_precedes_local_violation_when_fetch_returns_none`
+
+Standalone probe results on the exact head:
+- required-only injected payload: rc=1; stderr names `Session Evidence` as
+  required by main but absent from `PR-GOVERNANCE-001.md`.
+- injected fetch exception: rc=2; stderr names
+  `branches/main.protection.required_status_checks.contexts` and
+  `OSError: connection refused`.
+- injected None payload: rc=2; stderr names the same input and says the required
+  set is unavailable.
+
+Mutation verification on the exact head:
+- required-minus-declared forced empty: original targeted test raw_rc=0;
+  mutated targeted test raw_rc=1 with `AssertionError: 0 != 1`.
+- INCOMPLETE exception return changed from 2 to 0: original targeted test
+  raw_rc=0; mutated targeted test raw_rc=1 with `AssertionError: 0 != 2`.
+- Final harness output: `MUTATION TESTS: PASS (both mutations detected)`.
+
+All 16 branch-required context names have at least one completed SUCCESS check
+run on this exact head. The branch summary reports `protected=true`,
+`required_status_checks.enforcement_level=everyone`, and the 16 context
+names. However, reads of the branch-protection, required-status-checks, and
+enforce-admins endpoints each return HTTP 403 to this integration. Therefore
+the `strict` and `enforce_admins` booleans could not be independently
+verified; no merge was attempted. PR #1369 remains OPEN and Issue #134 remains
+OPEN. The L3 review comment `6083410132` was APPROVE WITH AMENDMENTS on the
+prior head; it is not a new approval event for the amended head.
+
+## L3 amendment
+
+Independent review ID `6083410132` returned APPROVE WITH AMENDMENTS. The reviewer identified a priority defect: an unproduced declared context could cause exit 1 before the required platform payload was fetched, even when that payload was unavailable.
+
+The checker now fetches and validates `protection.required_status_checks.contexts` before classifying local unproduced or duplicate declarations. A missing, malformed, exception or None required payload therefore returns 2 before local violations are considered.
+
+Added combination tests:
+- `test_incomplete_precedes_local_violation_when_fetch_raises`
+- `test_incomplete_precedes_local_violation_when_fetch_returns_none`
+
+Added standalone raw transcript probes in `scripts/probe_declared_check_contexts.py` and actual source-mutation verification in `scripts/run_declared_check_contexts_mutation_tests.py`. Both scripts are invoked as hard-failing steps in the existing Repository hygiene job.
+
+The first CI attempt exposed a metadata issue in three new work-item records; all three now declare `document_metadata.steward: USER-PRINCIPAL-DELEGATED`. A subsequent stale-base GOV-DOC-002 run also reported unrelated files introduced on main after the original PR base as newly added; the branch must be refreshed to the current main before that gate can be considered final.
+
+## Current verification status
+
+- Priority-fix combination tests: awaiting refreshed exact-head CI.
+- Three standalone raw probes: awaiting refreshed exact-head CI.
+- Both mutation tests: awaiting refreshed exact-head CI; no mutation result is claimed before the runner logs are inspected.
+- Live checker output and all 16 required contexts: awaiting refreshed exact-head CI.
+- Merge: not performed. Issue #134 remains OPEN.
+
+## Unresolved
+
+The implementation, probes, mutation tests and 16 required contexts are
+verified on the refreshed exact head. Merge remains blocked because the
+integration receives HTTP 403 for the branch-protection endpoints needed to
+verify `strict=true` and `enforce_admins=true`. No Owner acceptance or
+natural-person Owner signature is claimed. Issue #134 remains OPEN.

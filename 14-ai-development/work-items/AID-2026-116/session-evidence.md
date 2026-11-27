@@ -1,5 +1,6 @@
 ---
 document_metadata:
+  steward: "user-authorized operator (delegated by account owner)"
   domain: ai-development
   role: work-record
   lifecycle:
@@ -43,7 +44,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# Session evidence — AID-2026-187
+# Session evidence — AID-2026-116
 
 ## Session role / use case
 
@@ -59,9 +60,14 @@ edit to somebody else's manifest.
 
 ## Actual AI input
 
-The prompt executed is `AID-2026-187/prompt-v1.md`, 8274 bytes, SHA-256
-`7ddad18d00c801f497371a2b104a1f8c7bc13b2c983bc084f438a77307e9a9be`. It is the snapshot, not a
-summary of it, and it is committed beside this file.
+The prompt executed is the original `AID-2026-116/prompt-v1.md` snapshot at 8274 bytes, SHA-256
+`3b8f72e2e124b24625035c42398c0529655be4d8e8e48ddfc4b7369b89ce1c94`. Those original bytes are
+preserved in the parent revision before the DM-15 metadata correction. The committed snapshot later
+received the required steward field; its current bytes are 8341 with SHA-256
+`6fd626bfd4674e3e98f107baa93b4f2ef1061eac36c80c66a7778714ab5b725e`. The manifest's
+`executed_prompt_sha256` and `executed_prompt_bytes` pin the current committed snapshot bytes for
+blob-integrity validation; this post-execution metadata addition does not claim that the steward
+line was part of the original AI input.
 
 The dispatch that produced it, verbatim, was the standing instruction repeated across the preceding
 sessions:

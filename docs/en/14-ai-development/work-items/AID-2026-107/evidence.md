@@ -17,7 +17,7 @@ document_metadata:
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-26"
-      last_verification_note: "The 72 AID-2026-095 checkpoint rows remain NOT EVIDENCED; IMPL2 comparison at main a7e7c64bfd6c6d709a0a7b55358f94b8535815c1 classified 189 missing paths as 5 normative roots, 83 historical phase records and 101 undecided files; no missing path was restored."
+      last_verification_note: "The 72 AID-2026-095 checkpoint rows remain NOT EVIDENCED; IMPL2 comparison classified 189 missing paths as 5 normative roots, 83 historical phase records and 101 undecided files; PR #1299 merged after 16/16 exact-Head checks and three evidence blobs were verified equal on main."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -217,9 +217,9 @@ Rules: the original 095 matrix uses only PASS / FAIL / NOT EVIDENCED. AID-082/09
 
 | # | Gate A item | Current state | Closeout condition |
 |---|---|---|---|
-| 1 | Branch synchronized with current main | SATISFIED at reviewed base `44dc21a4970192118ba434801b8ca05702ac582c`; recheck if main advances | At final-head review, merge base equals current main and branch is not behind. |
+| 1 | Branch synchronized with current main | SATISFIED at PR #1299 merge; reviewed base `a7e7c64bfd6c6d709a0a7b55358f94b8535815c1`, merge commit `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c` | Final PR Head was 0 behind main immediately before merge. |
 | 2 | Cross-Owner role dispositions (10 roles: 3 ACCEPT / 7 CONDITIONAL / 0 REJECT) | SATISFIED as recorded proxy dispositions | Seven conditional obligations remain; no natural-person Owner signature is claimed. |
-| 3 | Exact-head CI | OPEN_PENDING_FINAL_HEAD | All 16 required contexts succeed on the exact final PR Head. |
+| 3 | Exact-head CI | SATISFIED — 16/16 SUCCESS on final Head `d40a05c9abc68b2a4a9b007805e3e1c34e4128f9`; merged as `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c` | All 16 required contexts succeeded on the exact final PR Head; the PR #1299 merge commit is an ancestor of current main. |
 | 4 | Complete A–I + Storage/Consistency composition review artifact | OPEN | Owner A coordinates the complete exact-version package across eight flows and nine checkpoint dimensions; relevant Owners accept their own boundaries. |
 | 5 | Missing D/E/F/I normative roots/contracts | OPEN — scope adjudicated; 5 identified roots to restore separately; F/I roots need Owner identification | Restore the 5 identified D/E roots in a separate Owner-reviewed PR; identify or explicitly replace the absent F/I README roots. No historical/undecided file enters main without Owner ruling. |
 | 6 | Storage/Consistency physical contract and evidence | OPEN — contract present, evidence missing | Candidate: `10-storage-consistency/storage-physical-consistency-contract.md` @ `d571f086505b312c40b6ae2e56a868131cfffc78` (Candidate/Draft/Unverified/Informative). SC-04/05/06/10/12/13/17/18 remain EVIDENCE_REQUIRED; backend, WAL/flush/torn-write, crash/restore, replica visibility, fail-closed projection, anti-rollback, accepted COC/GID and repeatable RPO/RTO evidence plus exact-version Owner dispositions are missing. |
@@ -227,7 +227,7 @@ Rules: the original 095 matrix uses only PASS / FAIL / NOT EVIDENCED. AID-082/09
 | 8 | Full-package bilingual semantic and source-revision parity | OPEN | Owner A/documentation Owners verify complete exact-head Canonical/EN/ZH-CN semantic parity and every source pin. |
 | 9 | DEC-13 normative approval evidence | RECORDED — AID-2026-096 | Exact six-blob scope only; #1189 remains OPEN and natural-person Owner/joint acceptance confirmation is still missing. |
 
-**Gate A: PARTIAL / OPEN.** Items 1, 2 and 9 are satisfied/recorded; items 3–8 remain open. Items 6 and 7 are now “contract present, evidence missing”, not CLOSED and not PASS.
+**Gate A: PARTIAL / OPEN.** Items 1, 2, 3 and 9 are satisfied/recorded; items 4–8 remain open. Items 6 and 7 are “contract present, evidence missing”, not CLOSED and not PASS.
 
 ## 5. HIR-01…HIR-18 row-count review and expired baseline pin
 
@@ -249,13 +249,12 @@ The eight HIR EVIDENCE_REQUIRED rows are not satisfied by candidate prose. Imple
 
 ## 7. Remaining items before Gate A can close
 
-1. Exact-head CI: all 16 required contexts succeed on and are read back against the final PR Head.
-2. Complete eight-flow A–I + Storage package, source pins, semantic parity and each relevant Owner's exact-version acceptance.
-3. IMPL2: restore the 5 identified D/E normative roots in a separate PR; obtain Owner identification or explicit replacement rulings for the absent F/I README roots; do not import the 83 history or 101 undecided paths without Owner ruling.
-4. Storage: close SC-04/05/06/10/12/13/17/18 with backend transaction, crash, restore, concurrency, replica/visibility, anti-rollback, COC/GID and RPO/RTO evidence.
-5. H/E/Storage: close HIR-05/06/08/12/14/16/17/18 with durable namespace reservation, concurrency/replay, Unknown recovery, crash reconciliation, Storage receipt join and C/G Attempt mapping evidence.
-6. Owner A/documentation Owners verify full-package Canonical/EN/ZH-CN semantic and source-revision parity.
-7. Gate B remains separately open pending implementation, conformance and operational evidence.
+1. Complete the eight-flow A–I + Storage package, source pins, semantic parity and each relevant Owner's exact-version acceptance.
+2. IMPL2: restore the 5 identified D/E normative roots in a separate PR; obtain Owner identification or explicit replacement rulings for the absent F/I README roots; do not import the 83 history or 101 undecided paths without Owner ruling.
+3. Storage: close SC-04/05/06/10/12/13/17/18 with backend transaction, crash, restore, concurrency, replica/visibility, anti-rollback, COC/GID and RPO/RTO evidence.
+4. H/E/Storage: close HIR-05/06/08/12/14/16/17/18 with durable namespace reservation, concurrency/replay, Unknown recovery, crash reconciliation, Storage receipt join and C/G Attempt mapping evidence.
+5. Owner A/documentation Owners verify full-package Canonical/EN/ZH-CN semantic and source-revision parity.
+6. Gate B remains separately open pending implementation, conformance and operational evidence.
 
 ## 8. Non-claims and constraints
 
@@ -529,3 +528,11 @@ AID-095 §2 names `05-memory-runtime/README.md` and `09-security-governance/READ
 Gate A item 5 is now executable rather than an undifferentiated “IMPL2” placeholder: **OPEN — scope adjudicated; 5 identified roots to restore in a separate PR; F/I root source artifacts still require Owner identification or an explicit replacement decision.** It remains OPEN until those roots and F/I source-root questions are resolved. No files from the 189-path inventory were restored by this PR.
 
 **Gate A remains PARTIAL / OPEN. Gate B remains PARTIAL / OPEN (NOT VERIFIED).** The 72 AID-095 checkpoint rows remain 0 UPGRADED / 72 UNCHANGED / 0 DOWNGRADED; all eight flows remain BLOCKED_WITH_REASON. Storage SC-04/05/06/10/12/13/17/18 and HIR-05/06/08/12/14/16/17/18 remain EVIDENCE_REQUIRED; checker/census evidence does not replace implementation-layer evidence.
+
+
+## 11. PR #1299 post-merge closeout
+
+- PR #1299 merged at `b5e1f2a3a54e16fd64fd0f6adb9ab3f3753bb40c` from final Head `d40a05c9abc68b2a4a9b007805e3e1c34e4128f9`.
+- All 16 required contexts are SUCCESS on that exact final Head; the PR #1299 merge commit is an ancestor of current main.
+- Post-merge Git blob equality (PR Head = main): Canonical `cce956d97b7a6d969bb3245fe0890905ca6d3979`; EN `101dcc3ca2a1d0c8358505a5a5cc221a5aa85cab`; ZH-CN `1b478d1114613adb3f7d3bbdcd913d403a78c36f`.
+- Gate A checklist item 3 (exact-head CI) is now SATISFIED. Items 4–8 remain OPEN; Gate A remains PARTIAL / OPEN and Gate B remains PARTIAL / OPEN (NOT VERIFIED).
