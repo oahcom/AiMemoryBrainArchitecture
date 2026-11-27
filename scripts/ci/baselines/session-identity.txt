@@ -72,5 +72,7 @@ SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-241/manifest.yaml#2
 SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-251/manifest.yaml#2
 SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-254/manifest.yaml#1
 SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-264/manifest.yaml#1
+SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-265/manifest.yaml#1
 SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-279/manifest.yaml#1
 SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-280/manifest.yaml#1
+SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-291/manifest.yaml#1
