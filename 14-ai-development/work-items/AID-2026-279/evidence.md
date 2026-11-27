@@ -1,3 +1,50 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-279/manifest.yaml"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "The initial CI self-test executed successfully; the full required gate and branch-protection serialization proof remain incomplete."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords:
+      - "work-item-uniqueness"
+      - "merge-time-gate"
+      - "serialization-evidence"
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+---
+
 # AID-2026-279 — Evidence
 
 **Attribution:** user-authorized operator (delegated by account owner)  
@@ -24,7 +71,7 @@ The branch endpoint reports 16 required contexts including Branch freshness vs b
 
 ## Execution evidence
 
-Raw stdout and exit codes for the deterministic scenarios are emitted by scripts/ci/test_work_item_uniqueness.py in the required GOV-DOC-002 check. This API-only implementation session did not execute Python locally. The PR and Issue evidence comment must carry the exact Actions output; absent Actions output is unverified.
+The required GOV-DOC-002 run executes scripts/ci/test_work_item_uniqueness.py. Its five deterministic tests and raw gate stdout are attached to PR #1372. This API-only implementation session did not execute Python locally.
 
 ## Boundaries
 
