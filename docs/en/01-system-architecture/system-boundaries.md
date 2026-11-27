@@ -37,7 +37,7 @@ document_metadata:
 - Document ID: SYS-BOUNDARIES-001
 - Version: 1.0
 - Source: [Normative source specification](../../../01-system-architecture/system-boundaries.md)
-- Source revision: a3c686291cb323559016f83330852d4df9b82ea9
+- Source revision: dc0e15e7f872dbbebc64545f92b398ef15700786
 - Chinese counterpart: [系统边界](../../zh-CN/01-system-architecture/system-boundaries.md)
 - Status: DECIDED where explicitly identified; CANDIDATE/OPEN items remain non-normative
 
@@ -267,19 +267,19 @@ The D canonical contract at [01-system-architecture/forget-fence-and-completion-
 
 - One deployment has one logical Brain authority.
 - Tenant and shard are partition boundaries within that authority.
-- \`CanonicalCommitCursor\` is partitioned by tenant and shard within that authority. There is no total order across shards.
+- `CanonicalCommitCursor` is partitioned by tenant and shard within that authority. There is no total order across shards.
 - Authority identity and epoch/incarnation are explicit parts of cursor identity. Cursors from different authorities are not comparable.
-- Aggregate revisions and lifecycle cursors are separate cursor domains; they must not be substituted for or compared with \`CanonicalCommitCursor\`.
+- Aggregate revisions and lifecycle cursors are separate cursor domains; they must not be substituted for or compared with `CanonicalCommitCursor`.
 
 ### 15.2 Cross-shard transactions
 
-- A cross-shard transaction produces one \`CanonicalCommitCursor\` entry for each participating shard.
+- A cross-shard transaction produces one `CanonicalCommitCursor` entry for each participating shard.
 - The transaction is atomic: either all participating shard entries commit or none do.
 - This atomicity does not imply a total order across shards.
 
 ### 15.3 Authority-fence scope
 
-- \`ForgetFence\`, \`ProducerRegistrationHighWater\`, and similar fences are per-authority.
+- `ForgetFence`, `ProducerRegistrationHighWater`, and similar fences are per-authority.
 - They must carry authority identity so a fence from one shard cannot be interpreted as covering another shard.
 
 ### 15.4 Open implementation boundary
