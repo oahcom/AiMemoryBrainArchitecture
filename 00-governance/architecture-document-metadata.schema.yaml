@@ -31,7 +31,7 @@
 # `when`。
 #
 
-schema_version: "2"
+schema_version: "3"
 
 fields:
 
@@ -256,10 +256,15 @@ fields:
     fields:
       source:
         kind: nullable-string
+      source_absence_reason:
+        kind: nullable-string
       en:
         kind: nullable-string
       zh-CN:
         kind: nullable-string
+      mirrors:
+        kind: sequence
+        items: string
 
   steward:
     kind: string

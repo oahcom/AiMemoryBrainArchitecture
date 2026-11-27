@@ -44,7 +44,7 @@ document_metadata:
 # Architecture Document Management Policy / 架构文档管理条例
 
 - Policy ID: GOV-DOC-002
-- Version: 1.24
+- Version: 1.25
 - Status: **NORMATIVE — PARTIALLY MACHINE-CHECKED** (see §9.1 for exactly which rules a machine can prove)
 - Owner: A — Principal Integration / Architecture Governance
 - Relation to GOV-DOC-001: **SUPPLEMENTARY — does not weaken, replace or waive GOV-DOC-001**
@@ -388,10 +388,25 @@ Machine-checkable rules / 机器可检查规则：
 | DM-09 | A file carrying the generated-artifact marker (an HTML comment containing `GENERATED FILE`, `GENERATED ARTIFACT` or `DO NOT EDIT`, anywhere in the body) MUST NOT be `Normative` or `Canonical` | Error |
 | DM-10 | `Approved` + `scheme: git` / `content-hash`: `approved_version.value` is an immutable full commit id; the body is unchanged since then, otherwise `Pending-Reapproval` + `Not-Applicable-To-Current-Version`. "Unchanged" uses only the equivalence §9.1 declares: CRLF/CR → LF, trailing spaces/tabs per line, leading/trailing blank lines. No other character is treated as a line break — `U+2028`, `U+2029`, `U+000B`, `U+000C`, `U+001C`–`U+001E` and `U+0085` are content, so they change the hash | Error |
 | DM-11 | A document under `Under-Review` conflict MUST NOT be `Canonical`; `Resolved` requires a complete resolution record whose `selected_document` is the unique `Canonical` document of the scope | Error |
-| DM-12 | A mirror group is consistent: every declared counterpart exists, is classified, points into the language directory named by its field, belongs to the same source, and the source lists every mirror that names it. A source that declares no mirrors at all is a failure, not a skipped check. `domain`/`role`/`normative_status` agree, and only one document in the group is `Canonical` | Error |
+| DM-12 | A mirror group is consistent and closed. A normal group has one authoritative source: `en` and `zh-CN` name its primary language mirrors, and optional `mirrors` lists additional mirrors. Every declared counterpart exists as a regular repository file, is classified, points into the language directory named by its field (or, for an additional mirror, under `docs/en/` or `docs/zh-CN/`), belongs to the same source, and is listed by that source. A source-less group MUST explicitly declare `source: NO_AUTHORITATIVE_SOURCE` and a non-empty `source_absence_reason` on every member; every member MUST list every other member, and the group MUST contain at least two members. The sentinel does not waive existence, classification, closure, or metadata parity. `domain`, `role`, and `normative_status` agree across the group, and only one document may be `Canonical` | Error |
 | DM-13 | `supersedes` targets exist, are not self-references, and form no cycle | Error |
 | DM-14 | The declared scope equals the enforced scope. Every top-level directory — hidden ones included, with `.git` as the sole structural exception — must be **governed**, **backlog**, or **excluded**. Excluded requires `kind: not-documentation` plus `reason` and `reason_zh`; backlog requires a document count that DM-14 compares to the disk and a bilingual reason, and is scanned like a governed root. No directory may be in two states, every named directory must exist, the declared roots must equal `NORMATIVE_ROOTS` in both directions, and `governed_files` must equal the gate's list with each entry proven to be a regular file *inside* the repository (a symlink, or a file reached through a symlinked parent, is an error — the registry check and the scanner must agree). A new top-level directory is therefore a governance decision, not a silent widening of the ungoverned surface; `.git` and `target/` are structurally exempt because they are VCS and build state present in some working copies and absent in others, so declaring them would describe a machine rather than the repository | Error |
 | DM-15 | Every newly added governed Markdown document declares a non-empty top-level steward. Existing documents remain non-blocking and are counted in the adoption baseline; closure requires a whole-tree count of zero missing stewards | Error for newly added documents; legacy census is advisory |
+
+**DM-12 additional mirrors / 额外镜像**
+
+The source's `en` and `zh-CN` slots remain the primary language slots.
+Additional mirror documents are declared separately under `mirrors`; they
+do not overwrite or repurpose the source's existing language slots.
+
+```yaml
+bilingual_counterpart:
+  source: "01-system-architecture/system-overview.md"
+  en: "docs/en/01-system-architecture/system-overview.md"
+  zh-CN: "docs/zh-CN/01-system-architecture/system-overview.md"
+  mirrors:
+    - "docs/en/01-system-architecture/system-architecture-specification.md"
+    - "docs/zh-CN/01-system-architecture/system-architecture-specification.md"
 
 ### 9.1 Verified versus unverified / 已验证与未验证
 
@@ -486,3 +501,4 @@ Amendments require a `decision-record` role document, bilingual, approved by the
 | 1.23 | 2026-11-25 | Corrected §4.3.1 so binding force is determined by `normative_status`, not `usage_status`; `Active` does not make Informative content binding, and `Pending-Reapproval` does not change Normative/Informative classification. Clarified both languages and the rationale. Updated the historical 1.22 entry to preserve its original persistence decision while explicitly marking the Active-based binding assertion as superseded. The English and Chinese policy clauses and changelog clarification now state the same rule. Documentation-only; no schema, checker, or CI logic changed. Direction recorded in #1037 (Owner-specified decision date 2026-11-26; registered during the 2026-11-25 session). |
 
 | 1.24 | 2026-11-27 | Added DM-15 document stewardship. The schema declares an optional top-level steward for legacy compatibility; incremental checks require a non-empty steward only for newly added governed documents and print the repository-wide missing-steward adoption count. The migration closes only when a whole-tree census reports zero classified governed documents missing a steward. The field is named steward rather than owner because M-08 uses “Consumer owners” for downstream consumers. |
+| 1.25 | 2026-11-27 | DM-12 now models additional mirrors through `bilingual_counterpart.mirrors` and explicit source-less groups through `NO_AUTHORITATIVE_SOURCE` plus `source_absence_reason`. All members of a source-less group must list every other member; ordinary source closure, classification, language-root, metadata-parity, and canonical-authority checks remain enforced. Schema version 3 and T21 positive/negative cases cover the new shape. |

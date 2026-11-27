@@ -1,0 +1,92 @@
+work_item_id: AID-2026-321
+title: "Extend DM-12 for additional mirrors and source-less bilingual groups"
+class: GATE/TEST + DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  The work extends a repository-wide governance gate and its published
+  metadata contract. Incorrect closure logic could accept an undeclared
+  mirror or incorrectly reject a valid source-less group. The change must
+  preserve fail-closed behavior and is covered by positive and negative
+  fixtures, schema/gate agreement, and the existing document-management
+  test suite.
+status: IN_PROGRESS
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner acceptance not recorded"
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "229c0a6b51f4c761ed969337f6ddf7d0bbbb7d0c"
+
+scope:
+  objective: >-
+    Extend DM-12 to support additional classified mirrors beyond the en and
+    zh-CN slots, and explicit closed mirror groups that genuinely have no
+    authoritative source, without relaxing existing group-closure,
+    classification, language-root, metadata-parity, or canonical-authority
+    checks.
+  accepted_shapes:
+    - "bilingual_counterpart.mirrors: sequence of additional mirror paths"
+    - "source: NO_AUTHORITATIVE_SOURCE plus non-empty source_absence_reason"
+  constraints:
+    - Every additional mirror must exist and carry document_metadata.
+    - Every additional mirror must declare the same authoritative source.
+    - The source must list every mirror that names it.
+    - listed_by_source must merge en, zh-CN, and mirrors.
+    - An undeclared third mirror remains an error.
+    - Every source-less group member must declare the sentinel and the same non-empty reason.
+    - Every source-less group member must list every other member.
+    - A source-less group must contain at least two members.
+    - Inconsistent domain, role, or authority.normative_status remains an error.
+    - An isolated mirror remains an error.
+    - An unclassified document remains an error.
+    - Preserve the existing source-is-a-mirror rejection.
+    - Preserve the existing single-Canonical-per-group rule.
+    - No change to the four AID-2026-320 documents.
+    - No new workflow, job, required context, or branch-protection change.
+    - No third-party dependencies.
+
+evidence: 14-ai-development/work-items/AID-2026-321/evidence.md
+
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-321/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-321/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-321/session-evidence.md
+    relationship: evidence
+
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1461"
+      - "#1267"
+    implementing_ai_session: "6b09267a-1e40-83ec-a1ee-8cad6f6c15c8"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-321/session-evidence.md
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-321/prompt-v1.md
+    executed_prompt_sha256: "a18b592d6b64abc4ccc034cb4c0d73524aaf43a37c02b8a2decfe4aab1e69ed1"
+    executed_prompt_bytes: 3464
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: "RECORDED"
+
+implementation:
+  status: NOT_STARTED
+  summary: >-
+    Implementation package authored. No code application, test execution,
+    gate result, pull request, merge, or Owner acceptance is claimed by this
+    manifest.
+  files_changed: []
+  tests:
+    - "python scripts/test_check_document_management.py"
+    - "python scripts/check_document_management.py --require-changed origin/main"
+    - "T19 schema/gate field agreement"
+    - "T21a additional mirror positive case"
+    - "T21b undeclared third mirror negative case"
+    - "T21c unclassified additional mirror negative case"
+    - "T21d source-less reciprocal group positive case"
+    - "T21e missing source-absence reason negative case"
+    - "T21f isolated source-less mirror negative case"
+    - "T21g inconsistent source-less metadata negative case"
+    - "T21h source-absence reason without sentinel negative case"

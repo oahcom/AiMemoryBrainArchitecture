@@ -1953,6 +1953,173 @@ def run_bilingual_closure() -> None:
                  "file, not a mirror"),
         )
 
+    # T21a-T21h: DM-12 models additional mirrors beyond the en / zh-CN slots,
+    # and explicit source-less groups that declare the absence of a canonical
+    # root instead of leaving a mirror outside every group. Each case varies
+    # exactly one property so a failure names the rule that broke.
+    source_with_mirrors = (
+        '  bilingual_counterpart:\n'
+        '    source: null\n'
+        '    en: "docs/en/00-governance/a.md"\n'
+        '    zh-CN: "docs/zh-CN/00-governance/a.md"\n'
+        '    mirrors:\n'
+        '      - "docs/en/00-governance/extra.md"\n'
+    )
+    source_without_mirrors = (
+        '  bilingual_counterpart:\n'
+        '    source: null\n'
+        '    en: "docs/en/00-governance/a.md"\n'
+        '    zh-CN: "docs/zh-CN/00-governance/a.md"\n'
+    )
+    en_mirror = (
+        '  bilingual_counterpart:\n'
+        '    source: "00-governance/src.md"\n'
+        '    en: null\n'
+        '    zh-CN: "docs/zh-CN/00-governance/a.md"\n'
+    )
+    zh_mirror = (
+        '  bilingual_counterpart:\n'
+        '    source: "00-governance/src.md"\n'
+        '    en: "docs/en/00-governance/a.md"\n'
+        '    zh-CN: null\n'
+    )
+    extra_mirror = (
+        '  bilingual_counterpart:\n'
+        '    source: "00-governance/src.md"\n'
+        '    en: null\n'
+        '    zh-CN: null\n'
+    )
+
+    def mirror_repo(tmp: str, source: str, extra_meta: str | None = None) -> Path:
+        root = _repo(tmp)
+        (root / "docs" / "en" / "00-governance").mkdir(parents=True)
+        (root / "docs" / "zh-CN" / "00-governance").mkdir(parents=True)
+        (root / "00-governance" / "src.md").write_text(
+            doc(BASE + source), encoding="utf-8"
+        )
+        (root / "docs" / "en" / "00-governance" / "a.md").write_text(
+            doc(BASE + en_mirror), encoding="utf-8"
+        )
+        (root / "docs" / "zh-CN" / "00-governance" / "a.md").write_text(
+            doc(BASE + zh_mirror), encoding="utf-8"
+        )
+        if extra_meta is not None:
+            (root / "docs" / "en" / "00-governance" / "extra.md").write_text(
+                extra_meta, encoding="utf-8"
+            )
+        return root
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = mirror_repo(tmp, source_with_mirrors, doc(BASE + extra_mirror))
+        expect_gate(
+            "T21a source declares and closes an additional mirror", root, 0
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = mirror_repo(tmp, source_without_mirrors, doc(BASE + extra_mirror))
+        expect_gate(
+            "T21b an undeclared third mirror is rejected", root, 1
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = mirror_repo(tmp, source_with_mirrors, "# no metadata\n")
+        expect_gate(
+            "T21c an additional mirror without metadata is rejected", root, 1
+        )
+
+    absence = (
+        '  bilingual_counterpart:\n'
+        '    source: NO_AUTHORITATIVE_SOURCE\n'
+        '    source_absence_reason: "No authoritative source has been established."\n'
+        '    en: null\n'
+        '    zh-CN: "docs/zh-CN/00-governance/a.md"\n'
+    )
+    absence_zh = (
+        '  bilingual_counterpart:\n'
+        '    source: NO_AUTHORITATIVE_SOURCE\n'
+        '    source_absence_reason: "No authoritative source has been established."\n'
+        '    en: "docs/en/00-governance/a.md"\n'
+        '    zh-CN: null\n'
+    )
+
+    def sourceless_repo(tmp: str, en_meta: str, zh_meta: str) -> Path:
+        root = _repo(tmp)
+        (root / "docs" / "en" / "00-governance").mkdir(parents=True)
+        (root / "docs" / "zh-CN" / "00-governance").mkdir(parents=True)
+        (root / "docs" / "en" / "00-governance" / "a.md").write_text(
+            doc(en_meta), encoding="utf-8"
+        )
+        (root / "docs" / "zh-CN" / "00-governance" / "a.md").write_text(
+            doc(zh_meta), encoding="utf-8"
+        )
+        return root
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = sourceless_repo(tmp, BASE + absence, BASE + absence_zh)
+        expect_gate(
+            "T21d reciprocal source-less bilingual pair is accepted", root, 0
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = sourceless_repo(
+            tmp,
+            BASE + absence.replace(
+                '    source_absence_reason: "No authoritative source has been established."\n',
+                "",
+            ),
+            BASE + absence_zh.replace(
+                '    source_absence_reason: "No authoritative source has been established."\n',
+                "",
+            ),
+        )
+        expect_gate(
+            "T21e source-less sentinel without a reason is rejected", root, 1
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "docs" / "en" / "00-governance").mkdir(parents=True)
+        (root / "docs" / "en" / "00-governance" / "a.md").write_text(
+            doc(BASE + absence.replace(
+                '    zh-CN: "docs/zh-CN/00-governance/a.md"\n',
+                "    zh-CN: null\n",
+            )),
+            encoding="utf-8",
+        )
+        expect_gate(
+            "T21f isolated source-less mirror is rejected", root, 1
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = sourceless_repo(
+            tmp,
+            BASE + absence,
+            BASE.replace("role: design-specification", "role: reference")
+            + absence_zh,
+        )
+        expect_gate(
+            "T21g source-less members with inconsistent metadata are rejected",
+            root, 1,
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "docs" / "en" / "00-governance").mkdir(parents=True)
+        (root / "docs" / "en" / "00-governance" / "a.md").write_text(
+            doc(BASE + (
+                '  bilingual_counterpart:\n'
+                '    source: null\n'
+                '    source_absence_reason: "reason without the sentinel"\n'
+                '    en: null\n'
+                '    zh-CN: null\n'
+            )),
+            encoding="utf-8",
+        )
+        expect_gate(
+            "T21h source-absence reason without sentinel is rejected", root, 1
+        )
+
+
 def run_schema_agreement() -> None:
     """T19: the published schema and the gate must accept the same shape.
 
@@ -2818,14 +2985,14 @@ def run_schema_fail_closed() -> None:
             return proc.returncode, (proc.stdout + proc.stderr)
 
     # Empty fields: must stop, not silently check nothing.
-    code, out = with_schema('schema_version: "2"\nfields: {}\n')
+    code, out = with_schema('schema_version: "3"\nfields: {}\n')
     record("T33 empty fields stops the gate",
            code != 0 and "no fields mapping" in out or "no longer declares" in out,
            f"  exit {code}: {out.strip()[:160]}")
 
     # Fields without the four dimensions: also must stop.
     code, out = with_schema(
-        'schema_version: "2"\nfields:\n  domain:\n    kind: string\n'
+        'schema_version: "3"\nfields:\n  domain:\n    kind: string\n'
     )
     record("T34 schema missing the four dimensions stops the gate",
            code != 0 and ("no longer declares" in out or "fewer than" in out),
@@ -3169,7 +3336,7 @@ def run_declared_but_unread() -> None:
         root = Path(tmp)
         (root / "00-governance").mkdir()
         (root / gate.SCHEMA_FILE).write_text(
-            src.replace('schema_version: "2"', 'schema_version: "3"'), encoding="utf-8"
+            src.replace('schema_version: "3"', 'schema_version: "0"'), encoding="utf-8"
         )
         try:
             gate.schema(root)
@@ -4223,7 +4390,7 @@ def run_restored_guards() -> None:
     # A schema that keeps all four dimensions and the required leaves, so the
     # run reaches check_schema_keys instead of stopping at "no longer declares".
     mutated = (
-        'schema_version: "2"\n'
+        'schema_version: "3"\n'
         "fields:\n"
         "  domain:\n    kind: NOT_A_KIND\n    required: true\n"
         "  role:\n    kind: string\n    required: true\n"
@@ -4798,7 +4965,7 @@ def run_unbound_emissions() -> None:
         _bind(
             "T105 DM-12 a counterpart that does not exist is named",
             _gate_lines(root),
-            r"DM\-12 .+: bilingual_counterpart\.en does not exist: .+",
+            r"DM\-12 .+: counterpart .+ is not a regular repository file",
         )
 
     with tempfile.TemporaryDirectory() as tmp:
