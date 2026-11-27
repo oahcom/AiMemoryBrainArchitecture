@@ -95,7 +95,7 @@ The AI-visible deliverable consists of:
 - `evidence.md` — E1–E4 measurements, the unsatisfiability proof, two bounded convergence paths, acceptance criteria, decision ownership, and canonical-document boundary.
 - `session-evidence.md` — this session-role and provenance record.
 - `prompt-v1.md` — a self-contained condensed record of the authoring instructions.
-- `INDEX-ROW.txt` — one proposed nine-column work-item index row.
+- `INDEX-ROW.txt` — one proposed nine-column work-item index row, inserted into `14-ai-development/work-items/INDEX.md` by the operator.
 
 The substantive conclusion is that the supplied measurements establish no repository-verifiable mechanism for determining principal-level distinctness. The two proposed convergence paths are recorded without selecting either.
 
@@ -110,4 +110,4 @@ The deliverable does not claim that:
 - An Owner has accepted either convergence path.
 - `14-ai-development/PR-GOVERNANCE-001.md` has been modified.
 
-The implementing session token, executed-prompt digest, and platform payload verification remain pending or unverified as represented in the manifest. No external session identity is inferred from the model name or this document.
+The implementing-session token and the executed-prompt digest are recorded in the manifest by the operator after this document was written; `executed_prompt_provenance` remains `NOT_VERIFIED`. No external session identity is inferred from the model name or from this document.
