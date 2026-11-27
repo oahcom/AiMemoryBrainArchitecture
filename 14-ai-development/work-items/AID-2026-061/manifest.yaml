@@ -11,8 +11,8 @@ prompt_id: AID-2026-061-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-061/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 7ea255ab98c081d797820fa48d7744d2209eb285c0bda17cee6c4f22d66f0b81
-prompt_bytes: 18776
+prompt_sha256: 6c0a9cc7e47f2e30505f8b765d08663b1c032cda128f7fb79a148152cff6e3cd
+prompt_bytes: 18718
 
 # ---------------------------------------------------------------------------
 # Two stages, deliberately split by an Owner close ruling on pull request

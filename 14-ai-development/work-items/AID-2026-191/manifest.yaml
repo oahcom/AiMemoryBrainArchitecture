@@ -12,7 +12,7 @@ risk_rationale: >-
   makes a gate stricter rather than weaker: the only path that used to print a pass without
   performing admission now exits 2. The blast radius is a caller that omitted the range, and there
   is exactly one such caller in the tree (the step this change rewrites).
-status: DISPATCHED
+status: MERGED
 id_status: PROVISIONAL
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED

@@ -24,8 +24,8 @@ prompt_id: AID-2026-101-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-101/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 89ac65f2d58e187451b7c0a98648d0dd4352e3dac79f521b8029b0432f7e94c1
-prompt_bytes: 4470
+prompt_sha256: de3b9b80c952096d7ba14b5226517eed8c14b61593328f80d3a3cf3f1122fc94
+prompt_bytes: 4412
 
 authorization:
   implementation_write: >-
@@ -55,7 +55,9 @@ scope:
 identifier_history: >-
   This correction was prepared four times under identifiers that main assigned to other work items
   while it was in review: AID-2026-080 (taken by PR #1215), AID-2026-081 (taken by the GOV-DOC-001
-  ratchet work item), AID-2026-090 (taken by the ContextVersion immutability work item, PR #1255)
+  ratchet work item), AID-2026-090 (taken by the ContextVersion immutability work item, merged by
+  PR #1241; the earlier PR #1255 proposed a different correction to that work item and CLOSED
+  WITHOUT MERGING, so it is not the pull request that took the number and is not written as one)
   and AID-2026-101 is the fourth and current number. Every collision was discovered by rebasing,
   not by a gate, because a work-item directory is a path and two branches adding the same path
   merge as a conflict only if the merge driver is asked -- the INDEX half merges cleanly under

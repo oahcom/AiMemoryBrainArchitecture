@@ -1,0 +1,102 @@
+work_item_id: AID-2026-267
+title: >-
+  Enforce the live required ⊆ declared ⊆ produced check-context chain with an explicit INCOMPLETE exit
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  The change strengthens an existing CI checker and its self-tests. It reads the
+  public branch endpoint already used by the checker, introduces no secret,
+  snapshot, schedule, workflow job, required context or branch-protection edit.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 242cf101c8b79007ad2fb8d9c89681224577188d
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: a7a252eb670b31066a0ffea35dc28cbe6ef5b836
+  assigned_id: AID-2026-267
+  allocation_rule: >-
+    Checked the all-state PR listing (up to 100 entries), the Work Items INDEX,
+    and the requested ID's manifest/evidence paths; AID-2026-267 was not found.
+  recheck_rule: >-
+    Recheck the all-state PR listing, INDEX, and branch names immediately before
+    opening the PR; renumber only within the user-reserved 267-269 range.
+scope:
+  objective: >-
+    Enforce required ⊆ declared ⊆ produced by reading the live main branch
+    protection payload and reporting both relevant set differences. Preserve
+    exit 1 for repository violations and make unavailable payload input exit 2.
+  changes:
+    - path: "scripts/check_declared_check_contexts.py"
+      detail: "Enforce required-not-declared and declared-not-produced; print the three counts and both differences; identify unavailable input and reason with exit 2."
+    - path: "scripts/test_check_declared_check_contexts.py"
+      detail: "Inject required-only, exception and None payloads; verify rc=1/2 and verify unreadable payload outranks simultaneous local unproduced-context violations."
+    - path: "scripts/probe_declared_check_contexts.py"
+      detail: "Emit independent raw rc/stderr transcripts for required-only, exception and None probes."
+    - path: "scripts/run_declared_check_contexts_mutation_tests.py"
+      detail: "Execute two source mutations against targeted tests; baseline must pass and each mutant must fail."
+    - path: ".github/workflows/repository-hygiene.yml"
+      detail: "Run the independent probes and mutation harness as hard-failing steps in the existing job."
+    - path: "14-ai-development/work-items/AID-2026-267/"
+      detail: "Record manifest, prompt snapshot, implementation evidence and session evidence."
+    - path: "14-ai-development/work-items/INDEX.md"
+      detail: "Append the AID-2026-267 registration row."
+  untouched:
+    - "branch protection settings and required status-check contexts"
+    - "workflow job names and workflow wiring"
+    - "Issue #134 state and body"
+    - "all other PRs and Issues"
+non_goals:
+  - "Storing a snapshot of required contexts"
+  - "Adding secrets, scheduled tasks, or new workflow jobs"
+  - "Changing the branch-protection configuration"
+evidence:
+  record: 14-ai-development/work-items/AID-2026-267/evidence.md
+  prompt: 14-ai-development/work-items/AID-2026-267/prompt-v1.md
+  session: 14-ai-development/work-items/AID-2026-267/session-evidence.md
+documentation:
+  - path: "scripts/check_declared_check_contexts.py"
+    relationship: implementation
+  - path: "scripts/test_check_declared_check_contexts.py"
+    relationship: implementation
+  - path: "14-ai-development/work-items/AID-2026-267/evidence.md"
+    relationship: evidence
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#134"
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-267/prompt-v1.md"
+    executed_prompt_sha256: "9d17287a92339566ffcbbf1f68da175e6cdffbe8d47f9451a450a0e2f79ceb88"
+    executed_prompt_bytes: 2762
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-267/session-evidence.md"
+implementation:
+  status: IN_PROGRESS
+  summary: "Priority fixed and verified on exact head 75c9f61b325611d28be0d2c858336f8570b3f728: 19 tests, three raw probes, both mutations detected, live checker PASS and all 16 required contexts SUCCESS. Merge remains blocked because strict and enforce_admins cannot be read through the integration (HTTP 403)."
+  files_changed:
+    - "scripts/check_declared_check_contexts.py"
+    - "scripts/test_check_declared_check_contexts.py"
+    - "scripts/probe_declared_check_contexts.py"
+    - "scripts/run_declared_check_contexts_mutation_tests.py"
+    - ".github/workflows/repository-hygiene.yml"
+    - "14-ai-development/work-items/AID-2026-267/"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "Injected required-only context must exit 1 and name the context."
+    - "Injected exception and None payloads must exit 2 and name the input."
+    - "Live checker and 19-test self-test run in repository-hygiene workflow."
+    - "Combination tests require exit 2 when a local unproduced context coexists with fetch exception or None."
+    - "Standalone probes record raw rc/stderr for required-only, exception and None payloads."
+    - "Two source mutations are detected by targeted tests; original raw_rc=0 and mutated raw_rc=1."
+    - "All 16 branch-required contexts have completed SUCCESS check runs on the refreshed exact head."

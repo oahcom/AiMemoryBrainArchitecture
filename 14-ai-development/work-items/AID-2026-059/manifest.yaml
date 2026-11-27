@@ -30,8 +30,8 @@ prompt_id: AID-2026-059-PROMPT
 prompt_version: v1
 prompt_file: 14-ai-development/work-items/AID-2026-059/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 65474e7f0927d2dfeaad33814fdbd7d576635cc8a0e8d2a3a7441e3a65ab7317
-prompt_bytes: 3866
+prompt_sha256: 4881d6292e96154d5f7364816ae3e9977365e09b88e8475f4dd9d655e3e34a8c
+prompt_bytes: 3808
 
 dependency_refs:
   - .github/workflows/session-evidence.yml

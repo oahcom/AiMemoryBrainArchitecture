@@ -8,7 +8,7 @@ risk_rationale: >-
   Read-only inventory. It adds three documents and one index row, and changes no
   checker logic, no threshold, no workflow and no registry value. The residual risk
   is that the inventory is read as a proposal to change a number it only records.
-status: DISPATCHED
+status: MERGED
 id_status: PROVISIONAL
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED

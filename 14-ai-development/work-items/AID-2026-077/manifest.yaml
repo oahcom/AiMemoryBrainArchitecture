@@ -11,8 +11,8 @@ prompt_id: AID-2026-077-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-077/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 0339f07cd6bd5dbd5211b45066ee5c1bba78d4768d763beeac4ce24aa368a931
-prompt_bytes: 5621
+prompt_sha256: 9de48039bb47ac8320d565205e67616a1345858d0f29c8e8e850d368fe134aee
+prompt_bytes: 5563
 # The digest above was recomputed after the work item was renumbered from
 # AID-2026-074 to AID-2026-077. The number appears twice inside
 # `prompt-v1.md` itself, so the rename changed the snapshot bytes: the
