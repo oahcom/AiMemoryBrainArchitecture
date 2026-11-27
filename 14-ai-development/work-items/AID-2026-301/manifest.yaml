@@ -1,0 +1,53 @@
+work_item_id: AID-2026-301
+title: Close manifest blob-pin field discovery gaps for Issue #1350
+class: GATE/CI/TEST
+risk: R2
+risk_rationale: >-
+  Extends the existing read-only manifest blob integrity checker and isolated
+  tests. The change preserves the existing required Repository hygiene job
+  and does not alter branch protection or runtime behavior.
+status: IMPLEMENTATION_IN_PROGRESS
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: af2660d55a93278157fa6668aba338daf81e127c
+scope:
+  issue: 1350
+  objective: Enumerate and verify every applicable manifest blob identity, fail closed for unresolved and unregistered digest fields, and add negative fixtures.
+  files_to_modify:
+    - scripts/ci/check_manifest_blob_pins.py
+    - scripts/ci/test_check_manifest_blob_pins.py
+    - scripts/ci/baselines/manifest-blob-pins.txt
+    - 14-ai-development/work-items/INDEX.md
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-301/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-301/evidence.md
+    - 14-ai-development/work-items/AID-2026-301/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-301/prompt-snapshot.md
+evidence:
+  field_registry: 14-ai-development/work-items/AID-2026-301/evidence.md
+  session: 14-ai-development/work-items/AID-2026-301/session-evidence.md
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-301/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-301/session-evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-301/prompt-snapshot.md
+    relationship: reference
+session_evidence:
+  - role: implementation
+    issue_refs:
+      - 1350
+    implementing_ai_session: current-chatgpt-implementation-session
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-301/session-evidence.md
+implementation:
+  status: IN_PROGRESS
+  summary: Close applicable blob-pin field discovery gaps and add fail-closed tests.
+  files_changed: []
+  tests:
+    - python3 scripts/ci/test_check_manifest_blob_pins.py
