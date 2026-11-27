@@ -50,14 +50,14 @@ document_metadata:
 - Implementation session: S6-B (acct4). Input: the landed `scripts/ci/check_manifest_blob_pins.py` and `scripts/ci/test_check_manifest_blob_pins.py` reproduced verbatim, plus four required mutation cases.
 - Output: the modified test module, returned as one `<<<FILE>>>` block and applied unedited.
 
-## What was dispatched
+## Actual AI input
 
 1. Neighbouring digest key: two sibling pairs, pair A's digest placed under pair B's key. A resolver that reads the neighbour reports the wrong pair clean; the test requires both pairs to be reported.
 2. Path-key identity: `en_mirror` names file X while `en_mirror_blob` holds file Y's blob id; the failure must name X.
 3. Cross-identity isolation: one correct and one wrong pin must yield exactly one mismatch.
 4. Field coverage: one minimal fixture per enumerated path/digest pair (`root`/`root_blob`, `en_mirror`/`en_mirror_blob`, `zh_cn_mirror`/`zh_cn_mirror_blob`, `path`/`blob`, `evidence_file`/`evidence_blob`, prompt and session-snapshot forms).
 
-## Visible output
+## AI-visible output
 
 The session returned the full test module; the eight pre-existing test methods were preserved byte-identically and four new methods were appended, each docstring naming the wrong implementation it kills.
 
