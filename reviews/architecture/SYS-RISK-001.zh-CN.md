@@ -9,6 +9,10 @@
 - 范围：A–I、Storage、跨 Owner 协议、治理和生产可运维性影响。
 - 证据规则：Owner 分支工件只能作为候选证据；分支中存在不等于已批准、已采用、已实现或已证明。
 - 语言：中文；对应英文文档：[SYS-RISK-001.en.md](SYS-RISK-001.en.md)。
+- assessor: R — 首席全系统架构风险评估
+- assessed_version: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- evidence_baseline: `main@b372b62c640a2b656e54b6db62a4ee67d7d8c001:reviews/architecture/SYS-RISK-001.zh-CN.md`
+- signature_attached: 2026-11-27，AID-2026-250 返工补录——事后附加，不冒充同期签署
 
 ## 1. 总体结论
 

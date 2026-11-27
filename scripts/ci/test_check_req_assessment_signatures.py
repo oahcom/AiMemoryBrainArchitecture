@@ -1,87 +1,89 @@
+import tempfile
 import unittest
+from pathlib import Path
 
-from scripts.ci.check_req_assessment_signatures import COMMENT_IDS, EXPECTED, inspect
-
-
-def valid_record(comment_id):
-    expected = EXPECTED[comment_id]
-    return {
-        "id": comment_id,
-        "body": (
-            f"- assessor: `REQ-01 Risk Assessment Owner — ChatGPT session {expected['assessor_session']}`\n"
-            f"- assessed_version: `{expected['assessed_version']}`\n"
-            f"- evidence_baseline: `main@{expected['assessed_version']}`\n"
-        ),
-    }
+from scripts.ci.check_req_assessment_signatures import ASSESSED_VERSION, FILES, FIELDS, inspect
 
 
-class SignatureCommentCheckerTests(unittest.TestCase):
-    def fetch_all(self, overrides=None):
-        records = {comment_id: valid_record(comment_id) for comment_id in COMMENT_IDS}
-        records.update(overrides or {})
-        return lambda comment_id: records[comment_id]
+def valid_content(path, assessor):
+    return (
+        f"- assessor: {assessor}\n"
+        f"- assessed_version: `{ASSESSED_VERSION}`\n"
+        f"- evidence_baseline: `main@{ASSESSED_VERSION}:{path}`\n"
+    )
 
-    def test_all_four_historical_comments_pass(self):
-        findings = inspect(self.fetch_all())
-        self.assertEqual(4, sum(item.startswith("PASS ") for item in findings))
-        self.assertFalse(any(item.startswith("FAIL ") for item in findings))
 
-    def test_each_missing_field_fails(self):
-        for name in ("assessor", "assessed_version", "evidence_baseline"):
-            with self.subTest(field=name):
-                record = valid_record(COMMENT_IDS[0])
-                record["body"] = "\n".join(
-                    line for line in record["body"].splitlines()
-                    if not line.startswith(f"- {name}:")
-                )
-                findings = inspect(self.fetch_all({COMMENT_IDS[0]: record}))
-                self.assertTrue(any(f"missing or empty {name}" in item for item in findings))
+class AssessmentDocumentSignatureTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp.name)
+        for relative, assessor in FILES:
+            target = self.root / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(valid_content(relative, assessor), encoding="utf-8")
 
-    def test_invalid_or_wrong_assessed_version_fails(self):
-        for value in ("abc", "g" * 40, "a" * 40):
+    def tearDown(self):
+        self.temp.cleanup()
+
+    def test_all_four_documents_pass(self):
+        results = inspect(self.root)
+        self.assertEqual(4, len(results))
+        self.assertTrue(all(item.startswith("PASS ") for item in results))
+
+    def test_each_field_deletion_fails(self):
+        for field in FIELDS:
+            with self.subTest(field=field):
+                relative, assessor = FILES[0]
+                target = self.root / relative
+                content = "\n".join(
+                    line for line in valid_content(relative, assessor).splitlines()
+                    if not line.startswith(f"- {field}:")
+                ) + "\n"
+                target.write_text(content, encoding="utf-8")
+                findings = inspect(self.root)
+                self.assertTrue(any(item.startswith("FAIL ") and relative in item and field in item for item in findings))
+                target.write_text(valid_content(relative, assessor), encoding="utf-8")
+
+    def test_wrong_assessor_fails(self):
+        relative, _ = FILES[0]
+        target = self.root / relative
+        target.write_text(valid_content(relative, "Wrong Principal"), encoding="utf-8")
+        self.assertTrue(any("assessor value" in item for item in inspect(self.root)))
+
+    def test_short_and_non_hex_assessed_version_fail(self):
+        relative, assessor = FILES[0]
+        target = self.root / relative
+        for value in ("abc", "g" * 40):
             with self.subTest(value=value):
-                record = valid_record(COMMENT_IDS[0])
-                record["body"] = (
-                    f"- assessor: `REQ-01 Risk Assessment Owner — ChatGPT session {EXPECTED[COMMENT_IDS[0]]['assessor_session']}`\n"
-                    f"- assessed_version: `{value}`\n"
-                    f"- evidence_baseline: `main@{EXPECTED[COMMENT_IDS[0]]['assessed_version']}`\n"
+                target.write_text(
+                    f"- assessor: {assessor}\n- assessed_version: `{value}`\n"
+                    f"- evidence_baseline: `main@{ASSESSED_VERSION}:{relative}`\n",
+                    encoding="utf-8",
                 )
-                findings = inspect(self.fetch_all({COMMENT_IDS[0]: record}))
-                self.assertTrue(any(item.startswith("FAIL ") and "assessed_version" in item for item in findings))
+                self.assertTrue(any("assessed_version" in item for item in inspect(self.root)))
 
-    def test_wrong_assessor_session_fails(self):
-        record = valid_record(COMMENT_IDS[0])
-        record["body"] = record["body"].replace(
-            EXPECTED[COMMENT_IDS[0]]["assessor_session"], "unknown-session"
+    def test_wrong_baseline_fails(self):
+        relative, assessor = FILES[0]
+        target = self.root / relative
+        target.write_text(
+            f"- assessor: {assessor}\n- assessed_version: `{ASSESSED_VERSION}`\n"
+            f"- evidence_baseline: `main@{ASSESSED_VERSION}:wrong/path.md`\n",
+            encoding="utf-8",
         )
-        findings = inspect(self.fetch_all({COMMENT_IDS[0]: record}))
-        self.assertTrue(any("assessor does not identify" in item for item in findings))
+        self.assertTrue(any("evidence_baseline value" in item for item in inspect(self.root)))
 
-    def test_wrong_evidence_baseline_fails(self):
-        record = valid_record(COMMENT_IDS[0])
-        record["body"] = record["body"].replace(
-            f"main@{EXPECTED[COMMENT_IDS[0]]['assessed_version']}", "main@"+("a"*40)
-        )
-        findings = inspect(self.fetch_all({COMMENT_IDS[0]: record}))
-        self.assertTrue(any("evidence_baseline differs" in item for item in findings))
+    def test_missing_file_fails(self):
+        relative, _ = FILES[0]
+        (self.root / relative).unlink()
+        self.assertTrue(any(item.startswith(f"FAIL {relative}: file missing") for item in inspect(self.root)))
 
-    def test_missing_comment_fails_closed(self):
-        def missing(comment_id):
-            if comment_id == COMMENT_IDS[0]:
-                raise FileNotFoundError("404")
-            return valid_record(comment_id)
-        findings = inspect(missing)
-        self.assertTrue(any("unable to read record" in item for item in findings))
-
-    def test_wrong_returned_comment_id_fails(self):
-        record = valid_record(COMMENT_IDS[0])
-        record["id"] = -1
-        findings = inspect(self.fetch_all({COMMENT_IDS[0]: record}))
-        self.assertTrue(any("different comment id" in item for item in findings))
+    def test_empty_file_fails(self):
+        relative, _ = FILES[0]
+        (self.root / relative).write_text("  \n", encoding="utf-8")
+        self.assertTrue(any(item.startswith(f"FAIL {relative}: file is empty") for item in inspect(self.root)))
 
     def test_output_is_deterministic(self):
-        fetcher = self.fetch_all()
-        self.assertEqual(inspect(fetcher), inspect(fetcher))
+        self.assertEqual(inspect(self.root), inspect(self.root))
 
 
 if __name__ == "__main__":
