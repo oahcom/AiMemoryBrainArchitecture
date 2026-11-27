@@ -1,0 +1,78 @@
+id: AID-2026-255
+title: Add a manifest blob-pin integrity checker for the explicitly authorized field identities
+date: 2026-11-27
+sponsor: USER-PRINCIPAL-DELEGATED
+class: TEST
+risk: R1
+risk_rationale: The change adds a read-only CI integrity checker and regression tests for a closed set of 12 manifest field identities. It does not modify production runtime behavior, rewrite manifests, or change the existing 12-entry baseline. The principal risk is an incorrect integrity verdict or an unintended expansion of checker scope, bounded by the exact authorization-set test and regression coverage.
+status: IMPLEMENTED_PENDING_CI
+lifecycle:
+  implementation: COMMITTED
+  local_checks: PASS
+  ci: PENDING
+  independent_review: PENDING
+  acceptance: PENDING
+  merge: PENDING
+
+prompts:
+  - path: 14-ai-development/work-items/AID-2026-255/prompt-v1.md
+    role: executed_authority
+    authority: EXECUTED
+    sha256: cb009e755cde42f8553edca13fb1e013c40bacd4007fcceeddccdc1ea2059cfe
+    bytes: 16491
+    mutability: IMMUTABLE
+  - path: 14-ai-development/work-items/AID-2026-255/prompt-v2.md
+    role: owner_a_scope_ruling
+    authority: SCOPE_RULING
+    sha256: 112d0371d90f89cfa895c8e2e62cc80cb751ab097355c5cbf72bb85378dd52f1
+    bytes: 2711
+    mutability: COMMITTED
+
+prompt_authority: prompt-v1.md is the executed authority; prompt-v2.md records Owner A's subsequent scope ruling and narrows the delivered checker, so the delivered code is governed by v1 as amended by the v2 ruling's exact 12-field scope.
+
+implementation:
+  base_sha: 10d33b3f6c012e1c0d5649a5279cadb6d27b1a2f
+  files:
+    - scripts/ci/check_manifest_blob_pins.py
+    - scripts/ci/test_check_manifest_blob_pins.py
+  baseline:
+    path: scripts/ci/baselines/manifest-blob-pins.txt
+    entries: 12
+    changed: false
+  scope:
+    authorized_pin_count: 12
+    digest_algorithm: Git blob SHA-1
+    digest_preimage: "blob <decimal byte length> NUL <file bytes>"
+    resolution: candidate Git tree
+    out_of_scope_fields_ignored:
+      - prompt_file
+      - prompt_sha256
+      - general path/blob fields
+      - paths without a digest
+      - pathless digests
+      - all other fields
+
+local_validation:
+  - command: python scripts/ci/check_manifest_blob_pins.py
+    expected_result: "Exactly 12 failure lines; exit 1 on the measured main tree"
+    observed_result: "Exactly 12 lines; exit 1"
+  - command: python scripts/ci/gate_ratchet.py --baseline scripts/ci/baselines/manifest-blob-pins.txt --format paths --command "python scripts/ci/check_manifest_blob_pins.py"
+    expected_result: "Existing 12-entry baseline ratchets without regression"
+    observed_result: "baseline=12 current=12 regressions=0 fixed=0; PASS; exit 0"
+  - command: python scripts/ci/test_check_manifest_blob_pins.py
+    expected_result: "All checker regression tests pass"
+    observed_result: "Ran 9 tests ... OK; exit 0"
+  - command: python scripts/ci/check_manifest_parse.py
+    expected_result: "All repository manifests parse"
+    observed_result: "115 manifests found, 115 parsed, 0 failed; exit 0"
+  - command: python scripts/ci/check_repository_hygiene.py --base <main> --head <head>
+    expected_result: "No repository hygiene violations"
+    observed_result: "violations=0; exit 0"
+
+review:
+  independent_review: PENDING
+  ci: PENDING
+acceptance:
+  status: PENDING
+  owner_acceptance: NOT_RECORDED
+  merged: false

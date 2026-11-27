@@ -1,0 +1,12 @@
+::error::14-ai-development/work-items/AID-2026-100/manifest.yaml#baseline_and_source_evidence.authored_indexes[0].root_blob
+::error::14-ai-development/work-items/AID-2026-100/manifest.yaml#baseline_and_source_evidence.authored_indexes[0].en_mirror_blob
+::error::14-ai-development/work-items/AID-2026-100/manifest.yaml#baseline_and_source_evidence.authored_indexes[0].zh_cn_mirror_blob
+::error::14-ai-development/work-items/AID-2026-100/manifest.yaml#baseline_and_source_evidence.authored_indexes[1].root_blob
+::error::14-ai-development/work-items/AID-2026-100/manifest.yaml#baseline_and_source_evidence.authored_indexes[1].en_mirror_blob
+::error::14-ai-development/work-items/AID-2026-100/manifest.yaml#baseline_and_source_evidence.authored_indexes[1].zh_cn_mirror_blob
+::error::14-ai-development/work-items/AID-2026-100/manifest.yaml#related_evidence[0].blob
+::error::14-ai-development/work-items/AID-2026-100/manifest.yaml#related_evidence[0].en_mirror_blob
+::error::14-ai-development/work-items/AID-2026-100/manifest.yaml#related_evidence[0].zh_cn_mirror_blob
+::error::14-ai-development/work-items/AID-2026-150/manifest.yaml#source.files[0].blob
+::error::14-ai-development/work-items/AID-2026-150/manifest.yaml#source.files[1].blob
+::error::14-ai-development/work-items/AID-2026-150/manifest.yaml#source.files[2].blob
