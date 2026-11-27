@@ -80,3 +80,27 @@ contexts.
 
 Attribution: user-authorized operator (delegated by account owner), 2026-11-27.
 代理裁决，非自然人 Owner 签署。
+
+## Amendment session — 2026-11-27
+
+### Actual AI input
+
+The follow-up task supplied independent L3 review ID `6083410132` and required:
+- required-payload failure to take precedence over local VIOLATION;
+- combination tests for local unproduced declaration plus injected exception and None;
+- actual execution of two source mutations, with original and mutated test output;
+- standalone raw rc/stderr transcripts for required-only, exception and None probes;
+- refresh to current main, full required-context verification, strict/enforce-admins verification, atomic merge and post-merge blob checks.
+
+### AI-visible output
+
+1. Moved required payload acquisition and validation ahead of local unproduced/duplicate checks.
+2. Added `test_incomplete_precedes_local_violation_when_fetch_raises` and `test_incomplete_precedes_local_violation_when_fetch_returns_none`.
+3. Added `scripts/probe_declared_check_contexts.py` for raw standalone rc/stderr records.
+4. Added `scripts/run_declared_check_contexts_mutation_tests.py` to run each targeted test first against the original checker (must pass) and then against a mutated temporary copy (must fail).
+5. Wired both scripts into the existing Repository hygiene hard-gate job; no `|| true` or `continue-on-error`.
+6. Fixed the three new governed document records to declare `document_metadata.steward: USER-PRINCIPAL-DELEGATED`.
+7. Refreshed base target observed during amendment work: `a588cd9914949c2c9db7b2c5704d906fd3f05b70`. A merge commit and final exact-head gate verification remain pending.
+
+Attribution: user-authorized operator (delegated by account owner), 2026-11-27.
+代理裁决，非自然人 Owner 签署。
