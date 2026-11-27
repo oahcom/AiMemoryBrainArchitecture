@@ -10,7 +10,7 @@ risk_rationale: >-
   exist to refuse that shape. The residual risk is the second-order one: a case that passes but
   no longer bites is indistinguishable from one that does, which is why the counterfactual in
   AC1 is an acceptance criterion and not a note.
-status: DISPATCHED
+status: MERGED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -132,10 +132,11 @@ findings:
       AID-2026-079 is registered here; the body now says so instead of repeating the argument.
 
 implementation:
-  status: IMPLEMENTED_IN_BRANCH
+  status: MERGED
   branch: test/T92-fault-injection
   pull_request: 1078
-  merge_commit_sha: NOT_MERGED
+  merge_commit_sha: 6314a65bd8be48c1a4bb0768e9960c4c808110ab
+  merged_at: "2026-11-25T21:02:20Z"
   note: >-
     The four cases were authored on the branch before this registration; this session rebased them
     onto 1f5ba824, registered the work item and corrected the pull request body. No assertion was
@@ -163,3 +164,13 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-079/session-evidence-827.md
+
+post_merge_correction:
+  date: "2026-11-27"
+  basis: "GitHub API GET /pulls/1078 returned merged=true; the merge commit is reachable from origin/main. This block records the correction so the original value stays auditable."
+  original_values:
+    - "implementation.status: IMPLEMENTED_IN_BRANCH"
+    - "implementation.merge_commit_sha: NOT_MERGED"
+    - "status: DISPATCHED"
+  corrected_values:
+    - "PR #1078 merged; see implementation/carrier above"
