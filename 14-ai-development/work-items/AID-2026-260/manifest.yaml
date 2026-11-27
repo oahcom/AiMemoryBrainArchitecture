@@ -29,6 +29,7 @@ scope:
     - "14-ai-development/work-items/AID-2026-260/evidence.md"
     - "14-ai-development/work-items/AID-2026-260/manifest.yaml"
     - "14-ai-development/work-items/AID-2026-260/prompt-v1.md"
+    - "14-ai-development/work-items/INDEX.md"
 evidence: "14-ai-development/work-items/AID-2026-260/evidence.md"
 documentation:
   - path: "14-ai-development/work-items/AID-2026-260/scope-confirmation.md"
@@ -57,4 +58,6 @@ implementation:
     - "14-ai-development/work-items/AID-2026-260/session-evidence.md"
     - "14-ai-development/work-items/AID-2026-260/evidence.md"
     - "14-ai-development/work-items/AID-2026-260/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-260/prompt-v1.md"
+    - "14-ai-development/work-items/INDEX.md"
   tests: []
