@@ -13,11 +13,14 @@ document_metadata:
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "14-ai-development/work-items/AID-2026-150/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-242/evidence.md"
+        - "Source branch session-d-memory-brain-2026-11-16 @ b525e1f8fee2471a131e4a38efda99804045e424"
+        - "AID-2026-089 / PR #1232 — D-only logical Fence authority"
       revocation: null
     evidence_verification:
-      verification_status: Verified
-      last_verified_date: "2026-11-26"
-      last_verification_note: "Source body matches source blob 6b37c91033fda21f072e2a3bde6f274663b1e76e byte-for-byte after GOV-DOC-002 frontmatter; Owner acceptance is not asserted."
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Historical source restored; §17 Fence-owner wording is explicitly superseded by AID-2026-089. Candidate only; no D Owner acceptance, cross-owner acceptance, implementation or production conformance is asserted."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -29,23 +32,25 @@ document_metadata:
       archival_reason: null
       archival_reference: null
   authority:
-    canonical_status: Canonical
-    canonical_scope: "D canonical Memory identity, immutable version and commit/outbox authority"
+    canonical_status: Candidate
+    canonical_scope: "D canonical Memory identity, immutable version, lifecycle and canonical commit/change-feed semantics (historical candidate; Fence boundary controlled by AID-2026-089)"
     canonical_scope_id: "memory-brain/canonical-memory-store"
     canonical_scope_keywords:
-      - "memory-brain"
-      - "canonical-store"
-      - "memory-version"
-      - "canonical-commit"
+      - canonical-memory-store
+      - memory-version
+      - canonical-commit-cursor
+      - index-watermark
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
   bilingual_counterpart:
-    source: null
     en: "docs/en/03-memory-brain/canonical-memory-store.md"
     zh-CN: "docs/zh-CN/03-memory-brain/canonical-memory-store.md"
 ---
 # Canonical Memory Store
+
+> **RECOVERY / AUTHORITY-CONFLICT NOTICE — INFORMATIVE ONLY.** This historical source is restored byte-for-byte after this notice. Its §17 dependency sentence assigns “Forget fence” to I. That phrase conflicts with AID-2026-089, merged by PR #1232 (merge commit `d914e8a1f8a1ba24c21c41a9249489d544388185`): D is the sole logical issuer of ForgetOperation identity/state and ForgetFence generation/cursor; Storage-local fence rows are D-derived, rebuildable projections; I owns authorization, global policy and Global Forget Completion. AID-2026-089 controls that boundary. Do not interpret §17 as granting I Fence issuance or Storage independent Fence authority. This recovered document remains a Draft / Informative candidate, not an approved normative contract.
+
 
 **Status:** Authority and immutability DECIDED; detailed record layouts and transaction implementation CANDIDATE pending engineering validation.  
 **Related blockers:** INT-P0-01, INT-P0-02, INT-P0-03, INT-P0-04, INT-P1-02, INT-P1-06; DM-001..DM-013.

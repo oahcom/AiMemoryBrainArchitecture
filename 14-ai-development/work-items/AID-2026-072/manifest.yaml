@@ -11,8 +11,8 @@ prompt_id: AID-2026-072-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-072/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 1c8f58cff7d248f7bd3a7b87aff836a2f497e57512e64376c1aa778085b67ea7
-prompt_bytes: 8623
+prompt_sha256: 5e29f0695537e19bbf2e64ee4bf4fe85d03e732126f5d7dec92b2cacacc67a8f
+prompt_bytes: 8565
 prompt_digest_correction: "The digest recorded at registration was 88d1eae165f7535fa608f847f2998930df3236ee77d596be440d3fc190054477 at 8623 bytes. It did not match the committed bytes, which hashed to 787b7c8f021c0991c00d06be8dbf38dbb40ab4818cce42a3f8f659507b2e163a at the same size, so the file was edited after it was hashed. A later renumbering of this work item, away from the number it was first registered under because main has since assigned that number to an unrelated work item, changed the single self-reference in the snapshot, which now hashes to 1c8f58cff7d248f7bd3a7b87aff836a2f497e57512e64376c1aa778085b67ea7 at 8623 bytes. Corrected here rather than by rewriting the snapshot: the snapshot is the executed input and is not changed to fit its own digest, only to carry its corrected identifier. session-evidence-903.md repeated the stale digest and is corrected there too."
 
 # ---------------------------------------------------------------------------
@@ -64,7 +64,11 @@ implementation:
     renumber the work item to AID-2026-072 and correct its prompt digest"). The merge commit is
     an ancestor of main and the specified change is present in main:
     crates/memory-event-store-sqlite/tests/forget_fence.rs carries the per-process atomic
-    counter. Refreshed by AID-2026-090, which records the prior value.
+    counter. Refreshed by AID-2026-101, which records the prior value. This sentence was written
+    while the correcting branch still held the identifier AID-2026-090; that number belongs to the
+    ContextVersion immutability work item, which merged as PR #1241 and never mentions this file.
+    The abandoned number is kept here rather than deleted, so a reader who has already followed the
+    wrong pointer learns why it was wrong. Corrected by AID-2026-116.
 
 review:
   status: NOT_ASSIGNED

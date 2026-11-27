@@ -1,5 +1,6 @@
 ---
 document_metadata:
+  steward: "Architecture Governance"  # REQUIRED for newly added governed documents
   domain: security-governance
   role: reference
   lifecycle:
@@ -23,7 +24,7 @@ must satisfy is `00-governance/architecture-document-metadata.schema.yaml`.
 将下面的块复制到受治理 Markdown 文件顶部并修改取值。其必须满足的契约见
 `00-governance/architecture-document-metadata.schema.yaml`。
 
-Every REQUIRED leaf must be present: a dimension that exists but declares no state is not a
+Every REQUIRED leaf must be present. Newly added governed documents must also declare a non-empty steward; legacy omissions remain a visible, non-blocking adoption baseline: a dimension that exists but declares no state is not a
 classification.
 
 每个 REQUIRED 叶子都必须存在：存在但不声明状态的维度不构成分类。
@@ -33,6 +34,7 @@ classification.
 ```yaml
 ---
 document_metadata:
+  steward: "Architecture Governance"  # REQUIRED for newly added governed documents
   domain: architecture              # REQUIRED, closed enum (13 values)
   role: design-specification        # REQUIRED, closed enum (9 values)
 

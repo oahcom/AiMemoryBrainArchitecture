@@ -11,8 +11,8 @@ prompt_id: AID-2026-067-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-067/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 07b49d7fa41ec6a5e9025dd3440e9f181654c8903288aa0d430d9324df5ac0da
-prompt_bytes: 5261
+prompt_sha256: c73aa6e35fddb745b7925d6b350fb661d538beb3e5f9b975c89d1e1bc4906ab5
+prompt_bytes: 5203
 
 # ---------------------------------------------------------------------------
 # WO-05 of the REQ-01 repair queue, registered against Issue #262 AC7.

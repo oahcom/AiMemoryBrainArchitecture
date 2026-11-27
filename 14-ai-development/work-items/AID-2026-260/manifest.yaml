@@ -1,0 +1,63 @@
+work_item_id: AID-2026-260
+title: "REQ-04 AC1 scope confirmation and explicit AC8 exclusion"
+class: ARCH + DOC
+risk: R1
+risk_rationale: >-
+  This work records a bounded proxy scope determination and an explicit scope exclusion.
+  It does not change architecture implementation, technology selection, runtime behavior,
+  tests, security controls, CI workflows, branch protection, or Issue acceptance beyond
+  the AC1 and AC8 lines requested after integration.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: f18adc9fa1d06837433a09498f5297bf13b35756
+scope:
+  objective: >-
+    Resolve REQ-04 AC1 through a documented proxy scope determination and resolve AC8
+    through an explicit EXIT-2 exclusion statement, preserving the status and boundaries
+    of all other acceptance criteria.
+  files_changed:
+    - "14-ai-development/work-items/AID-2026-260/scope-confirmation.md"
+    - "14-ai-development/work-items/AID-2026-260/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-260/evidence.md"
+    - "14-ai-development/work-items/AID-2026-260/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-260/prompt-v1.md"
+    - "14-ai-development/work-items/INDEX.md"
+evidence: "14-ai-development/work-items/AID-2026-260/evidence.md"
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-260/scope-confirmation.md"
+    relationship: design
+  - path: "14-ai-development/work-items/AID-2026-260/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-260/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-260/prompt-v1.md"
+    relationship: reference
+session_evidence:
+  - role: "DELEGATED_SCOPE_DETERMINATION_SESSION"
+    issue_refs:
+    implementing_ai_session: "NOT_EXPOSED_BY_PLATFORM"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-260/prompt-v1.md"
+    executed_prompt_sha256: "387381a009317666d534166fb74d1e7d3cb11b4d2cca109d37f5a1c09319e26b"
+    executed_prompt_bytes: 3124
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-260/session-evidence.md"
+implementation:
+  status: NOT_APPLICABLE
+  summary: "Documentation-only proxy scope determination; no production implementation or tests are claimed."
+  files_changed:
+    - "14-ai-development/work-items/AID-2026-260/scope-confirmation.md"
+    - "14-ai-development/work-items/AID-2026-260/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-260/evidence.md"
+    - "14-ai-development/work-items/AID-2026-260/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-260/prompt-v1.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests: []
