@@ -72,7 +72,14 @@ class DeclaredCheckContextsTest(unittest.TestCase):
     def test_pass_when_every_declared_context_is_produced(self):
         self.write(DOC, DOC_TEXT)
         self.write(".github/workflows/gates.yml", WORKFLOW)
-        self.assertEqual(self.run_checker(), 0)
+        errors = io.StringIO()
+        with redirect_stdout(io.StringIO()), redirect_stderr(errors):
+            self.assertEqual(checker.main(self.root, DECLARED), 0)
+        output = errors.getvalue()
+        self.assertIn("CONTEXT COUNTS: declared=2 required=2 produced=2", output)
+        self.assertIn("required_not_declared=[]", output)
+        self.assertIn("declared_not_produced=[]", output)
+        self.assertIn("::notice::2 declared, 2 required, all produced", output)
 
     def test_job_id_satisfies_a_declaration_without_a_display_name(self):
         # `audit` has no `name:` in WORKFLOW, so GitHub reports the job id.
@@ -120,6 +127,7 @@ class DeclaredCheckContextsTest(unittest.TestCase):
             self.assertEqual(checker.main(self.root, DECLARED + ["Session Evidence"]), 1)
         self.assertIn("Session Evidence", errors.getvalue())
         self.assertIn("does not declare it", errors.getvalue())
+        self.assertIn("required_not_declared=['Session Evidence']", errors.getvalue())
 
     def test_violation_when_the_document_declares_what_is_not_protected(self):
         """Dropping a line from protection while the document keeps it must fail."""
@@ -129,7 +137,8 @@ class DeclaredCheckContextsTest(unittest.TestCase):
         with redirect_stdout(io.StringIO()), redirect_stderr(errors):
             self.assertEqual(checker.main(self.root, ["audit"]), 1)
         self.assertIn("Rust format (hard gate)", errors.getvalue())
-        self.assertIn("not a required context", errors.getvalue())
+        self.assertIn("declares required check context", errors.getvalue())
+        self.assertIn("declared_not_produced=['Rust format (hard gate)']", errors.getvalue())
 
     def test_violation_when_a_context_is_declared_twice(self):
         """A duplicated line collapses into the set, so the sets still match."""
@@ -152,8 +161,22 @@ class DeclaredCheckContextsTest(unittest.TestCase):
         original = checker.fetch_protected_contexts
         checker.fetch_protected_contexts = unreachable
         self.addCleanup(setattr, checker, "fetch_protected_contexts", original)
-        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+        with redirect_stdout(io.StringIO()), redirect_stderr(errors := io.StringIO()):
             self.assertEqual(checker.main(self.root), 2)
+        self.assertIn("branches/main.protection.required_status_checks.contexts", errors.getvalue())
+        self.assertIn("OSError: connection refused", errors.getvalue())
+
+    def test_incomplete_when_the_payload_returns_none(self):
+        self.write(DOC, DOC_TEXT)
+        self.write(".github/workflows/gates.yml", WORKFLOW)
+        original = checker.fetch_protected_contexts
+        checker.fetch_protected_contexts = lambda **_kwargs: None
+        self.addCleanup(setattr, checker, "fetch_protected_contexts", original)
+        errors = io.StringIO()
+        with redirect_stdout(io.StringIO()), redirect_stderr(errors):
+            self.assertEqual(checker.main(self.root), 2)
+        self.assertIn("branches/main.protection.required_status_checks.contexts", errors.getvalue())
+        self.assertIn("returned None", errors.getvalue())
 
     def test_incomplete_when_the_payload_has_no_contexts(self):
         self.write(DOC, DOC_TEXT)
