@@ -7,6 +7,10 @@
 - Method: Static, source-grounded architecture assessment
 - Status: **PROVISIONAL — NOT PROVEN**
 - Scope: This report does not approve architecture, override Owner authority, certify implementation/performance/security, or claim complete review of every Owner branch.
+- assessor: X — Principal Architecture Complexity Assessment
+- assessed_version: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- evidence_baseline: `main@b372b62c640a2b656e54b6db62a4ee67d7d8c001:reviews/complexity/architecture-complexity-assessment.en.md`
+- signature_attached: 2026-11-27 by the AID-2026-250 rework — retrospective attachment, not a contemporaneous signature
 
 ## 0. Executive conclusion
 
