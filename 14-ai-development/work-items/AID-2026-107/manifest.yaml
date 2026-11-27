@@ -6,7 +6,7 @@ risk_rationale: >-
   Documentation-only rejudgment of an existing architecture matrix. The main risk is
   overclaiming evidence; all 72 Gate A cells remain NOT EVIDENCED and no Gate A PASS,
   Owner acceptance, implementation conformance or production behavior is inferred.
-status: DISPATCHED
+status: MERGED
 id_status: PROVISIONAL
 
 sponsor: USER-PRINCIPAL-DELEGATED

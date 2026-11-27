@@ -11,7 +11,7 @@ risk_rationale: >-
   row or baseline entry is added or deleted. Every new failing branch fires only on an input that
   previously produced a silent pass, and the real tree stays green at the same counts it reported
   before the change.
-status: DISPATCHED
+status: MERGED
 id_status: PROVISIONAL
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED

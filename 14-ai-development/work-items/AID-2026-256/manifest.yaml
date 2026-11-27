@@ -1,0 +1,90 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "CARRIER_PR_DRAFT"
+work_item_id: "AID-2026-256"
+id_status: "PROVISIONAL"
+title: "Reconcile INDEX status cells and manifest status fields for merged carriers"
+date: "2026-11-27"
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "40195e8bf96b9cc6aa254066b9b72968f29ac361"
+identifier_allocation:
+  method: "alloc_at_push"
+  assigned_at: "2026-11-27"
+  observed_main: "40195e8bf96b9cc6aa254066b9b72968f29ac361"
+  max_index_id: "AID-2026-254"
+  requested_id: "AID-2026-256"
+  id_status: "PROVISIONAL"
+  uniqueness_scope: "Re-read main work-items tree, INDEX rows, open PRs and branches at allocation; 241, 254 and 255 were already taken by other carriers, so 256 was the next collision-free identifier."
+  merge_time_rule: "Re-read main INDEX, work-item tree, Issues, PRs and branches; renumber if no longer unique."
+authority:
+  sponsor: "USER-PRINCIPAL-DELEGATED"
+  accountable_owner: "USER-PRINCIPAL-DELEGATED"
+  acceptance_authority: "NOT_ASSIGNED"
+  attribution: "user-authorized operator (delegated by account owner)"
+  signature_status: "代理执行记录，非自然人 Owner 签署"
+scope:
+  objective: "Correct the registration layer only: set the INDEX status cell prefix to MERGED for 19 work items whose carrier PR is already merged, and set the top-level manifest status field to MERGED where such a field exists. No other field is rewritten."
+  canonical_evidence: "14-ai-development/work-items/AID-2026-256/evidence.md"
+  prompt: "14-ai-development/work-items/AID-2026-256/prompt-v1.md"
+  session_evidence: "NOT_RECORDED"
+  files_to_create:
+    - "14-ai-development/work-items/AID-2026-256/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-256/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-256/evidence.md"
+  files_to_modify:
+    - "14-ai-development/work-items/INDEX.md"
+    - "14-ai-development/work-items/AID-2026-107/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-112/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-170/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-172/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-173/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-189/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-190/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-191/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-193/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-197/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-199/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-210/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-240/manifest.yaml"
+  exclusions:
+    - "No manifest status field is added where none exists (AID-2026-095, 098, 099, 110, 140, 150)."
+    - "No other manifest field is rewritten; id_status, scope, evidence and session evidence are untouched."
+    - "No PR, Issue, branch protection, workflow or checker change."
+    - "No acceptance claim: MERGED is a carrier fact, not Owner acceptance."
+acceptance_criteria:
+  - id: AC1
+    criterion: "Exactly 19 INDEX status cells change, each from a DRAFT/DRAFT PR/DISPATCHED prefix to a MERGED prefix."
+  - id: AC2
+    criterion: "Every changed INDEX cell retains its original trailing note; no provenance text is deleted."
+  - id: AC3
+    criterion: "Stale carrier phrases inside those cells ('PR PENDING', 'PR #NNN open') are replaced with the actual merge PR number."
+  - id: AC4
+    criterion: "Manifest top-level status is set to MERGED only where the field already existed (13 of 19)."
+  - id: AC5
+    criterion: "check_document_management.py reports no new rule violations attributable to this change."
+implementation:
+  status: "DRAFT_PR"
+  branch: "work-item/aid-2026-256-governance-registration-reconciliation"
+  pull_request: "PENDING"
+  merge_commit_sha: "PENDING"
+review:
+  status: "NOT_ASSIGNED"
+acceptance:
+  status: "NOT_GRANTED"
+  note: "Registration-layer correction only; no Owner acceptance asserted."
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs: []
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-256/prompt-v1.md"
+    executed_prompt_sha256: NOT_VERIFIED
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: NOT_RECORDED
+prohibitions:
+  - "No claim of Owner acceptance."
+  - "No change to checker semantics, required contexts or branch protection."
+  - "No merge of this PR until a real session evidence reference is recorded."

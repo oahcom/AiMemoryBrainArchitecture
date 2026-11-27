@@ -14,7 +14,7 @@ risk_rationale: >-
   was told about is exactly the defect being repaired, so the new discovery step fails
   closed on any tracked file that carries most of the inventory without being declared,
   and a real-tree test asserts that the declared set is the whole set at this head.
-status: DISPATCHED
+status: MERGED
 id_status: PROVISIONAL
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED

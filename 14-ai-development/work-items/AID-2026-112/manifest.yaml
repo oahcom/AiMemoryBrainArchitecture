@@ -5,7 +5,7 @@ risk: R2
 risk_rationale: >-
   Documentation-only evidence adjudication. The main risk is overclaiming local
   component tests as complete predicate or end-to-end conformance.
-status: DRAFT_PR
+status: MERGED
 id_status: PROVISIONAL
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
