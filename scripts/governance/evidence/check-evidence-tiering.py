@@ -150,7 +150,8 @@ def flatten(decl):
 
 def git(repo, *args):
     return subprocess.run(["git", "-C", repo] + list(args),
-                          capture_output=True, text=True, errors="replace")
+                          capture_output=True, text=True, encoding="utf-8",
+                          errors="replace")
 
 
 def discover_repo(start):

@@ -1,9 +1,48 @@
+---
+document_metadata:
+  domain: architecture
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-200/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "GOV-DOC-002 classification of a mirror that carried no front-matter: records domain, role, status and the canonical source path only (basis, the document's own statement: Status: DECIDED for authority and primary collaboration). Claims no canonical authority and does not verify semantic parity with the source. Pre-metadata content blob: b5ab766758ab199579ff2dc3cdce6326acfe6dba."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_conflict_status: None
+    normative_status: Normative
+  bilingual_counterpart:
+    source: "01-system-architecture/component-interactions.md"
+    en: null
+    zh-CN: "docs/zh-CN/01-system-architecture/component-interactions.md"
+---
 # Component Interactions
 
 - Document ID: SYS-INTERACTIONS-001
 - Version: 1.0
 - Source: [Normative source specification](../../../01-system-architecture/component-interactions.md)
-- Source revision: 50ddbeed51d88aecbeee0403a4021e21a668dbcb
+- Source revision: 49e9c1c7142c292df9efbc200c4683bd56a292ad
 - Chinese counterpart: [组件交互](../../zh-CN/01-system-architecture/component-interactions.md)
 - Status: DECIDED for authority and primary collaboration; CANDIDATE for orchestration patterns and call topology; OPEN for protocol details delegated to Session H
 

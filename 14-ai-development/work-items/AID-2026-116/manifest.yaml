@@ -27,8 +27,8 @@ prompt_id: AID-2026-116-PROMPT
 prompt_version: 1
 prompt_file: 14-ai-development/work-items/AID-2026-116/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 3b8f72e2e124b24625035c42398c0529655be4d8e8e48ddfc4b7369b89ce1c94
-prompt_bytes: 8274
+prompt_sha256: 6fd626bfd4674e3e98f107baa93b4f2ef1061eac36c80c66a7778714ab5b725e
+prompt_bytes: 8341
 
 # ---------------------------------------------------------------------------
 # The three references below were written while the correction branch still held
@@ -209,7 +209,11 @@ corrections:
       The byte count does not change, because the two texts differ only in an identifier of equal
       length. That is the same property that let the identical defect survive in AID-2026-047, and
       it is why the correction states the substitution rather than only the two digests.
+  - target: 14-ai-development/work-items/AID-2026-047/manifest.yaml
     field: prompt_digest_correction (trailing attribution only)
+    basis: >-
+      The unchanged digest, byte count and AID-2026-044-to-AID-2026-047 substitution identify the
+      field in AID-2026-047/manifest.yaml; only its trailing attribution is corrected.
     prior_value: "Corrected by AID-2026-090."
     new_value: >-
       Corrected by AID-2026-101, the record that itemises the prior digest. This sentence was

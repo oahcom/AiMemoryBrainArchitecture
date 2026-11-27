@@ -16,6 +16,12 @@ Usage:
         --format paths \
         --command "python3 scripts/check_bilingual_docs_full.py"
 
+An *item* is the whole line the wrapped gate printed for it, minus its
+`NNN. ` prefix: the part after ` -> ` is part of the item, not decoration. A
+line that only reports the run's verdict or a count is not an item, but a
+verdict word in front of a path (`OK <path> has no counterpart`) does not make
+one a summary.
+
 Exit codes: 0 ratchet holds, 1 regression, stale baseline, or a wrapped
 command that exited non-zero without reporting an item, 2 usage/IO error.
 
@@ -33,34 +39,48 @@ import sys
 from pathlib import Path
 
 NUMBERED_PREFIX = re.compile(r"^\d{3,4}\.\s+")
-ARROW_SUFFIX = re.compile(r"\s+->\s+.*$")
 
-# Lines that report a verdict or a count rather than an offending item.
-SUMMARY_PREFIXES = (
-    "PASS",
-    "FAIL",
-    "OK",
-    "Ran ",
-    "FAILED",
-    "NO TESTS",
-    "GOV-DOC-001 full scan:",
-    "runner admission:",
+# Lines that report a verdict or a count rather than an offending item. The
+# boundary keeps an item whose name merely starts with a verdict word
+# ("OK_STATUS") out of the summary set.
+SUMMARY_RE = re.compile(
+    r"^(?:PASS|FAIL|OK|FAILED|NO TESTS)(?![A-Za-z0-9_])"
+    r"|^Ran\s"
+    r"|^GOV-DOC-001 full scan:"
+    r"|^runner admission:"
+)
+
+# A token that names a repository object. A "summary" line that still names
+# one is not a summary: it is an offending item wearing a verdict prefix.
+# `OK 00-governance/a.md has no counterpart` used to be dropped whole by the
+# prefix filter, so a real failure never reached the comparison.
+ITEM_TOKEN_RE = re.compile(
+    r"\S*/\S*|\b[\w.-]+\.(?:md|py|ya?ml|rs|toml|json|txt)\b"
 )
 
 
+def is_summary(line: str) -> bool:
+    return bool(SUMMARY_RE.match(line)) and not ITEM_TOKEN_RE.search(line)
+
+
 def normalize(lines: list[str], fmt: str) -> list[str]:
-    """Reduce raw gate output to the stable set of offending items."""
+    """Reduce raw gate output to the stable set of offending items.
+
+    The item keeps everything the gate printed for it, including what follows
+    ` -> `. Truncating at the arrow merged two different failures on the same
+    path into one item, which is exactly the information a ratchet exists to
+    compare.
+    """
     items: set[str] = set()
     for raw in lines:
         line = raw.strip()
         if not line:
             continue
-        if line.startswith(SUMMARY_PREFIXES):
+        if is_summary(line):
             continue
         if fmt == "paths":
             # Bilingual scanner: "042. some/path.md -> target expression"
             line = NUMBERED_PREFIX.sub("", line)
-            line = ARROW_SUFFIX.sub("", line)
         # fmt == "schema": already one item per line, keep verbatim.
         items.add(line)
     return sorted(items)
@@ -76,6 +96,35 @@ def read_baseline(path: Path) -> list[str]:
             continue
         entries.append(stripped)
     return sorted(set(entries))
+
+
+def compare(baseline: list[str], current: list[str]) -> tuple[list[str], list[str]]:
+    """Pair items with baseline entries; return (regressions, fixed).
+
+    A baseline entry may be a bare path -- the shape `gates.yml` documents for
+    `--format paths` (`sed -E 's/ -> .*$//'`), which is what every entry in the
+    shipped baseline is. Such an entry stands for one item that begins with
+    `"<path> -> "`.
+
+    One item, not all of them: two different failures on the same path now need
+    two baseline entries, so the second one is a regression. Covering every
+    item of a path with that path's single entry is the same silent merge the
+    arrow truncation used to perform.
+    """
+    unused = list(baseline)
+    regressions: list[str] = []
+    for item in current:
+        matched = item if item in unused else None
+        if matched is None:
+            for entry in unused:
+                if item.startswith(entry + " -> "):
+                    matched = entry
+                    break
+        if matched is None:
+            regressions.append(item)
+        else:
+            unused.remove(matched)
+    return regressions, sorted(unused)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -106,10 +155,7 @@ def main(argv: list[str] | None = None) -> int:
     # below, because an empty set minus an empty baseline is otherwise a pass.
     current = normalize(proc.stdout.splitlines(), args.format)
 
-    current_set, baseline_set = set(current), set(baseline)
-    regressions = sorted(current_set - baseline_set)
-    fixed = sorted(baseline_set - current_set)
-
+    regressions, fixed = compare(baseline, current)
     print(f"ratchet: {args.baseline.as_posix()}")
     print(f"ratchet: baseline={len(baseline)} current={len(current)} "
           f"regressions={len(regressions)} fixed={len(fixed)}")

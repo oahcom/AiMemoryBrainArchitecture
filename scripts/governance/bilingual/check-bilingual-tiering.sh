@@ -30,7 +30,7 @@ for line in mapping.read_text(encoding="utf-8").splitlines():
 # The declared baseline commit is the classification evidence anchor.
 # Verify it exists and is a commit object; fall back to HEAD only if undeclared.
 if baseline:
-    kind=subprocess.run(["git","-C",str(root),"cat-file","-t",baseline],capture_output=True,text=True)
+    kind=subprocess.run(["git","-C",str(root),"cat-file","-t",baseline],capture_output=True,text=True,encoding="utf-8",errors="replace")
     if kind.returncode or kind.stdout.strip()!="commit":
         print(f"ERROR: declared baseline_commit {baseline} is not a commit object",file=sys.stderr)
         raise SystemExit(1)
@@ -38,7 +38,7 @@ if baseline:
 else:
     ref="HEAD"
 try:
-    files=subprocess.run(["git","-C",str(root),"ls-files","-z","--","*.md"],check=True,capture_output=True).stdout.decode().split("\0")
+    files=subprocess.run(["git","-C",str(root),"ls-files","-z","--","*.md"],check=True,capture_output=True).stdout.decode("utf-8",errors="replace").split("\0")
 except (OSError,subprocess.CalledProcessError) as exc:
     print(f"ERROR: cannot enumerate files: {exc}",file=sys.stderr); raise SystemExit(1)
 rules.sort(key=lambda x:len(x[0]),reverse=True); unknown=[]; drift=[]; missing=[]
@@ -54,7 +54,7 @@ for path in sorted(x for x in files if x):
     tier=tier or "UNKNOWN"; counts[tier]+=1; print(f"{tier}\t{path}")
     if tier=="UNKNOWN": unknown.append(path)
     if sha:
-        actual=subprocess.run(["git","-C",str(root),"rev-parse",f"{ref}:{path}"],capture_output=True,text=True)
+        actual=subprocess.run(["git","-C",str(root),"rev-parse",f"{ref}:{path}"],capture_output=True,text=True,encoding="utf-8",errors="replace")
         if actual.returncode or actual.stdout.strip()!=sha:
             drift.append(path); print(f"STALE_BLOB_SHA\t{path}\texpected={sha}\tactual={actual.stdout.strip() or 'MISSING'}\tref={ref}")
 # Registered per-file entries must bind to the declared baseline tree:

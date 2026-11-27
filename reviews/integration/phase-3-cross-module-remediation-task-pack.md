@@ -348,8 +348,8 @@ Parallel work is allowed for WS-1, WS-2, WS-4 and H/I first drafts. WS-3 must co
 - `09-security-governance/principal-actor-and-authorization-contract.md`
 - `09-security-governance/scope-and-revocation-policy.md`
 - `09-security-governance/forget-retention-backup-and-erasure-policy.md`
-- `09-security-governance/threat-model-and-adversarial-test-plan.md`
-- `09-security-governance/audit-and-exception-governance.md`
+- `09-security-governance/threat-model-and-adversarial-test-plan.md` (not restored on main; see AID-2026-107 §10)
+- `09-security-governance/audit-and-exception-governance.md` (not restored on main; see AID-2026-107 §10)
 
 ### Acceptance
 
