@@ -127,3 +127,17 @@ GET /repos/oahcom/AiMemoryBrainArchitecture/issues/comments/7042461592
 - effect: Owner delegation instrument for acceptance_authority
 
 Bounded reconciliation: semantic and identity decision only; downstream schema, DDL, API, wire and runtime implementation remain unfrozen.
+
+
+## Final exact-head validation (2026-11-27)
+
+- Active PR: #1374, branch w10/aid-253-ac3-ac4-r2.
+- Final PR head: bfb36d030c03f553ada01aa8698aa425ada8152c.
+- Main base at final refresh: 386d8f57b02d8e3c511ff0e3980b9ce0af8b3028.
+- GitHub compare result: ahead_by=29, behind_by=0; merge base equals main.
+- All 16 configured required contexts returned conclusion=success on this exact head: GOV-DOC-001 structural checks; Branch freshness vs base; audit; GOV-DOC-002 metadata checks; BMCP protocol index (hard gate); BMCP conformance suite (hard gate); Schema non-empty audit (hard gate); Bilingual docs coverage (ratchet); Rust clippy (hard gate); Repository hygiene (hard gate); Rust format (hard gate); Rust doctests (hard gate); Session Evidence; Session Evidence self-test (base); Session Evidence self-test (head); rust-workspace-test. The additional non-required Work Item manifest schema check also returned success.
+- Main branch API summary: protected=true; required_status_checks.enforcement_level=everyone; exactly 16 required contexts.
+- GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection, /protection/required_status_checks and /protection/enforce_admins returned HTTP 403, "Resource not accessible by integration". Therefore required_status_checks.strict and enforce_admins cannot be verified and no merge was attempted.
+- PR #1366 remains an overlapping AID-2026-253/W10 PR. Its head d94c5a1d716eac2039ed96f24d32d2c4e072c62d compares with current main 386d8f57b02d8e3c511ff0e3980b9ce0af8b3028 as ahead_by=8, behind_by=99; its file set includes unrelated AID-2026-109, AID-2026-251 and CI changes. Its branch was not overwritten.
+- Issue #265 remains OPEN and its body was not modified. No Issue comment was posted because the required merge has not occurred.
+- Post-merge blob verification and merge SHA: NOT APPLICABLE — no merge to main.
