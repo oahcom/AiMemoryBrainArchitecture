@@ -86,7 +86,7 @@ Baseline self-check on the unchanged base: `367/367 passed`. After adding the tw
 - `M-02 does not require approver or decision_date` — PASS.
 - `09-security-governance README matches five Canonical frontmatters` — PASS.
 
-Additional exact-head local results: GOV-DOC-002 incremental `--require-changed` — PASS (641 classified, 371 unclassified; 0 rule violations in the changed set); bilingual structural gate with `PR_BODY=BILINGUAL-MANIFEST: COMPLETE` — PASS (10 changed Markdown paths inspected, baseline 77 frozen / 0 new gaps); repository hygiene — PASS (119 work-item directories / 119 index links, 3 new paths admitted, 0 violations); line endings — 1715 files inspected, 0 violations. The bilingual gate explicitly reports that it is structural only; semantic parity is not claimed. The final PR sequence is recorded without treating the connector's incomplete Actions listing as authoritative: #1358's authenticated Actions listing contained eight workflows (seven success, one Session Evidence failure); its log said `MISSING: PR description: missing per-Issue mapping table`. The Session Evidence validator also requires an Issue-specific mapping row. Issue #1212 is historical and has no AI declaration, so the corrected row in #1360 is `| #1212 | LEGACY_UNDECLARED | N/A |`; the PR-level AI declaration and session evidence reference remain YES and fully populated. #1358 and #1359 were commented and closed as superseded; #1360 is the final active PR. The final branch head is a real two-parent merge commit, pushed through Git without force. The 16 required contexts must be read from the final head after this evidence update and are not inferred from earlier attempts.
+Additional exact-head local results: GOV-DOC-002 incremental `--require-changed` — PASS (642 classified, 371 unclassified; 0 rule violations in the changed set); bilingual structural gate with `PR_BODY=BILINGUAL-MANIFEST: COMPLETE` — PASS (11 changed Markdown paths inspected, baseline 77 frozen / 0 new gaps); repository hygiene — PASS (119 work-item directories / 119 index links, 4 new paths admitted, 0 violations); line endings — 1716 files inspected, 0 violations. The bilingual gate explicitly reports that it is structural only; semantic parity is not claimed. The final PR sequence is recorded without treating the connector's incomplete Actions listing as authoritative: #1358's authenticated Actions listing contained eight workflows (seven success, one Session Evidence failure); its log said `MISSING: PR description: missing per-Issue mapping table`. The Session Evidence validator also requires an Issue-specific mapping row. Issue #1212 is historical and has no AI declaration, so the corrected row in #1360 is `| #1212 | LEGACY_UNDECLARED | N/A |`; the PR-level AI declaration and session evidence reference remain YES and fully populated. #1358 and #1359 were commented and closed as superseded. #1360 was merged; the exact merge and post-merge verification are recorded below.
 
 The DM-side test constructs a document containing both optional fields and then removes `approver` and `decision_date`; `check_document()` returns zero errors. Its docstring quotes the revised M-02 description. The README-side test rejects the old Candidate/Informative wording in all three README group members and compares all five source frontmatters against the README declaration, while checking that the non-approval/non-conformance disclaimer remains.
 
@@ -98,3 +98,33 @@ The DM-side test constructs a document containing both optional fields and then 
 - No changes to policy obligations beyond clarifying that they are policy requirements, not machine-enforced by GOV-DOC-002.
 - No changes to branch protection, required contexts, CI workflows, merge mode or Issue state.
 - No Phase 3.x decision approval, production policy approval, implementation acceptance or conformance claim.
+
+
+## Post-merge closeout — PR #1360
+
+- Final PR: [#1360](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1360), merged at `2026-11-27T03:21:05Z` using the `merge` method.
+- Final PR head: `074a8765a93228bbcdc09c6209af76e7cc7c23be`.
+- Merge commit: `4fa75e7809a9319db2ab04489cc8f2f9e17fbd79`; it is the observed `origin/main` tip.
+- Required contexts: 16/16 SUCCESS, 0 failures, 0 pending. Exact required set: `GOV-DOC-001 structural checks`; `Branch freshness vs base`; `audit`; `GOV-DOC-002 metadata checks`; `BMCP protocol index (hard gate)`; `BMCP conformance suite (hard gate)`; `Schema non-empty audit (hard gate)`; `Bilingual docs coverage (ratchet)`; `Rust clippy (hard gate)`; `Repository hygiene (hard gate)`; `Rust format (hard gate)`; `Rust doctests (hard gate)`; `Session Evidence`; `Session Evidence self-test (base)`; `Session Evidence self-test (head)`; `rust-workspace-test`.
+- Immediately before merge, branch protection readback: `strict: true`, `enforce_admins: true`, exactly 16 required contexts. `compare` readback: `behind_by: 0`; PR head matched the expected SHA; PR was mergeable.
+- Issue #1212 was not closed and remains OPEN.
+
+### Post-merge blob verification
+
+For every changed path, `git rev-parse origin/main:<path>` matched `git rev-parse 074a8765a93228bbcdc09c6209af76e7cc7c23be:<path>`. Result: 11/11 MATCH, 0 mismatches.
+
+| Path | Verified main blob |
+|---|---|
+| `00-governance/architecture-document-management-policy.md` | `c04ddc648b2864a4863d9fe8a20f6b3f895355af` |
+| `09-security-governance/README.md` | `37b4c8a7f6b807bc22e9f278106972cbe84af8c8` |
+| `14-ai-development/work-items/AID-2026-211/evidence.md` | `2e37b47397bdc8ff75e188e69e2c155dfc4ef365` |
+| `14-ai-development/work-items/AID-2026-211/manifest.yaml` | `7ffbfb7fd0f1142ce9847aeb43ca055737729c73` |
+| `14-ai-development/work-items/AID-2026-211/prompt-v1.md` | `139c860019a294a302346563d50db1d302bf16a6` |
+| `14-ai-development/work-items/AID-2026-211/session-evidence.md` | `6e9904e7985060e08c6752b0c7a115570943d02f` |
+| `14-ai-development/work-items/INDEX.md` | `c3a01741a64d5b7492be84410d26df3aefcb5b02` |
+| `docs/en/09-security-governance/README.md` | `d5b9495f2a2461a66546291091a942bef778e9ed` |
+| `docs/zh-CN/09-security-governance/README.md` | `3d9be0a60a6c53e450d606222ff666add553ce96` |
+| `scripts/check_document_management.py` | `48a861a4bf4cc3dbe200fb6f5b2108b1ecd7c251` |
+| `scripts/test_check_document_management.py` | `7848590499e2af7584cd43e6fb5ac39d059d4346` |
+
+No acceptance decision is asserted. `#1212` remains OPEN. The merge records integration of the already-issued RC-1/RC-2 ruling, not a new approval of Phase 3.x or production policy.
