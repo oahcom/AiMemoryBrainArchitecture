@@ -1,7 +1,7 @@
 # AID-2026-268 manifest blob-pin baseline
 # Measured against main 6f597e2dd8b6e879bf7539aa16b88a39504d9c49.
-# 87 pre-existing mismatches: 40 prompt SHA-256 pins, 40 prompt byte-count pins,
-# 3 AID-2026-100 related-evidence pins, and 4 nested authored-index mirror pins.
+# 89 pre-existing mismatches: 40 prompt SHA-256 pins, 40 prompt byte-count pins,
+# 3 AID-2026-100 related-evidence pins, and 6 nested authored-index pins (2 roots + 4 mirrors).
 # These legacy records belong to other work items and are not modified here.
 # gate_ratchet requires every entry to remain failing; a fixed entry is stale/red.
 MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-059/prompt-v1.md declared=65474e7f0927d2dfeaad33814fdbd7d576635cc8a0e8d2a3a7441e3a65ab7317 actual=4881d6292e96154d5f7364816ae3e9977365e09b88e8475f4dd9d655e3e34a8c
@@ -87,3 +87,5 @@ MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-developmen
 MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-101/prompt-v1.md declared=4470 actual=4412
 MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-102/prompt-v1.md declared=df3c53282d858ecc7302ba86b4fb419bf6a31c8030d30cee256b64840b4e4e7a actual=468a1d4fd8f43d81c8ffba081afd46497b54a2b427849838946163785716072d
 MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-102/prompt-v1.md declared=4470 actual=4412
+MISMATCH authored_indexes[0].root path=05-memory-runtime/README.md declared=107c225b631eaa5732bab90bc09144799a542502 actual=13570e9fe2ad87958c387696088f145f6a24103d
+MISMATCH authored_indexes[1].root path=09-security-governance/README.md declared=1046665b0990183b689ed6db88edc9ba1089c83e actual=37b4c8a7f6b807bc22e9f278106972cbe84af8c8
