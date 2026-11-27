@@ -1,0 +1,45 @@
+work_item_id: AID-2026-261
+title: >-
+  Serialized, merge-time work-item uniqueness gate: judge the merge candidate
+  against the latest target branch, not the branch's own base (Issue #1341,
+  defect #1331)
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  One standard-library checker, its unit tests and a workflow job. No work-item
+  content is renumbered and no existing gate decision changes; the only new
+  rejection is a newly introduced work-item directory whose ID is already
+  occupied on the latest target branch.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: a7a252eb670b31066a0ffea35dc28cbe6ef5b836
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-261/manifest.yaml
+  files_to_modify:
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope:
+    - any existing work-item directory
+    - branch protection
+evidence:
+  record: 14-ai-development/work-items/AID-2026-261/evidence.md
+documentation: []
+session_evidence:
+  - role: "GATE_REPAIR_AUTHOR"
+    issue_refs:
+      - "#1341"
+      - "#1331"
+    implementing_ai_session: "PENDING"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-261/session-evidence.md"
+implementation:
+  status: NOT_STARTED
+  summary: "Number reservation skeleton only; the gate implementation is produced by the dispatched ChatGPT session and lands in a later commit on this branch."
+  files_changed: []
+  tests: []
