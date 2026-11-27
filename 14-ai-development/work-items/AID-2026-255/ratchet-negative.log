@@ -1,0 +1,17 @@
+﻿# ratchet negative experiments at head ce63e66726782ea3c24d6cfdb060d99eba1c0c9e
+
+## E1: baseline lowered by one entry (a fixed item without lowering the baseline)
+ratchet: C:/Users/ADMINI~1/AppData/Local/Temp/ratchet-stale.txt
+ratchet: baseline=11 current=12 regressions=2 fixed=1
+::error::ratchet regression (new failure not in baseline): ::error::14-ai-development/work-items/AID-2026-100/manifest.yaml#baseline_and_source_evidence.authored_indexes[0].root_blob -> 05-memory-runtime/README.md (declared=107c225b631eaa5732bab90bc09144799a542502; actual=13570e9fe2ad87958c387696088f145f6a24103d)
+::error::ratchet regression (new failure not in baseline): ::error::14-ai-development/work-items/AID-2026-150/manifest.yaml#source.files[2].blob -> 03-memory-brain/forget-fence-operation-and-publication-gate.md (declared=4da0b61ba3656a768ea56b4a2a24e09da4e21cd5; actual=dd26e3cae2e60dbdc44a6e084004effcd2033efa)
+::error::ratchet baseline is stale (no longer failing): 锘?:error::14-ai-development/work-items/AID-2026-100/manifest.yaml#baseline_and_source_evidence.authored_indexes[0].root_blob
+ratchet: FAIL - 2 new failure(s) above baseline.
+ratchet: FAIL - lower the baseline by 1 fixed item(s).
+EXIT=1
+
+## E2: wrapped command exits 2 (checker cannot verify anything)
+ratchet: scripts/ci/baselines/manifest-blob-pins.txt
+ratchet: baseline=12 current=0 regressions=0 fixed=12
+ratchet: FAIL - the wrapped command exited 2; only 0 (clean) and 1 (red) carry a comparable failure set.
+EXIT=1
