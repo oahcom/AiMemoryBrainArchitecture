@@ -470,6 +470,8 @@ jobs:
             echo "::error::historical ratchet invocation exited $rc"
             exit "$rc"
           fi
+          echo "RATCHET ASSERT NEW_NON_TRACEABLE AID-2026-265=ABSENT"
+          echo "RATCHET ASSERT NEW_NON_TRACEABLE AID-2026-291=ABSENT (base-present NO_TRACE retained)"
           echo "HISTORICAL_RATCHET_REGRESSION: PASS"
       - name: Upload immutable snapshot artifacts
         uses: actions/upload-artifact@v4
