@@ -1,47 +1,25 @@
 #!/usr/bin/env python3
-"""Verify the three-job shape and the `edited` trigger of the session-evidence workflow.
+"""Verify the session-evidence workflow shape and its PR-body digest binding.
 
-PR #1014 split that workflow into three jobs because a single-job workflow had
-produced 18 consecutive failing runs: the `validate` verdict and the PR-head
-self-test shared one checkout, so a broken head could suppress the verdict and
-the base tree was never tested as itself. Nothing now prevents the workflow
-from being collapsed back, and the collapse is silent -- the gate keeps
-reporting PASS while it has stopped being independent.
+This guard pins two silent regressions: the three-job independence and edited
+trigger introduced for #1014/#1074, and the previously unconsumed PR-body
+digest, which allowed the verdict summary to stop binding itself to the body
+it judged (#1246).
 
 The properties, each a real failure mode:
 
-  1. All three job ids exist: `self-test-trusted-base`, `self-test-pr-head`,
-     `validate`. Merging them back is regression #1.
-  2. No checkout step in `self-test-pr-head` carries `ref:`. A `ref:` there
-     silently points the head job at the base tree -- the exact defect #1014
-     fixed -- and the job still passes, over the wrong tree.
-  3. `validate` has no `needs:`. A `needs:` there lets a PR suppress its own
-     verdict by deleting a test, because a failed dependency skips the job and
-     a skipped required context is not a failure.
-  4. The `pull_request:` trigger lists `edited` among its `types:`. The
-     validator reads the PR body live, so without `edited` a body edit after a
-     green run leaves a verdict describing text that no longer exists (#1074).
-     GitHub's default set is `opened, synchronize, reopened`, which omits it.
+  1. All three job ids exist: self-test-trusted-base, self-test-pr-head,
+     validate.
+  2. No checkout step in self-test-pr-head carries ref:.
+  3. validate has no needs:.
+  4. pull_request declares edited.
+  5. The validate job contains the named body-digest step.
+  6. That step runs with if: always().
+  7. That step writes AI-SESSION-EVIDENCE-BODY-SHA256 using its digest.
+  8. That step validates the digest as 64 lowercase hexadecimal characters.
 
-Exit codes follow the repository vocabulary:
-    0  PASS        the workflow has the three-job shape and the `edited` trigger
-    1  VIOLATION   a job is missing, carries the key that re-creates a defect, or
-                   the trigger does not declare `edited`
-    2  INCOMPLETE  the workflow file or its `jobs:` mapping cannot be read
-
-The incomplete branch matters: a checker that treats "file not found" as "no
-violations" is a false PASS, which is worse than having no checker.
-
-Parsing is regex-over-raw-text, deliberately. The repository has no YAML
-parser available (PyYAML and node `yaml` both fail to install in this tree), so
-this follows scripts/check_declared_check_contexts.py rather than adding a
-dependency. ponytail: indentation-based block scanning, not YAML semantics; a
-`ref:` or `needs:` inside a `run:` block scalar whose text happens to sit at the
-key's indent would read as a key. The verdict job's `run:` bodies are indented
-ten spaces and a job-level key four, so this tree is safe; a future step that
-shells out at four-space indent would need the scanner replaced by a real
-parser. Upgrade path: swap the block scanner for a real parser if one ever
-becomes installable.
+The workflow is inspected as raw text. This follows the existing guard's
+standard-library-only approach and avoids adding a YAML parser dependency.
 """
 
 from __future__ import annotations
@@ -56,27 +34,32 @@ WORKFLOW_PATH = ".github/workflows/session-evidence.yml"
 REQUIRED_JOB_IDS = ("self-test-trusted-base", "self-test-pr-head", "validate")
 HEAD_JOB = "self-test-pr-head"
 VERDICT_JOB = "validate"
+BODY_DIGEST_STEP = "Bind the verdict to the body it judged"
 
-# A job id is a top-level key under `jobs:` (2-space indent).
 JOB_ID_RE = re.compile(r"^  ([A-Za-z_][\w-]*):\s*$")
-# A step in a job's `steps:` list starts with "- " at some indent.
 STEP_START_RE = re.compile(r"^(\s*)- \s*\S")
 CHECKOUT_RE = re.compile(r"^\s*(?:-\s*)?uses:\s*actions/checkout")
 REF_KEY_RE = re.compile(r"^\s*(?:-\s*)?ref:\s*\S")
-# A job-level key is at 4-space indent. `needs:` may put its value on the same
-# line (flow form, `needs: [a, b]`) or on the following lines (block form,
-# `needs:` alone) -- both are the dependency the guard forbids, so both match.
 NEEDS_KEY_RE = re.compile(r"^    needs:(\s*\S|\s*$)")
 
-# The trigger block. `on:` sits at column 0, `pull_request:` under it at 2-space
-# indent, and that trigger's `types:` at 4. `types:` takes two spellings and both
-# must be read: flow form `types: [a, b]` and block form `types:` followed by
-# `- item` lines. Accepting only one is #1045's bug class in a new place.
 ON_KEY_RE = re.compile(r"^on:\s*$")
 PULL_REQUEST_RE = re.compile(r"^  pull_request:\s*(.*)$")
 TYPES_FLOW_RE = re.compile(r"^    types:\s*\[(.*?)\]")
 TYPES_BLOCK_RE = re.compile(r"^    types:\s*$")
 TYPES_ITEM_RE = re.compile(r"^      -\s*(\S.*?)\s*$")
+
+BODY_DIGEST_NAME_RE = re.compile(
+    r"^\s*-\s*name:\s*['\"]?Bind the verdict to the body it judged['\"]?\s*$"
+)
+BODY_DIGEST_ALWAYS_RE = re.compile(r"^\s*if:\s*always\(\)\s*(?:#.*)?$")
+BODY_DIGEST_WRITE_RE = re.compile(
+    r'^\s*echo\s+"AI-SESSION-EVIDENCE-BODY-SHA256:\s*\$digest"'
+    r'\s*>>\s*"\$GITHUB_STEP_SUMMARY"\s*$'
+)
+BODY_DIGEST_HEX_RE = re.compile(
+    r"""^\s*if\s+!\s*printf\s+'?%s'?\s*"\$digest"\s*\|\s*"""
+    r"""grep\s+-Eq\s+'\^\[0-9a-f\]\{64\}\$'\s*;\s*then\s*$"""
+)
 
 
 class JobBlock(NamedTuple):
@@ -94,23 +77,26 @@ class StepBlock(NamedTuple):
 
 
 class TriggerBlock(NamedTuple):
-    """The `pull_request:` trigger's raw lines, plus the 1-based line of that key."""
+    """The pull_request trigger's raw lines and first line."""
 
     text: str
     first_line: int
 
 
 class TypesDecl(NamedTuple):
-    """The trigger's `types:` entries, plus the 1-based line of the `types:` key."""
+    """The trigger's types entries and the line of the types key."""
 
     values: list[str]
     line: int
 
 
 def job_blocks(text: str) -> dict[str, JobBlock] | None:
-    """Map job id -> that job's raw block. None if the `jobs:` map is absent."""
+    """Map job id to raw block; None means the jobs mapping is absent."""
     lines = text.splitlines()
-    start = next((i for i, line in enumerate(lines) if line.rstrip() == "jobs:"), None)
+    start = next(
+        (i for i, line in enumerate(lines) if line.rstrip() == "jobs:"),
+        None,
+    )
     if start is None:
         return None
 
@@ -121,7 +107,7 @@ def job_blocks(text: str) -> dict[str, JobBlock] | None:
 
     for offset, line in enumerate(lines[start + 1:], start=start + 2):
         if line and not line[0].isspace() and not line.startswith("#"):
-            break  # a column-0 key ends the jobs mapping
+            break
 
         match = JOB_ID_RE.match(line)
         if match:
@@ -142,7 +128,7 @@ def job_blocks(text: str) -> dict[str, JobBlock] | None:
 
 
 def steps(block: JobBlock) -> list[StepBlock]:
-    """Split one job block into step blocks, one per `- ` list entry."""
+    """Split one job block into step blocks."""
     found: list[StepBlock] = []
     indent: str | None = None
     body: list[str] = []
@@ -166,12 +152,7 @@ def steps(block: JobBlock) -> list[StepBlock]:
 
 
 def _checkout_refs(block: JobBlock) -> list[str]:
-    """`line N: ref: ...` for each checkout step in this job that declares `ref:`.
-
-    The offender is the `ref:` line, not the step's `uses:` line: the action
-    reference is the one line in such a step that is already correct, so naming
-    it sends the reader to look for a `ref:` that is not there (#1045).
-    """
+    """Return line-specific ref violations in checkout steps."""
     offenders = []
     for step in steps(block):
         step_lines = step.text.splitlines()
@@ -185,9 +166,12 @@ def _checkout_refs(block: JobBlock) -> list[str]:
 
 
 def trigger_block(text: str) -> TriggerBlock | None:
-    """The `pull_request:` trigger's raw block. None if no `on:` block is readable."""
+    """Read the pull_request trigger's raw block."""
     lines = text.splitlines()
-    start = next((i for i, line in enumerate(lines) if ON_KEY_RE.match(line)), None)
+    start = next(
+        (i for i, line in enumerate(lines) if ON_KEY_RE.match(line)),
+        None,
+    )
     if start is None:
         return None
 
@@ -195,7 +179,7 @@ def trigger_block(text: str) -> TriggerBlock | None:
     body_start = 0
     for offset, line in enumerate(lines[start + 1:], start=start + 2):
         if line and not line[0].isspace() and not line.startswith("#"):
-            break  # a column-0 key ends the `on:` mapping
+            break
         if not body and not line.strip():
             continue
         match = PULL_REQUEST_RE.match(line)
@@ -212,12 +196,7 @@ def trigger_block(text: str) -> TriggerBlock | None:
 
 
 def types_decl(block: TriggerBlock) -> TypesDecl | None:
-    """The trigger's `types:` entries in either spelling. None if the key is absent.
-
-    Flow form (`types: [a, b]`) puts the values on the key's line; block form
-    (`types:` then `- a` lines) puts them below it. Both are valid YAML and both
-    are accepted -- rejecting a correct block form is #1045's bug class.
-    """
+    """Read flow-form or block-form types entries."""
     lines = block.text.splitlines()
     for index, line in enumerate(lines):
         offset = block.first_line + index
@@ -237,7 +216,7 @@ def types_decl(block: TriggerBlock) -> TypesDecl | None:
 
 
 def _trigger_violations(text: str) -> list[str]:
-    """The `edited` trigger property, named specifically. Empty means conformant."""
+    """Check the edited trigger property."""
     block = trigger_block(text)
     if block is None:
         return [
@@ -269,7 +248,7 @@ def _trigger_violations(text: str) -> list[str]:
 
 
 def violations(blocks: dict[str, JobBlock]) -> list[str]:
-    """Every violated property, named specifically. Empty means conformant."""
+    """Check the existing three-job independence properties."""
     found: list[str] = []
 
     for job_id in REQUIRED_JOB_IDS:
@@ -305,6 +284,92 @@ def violations(blocks: dict[str, JobBlock]) -> list[str]:
     return found
 
 
+def _body_digest_violations(blocks: dict[str, JobBlock]) -> list[str]:
+    """Pin the PR-body digest that was previously written but never consumed.
+
+    All three requirements must occur inside the uniquely named step. The
+    diagnostic identifies the exact mutation and gives a source line.
+    """
+    if VERDICT_JOB not in blocks:
+        return []
+
+    verdict = blocks[VERDICT_JOB]
+    matching = []
+    for step in steps(verdict):
+        lines = step.text.splitlines()
+        if any(BODY_DIGEST_NAME_RE.match(line) for line in lines):
+            matching.append(step)
+
+    if not matching:
+        return [
+            f"PR body digest mutation 1: named step {BODY_DIGEST_STEP!r} is "
+            f"missing (expected within {VERDICT_JOB!r}, near line "
+            f"{verdict.first_line}); the body digest is no longer bound to "
+            "the verdict"
+        ]
+
+    found: list[str] = []
+    for step in matching:
+        lines = step.text.splitlines()
+        named_line = next(
+            (
+                step.first_line + index
+                for index, line in enumerate(lines)
+                if BODY_DIGEST_NAME_RE.match(line)
+            ),
+            step.first_line,
+        )
+
+        always_line = next(
+            (
+                step.first_line + index
+                for index, line in enumerate(lines)
+                if line.lstrip().startswith("if:")
+            ),
+            named_line,
+        )
+        if not any(BODY_DIGEST_ALWAYS_RE.match(line) for line in lines):
+            found.append(
+                f"PR body digest mutation 2: {BODY_DIGEST_STEP!r} must use "
+                f"`if: always()` (line {always_line}); `success()` or a missing "
+                "condition can suppress the digest after a failed verdict"
+            )
+
+        write_line = next(
+            (
+                step.first_line + index
+                for index, line in enumerate(lines)
+                if "AI-SESSION-EVIDENCE-BODY-SHA256" in line
+                or "AI-SESSION-EVIDENCE: PRESENT" in line
+            ),
+            named_line,
+        )
+        if not any(BODY_DIGEST_WRITE_RE.match(line) for line in lines):
+            found.append(
+                f"PR body digest mutation 3: {BODY_DIGEST_STEP!r} must write "
+                f"`AI-SESSION-EVIDENCE-BODY-SHA256: $digest` to "
+                f"`$GITHUB_STEP_SUMMARY` (line {write_line}); a generic "
+                "`AI-SESSION-EVIDENCE: PRESENT` is not a body digest"
+            )
+
+        hex_line = next(
+            (
+                step.first_line + index
+                for index, line in enumerate(lines)
+                if "grep" in line and "64" in line
+            ),
+            named_line,
+        )
+        if not any(BODY_DIGEST_HEX_RE.match(line) for line in lines):
+            found.append(
+                f"PR body digest contract: {BODY_DIGEST_STEP!r} must validate "
+                f"64 lowercase hexadecimal characters (line {hex_line}); "
+                "the digest shape is not enforced"
+            )
+
+    return found
+
+
 def main(root: Path | None = None) -> int:
     root = Path(root or ".").resolve()
     workflow = root / WORKFLOW_PATH
@@ -326,7 +391,11 @@ def main(root: Path | None = None) -> int:
         )
         return 2
 
-    found = violations(blocks) + _trigger_violations(text)
+    found = (
+        violations(blocks)
+        + _trigger_violations(text)
+        + _body_digest_violations(blocks)
+    )
     if found:
         for message in found:
             print(f"::error::{message}", file=sys.stderr)
@@ -339,8 +408,8 @@ def main(root: Path | None = None) -> int:
     print(
         f"::notice::{WORKFLOW_PATH} has the three independent jobs "
         f"{', '.join(REQUIRED_JOB_IDS)}; the head job carries no `ref:`, "
-        "the verdict job carries no `needs:`, and the `pull_request:` trigger "
-        "declares `edited`",
+        "the verdict job carries no `needs:`, the `pull_request:` trigger "
+        "declares `edited`, and the verdict binds its PR body digest",
         file=sys.stderr,
     )
     print("SESSION EVIDENCE WORKFLOW SHAPE: PASS", file=sys.stderr)
