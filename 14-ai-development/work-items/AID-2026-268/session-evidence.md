@@ -1,3 +1,37 @@
+---
+document_metadata:
+  steward: "user-authorized operator (delegated by account owner)"
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "Records the actual implementation input and API-visible actions; it does not claim local execution."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "AI session evidence for AID-2026-268 implementation"
+    canonical_scope_id: "ai-development/aid-2026-268-session-evidence"
+    canonical_scope_keywords:
+      - "manifest"
+      - "blob-pin"
+      - "implementation"
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+---
 # Session evidence — AID-2026-268
 
 Attribution: user-authorized operator (delegated by account owner)  
