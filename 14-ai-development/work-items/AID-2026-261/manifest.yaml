@@ -58,8 +58,6 @@ session_evidence:
       - "#1237"
     implementing_ai_session: "ChatGPT-GPT-6-S6-C"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-261/prompt-v1.md"
-    executed_prompt_sha256: "0000000000000000000000000000000000000000000000000000000000000000"
-    executed_prompt_bytes: 0
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-261/session-evidence.md"
@@ -87,5 +85,6 @@ acceptance:
   gate: PENDING_OWNER_ACCEPTANCE
 
 # The exact prompt payload was available in the conversation but was not snapshotted
-# verbatim at dispatch time. The absent path and zero digest/bytes are sentinels only;
-# NOT_VERIFIED / NOT_RECORDED are the operative evidence states, not a prompt hash claim.
+# verbatim at dispatch time. AID-2026-302 retired the all-zero digest/bytes sentinels
+# (FORMALLY_RETIRED): no snapshot path resolves, so no prompt hash or byte count is
+# claimed. NOT_VERIFIED / NOT_RECORDED are the operative evidence states.

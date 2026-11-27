@@ -118,7 +118,7 @@ baseline_and_source_evidence:
     - root: "04-memory-compiler/compiler-stage-contract.md"
       provenance: "RECONSTRUCTED_FROM_MIRROR"
       disposition: "REMOVED_FROM_PR_SCOPE_BY_OWNER_RULING_ON_OA_MERGE_2026_11_26_01"
-      note: "The reconstruction was produced at commit cae1b31e and is retained there; this PR no longer carries it and makes no claim about it."
+      note: "The reconstruction was produced at commit d28ebe21 and is retained there; the path is outside this PR by the Owner's OA-MERGE-2026-11-26-01 scope ruling."
       en_mirror: "docs/en/04-memory-compiler/compiler-stage-contract.md"
       en_mirror_blob: "6d733294232a93aa59123009d2a2801d9b83f459"
       zh_cn_mirror: "docs/zh-CN/04-memory-compiler/compiler-stage-contract.md"
