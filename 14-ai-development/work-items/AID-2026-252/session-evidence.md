@@ -43,7 +43,9 @@ The user assigned Work Item AID-2026-252 and required a schema field other than 
 
 ## Additional execution record
 
-- Initial PR #1363 had zero Actions workflow runs within the required recovery window. It was commented and closed; the branch was rebuilt with two parents, retaining the change tree and merging the observed main.
+- Initial PR #1363 had zero Actions workflow runs within the required recovery window. It was commented and closed; the branch was rebuilt with a two-parent merge commit, retaining the change tree and merging the observed main.
 - Replacement PR #1365 was opened from the rebuilt branch. The PR-level AI declaration is YES; because Issue #266 predates the Issue-level declaration policy, its mapping row is LEGACY_UNDECLARED / N/A.
-- The first GOV-DOC-002 self-check exposed an incorrect test-helper return-value assumption. The test was corrected to use the suite's expect_gate helper. The observed corrected self-check was 372/372 PASS.
-- The first Session Evidence validation then identified the missing canonical manifest session_evidence entry. A prompt snapshot and canonical manifest entry are now being added; final Session Evidence status remains pending direct readback.
+- The first GOV-DOC-002 self-check exposed an incorrect test-helper return-value assumption. The test was corrected to use the suite's expect_gate helper; the corrected self-check passed 372/372.
+- The first Session Evidence validation identified the missing canonical manifest session_evidence entry. A prompt snapshot was added with its byte count and SHA-256, and the manifest now uses the canonical session_evidence structure. The final Session Evidence Gate passed; its Issue-level result is NOT_APPLICABLE because #266 predates the policy effective date.
+- Final head f3e4a2eb884d28005850d154e0da2cd653386c31 produced 16/16 successful required contexts. GOV-DOC-002 printed a legacy adoption baseline of 641 missing stewards and an incremental PASS with 645 classified and 371 unclassified documents.
+- The branch is behind main by zero commits. However, branch-protection GET endpoints returned HTTP 403 "Resource not accessible by integration", so strict=true and enforce_admins=true cannot be verified. The merge is therefore deliberately not attempted. No Issue #266 comment or post-merge blob verification is claimed.
