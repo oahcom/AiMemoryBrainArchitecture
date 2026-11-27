@@ -7,6 +7,10 @@ concurrency:
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+  # `GOV-DOC-002 metadata checks` is required; the queue only reports checks
+  # produced by `merge_group`.
+  merge_group:
+    types: [checks_requested]
   push:
     branches: [main]
 
@@ -33,8 +37,8 @@ jobs:
 
       - name: Enforce work-item uniqueness against the current target base
         env:
-          PR_BASE: ${{ github.event.pull_request.base.sha }}
-          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PR_BASE: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_sha || github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event_name == 'merge_group' && github.event.merge_group.head_sha || github.event.pull_request.head.sha }}
           PUSH_BEFORE: ${{ github.event.before }}
           CANDIDATE_SHA: ${{ github.sha }}
         run: |
@@ -52,7 +56,7 @@ jobs:
       # diffs against github.event.before (GAP-02).
       - name: Validate document metadata (changed files must be classified)
         env:
-          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_BASE: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_sha || github.event.pull_request.base.sha }}
           PUSH_BEFORE: ${{ github.event.before }}
         run: |
           REF=""
