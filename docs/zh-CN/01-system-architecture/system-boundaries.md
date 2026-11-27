@@ -37,7 +37,7 @@ document_metadata:
 - 文档 ID：SYS-BOUNDARIES-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../01-system-architecture/system-boundaries.md)
-- 源版本：a3c686291cb323559016f83330852d4df9b82ea9
+- 源版本：dc0e15e7f872dbbebc64545f92b398ef15700786
 - 对应英文：[System Boundaries](../../en/01-system-architecture/system-boundaries.md)
 - 状态：明确标记的部分为 DECIDED；CANDIDATE/OPEN 项仍不具规范约束力
 
@@ -267,19 +267,19 @@ D 的规范契约 [01-system-architecture/forget-fence-and-completion-contract.m
 
 - 每个部署对应一个逻辑 Brain authority。
 - Tenant 与 shard 是该 authority 内部的分区边界。
-- \`CanonicalCommitCursor\` 在该 authority 内按 tenant 和 shard 分区；不同 shard 之间不存在全序。
+- `CanonicalCommitCursor` 在该 authority 内按 tenant 和 shard 分区；不同 shard 之间不存在全序。
 - Authority identity 与 epoch/incarnation 必须显式成为游标身份的一部分。不同 authority 的游标不可比较。
-- Aggregate revision 与 lifecycle cursor 属于独立游标域，不得替代 \`CanonicalCommitCursor\`，也不得与其比较。
+- Aggregate revision 与 lifecycle cursor 属于独立游标域，不得替代 `CanonicalCommitCursor`，也不得与其比较。
 
 ### 15.2 跨 shard 事务
 
-- 一个跨 shard 事务对每个参与的 shard 各产生一个 \`CanonicalCommitCursor\` 条目。
+- 一个跨 shard 事务对每个参与的 shard 各产生一个 `CanonicalCommitCursor` 条目。
 - 事务具有原子性：所有参与 shard 的条目要么全部提交，要么全部不提交。
 - 该原子性不意味着 shard 之间存在全序。
 
 ### 15.3 Authority fence 范围
 
-- \`ForgetFence\`、\`ProducerRegistrationHighWater\` 及类似 fence 均按 authority 归属。
+- `ForgetFence`、`ProducerRegistrationHighWater` 及类似 fence 均按 authority 归属。
 - 它们必须携带 authority identity，避免将一个 shard 的 fence 误认为覆盖另一个 shard。
 
 ### 15.4 尚待明确的实现边界
