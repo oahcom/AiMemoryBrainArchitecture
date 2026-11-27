@@ -15,7 +15,8 @@ document_metadata:
         included_sections: []
         included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
-      evidence_reference: []
+      evidence_reference:
+        - "AID-2026-241/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -35,7 +36,10 @@ document_metadata:
     canonical_status: Non-Canonical
     canonical_scope: null
     canonical_scope_id: null
-    canonical_scope_keywords: []
+    canonical_scope_keywords:
+      - "independent-review"
+      - "session-identity"
+      - "governance-gate"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
@@ -45,7 +49,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# Session evidence — AID-2026-082
+# Session evidence — AID-2026-241
 
 ## Session role / use case
 
@@ -195,3 +199,8 @@ first work item that reaches `REVIEWED`, not damage already done.
 - Not claimed that the 55 corpus failures are this work item's business. 53 are status
   vocabulary and belong to #1154.
 - Not claimed that the correction is reviewed, accepted or merged. None of those has happened.
+
+
+## Renumbering evidence
+
+This work item was originally stored under `AID-2026-082`, which collided with a distinct item already present on `main`. The assigned replacement is `AID-2026-241`. The original `prompt-v1.md` bytes were 6,983 bytes with SHA-256 `5c8f02062568720bb9132b27bdb3d6a4c9ac9fbb603d0c42a4818f6c2105002a`. After changing the work-item identifier and all self-referential paths, the current `prompt-v1.md` is 7,096 bytes with SHA-256 `6d00802519f99412119dc879ee64c5a89598ad5ff5d915d7aa5207cec2e825e2`. This digest was recomputed over the complete current file bytes; it is not a digest of the directory name or Git blob.

@@ -1,4 +1,4 @@
-work_item_id: AID-2026-082
+work_item_id: AID-2026-241
 title: Make the independent-review gate test the session, not the GitHub account
 class: GATE/POLICY
 risk: R2
@@ -25,12 +25,12 @@ base_branch: main
 base_commit_sha: 8d90843aec4583c3282a3b45da31c7d6fd734cf2
 tracking_issue: "#1247 - the defect report this work item answers, carrying both discriminating cases and their exact output."
 
-prompt_id: AID-2026-082-PROMPT
+prompt_id: AID-2026-241-PROMPT
 prompt_version: 1
-prompt_file: 14-ai-development/work-items/AID-2026-082/prompt-v1.md
+prompt_file: 14-ai-development/work-items/AID-2026-241/prompt-v1.md
 prompt_status: RECORDED_NOT_FROZEN
-prompt_sha256: 5c8f02062568720bb9132b27bdb3d6a4c9ac9fbb603d0c42a4818f6c2105002a
-prompt_bytes: 6983
+prompt_sha256: 6d00802519f99412119dc879ee64c5a89598ad5ff5d915d7aa5207cec2e825e2
+prompt_bytes: 7096
 
 authorization:
   implementation_write: >-
@@ -55,9 +55,9 @@ authorization:
 
 scope:
   files_to_create:
-    - 14-ai-development/work-items/AID-2026-082/manifest.yaml
-    - 14-ai-development/work-items/AID-2026-082/prompt-v1.md
-    - 14-ai-development/work-items/AID-2026-082/session-evidence-1247.md
+    - 14-ai-development/work-items/AID-2026-241/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-241/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-241/session-evidence-1247.md
   files_to_modify:
     - scripts/governance/status_migration/check_status_gates.py
     - scripts/governance/status_migration/test_status_migration.py
@@ -179,9 +179,9 @@ findings:
       described as verifying a declaration.
 
 implementation:
-  status: NOT_STARTED
+  status: IMPLEMENTED_IN_BRANCH
   branch: req05/aid-082-session-independence
-  pull_request: PENDING
+  pull_request: "#1325"
   merge_commit_sha: NOT_MERGED
   note: >-
     Registration only at the time this file was written. The prompt snapshot is the executed
@@ -206,9 +206,26 @@ session_evidence:
     issue_refs:
       - "#1247"
     implementing_ai_session: req05-convergence-session-identity-not-recorded
-    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-082/prompt-v1.md
+    executed_prompt_snapshot_file: "HISTORICAL_SNAPSHOT_NOT_RETAINED_AFTER_RENUMBERING"
     executed_prompt_sha256: 5c8f02062568720bb9132b27bdb3d6a4c9ac9fbb603d0c42a4818f6c2105002a
     executed_prompt_bytes: 6983
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
-    session_evidence_ref: 14-ai-development/work-items/AID-2026-082/session-evidence-1247.md
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-241/evidence.md
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1247"
+    implementing_ai_session: w3-session-2026-11-27-not-independently-verified
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-241/prompt-v1.md
+    executed_prompt_sha256: 6d00802519f99412119dc879ee64c5a89598ad5ff5d915d7aa5207cec2e825e2
+    executed_prompt_bytes: 7096
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-241/session-evidence.md
+
+renumbering:
+  previous_work_item_id: AID-2026-082
+  assigned_work_item_id: AID-2026-241
+  prompt_digest_recalculation: "Recomputed after renumbering and path updates; digest covers prompt-v1.md bytes only."
+  previous_prompt_sha256: 5c8f02062568720bb9132b27bdb3d6a4c9ac9fbb603d0c42a4818f6c2105002a
+  current_prompt_sha256: 6d00802519f99412119dc879ee64c5a89598ad5ff5d915d7aa5207cec2e825e2

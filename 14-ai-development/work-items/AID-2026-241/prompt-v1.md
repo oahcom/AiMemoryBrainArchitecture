@@ -15,7 +15,8 @@ document_metadata:
         included_sections: []
         included_assets: []
       approval_applicability: Not-Applicable-To-Current-Version
-      evidence_reference: []
+      evidence_reference:
+        - "AID-2026-241/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Verified
@@ -35,7 +36,10 @@ document_metadata:
     canonical_status: Non-Canonical
     canonical_scope: null
     canonical_scope_id: null
-    canonical_scope_keywords: []
+    canonical_scope_keywords:
+      - "independent-review"
+      - "session-identity"
+      - "governance-gate"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
@@ -45,7 +49,7 @@ document_metadata:
     zh-CN: null
 ---
 
-# AID-2026-082 — the independent-review gate must test the session, not the account
+# AID-2026-241 — the independent-review gate must test the session, not the account
 
 ## Context you are given, already measured at `9ee89b32` (main)
 
