@@ -1,3 +1,46 @@
+---
+document_metadata:
+  steward: "user-authorized operator (delegated by account owner)"
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/reports/aid-2026-255-evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "Local command output recorded verbatim; no CI run asserted."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Verbatim dispatch prompt snapshot for AID-2026-255"
+    canonical_scope_id: "ai-development/aid-2026-255-evidence"
+    canonical_scope_keywords:
+      - "manifest"
+      - "blob-pin"
+      - "sibling-key"
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+---
 # Delta contribution — sibling-key association tests against the landed checker
 
 Owner A ruled that `AID-2026-255` is not a second implementation. `main` already carries the checker from `AID-2026-268`; the only authorized delta is **sibling-key association tests** in `scripts/ci/test_check_manifest_blob_pins.py`, plus two evidence files the orchestrator handles.
