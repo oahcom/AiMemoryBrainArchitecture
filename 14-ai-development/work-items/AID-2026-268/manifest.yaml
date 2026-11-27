@@ -41,6 +41,7 @@ scope:
     - 14-ai-development/work-items/AID-2026-268/manifest.yaml
     - 14-ai-development/work-items/AID-2026-268/evidence.md
     - 14-ai-development/work-items/AID-2026-268/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-268/prompt-snapshot.md
   files_to_modify:
     - .github/workflows/repository-hygiene.yml
     - 14-ai-development/work-items/INDEX.md
@@ -48,6 +49,16 @@ scope:
     - scripts/ci/check_work_item_uniqueness.py
     - .github/workflows/document-management.yml
     - branch protection
+session_evidence:
+  - role: implementation
+    issue_refs: []
+    implementing_ai_session: S6-B
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-268/prompt-snapshot.md
+    executed_prompt_sha256: 9e75bdfb17a6fe89c4a48e9d2d9dc496d3a6a9fe774bfc66cc2aadd7f6c088c4
+    executed_prompt_bytes: 1774
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-268/session-evidence.md
 acceptance:
   required:
     - Every enumerated Git blob pin is recomputed from committed bytes.
