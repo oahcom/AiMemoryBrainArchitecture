@@ -60,6 +60,15 @@ The companion `prompt-v1.md` is a task-scope snapshot, not a verbatim platform p
 - The PR body and branch integration were not completed. No latest-main merge, ready-for-review transition, 16-context success verification, PR merge, merge SHA, or post-merge blob readback is claimed.
 - No independent reviewer or Owner acceptance is claimed.
 
+
+# GOV-DOC-002 metadata remediation (after merge-base refresh)
+
+- The first GOV-DOC-002 run on merge head `942e20932415831e87c1e116c57682235a8129cc` failed with 60 errors: 41 new governed files lacked `document_metadata.steward`; 18 Chinese mirrors were incorrectly marked `canonical_status: Canonical`, producing DM-07 duplicate-canonical-scope errors; one mirror had `lifecycle.archival` nested under `lifecycle.supersession`, producing a DM-02 unknown-key error.
+- This remediation added `steward: USER-PRINCIPAL-DELEGATED` to the 41 new governed documents (18 English source documents, 18 Chinese mirrors and five AID-2026-186 evidence/prompt/session renditions), changed the 18 Chinese mirrors to `canonical_status: Non-Canonical` while preserving their canonical scope references, and corrected the archival block indentation in `phase-3.8.2-e-recovery-join-orchestration-exact-review.zh-CN.md`.
+- No document body text was changed by this metadata remediation; edits were confined to front matter.
+- Metadata remediation commit: `59fa2ed2d4dbd0ec59f919e05e93eaba03bea3bc`.
+- Exact-head GOV-DOC-002 rerun and all other required contexts: PENDING at the time this note was added. No CI success is claimed here.
+
 # Unavailable / not recorded
 
 - Implementing platform session identifier: NOT_RECORDED.
