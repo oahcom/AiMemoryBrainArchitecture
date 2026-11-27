@@ -63,12 +63,17 @@ implementation:
     ipv4_mapped / sixtofour / teredo properties; _is_public_destination applies
     the previous predicate to the envelope and then to the embedded address.
     Reproduced at the base commit (both 6to4 forms accepted), fixed at head.
-    Full suite: 1255 tests, 2 failures, both pre-existing CJK-console cases in
-    tests/test_cdp_import_order.py that fail identically at the base commit.
+    Full suite: 1256 tests, 2 failures, both pre-existing CJK-console cases in
+    tests/test_cdp_import_order.py that fail identically at the base commit. The
+    first CI run failed on this work item's own positive control, because CI runs
+    3.11 where 2002::/16 is still private; 0e11c33 moves the control to an address
+    that is public on both releases. CI on 0e11c33: unit tests, tools/tests
+    guards, SDK integration and e2e all success.
   files_changed:
     - scripts/mcp_connector.py
     - tests/test_mcp_connector_url_guard.py
   tests:
-    - "python -m unittest tests.test_mcp_connector_url_guard  # 20 tests OK"
-    - "python -m unittest discover -s tests  # 1255 tests, 2 pre-existing failures"
-    - "base ea7bdd3: same two commands -> 16 tests / 1 failure, 1251 tests / 3 failures"
+    - "python -m unittest tests.test_mcp_connector_url_guard  # 21 tests OK on 3.11.15 and 3.12.3"
+    - "python -m unittest discover -s tests  # 1256 tests, 2 pre-existing failures (3.12.3)"
+    - "base ea7bdd3: same commands -> 16 tests / 1 failure, 1251 tests / 3 failures"
+    - "GitHub Actions on 0e11c33: unit tests success, tools/tests guards success, e2e success, SDK integration success"

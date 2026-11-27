@@ -88,7 +88,7 @@ Draft PR #161 <https://github.com/oahcom/chatgpt-session-ops/pull/161>:
 | Item | Value |
 |---|---|
 | base | `ea7bdd36607bcf99d8b68ccd647f4ee2ea7639e5` |
-| head | `ec468c667e6f4d4cc1be2fd9b82ca18b6f3b3cba` |
+| head | `0e11c33ce8a074c381119709994eb885e4fe9e3f` |
 | `scripts/mcp_connector.py` | `_embedded_ipv4`, `_is_public_destination`; +34 / −4 |
 | `tests/test_mcp_connector_url_guard.py` | `TestTransitionFormRejections`; +59 / −0 |
 
@@ -102,10 +102,20 @@ old code rejects: https://[::ffff:127.0.0.1]/ UNSAFE_ENDPOINT
 
 Test runs (Windows, Python 3.12.3):
 
-| Command | base `ea7bdd3` | head `ec468c66` |
+| Command | base `ea7bdd3` | head `0e11c33` |
 |---|---|---|
-| `python -m unittest tests.test_mcp_connector_url_guard` | 16 tests, 1 failure (`2002::1` not rejected) | 20 tests, OK |
-| `python -m unittest discover -s tests` | 1251 tests, 3 failures | 1255 tests, 2 failures |
+| `python -m unittest tests.test_mcp_connector_url_guard` (3.12.3) | 16 tests, 1 failure (`2002::1` not rejected) | 21 tests, OK |
+| `python -m unittest tests.test_mcp_connector_url_guard` (3.11.15) | — | 21 tests, OK |
+| `python -m unittest discover -s tests` (3.12.3) | 1251 tests, 3 failures | 1256 tests, 2 failures |
+| GitHub Actions on `0e11c33` | — | `unit tests` success, `tools/tests guards` success, `real MCP SDK integration` success, `e2e against real memory-stdio` success |
+
+The first CI run failed, and the failure was this work item's own positive control:
+CI runs Python 3.11, where `2002::/16` is still listed as private, so
+`2002:808:808::1` is rejected by the envelope alone and cannot serve as a positive
+control. 3.12 removed that entry — which is exactly why the bypass exists on 3.12 and
+not on 3.11. `0e11c33` moves the control to `2001:4860:4860::8888` and pins the decode
+`2002:808:808::1 -> 8.8.8.8` directly, so the property under test no longer depends on
+which release's `is_global` table is installed.
 
 The two remaining failures are `tests/test_cdp_import_order.py` CJK-console cases
 that fail identically at the base commit; they are not caused by this change and
