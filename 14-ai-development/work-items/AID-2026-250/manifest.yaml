@@ -48,8 +48,8 @@ session_evidence:
       - "#262"
     implementing_ai_session: "ChatGPT GPT-6; session identifier not exposed"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-250/prompt-v1.md"
-    executed_prompt_sha256: 9335ae462b80a89dee8fed7bde02769802e287ec3940051afa997de410dd02ad
-    executed_prompt_bytes: 646
+    executed_prompt_sha256: df909d129f823caeb657f1628cd72f8535686e305cf4a2d026fb0b0e3b6fe73a
+    executed_prompt_bytes: 1865
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: NOT_RECORDED
     session_evidence_ref: "14-ai-development/work-items/AID-2026-250/session-evidence.md"
