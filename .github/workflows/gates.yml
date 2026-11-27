@@ -291,3 +291,17 @@ jobs:
       - name: Verify repository formatting at this commit
         shell: bash
         run: python3 scripts/check_fmt.py --expect "$GITHUB_SHA"
+
+  work-item-manifest-schema:
+    name: Work Item manifest schema (read-only baseline)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install the repository's pinned YAML parser
+        run: python -m pip install PyYAML==6.0.2
+      - name: Validate all Work Item manifests without migration
+        run: python scripts/ci/check_work_item_manifest_schema.py

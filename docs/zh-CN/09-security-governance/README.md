@@ -51,7 +51,7 @@ document_metadata:
 
 ## 本次恢复范围
 
-AID-2026-109 仅恢复由 F4、F6、F7 缺口映射出的五份政策/契约文档，并新增本导航页。未整体迁入 2026-11-16 历史分支的其余文件。五份文档各自的 frontmatter 均声明 `canonical_status: Canonical`。每份文档自身的 frontmatter 是其 `canonical_status` 的唯一权威来源；本 README 仅用于导读，不构成规范性来源。上述文档的存在不代表 Owner 已批准，也不代表生产实现已符合。
+AID-2026-109 仅恢复由 F4、F6、F7 缺口映射出的五份政策/契约文档，并新增本导航页。未整体迁入 2026-11-16 历史分支的其余文件。五份文档均在各自 frontmatter 中声明 `canonical_status: Canonical`；该字段以各自 frontmatter 为唯一权威，本 README 仅为导读，不是规范来源。它们的 `normative_status: Informative`、`decision_status: Draft` 保持原样；文档存在不代表 Phase 3.x 决策已获批准、生产政策已获批准或实现符合性已得到证明。
 
 ## 权威边界
 
@@ -81,7 +81,7 @@ This is the bounded canonical entry point for the restored I-domain source set.
 
 AID-2026-109 restores only five policy/contract documents selected against the I-root blockers in F4, F6 and F7 of the 2026-11-26 A–I + Storage composition review. It does **not** import the historical `session-i-security-governance-2026-11-16` tree wholesale. That branch contains 91 files under this domain; the other files are not restored by this work item.
 
-这五份文档各自的 frontmatter 均声明 `canonical_status: Canonical`。每份文档自身的 frontmatter 是其 `canonical_status` 的唯一权威来源；本 README 仅用于导读，不构成规范性来源。这些文档在 main 上的存在不代表批准 Phase 3.x 决策，不代表批准生产策略，也不构成实现或符合性证据。
+Each of the five documents declares `canonical_status: Canonical` in its own frontmatter. That field is authoritative; this README is a guide, not a normative source. Their `normative_status: Informative` and `decision_status: Draft` remain as recorded. Their presence does not ratify Phase 3.x decisions, approve a production policy, or establish implementation/conformance evidence.
 
 ## Canonical I documents
 
