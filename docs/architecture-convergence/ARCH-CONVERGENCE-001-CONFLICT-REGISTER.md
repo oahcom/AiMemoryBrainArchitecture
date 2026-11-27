@@ -1,7 +1,7 @@
 # ARCH-CONVERGENCE-001 — Conflict Register
 # ARCH-CONVERGENCE-001 — 架构冲突登记册
 
-- Status: **DRAFT / OPEN REGISTER / NON-NORMATIVE**
+- Status: **DRAFT / OPEN REGISTER / NON-NORMATIVE — 1/16 RECONCILED (6.25%); 15 remain OPEN/BLOCKED/CANDIDATE under their accountable Owners**
 - Baseline: `main@e52594f181d2edb77448adcfed64a0fbdffaf3aa`
 - Rule: Conflicts remain visible until the authority owning the affected contract resolves them. This register does not decide Owner semantics.
 
@@ -58,3 +58,34 @@ For every conflict:
 - No implementation or production activation is authorized.
 
 All conflicts remain OPEN unless the closure evidence above is supplied by the accountable Owner and governance process.
+
+
+## 5. W10 closure review — 2026-11-27 (AID-2026-253)
+
+This review applies each row's existing closure condition literally. It does not substitute evidence of discussion, product maturity, or a candidate recommendation for the accountable Owner's required decision and acceptance evidence. The register remains DRAFT and NON-NORMATIVE.
+
+| ID | Prior status | W10 status | Missing closure evidence / accountable completion |
+|---|---|---|---|
+| CF-001 | OPEN | OPEN | A and each affected Owner must approve canonical paths and publish/link exact source documents. Missing: approved path map and per-owner source pins. |
+| CF-002 | OPEN | OPEN | ARCH-CONVERGENCE integration must publish a correction successor to the inaccurate PR #89 report while retaining #89 as historical draft. Missing: correction artifact and exact main-tree/blob readback. |
+| CF-003 | OPEN | OPEN | H must confirm the canonical path and A must update the governance portal map. Missing: H confirmation and committed portal-map correction. |
+| CF-004 | OPEN | OPEN | I must identify the canonical directory and disposition alternate copies. Missing: explicit I decision and disposition/readback for the alternate directory. |
+| CF-005 | OPEN | OPEN | Storage must publish a canonical source index and exact L1/L4 status. Missing: accepted index and exact source/version/status pins. |
+| CF-006 | ADR-BLOCKED | ADR-BLOCKED | Governance must decide the Fact/Claim conflict; B/D/E/F/G/H/I downstream mapping and schema/consumer acceptance remain missing. |
+| CF-007 | OPEN | OPEN | D and Storage must settle row ownership, physical engine/profile and supply crash/failover/restore evidence. Missing: accepted topology and executable recovery evidence. |
+| CF-008 | P0 OPEN | P0 OPEN | D/I/Storage must supply closed-world inventory, barriers, evidence joins and restore proof. Missing: accepted inventory and end-to-end Forget/restore evidence. |
+| CF-009 | OPEN | OPEN | H and A must pin exact ancestry, live branch ref, tree digest and restoration record. Missing: complete reproducible incident-to-restoration chain. |
+| CF-010 | RECONCILED FOR TREE CURRENTNESS | RECONCILED FOR TREE CURRENTNESS | Retained only for the previously recorded source-tree-currentness scope. Provider Outcome 19/19, exact tested-commit pinning and end-to-end C/Brain proof remain explicitly outside that reconciliation. No broader closure is claimed. |
+| CF-011 | P0 OPEN | P0 OPEN | G/C/H/I/D/Storage must accept exact field mapping, identity, persistence and crash recovery. Missing: complete mapping and acceptance tests. |
+| CF-012 | OPEN | OPEN | C/H/Storage must publish one exact compatible bundle manifest and trigger successful schema-only CI on that bundle. Missing: pinned manifest and successful exact-bundle run. |
+| CF-013 | CANDIDATE | CANDIDATE | I must accept the Cedar wrapper, fail-closed vectors and revocation tests. Missing: version-pinned wrapper vectors, revocation evidence and explicit I approval. |
+| CF-014 | OPEN | OPEN | Storage/D/Engineering must provide representative workload, atomicity, HA, backup/restore and operational comparison. Missing: reproducible workload results and accepted physical-profile comparison. |
+| CF-015 | OPEN | OPEN | All Owners must complete per-contract bilingual semantic parity and review. Missing: complete contract-by-contract parity evidence and Owner review. |
+| CF-016 | OPEN | OPEN | Product research Owners and Architecture Governance must issue exact Owner ADRs and measured conformance evidence. Missing: approved ADRs and reproducible conformance results. |
+
+### W10 reconciliation accounting
+
+- RECONCILED: 1/16 (6.25%), CF-010 only and only for tree currentness.
+- Unresolved: 15/16. The accountable Owners and missing evidence are listed above.
+- No additional item met its own closure condition in the evidence inspected for this review; therefore no new status was changed to RECONCILED.
+- The pre-existing CF-010 evidence is retained as recorded in §1. This review does not claim a fresh shell command/output for it; no unexecuted command is represented as measured output.
