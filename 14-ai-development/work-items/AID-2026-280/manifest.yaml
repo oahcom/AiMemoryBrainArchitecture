@@ -1,0 +1,66 @@
+work_item_id: AID-2026-280
+title: "Adjudicate REQ-04 AC8 EXIT-1 / EXIT-2 carrier conflict"
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: "Documentation-only proxy adjudication; no Issue body mutation, source carrier rewrite, code, workflow, or branch-protection change. Does not claim natural-person Owner authority."
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 756e1e25d735f526254fc3241b47880fef527b24
+prompt_status: RECONSTRUCTED_NOT_VERBATIM
+prompt_provenance: "Current conversation task summarized; exact verbatim prompt snapshot unavailable"
+approval_scope:
+  type: Full-document
+evidence_reference:
+  - "14-ai-development/work-items/AID-2026-280/evidence.md"
+supersession:
+  supersedes: []
+  supersession_reason: null
+  effective_date: null
+archival:
+  archived_date: null
+  archival_reason: null
+  archival_reference: null
+canonical_scope_keywords:
+  - "req-04"
+  - "ac8"
+  - "exit-1"
+  - "exit-2"
+scope:
+  objective: "Independently inspect the two merged AC8 carriers, determine whether the EXIT-2 exclusion is effective, adjudicate whether AID-2026-254 satisfies AC8, and preserve the evidence without exercising reserved Owner scope authority."
+  files_changed:
+    - "14-ai-development/work-items/AID-2026-280/decision.md"
+    - "14-ai-development/work-items/AID-2026-280/evidence.md"
+    - "14-ai-development/work-items/AID-2026-280/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-280/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-280/manifest.yaml"
+    - "14-ai-development/work-items/INDEX.md"
+session_evidence:
+  - role: "CROSS_WORKFLOW_CONFLICT_ADJUDICATION_S8"
+    issue_refs:
+    implementing_ai_session: "ChatGPT-GPT-6"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-280/prompt-v1.md"
+    executed_prompt_sha256: "582f797c73360b0b200208af761f3ec511461017f68c288c8c4ecb837c70cd11"
+    executed_prompt_bytes: 3708
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-280/session-evidence.md"
+implementation:
+  status: DOCUMENTATION_ONLY
+  summary: "Decision record and evidence package only; no Issue body or pre-existing carrier modified."
+  files_changed:
+    - "14-ai-development/work-items/AID-2026-280/decision.md"
+    - "14-ai-development/work-items/AID-2026-280/evidence.md"
+    - "14-ai-development/work-items/AID-2026-280/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-280/prompt-v1.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "Source pins and body/comment text read via cache-busted GitHub API."
+    - "No local test or shell command executed."
