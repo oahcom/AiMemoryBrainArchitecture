@@ -73,6 +73,14 @@ The REQ-04 scope is confirmed as the bounded architecture-composition and conver
 
 No exclusion removes AC2, AC5, or AC7 carriers from REQ-04. AC3, AC4, and AC6 remain in scope with the partial-gap dispositions above.
 
+## Reconciliation of AID-2026-254 measurement carrier — EXIT-2 reaffirmed
+
+AID-2026-254 / PR #1370 (merge `40195e8bf96b9cc6aa254066b9b72968f29ac361`) adds a reproducible declared root/domain fan-out measurement and a proposed budget. That artifact is retained unchanged as an optional, out-of-scope repository observation. It is **not** an REQ-04 AC8 acceptance carrier, does not reinstate AC8 within REQ-04, and does not evidence Owner acceptance of the metric as an REQ-04 acceptance basis. Its own evidence labels the mechanism as proposed and explicitly claims no natural-person Owner approval or acceptance.
+
+The existence of a measurement mechanism is not equivalent to inclusion of the measured dimension in a requirement's scope: measurement establishes that a chosen proxy can be computed, while scope inclusion requires an explicit decision that the dimension is owned by the requirement and is part of its acceptance conditions. AID-2026-254 does not make that scope decision, and its proposal cannot supersede the explicit EXIT-2 boundary recorded here. In particular, root/domain fan-out measures manifest path dispersion; it does not directly measure elapsed time, cognitive load, human session-switch count, or Agent context-window/token cost. The fan-out script, baseline, and proposed thresholds may remain useful operational observations outside REQ-04, but they are not an AC8 pass, acceptance threshold, or required deliverable.
+
+Accordingly, **EXIT-2 remains the sole effective REQ-04 AC8 disposition**. AID-2026-260 / PR #1368 (merge `10d33b3f6c012e1c0d5649a5279cadb6d27b1a2f`) is the scope authority for this delegated proxy determination; AID-2026-254 / PR #1370 is retained as an informative, optional measurement artifact only. This reconciliation is a delegated proxy determination, not a natural-person Owner signature.
+
 ## AC8 issue-ready exclusion text
 
 `§Excluded scope: attention and context-switching cost, because human review-capacity metrics (parallel PR count, version-family span, and review-round count) are project-operating measures rather than architecture-convergence acceptance criteria, while Agent context-window/token cost is a distinct measurement domain; REQ-04 does not combine or own either.`
