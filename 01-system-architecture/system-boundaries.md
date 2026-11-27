@@ -22,6 +22,9 @@ document_metadata:
       - trust-boundary
       - ownership
       - forget
+      - cursor
+      - tenant
+      - shard
     canonical_conflict_status: None
     normative_status: Normative
   bilingual_counterpart:
@@ -249,3 +252,31 @@ The following register keeps three authorities separate. A policy authority auth
 ## 14. Forget Fence authority boundary — 2026-11-26
 
 The D canonical contract at [01-system-architecture/forget-fence-and-completion-contract.md](forget-fence-and-completion-contract.md) is the sole logical authority for ForgetOperation and ForgetFence target/lineage decisions. Storage/Consistency may persist and physically protect that authority, but a Storage-local Memory/Version fence is only a derived, rebuildable projection; it MUST NOT issue an independent generation/cursor or become a competing decision source. If current D authority cannot be established, affected reads and publication fail closed. Local suppression is not Global Forget Completion. This is a recorded direction decision; exact-version Owner acceptance and implementation evidence remain pending.
+
+## 15. Canonical commit cursor authority
+
+**Decision status:** DECIDED — Owner decision recorded in [Issue #1210](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1210#issuecomment-7174534633) on 2026-11-27. This section records that decision; it does not imply that downstream D/F/G specifications or runtime implementations have been updated or accepted.
+
+### 15.1 Authority and partition boundaries
+
+- One deployment has one logical Brain authority.
+- Tenant and shard are partition boundaries within that authority.
+- \`CanonicalCommitCursor\` is partitioned by tenant and shard within that authority. There is no total order across shards.
+- Authority identity and epoch/incarnation are explicit parts of cursor identity. Cursors from different authorities are not comparable.
+- Aggregate revisions and lifecycle cursors are separate cursor domains; they must not be substituted for or compared with \`CanonicalCommitCursor\`.
+
+### 15.2 Cross-shard transactions
+
+- A cross-shard transaction produces one \`CanonicalCommitCursor\` entry for each participating shard.
+- The transaction is atomic: either all participating shard entries commit or none do.
+- This atomicity does not imply a total order across shards.
+
+### 15.3 Authority-fence scope
+
+- \`ForgetFence\`, \`ProducerRegistrationHighWater\`, and similar fences are per-authority.
+- They must carry authority identity so a fence from one shard cannot be interpreted as covering another shard.
+
+### 15.4 Open implementation boundary
+
+This decision does not define the serialized representation of a multi-shard transaction's cursor entries or the consistent snapshot/cut protocol used by F/G consumers. Those details remain open for the corresponding D/F/G contracts; they must not be inferred from a single scalar cursor.
+
