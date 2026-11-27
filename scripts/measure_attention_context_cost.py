@@ -21,7 +21,7 @@ ROOTS = (
     "reviews", "tests", "crates", "experiments", "prompts", "recovery", "tools",
 )
 MANIFEST_RE = re.compile(
-    r"^14-ai-development/work-items/(AID-2026-(\\d{3}))/manifest\\.yaml$"
+    r"^14-ai-development/work-items/(AID-2026-(\d{3}))/manifest\.yaml$"
 )
 SCOPE_LISTS = {"changes", "files_to_create", "files_to_modify", "files_changed"}
 
@@ -47,15 +47,15 @@ def scope_paths(manifest: str) -> list[str]:
     for line in lines[start + 1:]:
         if line and not line[0].isspace() and re.match(r"^[A-Za-z_][A-Za-z0-9_-]*:", line):
             break
-        key = re.match(r"^  ([A-Za-z_][A-Za-z0-9_-]*):\\s*$", line)
+        key = re.match(r"^  ([A-Za-z_][A-Za-z0-9_-]*):\s*$", line)
         if key:
             active = key.group(1) in SCOPE_LISTS
             continue
         if not active:
             continue
-        item = re.match(r"^\\s+-\\s+(?:path:\\s*)?(.+?)\\s*$", line)
+        item = re.match(r"^\s+-\s+(?:path:\s*)?(.+?)\s*$", line)
         if item:
-            value = item.group(1).strip().strip("\\\"'").rstrip("/")
+            value = item.group(1).strip().strip("\"'").rstrip("/")
             if "/" in value:
                 selected.append(value)
     return selected
