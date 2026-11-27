@@ -182,13 +182,21 @@ entries:
     state: IN_FLIGHT
     carrier: "PR #1337 (external): records that the 03-memory-brain normative root is already registered"
   - id: AID-2026-242
-    state: RESERVED
-    carrier: "branch feat/1341-workitem-uniqueness-gate (issue #1341)"
-    note: "serialized merge-time work-item uniqueness gate; reserved 2026-11-27 after a main + code-search scan showed 242 free (open PRs hold 251-253, main holds up to 240)"
+    state: MERGED
+    carrier: "PR #1297 (merged into main 044dee41)"
+    note: "242 已由 #1297 的 D canonical store root 恢复占用；#1341 的预留作废"
   - id: AID-2026-241
+    state: IN_FLIGHT
+    carrier: "PR #1325 (req05/aid-082-session-independence)"
+    note: "241 属 #1325 的独立审查 session 判定工作项；曾被误预留为 #1350 的 blob-pin 检查器，该误预留作废，不得复用"
+  - id: AID-2026-260
+    state: IN_FLIGHT
+    carrier: "branch fix/2026-11-27-aid260-manifest-blob-pins"
+    note: "#1350 manifest blob-pin 完整性检查器；当前仅有登记骨架，实现未完成"
+  - id: AID-2026-262
     state: RESERVED
-    carrier: "branch feat/1349-blob-pin-integrity (issue #1350)"
-    note: "manifest blob-pin integrity checker; reserved 2026-11-27 after a main + code-search scan showed 241 free (242 reserved for #1341, open PRs hold 251-253, main holds up to 240)"
+    carrier: "Issue #1341 (serialized merge-time work-item uniqueness gate)"
+    note: "2026-11-27 重分配：241/242 均已被占用，261 属未 push 的本地 worktree 不可信；262 经 main + 已知分支扫描为空闲"
   - id: AID-2026-117
     state: FREE
     note: "do not trust this row: external numbering is already at 188 in flight. Re-scan main's work-items tree immediately before any reservation push; the next plausibly free number is >= 189."
