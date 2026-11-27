@@ -106,3 +106,13 @@ findings:
   - id: AID-2026-050-F3
     severity: P2
     feedback_destination: "Delivery PR conversation. The obvious way to satisfy criterion 4 is a loop over the 20 type strings. A loop is acceptable only if it is driven from a list that is itself checked against parse_dispatch's match arms, otherwise the test and the implementation can drift together and still pass. Prefer an explicit case per type, or a list plus a test that asserts the list length equals the arm count."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-050/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/adr/OWNER-DECISION-BMCP-MCP-DISPATCH-001.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/GAP-32-DISPATCH-LANDED-TOOLS-ABSENT.md"
+    relationship: reference
+  - path: "08-bmcp-protocol/protocol-index.md"
+    relationship: reference
