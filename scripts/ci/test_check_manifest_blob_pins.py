@@ -171,7 +171,7 @@ class BlobPinsTest(unittest.TestCase):
         })
         code, out, err = self.run_gate(candidate)
         self.assertEqual(code, 1, out + err)
-        self.assertIn("UNRESOLVED(source.selected_source_files[0].frontmatter_blob_sha)", out)
+        self.assertIn("UNRESOLVED(source.selected_source_files[0].frontmatter_blob_sha blob locator)", out)
 
     def test_source_files_blob_shape_is_checked(self):
         data = b"source file\n"
@@ -285,6 +285,36 @@ class BlobPinsTest(unittest.TestCase):
         code, out, err = self.run_gate()
         self.assertEqual(code, 0, out + err)
         self.assertIn("pins=4 ok=4 mismatch=0", out)
+
+    def test_source_baseline_digest_only_pin_resolves_unique_blob_oid_in_commit_tree(self):
+        data = b"source baseline artifact\\n"
+        source = commit_tree(self.root, {"baseline.md": data})
+        candidate = commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                ("source_baseline:\\n"
+                 f"  main: {source}\\n"
+                 f"  artifact_blob: {self.blob_sha(data)}\\n"),
+        })
+        code, out, err = self.run_gate(candidate)
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=1 ok=1", out)
+
+    def test_prompt_snapshot_relative_file_locator_is_resolved_from_manifest_directory(self):
+        data = b"prompt snapshot\\n"
+        sha256 = hashlib.sha256(data).hexdigest()
+        manifest_path = "14-ai-development/work-items/AID-2026-900/manifest.yaml"
+        prompt_path = "14-ai-development/work-items/AID-2026-900/prompt-v1.md"
+        commit_tree(self.root, {
+            prompt_path: data,
+            manifest_path:
+                ("prompt:\\n"
+                 "  snapshot_file: prompt-v1.md\\n"
+                 f"  snapshot_git_blob_sha: {self.blob_sha(data)}\\n"
+                 f"  snapshot_sha256: {sha256}\\n"),
+        })
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=2 ok=2", out)
 
     def test_empty_tree_is_incomplete(self):
         code, out, err = self.run_gate()
