@@ -62,8 +62,8 @@ implementation:
 prompt:
   prompt_file: "14-ai-development/work-items/AID-2026-212/prompt-v1.md"
   prompt_version: "v1"
-  prompt_sha256: "e50511aab7c1f01428e90575ec430f68bf37fc4da9043106461bf3f594059299"
-  prompt_bytes: "2629"
+  prompt_sha256: "8b1fe2b2a0cbb11b042190a638fbf8fd65c19ce9cede26e323c3eed25f4b0cce"
+  prompt_bytes: "3695"
   prompt_provenance: "RECORDED_TASK_INPUT"
   prompt_provenance_note: >-
     This snapshot records the actual task requirements supplied for this
@@ -77,8 +77,8 @@ session_evidence:
       - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1350"
     implementing_ai_session: "CURRENT_CHATGPT_IMPLEMENTATION_SESSION"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-212/prompt-v1.md"
-    executed_prompt_sha256: "e50511aab7c1f01428e90575ec430f68bf37fc4da9043106461bf3f594059299"
-    executed_prompt_bytes: "2629"
+    executed_prompt_sha256: "8b1fe2b2a0cbb11b042190a638fbf8fd65c19ce9cede26e323c3eed25f4b0cce"
+    executed_prompt_bytes: "3695"
     executed_prompt_provenance: "VERIFIED"
     session_reference_status: "NOT_RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-212/session-evidence.md"

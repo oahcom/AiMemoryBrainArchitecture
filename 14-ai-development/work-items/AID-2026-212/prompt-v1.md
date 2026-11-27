@@ -103,8 +103,7 @@ Issue #1349 is the defect-origin reference, not a second carrier issue.
 ## Execution record
 
 This snapshot records the task-specific implementation requirements.
-The exact final snapshot bytes are measured after all edits and before
-the candidate commit.
-
-SHA-256: __PROMPT_SHA256__
-Bytes: __PROMPT_BYTES__
+Its digest and byte count are recorded in `manifest.yaml` under
+`session_evidence[0]` (`executed_prompt_sha256`, `executed_prompt_bytes`);
+no copy is embedded here, because a digest inside the file it measures
+cannot describe the file that contains it.

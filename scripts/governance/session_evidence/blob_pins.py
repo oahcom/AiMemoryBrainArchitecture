@@ -147,6 +147,227 @@ def _split_mapping_pair(value: str) -> tuple[str, str]:
     )
 
 
+def _flow_skip_space(text: str, index: int) -> int:
+    while index < len(text) and text[index].isspace():
+        index += 1
+    return index
+
+
+def _flow_quoted_end(text: str, index: int) -> int:
+    """Return the index just past a quoted flow scalar."""
+    quote = text[index]
+    cursor = index + 1
+
+    while cursor < len(text):
+        char = text[cursor]
+
+        if quote == '"':
+            if char == "\\":
+                cursor += 2
+                continue
+            if char == '"':
+                return cursor + 1
+        else:
+            if char == "'":
+                if text[cursor + 1:cursor + 2] == "'":
+                    cursor += 2
+                    continue
+                return cursor + 1
+
+        cursor += 1
+
+    raise BlobPinError(
+        f"unterminated quoted scalar in flow collection: {text!r}"
+    )
+
+
+def _parse_flow_node(text: str, index: int):
+    """Parse one flow node: a collection, a quoted or a plain scalar."""
+    index = _flow_skip_space(text, index)
+
+    if index >= len(text):
+        raise BlobPinError(
+            f"truncated YAML flow collection: {text!r}"
+        )
+
+    char = text[index]
+
+    if char == "[":
+        return _parse_flow_sequence(text, index)
+
+    if char == "{":
+        return _parse_flow_mapping(text, index)
+
+    if char in ("'", '"'):
+        end = _flow_quoted_end(text, index)
+        return _scalar(text[index:end]), end
+
+    start = index
+
+    while index < len(text):
+        char = text[index]
+
+        if char in ",]}":
+            break
+
+        if char in "[{":
+            raise BlobPinError(
+                f"invalid YAML flow scalar: {text!r}"
+            )
+
+        index += 1
+
+    raw = text[start:index].strip()
+
+    if not raw:
+        raise BlobPinError(f"empty YAML flow scalar: {text!r}")
+
+    return _scalar(raw), index
+
+
+def _parse_flow_sequence(text: str, index: int):
+    result = []
+    index += 1
+
+    while True:
+        index = _flow_skip_space(text, index)
+
+        if index >= len(text):
+            raise BlobPinError(
+                f"unterminated YAML flow sequence: {text!r}"
+            )
+
+        if text[index] == "]":
+            return result, index + 1
+
+        item, index = _parse_flow_node(text, index)
+        result.append(item)
+        index = _flow_skip_space(text, index)
+
+        if index >= len(text):
+            raise BlobPinError(
+                f"unterminated YAML flow sequence: {text!r}"
+            )
+
+        if text[index] == ",":
+            index += 1
+            continue
+
+        if text[index] == "]":
+            return result, index + 1
+
+        raise BlobPinError(
+            f"invalid YAML flow sequence separator: {text!r}"
+        )
+
+
+def _parse_flow_mapping(text: str, index: int):
+    result = {}
+    index += 1
+
+    while True:
+        index = _flow_skip_space(text, index)
+
+        if index >= len(text):
+            raise BlobPinError(
+                f"unterminated YAML flow mapping: {text!r}"
+            )
+
+        if text[index] == "}":
+            return result, index + 1
+
+        key, index = _parse_flow_key(text, index)
+        index = _flow_skip_space(text, index)
+        value, index = _parse_flow_node(text, index)
+
+        if key in result:
+            raise BlobPinError(
+                f"duplicate key in YAML flow mapping: {key!r}"
+            )
+
+        result[key] = value
+        index = _flow_skip_space(text, index)
+
+        if index >= len(text):
+            raise BlobPinError(
+                f"unterminated YAML flow mapping: {text!r}"
+            )
+
+        if text[index] == ",":
+            index += 1
+            continue
+
+        if text[index] == "}":
+            return result, index + 1
+
+        raise BlobPinError(
+            f"invalid YAML flow mapping separator: {text!r}"
+        )
+
+
+def _parse_flow_key(text: str, index: int):
+    index = _flow_skip_space(text, index)
+
+    if index >= len(text):
+        raise BlobPinError(
+            f"unterminated YAML flow mapping: {text!r}"
+        )
+
+    if text[index] in ("'", '"'):
+        end = _flow_quoted_end(text, index)
+        key = _scalar(text[index:end])
+        index = _flow_skip_space(text, end)
+
+        if index >= len(text) or text[index] != ":":
+            raise BlobPinError(
+                f"expected ':' in YAML flow mapping: {text!r}"
+            )
+
+        return key, index + 1
+
+    start = index
+
+    while index < len(text) and text[index] not in ":,{}[]":
+        index += 1
+
+    if index >= len(text) or text[index] != ":":
+        raise BlobPinError(
+            f"expected ':' in YAML flow mapping: {text!r}"
+        )
+
+    key = text[start:index].strip()
+
+    if not key:
+        raise BlobPinError(
+            f"empty YAML flow mapping key: {text!r}"
+        )
+
+    return key, index + 1
+
+
+def _parse_flow_collection(value: str):
+    """Parse a YAML flow collection with a tokenizer and recursive descent.
+
+    Standard library only: no third-party YAML runtime is imported. Nested
+    collections, single- and double-quoted scalars, and plain scalars are
+    supported. Malformed input, duplicate keys and illegal separators fail
+    closed; a flow collection is never downgraded to an ordinary string.
+    """
+    node, index = _parse_flow_node(value, 0)
+
+    if _flow_skip_space(value, index) != len(value):
+        raise BlobPinError(
+            f"trailing content after YAML flow collection: {value!r}"
+        )
+
+    if not isinstance(node, (list, dict)):
+        raise BlobPinError(
+            f"expected YAML flow collection, got {value!r}"
+        )
+
+    return node
+
+
 def _scalar(value: str):
     """Parse a YAML scalar while preserving embedded colons."""
     value = value.strip()
@@ -207,9 +428,7 @@ def _scalar(value: str):
         return value[1:-1].replace("''", "'")
 
     if value.startswith(("[", "{")):
-        raise BlobPinError(
-            f"unsupported YAML flow collection: {value!r}"
-        )
+        return _parse_flow_collection(value)
 
     if re.fullmatch(r"-?[0-9]+", value):
         try:
@@ -671,6 +890,12 @@ def enumerate_blob_pins(source: str) -> list[BlobPin]:
             if key in consumed_paths:
                 continue
 
+            if (
+                key == "path"
+                and location.startswith("$.declared_exceptions[")
+            ):
+                continue
+
             corresponding_digest = None
 
             for digest_key in _EXPLICIT_BINDINGS:
@@ -725,14 +950,9 @@ def enumerate_blob_pins(source: str) -> list[BlobPin]:
         for key, child in value.items():
             if key == "d_source_commit":
                 continue
-
             child_location = _location(location, key)
-
-            visit(
-                child,
-                child_location,
-                local_commit,
-            )
+            child_commit = local_commit if key == "d_source_blobs" else None
+            visit(child, child_location, child_commit)
 
     visit(document)
     return pins
