@@ -140,7 +140,18 @@ S8 chooses **ABSENT**, not PARTIAL. The reason is the criterion in contemporaneo
 - The prior head was `b2b97862479f3a1279d20b879bddec1431e56adf`; round-two documentation commit is `f8f55becbad934703768946d2a86065d2b2a87b4`.
 - Branch protection endpoint read: HTTP 403, `Resource not accessible by integration`; record as `protection read = 403 NOT_READABLE`. This is not evidence that protection is disabled.
 - No strict/enforce_admins values are claimed. Merge success/failure must be determined from the merge API response.
-- This evidence will be amended after syncing the current main, running checks on the final head, merging, and reading back all six main-branch file blobs.
+- The first adjudication PR #1404 was merged using merge method `merge`. GitHub returned `merged=true`, message `Pull Request successfully merged`, merge commit `31b305d7c8665d0496cea00d2b0acb6626bde072`. Fresh `GET /contents/<path>?ref=main` readbacks at main=`31b305d7c8665d0496cea00d2b0acb6626bde072` returned the following six blob SHAs:
+
+| Path | Main blob SHA |
+|---|---|
+| `14-ai-development/work-items/AID-2026-280/decision.md` | `85b76de3a8531e5c3a345de120dce546f7f41f0f` |
+| `14-ai-development/work-items/AID-2026-280/manifest.yaml` | `967b284e945880229766443b833a343f102e9fd5` |
+| `14-ai-development/work-items/AID-2026-280/evidence.md` | `0900855e92628c0b3ebba945fe184422083556e5` (this pre-closeout blob; updated closeout evidence is proposed in a follow-up PR) |
+| `14-ai-development/work-items/AID-2026-280/session-evidence.md` | `da8d4b9d55b5a7231bd3978cc9a89a94358c7d1f` |
+| `14-ai-development/work-items/AID-2026-280/prompt-v1.md` | `5b3b9db87cb50469925b3f1984b6ce611286fd0c` |
+| `14-ai-development/work-items/INDEX.md` | `cb2a1f7673d07e295ee17dda822fcf134d00adcc` |
+
+The evidence file cannot contain its own final post-closeout blob SHA without a further commit; the table records the exact blob read from main immediately after PR #1404 merge. Branch protection read remains `403 NOT_READABLE`; no strict/enforce_admins values are asserted. The merge API returned success; that response is the merge outcome evidence.
 
 ## Post-merge file verification
 
