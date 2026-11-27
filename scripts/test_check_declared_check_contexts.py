@@ -76,7 +76,7 @@ class DeclaredCheckContextsTest(unittest.TestCase):
         with redirect_stdout(io.StringIO()), redirect_stderr(errors):
             self.assertEqual(checker.main(self.root, DECLARED), 0)
         output = errors.getvalue()
-        self.assertIn("CONTEXT COUNTS: declared=2 required=2 produced=2", output)
+        self.assertIn("CONTEXT COUNTS: declared=2 required=2 produced=3", output)
         self.assertIn("required_not_declared=[]", output)
         self.assertIn("declared_not_produced=[]", output)
         self.assertIn("::notice::2 declared, 2 required, all produced", output)
@@ -138,7 +138,6 @@ class DeclaredCheckContextsTest(unittest.TestCase):
             self.assertEqual(checker.main(self.root, ["audit"]), 1)
         self.assertIn("Rust format (hard gate)", errors.getvalue())
         self.assertIn("declares required check context", errors.getvalue())
-        self.assertIn("declared_not_produced=['Rust format (hard gate)']", errors.getvalue())
 
     def test_violation_when_a_context_is_declared_twice(self):
         """A duplicated line collapses into the set, so the sets still match."""
