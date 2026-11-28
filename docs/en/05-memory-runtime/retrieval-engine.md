@@ -146,7 +146,7 @@ D canonical schema/lifecycle; E index/watermark; I permission/Forget authority; 
 
 ## Phase 3.5 — Typed Cursor and Forget Suppression Addendum (normative supplement)
 
-The detailed owner/consumer contract is in [Phase 3.5 Runtime Forget Suppression and Typed Cursor Consumer Contract](../../governance/documentation-gaps.md). This supplement supersedes any earlier provisional wording in this file where the two differ.
+The detailed owner/consumer contract is in [Phase 3.5 Runtime Forget Suppression and Typed Cursor Consumer Contract](../../governance/documentation-gaps.md) (unsubmitted and not restored; see [documentation gaps](../../governance/documentation-gaps.md)). This supplement supersedes any earlier provisional wording in this file where the two differ.
 
 ### Typed cursor discipline
 

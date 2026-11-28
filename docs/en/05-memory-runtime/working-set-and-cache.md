@@ -141,7 +141,7 @@ Working Set admission occurs only after request authorization and session bindin
 
 ## Phase 3.5 — Forget Fence and Permission Invalidation Addendum (normative supplement)
 
-The detailed contract and conformance cases are in [Phase 3.5 Runtime Forget Suppression and Typed Cursor Consumer Contract](../../governance/documentation-gaps.md). This addendum supersedes earlier provisional wording where inconsistent.
+The detailed contract and conformance cases are in [Phase 3.5 Runtime Forget Suppression and Typed Cursor Consumer Contract](../../governance/documentation-gaps.md) (unsubmitted and not restored; see [documentation gaps](../../governance/documentation-gaps.md)). This addendum supersedes earlier provisional wording where inconsistent.
 
 ### Required cache/Working Set binding
 

@@ -196,7 +196,7 @@ Scheduler 在插入前强制执行 Per-session/Global Entry/Byte Budget；Intera
 
 ## Phase 3.5 — Forget Fence 与 Permission Invalidation 补充（规范性补充）
 
-详细 Contract 和 Conformance Case 见 [Phase 3.5 Runtime Forget Suppression and Typed Cursor Consumer Contract](../../governance/documentation-gaps.md)。本补充在不一致时取代之前的临时措辞。
+详细 Contract 和 Conformance Case 见 [Phase 3.5 Runtime Forget Suppression and Typed Cursor Consumer Contract](../../governance/documentation-gaps.md)（该文件未提交、未恢复；参见 [documentation gaps](../../governance/documentation-gaps.md)）。本补充在不一致时取代之前的临时措辞。
 
 ### 必需 Cache/Working Set Binding
 
