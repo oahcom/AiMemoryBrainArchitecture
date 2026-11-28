@@ -587,16 +587,28 @@ dev_baseline_integration:
     canonical: git blob bytes (LF, repository index)
     working_copy_windows: bytes and sha256 of the CRLF-rendered working copy
     note: execution-record-013 and execution-record-015 quote the CRLF working-copy figures; both bases are reproduced below so no figure has to be inferred
+    model_path: 14-ai-development/work-items/AID-2026-001/reference-model/r3_contract_model.py
     model_blob_bytes_lf: 55526
     model_blob_lines: 1494
     model_blob_sha256_lf: 8324ec551749c2d50067967e4a445b26a6683008a4fa52e02da02a9976417a15
     model_blob_bytes_crlf: 57020
-    model_blob_sha256_crlf: 35efab9361f313bb556159818ef2fbb1a6380cbf48d12f8aead273c3c438a946
+    tests_path: 14-ai-development/work-items/AID-2026-001/reference-model/test_r3_contract.py
     tests_blob_bytes_lf: 91930
     tests_blob_lines: 2450
     tests_blob_sha256_lf: 26c72ceaa636606118ef94013b7515842d51b02b521c3cb0e6ef4303c72308af
     tests_blob_bytes_crlf: 94380
-    tests_blob_sha256_crlf: f326cafd70c97a7cc0133ad2139d7508d83f493c710d80f534e01c25d68734ce
+    # Independent-schema declaration (AID-2026-296 decision). The two keys below
+    # are NOT committed Git blob pins: they are rendered working-copy
+    # representation digests, defined as SHA-256 over the exact bytes produced by
+    # replacing each LF line ending of the corresponding committed source blob
+    # with CRLF, all other bytes preserved. Their field names therefore carry
+    # `sha256`, not `blob_sha256`, so the manifest blob-pin checker does not
+    # classify them as blob pins and no path is implied or required. Sources:
+    # model_path and tests_path above. Verification is by reproducing the
+    # transformation from the named committed blob, never by hashing the blob
+    # bytes directly.
+    model_working_copy_sha256_crlf: 35efab9361f313bb556159818ef2fbb1a6380cbf48d12f8aead273c3c438a946
+    tests_working_copy_sha256_crlf: f326cafd70c97a7cc0133ad2139d7508d83f493c710d80f534e01c25d68734ce
   baseline_reconciliation:
     runbook_original_expectation: "59 = DFI 22 + I-U011 16 + STOR 7 + forget baseline 14 (superseded)"
     source_dev_baseline: "93 = 79 contract + 14 forget at 95347a5/745c768 (record-014/record-015)"

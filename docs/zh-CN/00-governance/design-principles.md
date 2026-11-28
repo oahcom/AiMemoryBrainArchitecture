@@ -12,7 +12,7 @@ document_metadata:
         value: "7cd923872a16ec0b01174798614d6ccf867b20fa18edfe9c3c08b4f3e31e3e00"
       approval_scope:
         type: Full-document
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "14-ai-development/work-items/AID-2026-096/approval-evidence.md"
       revocation: null
@@ -21,7 +21,7 @@ document_metadata:
       last_verified_date: null
       last_verification_note: "通常用于描述约束子系统设计的原则"
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Pending-Reapproval
     supersession:
       supersedes: []
       supersession_reason: null
@@ -46,6 +46,7 @@ document_metadata:
   bilingual_counterpart:
     source: "00-governance/design-principles.md"
     en: "docs/en/00-governance/design-principles.md"
+  steward: "user-authorized operator (delegated by account owner)"
 ---
 
 # 架构设计原则
@@ -53,7 +54,7 @@ document_metadata:
 - 文档 ID：GOV-PRINCIPLES-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../00-governance/design-principles.md)
-- 源版本：9792e189d63fbbc3694ab891fc4aeba5143b3b1c
+- 源版本：9fb729a4bd6ebcfa9576e5318804a65e2a95abe2
 - 对应英文：[Design Principles](../../en/00-governance/design-principles.md)
 - 状态：已批准 / Normative——批准事件日期为 2026-11-26。本批准不证明 P-01 至 P-16 的实现符合性。
 

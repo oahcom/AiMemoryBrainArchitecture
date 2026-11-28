@@ -68,6 +68,10 @@ check enforces instead of borrowing an ordinal that does not exist::
         OD-A2/OD-A3 mapping consistency holds.
 
     11  check_11_prompt_snapshot_hashes
+    12  check_12_blob_pin_integrity
+        Every declared blob identity resolves to committed bytes in the
+        candidate tree, or to an explicitly declared and verified source
+        commit for historical source pins.
         executed_prompt_sha256 and executed_prompt_bytes match the executed
         prompt snapshot blob.
 
@@ -90,6 +94,8 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import PurePosixPath
 from typing import Any
+
+from .blob_pins import BlobPinError, verify_blob_pins
 
 
 class ValidationError(Exception):
@@ -1837,6 +1843,82 @@ def check_11_prompt_snapshot_hashes(
             )
 
 
+def check_12_blob_pin_integrity(
+    ctx: ValidationContext,
+    manifest_path: str,
+) -> None:
+    """Verify every declared blob pin against committed bytes.
+
+    The candidate tree is always ctx.head_sha's tree. Historical source
+    pins are limited to d_source_blobs entries with a sibling
+    d_source_commit. A branch declaration alone is not an exemption:
+    resolving an unpinned mutable branch would make the result unstable.
+    The exact source commit must be retrievable through the GitHub API,
+    and its complete recursive tree must be available.
+
+    Tree SHA and recomputed Git blob SHA are both checked. The former
+    establishes the path-to-object binding in the selected commit tree;
+    the latter establishes that the returned original bytes really are
+    that Git object. SHA-256 pins are additionally checked against bytes.
+    """
+    manifest_item = _validate_regular_file(
+        manifest_path,
+        ctx.tree_by_path,
+        "Work Item manifest blob-pin validation",
+    )
+    manifest_text = gh_blob_text(
+        ctx.repo,
+        manifest_item["sha"],
+        manifest_path,
+    )
+
+    def read_blob(blob_sha: str, path: str) -> bytes:
+        return gh_blob_bytes(ctx.repo, blob_sha, path)
+
+    def resolve_source_tree(commit_sha: str) -> dict[str, dict]:
+        if not isinstance(commit_sha, str) or not re.fullmatch(
+            r"[0-9a-fA-F]{40,64}", commit_sha
+        ):
+            raise ValidationError(
+                f"historical blob source has invalid commit SHA: "
+                f"{commit_sha!r}"
+            )
+
+        response = gh_api(
+            f"/repos/{ctx.repo}/commits/{commit_sha}"
+        )
+        if not isinstance(response, dict):
+            raise ValidationError(
+                f"historical blob source commit is unavailable: {commit_sha}"
+            )
+
+        resolved_sha = response.get("sha")
+        if (
+            not isinstance(resolved_sha, str)
+            or resolved_sha.lower() != commit_sha.lower()
+        ):
+            raise ValidationError(
+                f"historical blob source commit did not resolve exactly: "
+                f"{commit_sha}"
+            )
+
+        # gh_tree rejects truncated trees. Indexing also rejects duplicate
+        # paths, so a partial or ambiguous source cannot grant an exemption.
+        return _tree_index(gh_tree(ctx.repo, commit_sha))
+
+    try:
+        verify_blob_pins(
+            manifest_text,
+            ctx.tree_by_path,
+            read_blob,
+            source_tree_resolver=resolve_source_tree,
+        )
+    except BlobPinError as exc:
+        raise ValidationError(
+            f"{manifest_path}: blob-pin integrity: {exc}"
+        ) from exc
+
+
 # ---------------------------------------------------------------------------
 # Context loading and orchestration
 # ---------------------------------------------------------------------------
@@ -2010,6 +2092,7 @@ def _check_manifest_entries(
         changed_paths,
     )
     check_11_prompt_snapshot_hashes(ctx, entries)
+    check_12_blob_pin_integrity(ctx, manifest_path)
 
 
 def _load_context(

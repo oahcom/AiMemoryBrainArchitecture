@@ -754,6 +754,13 @@
       ],
       "primary_status": "NO_TRACE"
     },
+    "AID-2026-212": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
     "AID-2026-240": {
       "findings": [
         "digest_absent",
@@ -845,6 +852,13 @@
       ],
       "primary_status": "NO_TRACE"
     },
+    "AID-2026-265": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
     "AID-2026-267": {
       "findings": [
         "digest_absent",
@@ -855,6 +869,13 @@
     "AID-2026-268": {
       "findings": [
         "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-269": {
+      "findings": [
+        "digest_unpinned",
         "commit_absent"
       ],
       "primary_status": "NO_TRACE"
@@ -894,6 +915,13 @@
       ],
       "primary_status": "NO_TRACE"
     },
+    "AID-2026-286": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
     "AID-2026-290": {
       "findings": [
         "digest_absent",
@@ -902,6 +930,20 @@
       "primary_status": "NO_TRACE"
     },
     "AID-2026-291": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-302": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-311": {
       "findings": [
         "digest_absent",
         "commit_absent"
@@ -922,7 +964,21 @@
       ],
       "primary_status": "NO_TRACE"
     },
+    "AID-2026-324": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
     "AID-2026-325": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-326": {
       "findings": [
         "digest_absent",
         "commit_absent"
@@ -938,6 +994,39 @@
     }
   },
   "schema_version": 1,
-  "seeded_work_items": {},
+  "seeded_work_items": {
+    "AID-2026-212": {
+      "observed_in_pr_head": "38edfdf2b2f48e246e3e7cf7f147db41d1036e4a",
+      "reason": "Initial ratchet seed for the newly registered work item; this records its current NO_TRACE state without claiming traceability."
+    },
+    "AID-2026-265": {
+      "observed_in_pr_head": "38edfdf2b2f48e246e3e7cf7f147db41d1036e4a",
+      "reason": "Initial ratchet seed for the newly registered work item; this records its current NO_TRACE state without claiming traceability."
+    },
+    "AID-2026-269": {
+      "observed_in_pr_head": "38edfdf2b2f48e246e3e7cf7f147db41d1036e4a",
+      "reason": "Initial ratchet seed for the newly registered work item; this records its current NO_TRACE state without claiming traceability."
+    },
+    "AID-2026-286": {
+      "observed_in_pr_head": "38edfdf2b2f48e246e3e7cf7f147db41d1036e4a",
+      "reason": "Initial ratchet seed for the newly registered work item; this records its current NO_TRACE state without claiming traceability."
+    },
+    "AID-2026-302": {
+      "observed_in_pr_head": "38edfdf2b2f48e246e3e7cf7f147db41d1036e4a",
+      "reason": "Initial ratchet seed for the newly registered work item; this records its current NO_TRACE state without claiming traceability."
+    },
+    "AID-2026-311": {
+      "observed_in_pr_head": "38edfdf2b2f48e246e3e7cf7f147db41d1036e4a",
+      "reason": "Initial ratchet seed for the newly registered work item; this records its current NO_TRACE state without claiming traceability."
+    },
+    "AID-2026-324": {
+      "observed_in_pr_head": "38edfdf2b2f48e246e3e7cf7f147db41d1036e4a",
+      "reason": "Initial ratchet seed for the newly registered work item; this records its current NO_TRACE state without claiming traceability."
+    },
+    "AID-2026-326": {
+      "observed_in_pr_head": "38edfdf2b2f48e246e3e7cf7f147db41d1036e4a",
+      "reason": "Initial ratchet seed for the newly registered work item; this records its current NO_TRACE state without claiming traceability."
+    }
+  },
   "source_commit": "cd1722e753a429247d91f990caa2defac565e308"
 }

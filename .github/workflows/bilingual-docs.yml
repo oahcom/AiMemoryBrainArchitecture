@@ -34,12 +34,29 @@ jobs:
       - name: Self-check the pairing and root-departure rules
         run: python3 -m unittest scripts.governance.evidence.test_gate_normative_roots
 
-      - name: Run required Owner namespace and governance traceability gates
+      - name: Test and check #1196 owner-namespace references
+        shell: bash
         run: |
-          python3 scripts/check_owner_namespace_references.py --check
-          python3 scripts/check_governance_operation_traceability.py --check
+          set +e
           (cd tests && python3 -m unittest -v test_check_owner_namespace_references.py)
+          test_status=$?
+          python3 scripts/check_owner_namespace_references.py --check
+          check_status=$?
+          if [ "$test_status" -ne 0 ] || [ "$check_status" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Test and check #1208 governance-operation traceability
+        shell: bash
+        run: |
+          set +e
           (cd tests && python3 -m unittest -v test_check_governance_operation_traceability.py)
+          test_status=$?
+          python3 scripts/check_governance_operation_traceability.py --check
+          check_status=$?
+          if [ "$test_status" -ne 0 ] || [ "$check_status" -ne 0 ]; then
+            exit 1
+          fi
 
       - name: Check paired documentation and PR manifest
         env:
