@@ -75,12 +75,22 @@ jobs:
           echo "Resolved merge-candidate base: $BASE_SHA"
 
           set +e
-          python3 scripts/ci/check_manifest_blob_pins.py --commit "$BASE_SHA"
+
+          # Historical base may predate the ledger. This exception is
+          # deliberately scoped to this base-only measurement.
+          python3 scripts/ci/check_manifest_blob_pins.py \
+            --commit "$BASE_SHA" \
+            --allow-missing-ledger
           base_status=$?
+
+          # The immutable negative sample remains under the strict default.
           python3 scripts/ci/assert_manifest_blob_pin_negative.py \
             --commit 9a2063ae1fa5d905b3817cd4eddba065a06daa73
           negative_status=$?
-          python3 scripts/ci/check_manifest_blob_pins.py --commit "$GITHUB_SHA"
+
+          # Candidate verification must remain strict: missing ledger is INCOMPLETE.
+          python3 scripts/ci/check_manifest_blob_pins.py \
+            --commit "$GITHUB_SHA"
           candidate_status=$?
           set -e
 
@@ -115,7 +125,9 @@ jobs:
             --command "python3 scripts/ci/check_manifest_blob_pins.py --commit HEAD | sed -n '/^MISMATCH /p; /^PATH_MISSING /p; /^INCOMPLETE /p; /^UNBOUND_BLOB_SHA256 /p'"
 
       - name: Self-check manifest blob pin verification
-        run: python3 scripts/ci/test_check_manifest_blob_pins.py
+        run: |
+          python3 scripts/ci/test_check_manifest_blob_pins.py
+          python3 tests/test_manifest_pin_ledger.py
 
       - name: Self-check manifest blob-pin base resolution and negative assertion
         run: |
