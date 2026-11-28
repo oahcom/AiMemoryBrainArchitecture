@@ -985,3 +985,25 @@ completed review can correctly return `overall_result: FAIL` when the reviewed
 head contains declarations or evidence defects. Recording the post-remediation E0
 results for F1 and F2, and for F3 at Head D, does not imply that the remaining
 findings at `c7d56bbe` or at `5e30d497` have been remediated.
+
+## Prompt-to-Commit Trace Gate Disposition
+
+The Prompt-to-commit trace (ratchet) check reports:
+
+`NEW_NON_TRACEABLE AID-2026-269 NO_TRACE`
+
+This is an expected fail-closed policy outcome, not a checker defect.
+
+The ratchet compares newly introduced manifest identifiers against the manifest inventory in the base snapshot. Seeding an identifier into `--baseline` does not exempt it from the base-snapshot addition check. The checker explicitly requires a genuinely new non-traceable manifest to fail.
+
+No implementation commit reachable from the PR base has been established as the implementation commit for AID-2026-269. The PR head commit is not base-reachable, and the base commit itself has not been established as implementing this work item. Assigning either commit as an implementation reference would create unsupported provenance.
+
+Disposition:
+
+- Work-item trace status: `NO_TRACE`
+- Gate result: `FAIL`
+- Governance disposition: `BLOCKED — PROMPT_TO_COMMIT_TRACE`
+- Checker or workflow modification: `NOT AUTHORIZED`
+- Fabricated implementation commit reference: `PROHIBITED`
+
+This disposition does not invalidate the independently verified review findings recorded in this case. It records that the review artifact itself does not yet satisfy the repository's prompt-to-commit trace policy.

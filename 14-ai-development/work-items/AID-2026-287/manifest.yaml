@@ -1,0 +1,166 @@
+work_item_id: AID-2026-287
+title: "Record the Capacity Alignment Ruling on the Allocation of Governance Capacity Between Records and Product Implementation."
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  R1 is appropriate because this work item produces documentation and a
+  governance decision record only. It changes no application code, gates,
+  workflows, branch protection settings, or permission boundaries. The ruling
+  is PROPOSED and does not assert adoption, approval, or any change to existing
+  normative requirements.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 460f437eb3496e10737b9ef20f4b816e34d155c4
+tracking_issue: "#1341, #1349"
+
+scope:
+  objective: >-
+    Produce a capacity alignment decision record diagnosing why record
+    production consumes capacity that should support product implementation,
+    and establishing four proposed rulings A1-A4 covering risk-tiered record
+    obligations, a single normative source, executable proof that every gate
+    can fail, and an executable Phase 3 exit checklist. The record interprets
+    existing normative requirements and does not modify any upstream normative
+    text.
+  files_to_create:
+    - 14-ai-development/AI-DEV-CAPACITY-ALIGNMENT-RULING-001.md
+    - 14-ai-development/AI-DEV-CAPACITY-ALIGNMENT-RULING-001.en.md
+    - 14-ai-development/work-items/AID-2026-287/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-287/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-287/evidence.md
+    - 14-ai-development/work-items/AID-2026-287/session-evidence.md
+  files_to_modify:
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope:
+    - .github/workflows/
+    - scripts/
+    - crates/
+    - ROADMAP.md
+    - README.md
+  constraints:
+    - "Do not write task lists, TODOs, assignments, milestones, or schedules in the decision record."
+    - "Do not claim adoption, approval, merge, review, acceptance, or successful CI execution."
+    - "Use only the supplied measured numbers; do not invent or independently recalculate figures."
+    - "Do not delete, rewrite, or modify existing normative documents."
+    - "Keep the ruling proposed and distinguish decisions from implementation actions."
+    - "Preserve the distinction between historical records and behavior occurring after adoption."
+
+acceptance_criteria:
+  - id: AC1
+    criterion: >-
+      The diagnosis is traceable to all six groups of supplied measured facts:
+      commit distribution, issue references, normative corpus membership,
+      gate negative cases and target base, end-to-end execution chain, and
+      product phase and exit criterion.
+    measurement: >-
+      Cross-check every causal diagnosis against the corresponding numbered
+      evidence subsection in Section 1. No unsupported measurements or
+      additional numerical claims are present.
+  - id: AC2
+    criterion: >-
+      All four rulings A1-A4 contain Decision, Rationale, Alternatives
+      considered and rejected, Consequences, and Falsifier.
+    measurement: >-
+      Inspect each ruling and verify that all five elements are present,
+      applicable scope is explicit, and at least two rejected alternatives
+      are explained.
+  - id: AC3
+    criterion: >-
+      Every ruling has an observable and measurable falsification condition
+      with an explicit threshold or triggering observation, and an identified
+      adjudicator role.
+    measurement: >-
+      Inspect the individual Falsifier sections and the consolidated
+      falsification table. Verify that each condition can be tested against
+      actual behavior, execution results, or normative authority relationships.
+  - id: AC4
+    criterion: >-
+      The decision record contains no task-list language and does not claim
+      adoption, approval, merge, review, acceptance, or CI success.
+    measurement: >-
+      Inspect all sections for TODOs, assignments, milestones, schedules,
+      unsupported implementation commitments, and assertions of completed
+      governance approval.
+  - id: AC5
+    criterion: >-
+      The Chinese and English decision records are semantically equivalent,
+      preserve the same section order, A1-A4 decisions, measurements,
+      falsification conditions, exclusions, and NOT_VERIFIED markings.
+      Independent bilingual review is NOT RECORDED.
+    measurement: >-
+      Compare both complete files section by section, including frontmatter,
+      decision elements, numerical values, falsification table, and
+      provenance declarations. Do not equate semantic equivalence with
+      independent bilingual review.
+
+documentation:
+  - path: 14-ai-development/AI-DEV-CAPACITY-ALIGNMENT-RULING-001.md
+    relationship: normative
+  - path: 14-ai-development/AI-DEV-CAPACITY-ALIGNMENT-RULING-001.en.md
+    relationship: normative
+  - path: 14-ai-development/work-items/AID-2026-287/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-287/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-287/session-evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-287/manifest.yaml
+    relationship: reference
+
+evidence: 14-ai-development/work-items/AID-2026-287/evidence.md
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    No independent reviewer is assigned or recorded. This manifest does not
+    claim that either ruling file has undergone independent review.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: "USER-PRINCIPAL-DELEGATED (no Owner acceptance decision is asserted)"
+
+session_evidence:
+  - role: DOCUMENTATION_AUTHOR
+    issue_refs:
+      - "#1341"
+      - "#1349"
+    implementing_ai_session: 6b0939f9-7c6c-83ec-b7dc-6b043f15578c
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-287/prompt-v1.md
+    executed_prompt_sha256: "9044c0fb487e91babdf100678b9ed859aee3111c63692c8317cefd73763df19c"
+    executed_prompt_bytes: 11534
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-287/session-evidence.md
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    The decision-record content and associated work-item documentation are
+    prepared for persistence. The work item has not been committed or pushed,
+    and no pull request has been opened. The PR is to be created by the
+    persistence operator after pushing the branch. IMPLEMENTED describes
+    preparation of the documentation artifacts, not repository integration,
+    review, or acceptance.
+  files_changed:
+    - 14-ai-development/AI-DEV-CAPACITY-ALIGNMENT-RULING-001.md
+    - 14-ai-development/AI-DEV-CAPACITY-ALIGNMENT-RULING-001.en.md
+    - 14-ai-development/work-items/AID-2026-287/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-287/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-287/evidence.md
+    - 14-ai-development/work-items/AID-2026-287/session-evidence.md
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - "PLANNED LOCAL CHECK: python scripts/check_document_management.py"
+    - "PLANNED LOCAL CHECK: python scripts/ci/check_work_item_manifest_schema.py"
+    - "PLANNED LOCAL CHECK: python scripts/check_bilingual_docs.py"
+    - "PLANNED LOCAL CHECK: validate manifest.yaml with a standard YAML parser"
+    - "PLANNED LOCAL CHECK: verify prompt-v1.md SHA-256 and byte count against manifest placeholders"
+    - "PLANNED LOCAL CHECK: inspect the seven-file change scope and confirm no out-of-scope paths changed"

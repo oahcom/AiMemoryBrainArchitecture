@@ -25,11 +25,11 @@ source:
   tree: "258f53ab74a6618493a15e6a0d190467997bec43"
   files:
     - path: "03-memory-brain/canonical-memory-store.md"
-      blob: "6b37c91033fda21f072e2a3bde6f274663b1e76e"
+      blob: "2e10e23f651f1f6cb03247f01727f2b7ff5342f1"
     - path: "03-memory-brain/commit-cursor-semantics.md"
-      blob: "4688a0ca487bf4d853c7f0220408abe8d743d159"
+      blob: "2c68161d039310b8df0e1387b4f1111ed74699db"
     - path: "03-memory-brain/forget-fence-operation-and-publication-gate.md"
-      blob: "4da0b61ba3656a768ea56b4a2a24e09da4e21cd5"
+      blob: "dd26e3cae2e60dbdc44a6e084004effcd2033efa"
 authority:
   sponsor: "USER-PRINCIPAL-DELEGATED"
   accountable_owner: "USER-PRINCIPAL-DELEGATED"
