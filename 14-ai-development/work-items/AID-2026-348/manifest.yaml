@@ -1,0 +1,153 @@
+work_item_id: AID-2026-348
+title: "Align GOV-NC-2026-11-21-GATE-DEADLOCK-006 status with its own section 12 in all three copies"
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Documentation-only. The change replaces four existing status sentences so
+  that a work-record stops asserting a state that the same document refutes
+  in section 12. It adds no normative requirement, changes no gate, no
+  baseline and no executable behaviour. The only new obligation is the
+  mandated DM-15 steward field on the three changed documents.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "f0843a8f38a420883921cfda96b515204967f885"
+tracking_issue: "#1541"
+
+scope:
+  summary: >-
+    GOV-NC-2026-11-21-GATE-DEADLOCK-006 records the status RESOLVED_ON_MAIN at
+    its header, but its English mirror still said ACCEPTED at the same line and
+    all three copies still said ACCEPTED plus "empty diff on main is permanently
+    EXIT=2" at the end of section 11. Section 12 of the same document, and the
+    section 1 table, record EXIT=0 from 81dd9a72d2. This change sets the status
+    to RESOLVED_ON_MAIN in all three copies and describes the empty diff as
+    resolved, keeping the section 2.1 boundary sentence, the direct-push
+    provenance sentence and the F-2/F-1 execution note unchanged.
+  in_scope:
+    - "14-ai-development/governance-register/GOV-NC-2026-11-21-GATE-DEADLOCK-006.md: header status line and the section 11 register-status line."
+    - "docs/en/14-ai-development/governance-register/GOV-NC-2026-11-21-GATE-DEADLOCK-006.md: the same two lines."
+    - "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-GATE-DEADLOCK-006.md: the same two lines."
+    - "Add the mandated DM-15 steward field to the document_metadata of the three changed documents."
+    - "Register the work item and its INDEX.md row."
+  files_out_of_scope:
+    - "Sections 12, 13 and 14 of the same register."
+    - "Any other governance register."
+    - "Gate scripts, baselines, workflows and normative requirements."
+  change_boundary: >-
+    Four status sentences and three metadata lines across three existing files.
+    No claim, number or conclusion is added; two claims that the document itself
+    refutes are removed and one mirror is brought level with the canonical copy.
+
+evidence:
+  - "Issue #1541: GOV-NC-2026-11-21-GATE-DEADLOCK-006 records ACCEPTED and a permanent EXIT=2 that its own section 12 refutes."
+  - "Canonical :47 and docs/zh-CN :47 already read RESOLVED_ON_MAIN at origin/main f0843a8f; docs/en :47 read ACCEPTED."
+  - "All three copies read ACCEPTED at the end of section 11 (canonical :281, docs/zh-CN :281, docs/en :279)."
+  - "Section 12 heading and the section 1 table in the same document record EXIT=0 from 81dd9a72d2."
+  - "check_bilingual_docs.py fails on an en-only change: 'requires all counterparts changed in this PR'. All three copies are therefore changed here."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-348/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-348/prompt-v2.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-348/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-348/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-348/session-evidence-2.md"
+    relationship: evidence
+
+acceptance_criteria:
+  - id: AC1
+    description: >-
+      No copy of the register asserts ACCEPTED as its status.
+    measurement: >-
+      Run:
+      git grep -n -F '`ACCEPTED`' -- 14-ai-development/governance-register/GOV-NC-2026-11-21-GATE-DEADLOCK-006.md docs/en/14-ai-development/governance-register/GOV-NC-2026-11-21-GATE-DEADLOCK-006.md docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-GATE-DEADLOCK-006.md
+    expected_result: "Zero hits."
+
+  - id: AC2
+    description: >-
+      No copy asserts that the empty diff is permanently EXIT=2 on main.
+    measurement: >-
+      Run:
+      git grep -n -i -e 'permanently `EXIT=2`' -e '恒为 `EXIT=2`' -- 14-ai-development/governance-register/GOV-NC-2026-11-21-GATE-DEADLOCK-006.md docs/
+    expected_result: "Zero hits in the three in-scope files."
+
+  - id: AC3
+    description: >-
+      The three copies remain bilingual-paired and pass the structural gate.
+    measurement: >-
+      Run:
+      BASE_SHA=origin/main HEAD_SHA=HEAD PR_BODY="BILINGUAL-MANIFEST: COMPLETE" python scripts/check_bilingual_docs.py
+    expected_result: "PASS with three changed paths inspected."
+
+  - id: AC4
+    description: >-
+      Section 2.1's boundary sentence, the direct-push provenance sentence and
+      the F-2 approved / F-1 executed note survive unchanged in meaning.
+    measurement: >-
+      Run:
+      git diff --unified=0 origin/main..HEAD -- 14-ai-development/governance-register/ docs/en/14-ai-development/governance-register/ docs/zh-CN/14-ai-development/governance-register/
+    expected_result: "Only the status value and the empty-diff clause change; the boundary, provenance and F-2/F-1 clauses are retained."
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    Independent review has not been assigned or recorded. No independent
+    reviewer approval or review completion is claimed.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: NOT_ASSIGNED
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    Four status sentences and three steward lines were applied mechanically from
+    authoring blocks, each OLD string required to match exactly once. The
+    English mirror's header line was the corpus-10 defect; the section 11 line
+    was found while verifying that the mirror change would pass the bilingual
+    pairing gate, which rejects an en-only change.
+  pull_request: PENDING
+  merge_commit: ""
+  implementation_commit: "9be015976769d6f683dc3189c926a4ed36d69208"
+  ci_status: NOT_CLAIMED
+  files_changed:
+    - "14-ai-development/governance-register/GOV-NC-2026-11-21-GATE-DEADLOCK-006.md"
+    - "docs/en/14-ai-development/governance-register/GOV-NC-2026-11-21-GATE-DEADLOCK-006.md"
+    - "docs/zh-CN/14-ai-development/governance-register/GOV-NC-2026-11-21-GATE-DEADLOCK-006.md"
+  tests:
+    - "check_bilingual_docs.py: PASS, 3 changed paths inspected."
+    - "check_document_management.py --require-changed origin/main: PASS (incremental)."
+    - "En-only variant of the same change: FAIL 'requires all counterparts changed in this PR', which is why all three copies are in scope."
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1541"
+    implementing_ai_session: 6b0a5e71-7b90-83ec-b535-2d618c6ab862
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-348/prompt-v1.md
+    executed_prompt_sha256: 30baae3b1c5e54762646d7e321bd9c319ff683d9e54b59a3beb9f97aa17ccd13
+    executed_prompt_bytes: 6177
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: "RECORDED"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-348/session-evidence.md
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1541"
+    implementing_ai_session: 6b0a5e71-7b90-83ec-b535-2d618c6ab862
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-348/prompt-v2.md
+    executed_prompt_sha256: bdc867877aa8c203c18e8784f686d0d6e405c9afcafc9d1a19b213525cb9967d
+    executed_prompt_bytes: 6852
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: "RECORDED"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-348/session-evidence-2.md
