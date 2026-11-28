@@ -75,7 +75,13 @@ jobs:
           echo "Resolved merge-candidate base: $BASE_SHA"
 
           set +e
-          python3 scripts/ci/check_manifest_blob_pins.py --commit "$BASE_SHA"
+          # The base is measured under the semantics it was written for:
+          # reference_mode is a new requirement, so an absent key is read as
+          # the legacy current mode here. The candidate scan below keeps the
+          # default fail-closed behaviour.
+          python3 scripts/ci/check_manifest_blob_pins.py \
+            --commit "$BASE_SHA" \
+            --allow-missing-reference-mode
           base_status=$?
           python3 scripts/ci/assert_manifest_blob_pin_negative.py \
             --commit 9a2063ae1fa5d905b3817cd4eddba065a06daa73

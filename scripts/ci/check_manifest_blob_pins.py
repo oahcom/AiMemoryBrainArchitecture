@@ -199,7 +199,12 @@ def discover_manifests(git: Git, commit: str):
                   if p.startswith(MANIFEST_ROOT + "/") and p.endswith("/manifest.yaml"))
 
 
-def verify(root: Path, commit: str, verbose: bool = True):
+def verify(
+    root: Path,
+    commit: str,
+    verbose: bool = True,
+    allow_missing_reference_mode: bool = False,
+):
     git = Git(root)
     manifests = discover_manifests(git, commit)
     if not manifests:
@@ -394,20 +399,27 @@ def verify(root: Path, commit: str, verbose: bool = True):
             if not isinstance(item, dict):
                 continue
 
-            reference_mode = item.get("reference_mode")
-            if (
-                not isinstance(reference_mode, str)
-                or reference_mode.strip() not in ("historical", "current")
-            ):
-                incomplete += 1
-                problems.append(
-                    f"INCOMPLETE related_evidence[{i}]: "
-                    f"missing or invalid reference_mode={reference_mode!r}; "
-                    "expected 'historical' or 'current'"
-                )
-                continue
+            if "reference_mode" not in item and allow_missing_reference_mode:
+                # Legacy measurement only: a base tree that predates the rule
+                # is measured under the old current-bytes semantics. The
+                # candidate scan never passes this flag, so the rule stays
+                # fail closed where it is enforced.
+                reference_mode = "current"
+            else:
+                reference_mode = item.get("reference_mode")
+                if (
+                    not isinstance(reference_mode, str)
+                    or reference_mode.strip() not in ("historical", "current")
+                ):
+                    incomplete += 1
+                    problems.append(
+                        f"INCOMPLETE related_evidence[{i}]: "
+                        f"missing or invalid reference_mode={reference_mode!r}; "
+                        "expected 'historical' or 'current'"
+                    )
+                    continue
 
-            reference_mode = reference_mode.strip()
+                reference_mode = reference_mode.strip()
             for path_key, digest_key in (
                 ("path", "blob"),
                 ("en_mirror", "en_mirror_blob"),
@@ -520,10 +532,23 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[2])
     parser.add_argument("--commit", default="HEAD")
+    parser.add_argument(
+        "--allow-missing-reference-mode",
+        action="store_true",
+        help=(
+            "Measure a legacy tree: treat an absent "
+            "related_evidence.reference_mode as current. Never used for the "
+            "candidate scan."
+        ),
+    )
     args = parser.parse_args(argv)
     try:
         commit = Git(args.root).run("rev-parse", f"{args.commit}^{{commit}}").decode().strip()
-        return verify(args.root, commit)
+        return verify(
+            args.root,
+            commit,
+            allow_missing_reference_mode=args.allow_missing_reference_mode,
+        )
     except Incomplete as exc:
         print(f"INCOMPLETE: {exc}", file=sys.stderr)
         return 2
