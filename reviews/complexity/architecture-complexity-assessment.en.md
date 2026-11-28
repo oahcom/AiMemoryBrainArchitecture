@@ -71,6 +71,33 @@ Score order: Internal / Dependency / State / Concurrency / Recovery / Verificati
 
 D/E have directly inspected Owner source files, so their confidence is higher. H/I/Storage scores are inferred from responsibilities referenced by other modules and system flows; their Owners must calibrate these scores against authoritative contracts and technology decisions.
 
+### 2.1 Four-dimensional change-risk supplement
+
+The original eight-number score column above is retained as a historical format. It does not encode, imply, or substitute for the four dimensions below.
+
+#### Rating scale (1–5)
+
+- **1 — Minimal:** local, reversible change; few stable dependencies; no meaningful concurrent state transition.
+- **2 — Low:** bounded change surface; limited coupling; straightforward rollback; concurrency is incidental and well-contained.
+- **3 — Material:** multiple modules or contracts change; dependencies require coordination; rollback needs controlled migration; state transitions require explicit tests.
+- **4 — High:** broad cross-owner change; strong coupling or shared invariants; rollback is costly or lossy; concurrent operations and recovery materially affect correctness.
+- **5 — Critical:** system-wide or authority-boundary change; tightly coupled invariants; irreversible or externally consequential effects; correctness depends on serialization, fencing, replay, or recovery proofs.
+
+| Module/capability | Change surface | Coupling | Irreversibility | Concurrency and state | Evidence status |
+|---|---:|---:|---:|---:|---|
+| A Architecture governance/integration | 4 | 5 | 3 | 4 | EVIDENCE_GAP: no module-specific source line was revalidated for these four scores in this pass. |
+| B Domain Model | 5 | 5 | 4 | 4 | EVIDENCE_GAP: no module-specific source line was revalidated for these four scores in this pass. |
+| C Agent Integration | 4 | 5 | 4 | 5 | EVIDENCE_GAP: no module-specific source line was revalidated for these four scores in this pass. |
+| D Memory Brain | 5 | 5 | 5 | 5 | EVIDENCE_GAP: no module-specific source line was revalidated for these four scores in this pass. |
+| E Memory Compiler | 5 | 5 | 4 | 5 | EVIDENCE_GAP: no module-specific source line was revalidated for these four scores in this pass. |
+| F Memory Runtime | 4 | 5 | 4 | 5 | EVIDENCE_GAP: no module-specific source line was revalidated for these four scores in this pass. |
+| G Memory Context | 4 | 5 | 4 | 5 | EVIDENCE_GAP: no module-specific source line was revalidated for these four scores in this pass. |
+| H BMCP / Adapter protocol | 4 | 5 | 5 | 5 | EVIDENCE_GAP: no module-specific source line was revalidated for these four scores in this pass. |
+| I Security / Governance | 5 | 5 | 5 | 5 | EVIDENCE_GAP: no module-specific source line was revalidated for these four scores in this pass. |
+| Storage / Consistency | 5 | 5 | 5 | 5 | EVIDENCE_GAP: no module-specific source line was revalidated for these four scores in this pass. |
+
+These scores are provisional comparative judgments, not measured implementation complexity. Replace or retain each score only after the module Owner validates the dimension definitions and attaches source-grounded evidence. The evidence-gap marker is intentionally not a claim that evidence does not exist.
+
 ## 3. Cross-module complexity matrix
 
 | Cross-module mechanism | Eight scores | Confidence | Complexity drivers / blockers |
