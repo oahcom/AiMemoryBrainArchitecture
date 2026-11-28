@@ -75,16 +75,27 @@ scope:
       detail: "Record manifest, evidence, prompt snapshot and session evidence."
     - path: "14-ai-development/work-items/INDEX.md"
       detail: "Register AID-2026-296."
+    - path: "14-ai-development/work-items/AID-2026-001/manifest.yaml"
+      detail: >-
+        Remediate the four findings this gate reports, decided field by field by
+        the adjudicating session (conv 6b0a40f6). The two LF digests are bound to
+        their committed blobs by adding model_path and tests_path inside
+        measurement_basis, so the checker verifies them as blob pins. The two CRLF
+        digests are reclassified as rendered working-copy representation digests
+        under an independent schema and renamed model_working_copy_sha256_crlf /
+        tests_working_copy_sha256_crlf, so they no longer claim to be blob pins.
+        The block carries the declaration inline. No other field in that manifest
+        is touched and no ratchet baseline entry is added.
   untouched:
     - "scripts/ci/baselines/manifest-blob-pins.txt"
     - "all other .github/workflows files"
     - "GitHub branch protection, rulesets and required contexts"
     - "PR #1426 and its branch"
-    - "all existing work-item records"
+    - "all work-item records other than the AID-2026-001 measurement_basis remediation declared above"
 non_goals:
   - "Baselining the newly found unbound declarations to keep the gate green"
   - "Changing the malformed-array handling that #1426 carries"
-  - "Rebinding or rewriting AID-2026-001's measurement_basis records"
+  - "Changing any part of AID-2026-001 outside its measurement_basis block"
   - "Adding a new required check context or a new workflow job"
 evidence:
   record: "14-ai-development/work-items/AID-2026-296/evidence.md"
@@ -120,12 +131,22 @@ implementation:
     main b333ad1c the immutable negative sample 9a2063ae also yields four
     unbound findings, so its exact-equality expectation moved to pins=172 with
     unbound=4 and now requires exactly four UNBOUND_BLOB_SHA256 lines.
+    The four findings in AID-2026-001 are then remediated rather than baselined:
+    the adjudicating session (conv 6b0a40f6) ruled field by field that the two LF
+    digests are committed-blob pins and must be bound by model_path / tests_path,
+    and that the two CRLF digests are SHA-256 over a deterministic CRLF rendering
+    of those same committed blobs, not blob pins, so they move to an independent
+    representation-digest schema under the names
+    model_working_copy_sha256_crlf / tests_working_copy_sha256_crlf. After that
+    change the checker reports unbound=0 and the ratchet reports the unchanged
+    four-item baseline against four current items.
   files_changed:
     - "scripts/ci/check_manifest_blob_pins.py"
     - "scripts/ci/test_check_manifest_blob_pins.py"
     - "scripts/ci/assert_manifest_blob_pin_negative.py"
     - "scripts/ci/test_assert_manifest_blob_pin_negative.py"
     - ".github/workflows/repository-hygiene.yml"
+    - "14-ai-development/work-items/AID-2026-001/manifest.yaml"
     - "14-ai-development/work-items/AID-2026-296/manifest.yaml"
     - "14-ai-development/work-items/AID-2026-296/evidence.md"
     - "14-ai-development/work-items/AID-2026-296/prompt-v1.md"

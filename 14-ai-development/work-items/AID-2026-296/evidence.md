@@ -190,3 +190,70 @@ branch were not touched. The base was merged into this branch (a merge commit,
 not a rebase, not a force push) only because a conflicted PR produces no
 `refs/pull/<n>/merge` ref and therefore triggers no `pull_request` workflow at
 all; the first head `8918d2ea` produced zero check runs for that reason.
+
+## Remediation of the four findings: per-field adjudication
+
+The four findings were remediated, not baselined. The adjudicating session
+`6b0a40f6-4d1c-83ec-b214-eb8945d0e97c` (reply
+`D:\code\chatgpt-session-ops\scripts\replies\reply-6b0a40f6-104925.md`) ruled
+field by field, on measured evidence:
+
+- `771c1fdc` is the committed blob of
+  `14-ai-development/work-items/AID-2026-001/reference-model/r3_contract_model.py`
+  and `22b8d81e` the committed blob of `.../test_r3_contract.py`; both are
+  unchanged at HEAD.
+- `sha256(LF bytes)` of those blobs is exactly `8324ec55...` and `26c72cea...`,
+  i.e. the two `*_blob_sha256_lf` declarations are committed-blob pins and must
+  be bound to a path, not exempted.
+- `sha256` over the same bytes with every LF replaced by CRLF is exactly
+  `35efab93...` and `f326cafd...`, i.e. the two `*_blob_sha256_crlf`
+  declarations are digests of a deterministic rendering, not of a committed
+  blob. `execution-record-016.md` L25-39 records the same basis.
+
+Ruling, transcribed verbatim in effect:
+
+1. The two LF digests take option A: bind them by adding `model_path` and
+   `tests_path` inside `measurement_basis`, so the checker verifies them as
+   committed-blob pins. Binding all four to the same path was rejected: the
+   checker hashes committed bytes only, so both CRLF digests would have become
+   MISMATCH.
+2. The two CRLF digests take option B: an independent representation-digest
+   schema, declared here and inline in the manifest, with the field names
+   `model_working_copy_sha256_crlf` and `tests_working_copy_sha256_crlf`. The
+   names no longer contain the `blob_sha256` token, so the checker does not
+   classify them as blob pins; no checker change and no exclusion list is
+   introduced.
+3. `scripts/ci/baselines/manifest-blob-pins.txt` is not modified and no entry is
+   added. No historical measurement figure is deleted; both bases stay recorded.
+
+### Independent schema: rendered working-copy representation digest
+
+```yaml
+working_copy_representation_digest:
+  fields:
+    - model_working_copy_sha256_crlf
+    - tests_working_copy_sha256_crlf
+  semantic_type: rendered_working_copy_representation_digest
+  definition:
+    algorithm: SHA-256
+    input: exact bytes of the CRLF-rendered working copy
+    transformation:
+      source: corresponding committed Git blob bytes
+      operation: replace each LF line ending with CRLF
+      preserve_other_bytes: true
+  verification:
+    - Resolve the corresponding committed source blob (model_path / tests_path).
+    - Reproduce the specified CRLF transformation.
+    - Calculate SHA-256 over the resulting exact bytes.
+    - Compare against the representation digest.
+    - Do not interpret this digest as a committed Git blob pin.
+  classification:
+    git_blob_pin: false
+    independent_representation_schema: true
+  enforcement:
+    manifest_blob_pin_checker: excluded_by_field_name
+    representation_digest_verification: required
+```
+
+The declaration is also carried inline, as a comment directly above the two
+renamed keys, so the manifest states the classification at the point of use.
