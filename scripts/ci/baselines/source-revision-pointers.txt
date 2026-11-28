@@ -1,0 +1,8 @@
+# AID-2026-303 source revision pointer ratchet baseline
+# Measured against origin/main 7ecf2a8e7d1e40a13f6af6d4335a6766a222194f.
+# Twelve failures are repaired: 8 STALE and 4 NON_BLOB_REFERENCE.
+# Two memory-brain-guide mirrors remain ORPHAN_MIRROR_PENDING_DECISION.
+# Their canonical source has not been adjudicated; no candidate is promoted.
+# Every entry is the exact complete failure item emitted by the scanner.
+NON_BLOB_REFERENCE docs/en/03-memory-brain/memory-brain-guide.md:6 -> D branch session-d-memory-brain-2026-11-16, including Forget Fence and cursor contracts
+NON_BLOB_REFERENCE docs/zh-CN/03-memory-brain/memory-brain-guide.md:6 -> D 分支 session-d-memory-brain-2026-11-16，包含 Forget Fence 和 Cursor 契约

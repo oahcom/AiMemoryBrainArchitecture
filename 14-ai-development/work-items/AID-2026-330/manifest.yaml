@@ -1,0 +1,174 @@
+work_item_id: AID-2026-330
+title: "Document the Blob Declaration Inventory and Discovery Limits"
+class: DOC
+risk: R1
+risk_rationale: >-
+  Documentation-only inventory of existing manifest declaration families,
+  their definition locations, checker coverage, and overlapping prompt
+  evidence enforcement. No executable checker, validator, workflow,
+  declaration, or existing blob pin is changed.
+status: PROPOSED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "AI-assisted documentation prepared from user-supplied repository evidence"
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "f77b1e63f0aca6b93f14fee5bd5c04510053ee23"
+tracking_issue: "#1350"
+
+scope:
+  summary: >-
+    Record the blob declaration families currently consumed by the manifest
+    blob-pin checker, identify which families have no independent normative
+    definition, document the normative prompt/session-evidence contract and
+    its conflict with the checker's nested prompt mapping, and record the
+    overlap between prompt snapshot checks performed by the blob-pin checker
+    and Session Evidence validator.
+  in_scope:
+    - "Inventory checker-defined root, mirror, authored-index, related-evidence, evidence-file, and D-source declaration families."
+    - "Record that the manifest schema checker defines no blob-declaration fields."
+    - "Record the normative prompt/session-evidence definitions and their template locations."
+    - "Record that top-level prompt_sha256 is non-normative."
+    - "Record that the nested prompt mapping consumed by checker branch F is not defined by the normative template."
+    - "Record Session Evidence check 11 enforcement of executed_prompt_sha256 and executed_prompt_bytes."
+    - "Record the candidate-commit versus PR-head-tree resolution-base distinction."
+    - "Record enumeration commands, supplied outputs, and discovery limits."
+    - "Register this documentation work item in the work-item INDEX."
+  files_out_of_scope:
+    - "scripts/ci/check_manifest_blob_pins.py"
+    - "scripts/ci/test_check_manifest_blob_pins.py"
+    - "scripts/ci/check_work_item_manifest_schema.py"
+    - "scripts/governance/session_evidence/validate.py"
+    - ".github/workflows/session-evidence.yml"
+    - ".github/workflows/aid-2026-001-manifest-validation.yml"
+    - "14-ai-development/prompt-and-evidence-template.md"
+  change_boundary: >-
+    This work item records existing definitions and observed checker behavior.
+    It does not implement fail-closed discovery, repair declarations, remove
+    duplicate checks, change the prompt template, define a new executable
+    schema, or establish data integrity.
+
+evidence:
+  - "Issue #1350."
+  - "Base commit f77b1e63f0aca6b93f14fee5bd5c04510053ee23."
+  - "git grep -l -E 'root_blob|en_mirror_blob|related_evidence|authored_indexes' at the pinned base; seven displayed paths."
+  - "scripts/ci/check_work_item_manifest_schema.py: required top-level keys and documentation/session_evidence/implementation structural rules supplied for the pinned base."
+  - "14-ai-development/prompt-and-evidence-template.md: supplied lines 45-55, 222-228, 246-248."
+  - "scripts/governance/session_evidence/validate.py: supplied check 11 and implementation lines 1811-1828."
+  - "scripts/governance/session_evidence/validate.py: supplied gh_blob_bytes resolution helper lines 286-330."
+  - ".github/workflows/session-evidence.yml: supplied pull_request and merge_group triggers and required validate context."
+  - ".github/workflows/aid-2026-001-manifest-validation.yml: supplied scope limited to AID-2026-001 manifest required keys."
+  - "14-ai-development/work-items/INDEX.md: supplied registration table header and live example row."
+  - "AID-2026-326/manifest.yaml: supplied operative manifest example."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-330/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-330/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-330/blob-declaration-inventory.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
+
+dependency_refs:
+  - "#1350"
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+prompt_id: AID-2026-330-PROMPT
+prompt_version: "v1"
+
+created_at: "2026-11-27"
+updated_at: "2026-11-27"
+implementation_branch: ""
+implementation_commits: []
+changed_paths:
+  - "14-ai-development/work-items/AID-2026-330/manifest.yaml"
+  - "14-ai-development/work-items/AID-2026-330/prompt-v1.md"
+  - "14-ai-development/work-items/AID-2026-330/session-evidence.md"
+  - "14-ai-development/work-items/AID-2026-330/blob-declaration-inventory.md"
+  - "14-ai-development/work-items/INDEX.md"
+
+verification:
+  status: NOT_RUN
+  commit_sha: ""
+  commands:
+    - "python scripts/ci/check_work_item_manifest_schema.py"
+    - "python scripts/ci/check_manifest_parse.py"
+    - "python scripts/ci/check_repository_hygiene.py --base <base> --head <head>"
+  evidence_refs: []
+
+evidence_tiering:
+  repository: "oahcom/AiMemoryBrainArchitecture"
+  change_class: DOC_EDITORIAL
+  review_level: R1
+  evidence_level: "1"
+  assessed_by: NOT_ASSIGNED
+  assessed_at: ""
+  rationale: >-
+    Documentation-only inventory based on pinned repository paths,
+    supplied command outputs, and supplied source excerpts. No executable
+    behavior or repository integrity result is asserted.
+  base_head: "f77b1e63f0aca6b93f14fee5bd5c04510053ee23"
+  classification_basis: "Documentation-only change boundary"
+  classification_confirmed_by: NOT_ASSIGNED
+  classification_record: ""
+  downgrade_justification: ""
+  downgrade_confirmed_by: ""
+  downgrade_confirmation_record: ""
+  escalation_target: ""
+  checker_result: NOT_RUN
+  declaration_path: "evidence-declaration.yaml"
+
+review:
+  status: NOT_STARTED
+  report_ref: ""
+  findings: []
+
+acceptance:
+  status: PENDING
+  record_ref: ""
+
+merge:
+  target_branch: main
+  merge_commit_sha: ""
+  status: NOT_MERGED
+
+implementation:
+  status: NOT_STARTED
+  summary: >-
+    Documentation-only inventory proposed. No repository write, executable
+    change, CI run, independent review, Owner acceptance, or merge is claimed.
+    The prompt snapshot remains a placeholder pending replacement with the
+    exact literal payload and computation of its raw-byte digest and length.
+  pull_request: PENDING
+  merge_commit: ""
+  implementation_commit: ""
+  ci_status: NOT_CLAIMED
+  files_changed:
+    - "14-ai-development/work-items/AID-2026-330/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-330/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-330/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-330/blob-declaration-inventory.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "python scripts/ci/check_work_item_manifest_schema.py"
+    - "python scripts/ci/check_manifest_parse.py"
+    - "python scripts/ci/check_repository_hygiene.py --base <base> --head <head>"
+
+session_evidence:
+  - role: DOCUMENTATION
+    issue_refs:
+      - "#1350"
+    implementing_ai_session: NOT_VERIFIED
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-330/prompt-v1.md"
+    executed_prompt_sha256: "9d2de6dc4f809008649ab535fff3e478b42e30fa23406cf477e43ae30868f4eb"
+    executed_prompt_bytes: 17201
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-330/session-evidence.md"
