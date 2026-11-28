@@ -51,8 +51,6 @@ session_evidence:
   - role: IMPLEMENTATION_SESSION
     issue_refs:
       - "#1237"
-      - "#1196"
-      - "#1208"
     implementing_ai_session: "6b08ffa5-bccc-83ec-ae24-ea58c1d913b9"
     session_evidence_ref: 14-ai-development/work-items/AID-2026-332/session-evidence.md
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-332/prompt-v1.md
