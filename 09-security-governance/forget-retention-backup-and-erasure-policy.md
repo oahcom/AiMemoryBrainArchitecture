@@ -2,6 +2,7 @@
 document_metadata:
   domain: security-governance
   role: design-specification
+  steward: "user-authorized operator (delegated by account owner)"
   lifecycle:
     approval:
       decision_status: Draft
@@ -412,7 +413,7 @@ These are specification-level cases only. No PASS is claimed without executable 
 
 ## Phase 3.5 governance reconciliation
 
-The authoritative I-owned Producer/Recipient Domain Inventory, ACK-to-Target mapping and Global Forget Completion Vector are consolidated in `phase-3.5-global-identity-forget-governance.md` §§3–5 and the detailed target contract.
+The authoritative I-owned Producer/Recipient Domain Inventory, ACK-to-Target mapping and Global Forget Completion Vector are historically referenced in `phase-3.5-global-identity-forget-governance.md` §§3–5 and the detailed target contract. The referenced document is unsubmitted and not restored; see [documentation gaps](../docs/governance/documentation-gaps.md).
 
 For avoidance of doubt:
 - I's global `ProducerDomainInventoryEpoch` and D's per-Forget `ProducerRegistrationHighWater` / `WorkItemBarrier` are separate and both required.

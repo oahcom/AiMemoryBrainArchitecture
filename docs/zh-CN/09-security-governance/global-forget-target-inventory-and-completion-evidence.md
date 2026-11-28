@@ -2,6 +2,7 @@
 document_metadata:
   domain: security-governance
   role: design-specification
+  steward: "user-authorized operator (delegated by account owner)"
   lifecycle:
     approval:
       decision_status: Draft
@@ -322,7 +323,7 @@ This contract does not prove deployed code, runtime suppression, physical media 
 
 ## Phase 3.5 reconciliation addendum
 
-The detailed I-owned identity and two-layer producer inventory mapping is normative candidate policy in `phase-3.5-global-identity-forget-governance.md` §§2–3. The following clarifications apply to this inventory contract:
+The detailed I-owned identity and two-layer producer inventory mapping is historically described as normative candidate policy in `phase-3.5-global-identity-forget-governance.md` §§2–3 (unsubmitted and not restored; see [documentation gaps](../../governance/documentation-gaps.md)). The following clarifications apply to this inventory contract:
 
 1. I's `ProducerDomainInventoryEpoch` covers the global catalogue of producer/recipient classes and instances. D's `ProducerRegistrationHighWater` / per-operation `WorkItemBarrier` covers concrete admitted work for one ForgetOperation. They are separate mandatory evidence references; neither substitutes for the other.
 2. A target inventory entry is not valid merely because a payload or module reports its own ID. Issuer, Principal, instance, ScopeRef coverage and owner must be authenticated and resolved.
