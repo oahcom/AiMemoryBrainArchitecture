@@ -115,12 +115,12 @@ session_evidence:
   - role: "IMPLEMENTATION_SESSION"
     issue_refs:
       - "#1341"
-    implementing_ai_session: "UNIQ-1432"
+    implementing_ai_session: NOT_RECORDED
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-341/prompt-v1.md"
     executed_prompt_sha256: "8d269e25ee950a36804ef729e1fe24c6d2ae39061ecb81f29a2e884089708a36"
     executed_prompt_bytes: 3043
     executed_prompt_provenance: "NOT_VERIFIED"
-    session_reference_status: "RECORDED"
+    session_reference_status: NOT_RECORDED
     session_evidence_ref: "14-ai-development/work-items/AID-2026-341/session-evidence.md"
 implementation:
   status: IN_PROGRESS
