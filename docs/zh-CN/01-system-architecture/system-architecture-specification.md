@@ -47,7 +47,9 @@ Brain 不负责：
 - 实体与关系管理。
 - 认知和时间限定。
 - 来源链和证据引用。
-- 保留与遗忘治理。
+- Canonical Forget 身份／生命周期／Fence 机制（Owner D）；全局授权、保留／法律保全、外部副本策略、全局目标清单及全局完成标准（Owner I）。
+
+Global Forget Completion 必须由 Owner D 与每一位相关执行 Owner 根据经这些 Owner 接受的完成证据契约共同确定。Owner D 和 Owner I 均不得单方面宣布全局完成。该契约仍有待相关 Owner 接受；本方向性要求本身不构成相关 Owner 已接受该契约的证据。
 
 ### 4.2 Memory Compiler（记忆编译器）
 
