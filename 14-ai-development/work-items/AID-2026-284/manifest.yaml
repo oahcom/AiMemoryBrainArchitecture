@@ -36,6 +36,8 @@ documentation:
     relationship: structured prompt snapshot used to derive the work-item record
   - path: "14-ai-development/work-items/INDEX.md"
     relationship: one work-item registry row
+  - path: "reviews/governance/AID-2026-284-independent-review-2026-11-27.md"
+    relationship: independent exact-head review report; non-canonical review artifact associated with AID-2026-284
 session_evidence:
   - role: "DELEGATED_REQ04_AC1_SCOPE_CONFIRMATION"
     issue_refs:
