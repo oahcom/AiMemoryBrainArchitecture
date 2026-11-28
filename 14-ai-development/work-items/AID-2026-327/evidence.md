@@ -33,7 +33,9 @@ document_metadata:
     canonical_status: Non-Canonical
     canonical_scope: "Evidence for recording the final Owner D-10 cursor authority decision."
     canonical_scope_id: "ai-development/aid-2026-327-evidence"
-    canonical_scope_keywords: ["AID-2026-327", "d10-cursor-authority"]
+    canonical_scope_keywords:
+      - "AID-2026-327"
+      - "d10-cursor-authority"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
