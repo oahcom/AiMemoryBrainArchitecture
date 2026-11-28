@@ -78,6 +78,16 @@ The second session addressed independent-review findings, expanded regression co
 
 ## Actual AI input
 
+The following delivery records were observed for the work item. Session `6b090a00-bdcc-83ec-9145-a45e515abe8d` (acct3) sent the three prior-round inputs directly through the P0 API using `chatgpt_send.py`:
+
+- `SEND 32-unblock-1443.md -> 200 respLen=2042492 in 38s`
+- `SEND 33-unblock-1443-session-field.md -> 200 respLen=148635 in 15s`
+- `SEND 34-unblock-1443-index-and-bytes.md -> 200 respLen=1438018 in 28s`
+
+The corresponding replies were written to `reply-6b090a00-155816.md` (9046 chars), `reply-6b090a00-161401.md` (1083 chars), and `reply-6b090a00-164907.md` (5731 chars), respectively. The current request is the fourth delivery in this sequence.
+
+The two implementation-session prompt snapshots are registered in `14-ai-development/work-items/AID-2026-016/manifest.yaml` under `session_evidence`: `prompt-v1.md` (9998 B), SHA-256 `0aeeb697cfd88b1f972724a46c6385c978069ce3e44e37330ed26dc56d5f80dc`; and `prompt-v2.md` (47050 B), SHA-256 `9394cc50b1053dcee0cdeb177ccd998f4b0e54388020ff8d590fbbf2783da69e`. Each snapshot is associated there with its corresponding implementing AI session.
+
 ### First implementation session
 
 Executed prompt snapshot:
@@ -118,6 +128,14 @@ Two deliveries were recorded:
 The final prompt-v2 SHA-256 and byte count are measured over the assembled final file, including its GOV-DOC-002 frontmatter, and are recorded in the manifest's second session evidence entry.
 
 ## AI-visible output
+
+The two implementation sessions returned the following implementation outputs.
+
+The first implementation session returned EDIT blocks and a NEWFILE artifact. Its changes introduced the public `content_hash_for(rendered_content: &str) -> String` helper and the `ContextError::ContentHashMismatch` variant, added hash comparisons to `ContextEntryVersion::validate()` and `validate_edit_entry()`, and updated the production-side shared hash generation. It also clarified the validated-entry precondition of `snapshot_hash()`, updated inline test fixtures, and added the initial `content_hash_integrity.rs` integration test file.
+
+The second implementation session returned seven EDIT blocks covering the corrective changes. These included additional edit-entry and empty-content-hash regression coverage, assertions for commit and edit-entry paths, and the brain-cli producer correction. The CLI now generates the canonical content hash through `memory_context::content_hash_for(&rendered_content)` instead of its local bare-hex content hash generation. The local `sha256_hex` helper was retained for its other non-content-hash uses.
+
+The resulting `content_hash_integrity.rs` integration test file contains 192 lines and eight named tests. After correction, mutation checks V1 through V4 produced 2, 1, 1, and 2 red tests, respectively.
 
 ### First implementation session
 
