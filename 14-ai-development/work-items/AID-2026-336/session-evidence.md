@@ -1,10 +1,48 @@
 ---
 document_metadata:
-  steward: USER-PRINCIPAL-DELEGATED
-  domain: repository-governance
-  role: session-evidence
-  lifecycle: active
-  authority: supporting-evidence
+  steward: "user-authorized operator (delegated by account owner)"
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-336/manifest.yaml"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-28"
+      last_verification_note: "Records supplied session evidence; executing session identity is not asserted."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Session evidence for AID-2026-336"
+    canonical_scope_id: "ai-development/aid-2026-336-session-evidence"
+    canonical_scope_keywords:
+      - "manifest blob pin"
+      - "session evidence"
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
 ---
 
 # AID-2026-336 Session Evidence
