@@ -149,6 +149,14 @@ acceptance:
   record_ref: ""
   acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
 
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-084/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-084/session-evidence-944.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
+
 session_evidence:
   - role: IMPLEMENTER
     issue_refs:
@@ -160,11 +168,3 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-084/session-evidence-944.md
-
-documentation:
-  - path: "14-ai-development/work-items/AID-2026-084/prompt-v1.md"
-    relationship: reference
-  - path: "14-ai-development/work-items/AID-2026-084/session-evidence-944.md"
-    relationship: reference
-  - path: "14-ai-development/work-items/INDEX.md"
-    relationship: reference
