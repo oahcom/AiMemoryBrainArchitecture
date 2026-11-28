@@ -72,19 +72,34 @@ failure when the pinned window is absent, a target-tree-only claim ledger,
 violations rather than incomplete input, and a merge-group-aware workflow with
 the missing trigger added.
 
+A third ruling covered a change on main during implementation: PR #1432 and PR
+#1477 merged, and #1477 replaced the checker with a tree-only directory-diff
+verdict that rejects added files under an existing work-item directory and
+treats a deleted directory as a failure. The ruling required replacing that
+verdict with the manifest-identity rule, keeping this branch's version of the
+two checker files when merging `origin/main`, and leaving #1432's lifecycle
+untouched because it is already merged.
+
 ## AI-visible output
 
 Measured results.
 
 ```text
-origin/main                                         31c1e5d83e7dad326dbd4b69d4a8e19534718ff1
+origin/main at start of work                        31c1e5d83e7dad326dbd4b69d4a8e19534718ff1
+origin/main merged into this branch                 473f06d76f7a06ff91615a2dae0ddd75295391c0
 old rule location (M/D branch)                      #1413 head 54c44fbac,
                                                     competing_claims(), status in M/D/T/R/C
+tree-only rule replaced                             #1477, commit a0500d519
 old rule on the pinned window                       VIOLATION on 2 of 8 commits
                                                     (31c1e5d83: 45 ids; 6482901cb: AID-2026-291)
 new rule on the pinned window                       PASS on 8 of 8, duplicate_declarations=0
 test suite                                          Ran 28 tests, OK
 ```
+
+Deleted and additive outcomes: a same-path deletion and an auxiliary file added
+inside an existing work-item directory both PASS. #1477 reported the first as
+`DELETION` with exit 1 and the second as `VIOLATION new_paths=...`; the ruling
+replaced that verdict rather than layering on top of it.
 
 Duplicate and identity cases executed by the suite: two work-item directories
 declaring one id (VIOLATION), base record plus a second candidate path in the

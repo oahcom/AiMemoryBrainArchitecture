@@ -79,13 +79,17 @@ a merge-group-aware workflow. The exact ruling text is in the session record.
 
 Measured state of this change.
 
-Old rule location: the modification/deletion branch exists at `#1413` head
-`54c44fbac`, `scripts/ci/check_work_item_uniqueness.py`, `competing_claims()`,
-`elif status in ("M", "D", "T", "R", "C")`. The copy kept as the regression
-oracle carries the same branch at
-`scripts/ci/fixtures/legacy_shared_id_rule_1413.py:160`. The version on main at
-the observed commit had no such branch: it derived claims from directory names
-and `merge-base`.
+Two earlier rules produced false verdicts. The first, in the `#1413` carrier,
+treated a modified or deleted path under an id the target branch already owned
+as a competing declaration: `competing_claims()`,
+`elif status in ("M", "D", "T", "R", "C")`, present in the pinned oracle at
+`scripts/ci/fixtures/legacy_shared_id_rule_1413.py:160`. The second is the
+tree-only verdict merged by PR #1477 (commit `a0500d519`): it reported
+`VIOLATION new_paths=...` for any file added under an existing work-item
+directory and `DELETION` with exit 1 for a directory absent from the candidate,
+without ever reading a manifest identity. Section 4.4 requires both of those
+outcomes to pass, so this change replaces the tree-only verdict rather than
+adding to it.
 
 Pinned first-parent window (base = first parent, old rule = the #1413 copy):
 
@@ -164,5 +168,11 @@ Ran 28 tests
 OK
 ```
 
-No merge, no force push, no branch-protection change, and no real merge-queue
-run is claimed by this document.
+The branch carries one merge of `origin/main` at
+`473f06d76f7a06ff91615a2dae0ddd75295391c0`; on the two checker files the merge
+kept this branch's version and discarded #1477's tree-only implementation and
+its incompatible tests, as the ruling required. No other file was resolved by
+whole-side selection.
+
+No merge of the pull request, no force push, no branch-protection change, and
+no real merge-queue run is claimed by this document.

@@ -1,5 +1,5 @@
 work_item_id: AID-2026-327
-title: "Replace shared-ID modification/deletion rejection with tree-level uniqueness"
+title: "Replace tree-only work-item rejection with manifest-ID uniqueness"
 class: GATE/TEST
 risk: R1
 risk_rationale: >-
@@ -17,7 +17,7 @@ date: "2026-11-28"
 repository:
   name: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: 31c1e5d83e7dad326dbd4b69d4a8e19534718ff1
+base_commit_sha: 473f06d76f7a06ff91615a2dae0ddd75295391c0
 prompt_status: RECORDED_NOT_FROZEN
 prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
 identifier_allocation:
@@ -50,17 +50,21 @@ identifier_allocation:
     immediately before opening or updating the pull request.
 scope:
   objective: >-
-    Make the work-item uniqueness gate reject duplicate work-item id
-    declarations instead of treating a modified or deleted path under a shared
-    id as a competing claim, and make the workflow evaluate the real
-    merge-group candidate against the event's base.
+    Replace the tree-only work-item uniqueness verdict with a manifest-identity
+    rule: a violation is a duplicate declaration of one work-item id at distinct
+    record paths, an identity conflict between a record's path and its content,
+    or a newly introduced id already claimed by another pull request. Modifying
+    or deleting a record at the same path, and adding auxiliary files inside an
+    existing work-item directory, are not uniqueness violations.
   changes:
     - path: "scripts/ci/check_work_item_uniqueness.py"
       detail: >-
         Enumerate canonical work-item manifests, read each id from content
         across the supported legacy shapes, reject duplicate declarations and
         identity conflicts, and keep the claim ledger authoritative on the
-        target tree only.
+        target tree only. Replaces the tree-only directory-diff verdict merged
+        by PR #1477: deleting a record path or adding an auxiliary file inside
+        an existing work-item directory is no longer a uniqueness failure.
     - path: "scripts/ci/test_work_item_uniqueness.py"
       detail: >-
         Cover canonical and legacy record discovery, duplicate declarations,
@@ -89,6 +93,7 @@ non_goals:
   - "Enabling the merge queue or changing branch protection through the API"
   - "Introducing a shared allocation ledger or atomic allocator"
   - "Proving a real merge-queue run with two candidates before the queue is enabled"
+  - "Deciding whether deleting a work item is legitimate: the uniqueness gate no longer judges deletion at all"
 evidence:
   record: "14-ai-development/work-items/AID-2026-327/evidence.md"
   prompt: "14-ai-development/work-items/AID-2026-327/prompt-v1.md"
