@@ -7,6 +7,7 @@ retrieval_semantics_acceptance: F_ACCEPTS_RETRIEVAL_SEMANTICS
 document_metadata:
   domain: memory-runtime
   role: design-specification
+  steward: "user-authorized operator (delegated by account owner)"
   lifecycle:
     approval:
       decision_status: Draft
@@ -56,7 +57,7 @@ document_metadata:
 **Owner:** Session F — Memory Runtime  
 **Status:** DECIDED for authority/safety boundaries; CANDIDATE for topology; TO_VALIDATE for numeric budgets.  
 **Baseline:** main at e443b23f8a179ad12c163722ad93bc646fd3a80a.  
-**Phase 3.5 dependency review:** D/E/I/G/H/C/B owner-branch contracts are present and were re-read at the exact heads recorded in `phase-3.5-forget-suppression-and-cursor-consumption.md`. F's consumer semantics are DECIDED; callable cross-module schemas, Storage realization and runtime conformance remain OPEN. No wire schema is frozen by this document.
+**Phase 3.5 dependency review:** D/E/I/G/H/C/B owner-branch contracts are present and were re-read at the exact heads historically recorded in `phase-3.5-forget-suppression-and-cursor-consumption.md` (unsubmitted and not restored; see [GAP-01](../docs/governance/documentation-gaps.md)). F's consumer semantics are DECIDED; callable cross-module schemas, Storage realization and runtime conformance remain OPEN. No wire schema is frozen by this document.
 
 ## 1. Purpose
 Memory Runtime is the Brain's bounded online read/activation execution layer. It interprets Recall, authorizes scope, routes retrieval across canonical and derived representations, produces evidence-bearing candidates, recommends activation, and maintains disposable Working Sets/caches. It is not an Agent Runtime, planner, tool executor, canonical store, compiler, or Context Version authority. Default Recall is deterministic and does not synchronously invoke a large LLM.
@@ -145,7 +146,7 @@ OPEN: D canonical read/lifecycle snapshot consistency; E watermark granularity/r
 
 ## Phase 3.5 — Forget and Cursor Integration
 
-The normative F consumer matrix, retrieval-stage suppression matrix, cache/Working Set invalidation contract, index rebuild contract and ten conformance specifications are maintained in [phase-3.5-forget-suppression-and-cursor-consumption.md](phase-3.5-forget-suppression-and-cursor-consumption.md).
+The normative F consumer matrix, retrieval-stage suppression matrix, cache/Working Set invalidation contract, index rebuild contract and ten conformance specifications are historically associated with `phase-3.5-forget-suppression-and-cursor-consumption.md` (unsubmitted and not restored; see [documentation gaps](../docs/governance/documentation-gaps.md)).
 
 Runtime consumes D's per-authority global CanonicalCommitCursor, per-aggregate AggregateRevision, per-Memory LifecycleEventCursor and ForgetFenceGeneration as separate types; F owns per-index/per-partition IndexWatermark; I owns PermissionEpoch; G owns ContextVersion. These values are not interchangeable. IndexWatermark is only contiguous projection freshness evidence and never proves Forget completion.
 
