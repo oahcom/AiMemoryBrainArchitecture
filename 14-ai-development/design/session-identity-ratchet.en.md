@@ -410,3 +410,20 @@ It does not mean:
 - Every historical session-evidence record is authentic.
 
 Those claims require separate evidence and separate controls.
+
+
+## 12. Why a diff against the base, not a baseline snapshot
+
+The 2026-11-28 migration was justified by an 83-run workflow sample: 65 failures and 18 successes, approximately a 78% failure rate. The most recent eight results were failure, failure, failure, failure, success, success, failure, failure. The checker on main reported 92 violations: 91 baselined and one new. The sole new finding was SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-297/manifest.yaml#1, introduced by PR #1513. The inventory also reported no_evidence_section=39. These measurements indicate that persistent failures largely came from snapshot attribution of debt already present in each PR base, not from each PR introducing violations.
+
+The snapshot mechanism has two recovery deadlocks. --write-baseline only permits shrinkage and exits 1 when current - previous is non-empty. --bootstrap-baseline --base-ref REF requires the referenced tree not to contain the baseline file, but the baseline is already on main. Once the baseline lands on the target branch, ordinary operations cannot re-anchor it. The shared file also concentrates ownership and creates recurring conflicts when parallel PRs update it.
+
+Diff mode uses violations(current_tree) - violations(base_tree) as the PR-increment criterion. Existing debt is absorbed automatically; PRs need not modify or merge a baseline file; no human needs to remember whether a snapshot is current; and the check can be added to an existing required job without creating a new required context. A finding present in base and absent in HEAD is a repair, not an addition. A finding absent from base and present in HEAD must be printed individually with the NEW: prefix and block with exit 1.
+
+Diff mode does not read, write, or require the baseline file. SESSION_YAML_INVALID in the current tree always fails; invalid YAML in the base tree is reported as existing debt and is not counted as an increment. An unresolvable ref, non-Git work tree, shallow clone, or missing Git object fails closed with exit 2. --diff-base is mutually exclusive with the legacy baseline mutation flags.
+
+Existing debt does not disappear merely because the differential gate exists. A violation introduced by a PR still fails, but a violation introduced by a direct push to main becomes debt in the next PR base. That gap must be exposed by a periodic full-tree scan and alert on main; the PR diff gate must not be represented as detecting it. The differential gate prevents PR increments; it does not prove that main is debt-free.
+
+This check is a step inside Repository hygiene (hard gate), preserving its job ID, job name, and existing required context. Session identity ratchet is not among the 16 required contexts declared in PR-GOVERNANCE-001 §7. The effective enforcement point is the step inside Repository hygiene (hard gate). Adding a new required context would leave already-open PRs with a permanently absent check run; the supplied measurement found that only 2 of 18 open PRs had ever produced the old ratchet check run.
+
+The 83-run sample, 65/18 result, recent-eight sequence, 92/91/1 counts, specific AID-2026-297 finding, both recovery deadlocks, and required-job migration rationale are measurements supplied by the coordinating operator on 2026-11-28; they were not re-measured by this PR.
