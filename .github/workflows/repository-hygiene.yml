@@ -146,23 +146,12 @@ jobs:
       - name: Self-check source revision pointer verification
         run: python3 scripts/test_check_source_revision_pointers.py
 
-      - name: Ratchet source revision pointers
-        env:
-          BASELINE_REF: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -n "$BASELINE_REF" || {
-            echo "INCOMPLETE: event has no authoritative base commit"
-            exit 2
-          }
-          git fetch --no-tags origin "$BASELINE_REF"
-          python3 scripts/ci/gate_ratchet.py \
-            --baseline-id source-revision-pointers \
-            --baseline scripts/ci/baselines/source-revision-pointers.txt \
-            --baseline-ref "$BASELINE_REF" \
-            --format schema \
-            --command "bash -o pipefail -c 'python3 scripts/check_source_revision_pointers.py | sed -n -e \"/^STALE /p\" -e \"/^UNRESOLVED /p\" -e \"/^NON_BLOB_REFERENCE /p\" -e \"/^BAD_DEREFERENCE /p\"'"
+      # The ratchet retired on the day it went green: AID-2026-342 replaced the
+      # last two NON_BLOB_REFERENCE entries, so this is now a hard gate and its
+      # baseline file is deleted. A baseline with nothing left in it is the
+      # exemption the ratchet rules forbid.
+      - name: Verify source revision pointers
+        run: python3 scripts/check_source_revision_pointers.py
 
       # Each listed file is unreachable by unittest discover; discovery here would silently run
       # nothing. The explicit list is the defect tracked by #834.

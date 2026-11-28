@@ -20,7 +20,6 @@ from pathlib import Path
 BASELINES = {
     "manifest-blob-pins": "scripts/ci/baselines/manifest-blob-pins.txt",
     "bilingual-docs": "scripts/ci/baselines/bilingual-docs.txt",
-    "source-revision-pointers": "scripts/ci/baselines/source-revision-pointers.txt",
 }
 
 NUMBERED_PREFIX = re.compile(r"^\d{3,4}\.\s+")
