@@ -1,0 +1,126 @@
+work_item_id: AID-2026-294
+title: "Restore merge_group wiring for GOV-DOC-002 metadata checks and gate its recurrence"
+class: GATE/CI/TEST
+risk: R2
+risk_rationale: >-
+  Restores a required check's merge-queue subscription that #1453 dropped, and
+  adds a repository-hygiene gate over the declared required contexts. The
+  workflow edits change which events schedule an existing job; they do not add,
+  remove or rename a required context, and they do not touch branch protection,
+  rulesets or merge-queue settings.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: a0500d5196dc990d899d8ccaca2e270faaf29efc
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: a0500d5196dc990d899d8ccaca2e270faaf29efc
+  assigned_id: AID-2026-294
+  allocation_rule: >-
+    Scanned 14-ai-development/work-items/ on main at a0500d519 and the whole
+    tracked tree for the literal AID-2026-294; the newest allocated directories
+    are AID-2026-290 and AID-2026-291 and the string occurs nowhere. The number
+    was therefore free when this work item was created.
+  recheck_rule: >-
+    Recheck the directory and the all-state PR listing immediately before
+    opening or updating the PR.
+scope:
+  objective: >-
+    Put `GOV-DOC-002 metadata checks` back on the merge-queue candidate, restore
+    the fail-closed merge_group base/head resolution that #1453 removed with it,
+    serialize the workflow by target branch, and make the loss detectable.
+  changes:
+    - path: ".github/workflows/document-management.yml"
+      detail: >-
+        Restore `merge_group: types: [checks_requested]`; resolve the
+        uniqueness base from `merge_group.base_sha` and the head from
+        `merge_group.head_sha`; key the concurrency group off the target branch
+        for pull_request, merge_group and push, with `cancel-in-progress: false`
+        and `queue: max`.
+    - path: ".github/workflows/gates.yml"
+      detail: >-
+        Correct the required-context count comment from six to seven; the file
+        produces seven of the sixteen declared contexts.
+    - path: ".github/workflows/repository-hygiene.yml"
+      detail: >-
+        Run the new wiring gate and its self-check beside the existing
+        declared-check-contexts steps.
+    - path: "scripts/check_required_contexts_merge_group.py"
+      detail: >-
+        New read-only gate: declared context -> producing workflow must subscribe
+        to merge_group with checks_requested; document-management.yml concurrency
+        must serialize by target branch; a workflow's required-context count
+        comment must match the declared contexts it produces.
+    - path: "scripts/test_check_required_contexts_merge_group.py"
+      detail: "Regression cases for each of the three conditions, positive and negative."
+    - path: "14-ai-development/work-items/AID-2026-294/"
+      detail: "Record the prompt snapshot and session evidence."
+    - path: "14-ai-development/work-items/INDEX.md"
+      detail: "Register AID-2026-294."
+  untouched:
+    - "branch protection and repository rulesets"
+    - "merge queue enablement"
+    - "the sixteen required context names"
+    - "all other pull requests and work items"
+non_goals:
+  - "Enabling the merge queue or changing branch protection through the API"
+  - "Claiming a real merge_group run while the queue is not enabled"
+  - "Replacing the full merge-queue membership and per-PR body validation"
+evidence:
+  record: "14-ai-development/work-items/AID-2026-294/session-evidence.md"
+  prompt: "14-ai-development/work-items/AID-2026-294/prompt-v1.md"
+  session: "14-ai-development/work-items/AID-2026-294/session-evidence.md"
+documentation:
+  - path: ".github/workflows/document-management.yml"
+    relationship: implementation
+  - path: "scripts/check_required_contexts_merge_group.py"
+    relationship: implementation
+  - path: "scripts/test_check_required_contexts_merge_group.py"
+    relationship: implementation
+  - path: "14-ai-development/work-items/AID-2026-294/session-evidence.md"
+    relationship: evidence
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1453"
+    implementing_ai_session: "9router-hermes / MQ-FIX-01"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-294/prompt-v1.md"
+    executed_prompt_sha256: "056b9208fb9425913d3fa57cc8f30414423119b2a98908d706a58f0ed138de55"
+    executed_prompt_bytes: 25170
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-294/session-evidence.md"
+implementation:
+  status: IN_PROGRESS
+  summary: >-
+    Restores the merge_group subscription and the fail-closed merge-group base
+    and head resolution that #1453 removed from document-management.yml,
+    serializes the workflow by target branch with `queue: max`, corrects the
+    gates.yml context count, and adds a self-tested repository-hygiene gate that
+    fails when a declared required context's workflow stops subscribing to
+    merge_group.
+  files_changed:
+    - ".github/workflows/document-management.yml"
+    - ".github/workflows/gates.yml"
+    - ".github/workflows/repository-hygiene.yml"
+    - "scripts/check_required_contexts_merge_group.py"
+    - "scripts/test_check_required_contexts_merge_group.py"
+    - "14-ai-development/work-items/AID-2026-294/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-294/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-294/session-evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "Gate self-check: 7 cases covering missing merge_group, wrong merge_group type, missing queue: max, github.ref_name, a missing push selector, and wrong/right count comments."
+    - "Negative: the gate exits 1 on the clean pre-fix origin/main tree with five violations."
+    - "Positive: the gate exits 0 on the repaired tree with all sixteen contexts."
+    - "scripts/test_check_document_management.py: 376/376 passed."
+    - "scripts/test_check_repository_hygiene.py: 107 tests OK (skipped=1)."
