@@ -77,3 +77,26 @@ implementation:
     - "python -m unittest discover -s tests  # 1256 tests, 2 pre-existing failures (3.12.3)"
     - "base ea7bdd3: same commands -> 16 tests / 1 failure, 1251 tests / 3 failures"
     - "GitHub Actions on 0e11c33: unit tests success, tools/tests guards success, e2e success, SDK integration success"
+
+# Initial registration only:
+# permits this newly introduced Work Item to enter main before its
+# implementation commit is reachable from the target branch.
+prompt_file: "14-ai-development/work-items/AID-2026-313/prompt-v1.md"
+
+# SHA-256 of the exact prompt-v1.md bytes.
+# The checker independently recalculates this from both the head file
+# and the immutable Git blob.
+prompt_sha256: "7fb1d53aaf31c80a95222872f9b8608fd5208953c79ee2560051ead6b7b74679"
+
+# Git blob object ID of the exact same prompt-v1.md bytes.
+# This is a blob OID, not a commit SHA.
+prompt_file_blob_sha: "4f5e6c0985d3bad62b9fbae5fa523b1b3fe4e530"
+
+# Explicitly declares this as the narrowly scoped first-registration state.
+prompt_commit_trace_initial_registration: true
+
+# IMPORTANT:
+# Do not add prompt_file_commit_sha here.
+# Do not add implementation.implementation_commit_sha here.
+# Do not add implementation.merge_commit_sha here.
+# The initial-registration exception rejects those pins.
