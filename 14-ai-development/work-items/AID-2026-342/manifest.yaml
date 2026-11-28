@@ -76,7 +76,8 @@ documentation:
 
 session_evidence:
   - role: "AI-assisted governance and CI documentation repair; AI provides task design, document text, and validation criteria, while the authorized operator performs repository edits and commands."
-    issue_refs: []
+    issue_refs:
+      - "#1267"
     implementing_ai_session: "6b08ffa5-bccc-83ec-ae24-ea58c1d913b9"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-342/session-evidence.md"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-342/prompt-v1.md"
