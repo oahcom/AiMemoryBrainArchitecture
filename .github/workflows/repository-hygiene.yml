@@ -147,9 +147,20 @@ jobs:
         run: python3 scripts/test_check_source_revision_pointers.py
 
       - name: Ratchet source revision pointers
+        env:
+          BASELINE_REF: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+        shell: bash
         run: |
+          set -euo pipefail
+          test -n "$BASELINE_REF" || {
+            echo "INCOMPLETE: event has no authoritative base commit"
+            exit 2
+          }
+          git fetch --no-tags origin "$BASELINE_REF"
           python3 scripts/ci/gate_ratchet.py \
+            --baseline-id source-revision-pointers \
             --baseline scripts/ci/baselines/source-revision-pointers.txt \
+            --baseline-ref "$BASELINE_REF" \
             --format schema \
             --command "bash -o pipefail -c 'python3 scripts/check_source_revision_pointers.py | sed -n -e \"/^STALE /p\" -e \"/^UNRESOLVED /p\" -e \"/^NON_BLOB_REFERENCE /p\" -e \"/^BAD_DEREFERENCE /p\"'"
 
