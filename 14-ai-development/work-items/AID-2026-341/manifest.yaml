@@ -1,0 +1,153 @@
+work_item_id: AID-2026-341
+title: "Replace tree-only work-item rejection with manifest-ID uniqueness"
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  Narrows one CI gate's rejection rule to the duplicate declaration it was
+  meant to catch, and adds the merge_group trigger this workflow was missing.
+  No branch protection, merge queue setting, or existing work-item record is
+  modified.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 473f06d76f7a06ff91615a2dae0ddd75295391c0
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+prompt_file: "14-ai-development/work-items/AID-2026-341/prompt-v1.md"
+prompt_sha256: "8d269e25ee950a36804ef729e1fe24c6d2ae39061ecb81f29a2e884089708a36"
+prompt_file_blob_sha: "62f23ae533ba358dab4319ee255688554a8c67d3"
+prompt_commit_trace_initial_registration: true
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: 31c1e5d83e7dad326dbd4b69d4a8e19534718ff1
+  assigned_id: AID-2026-341
+  scanned_refs:
+    - "refs/heads/main at 31c1e5d83e7dad326dbd4b69d4a8e19534718ff1"
+    - "pulls?state=all&per_page=100 pages 1 through 4 (titles and bodies)"
+  scanned_identity_sources:
+    - "14-ai-development/work-items/*/manifest.yaml work_item_id fields"
+    - "14-ai-development/work-items/*/manifest.yaml legacy aid fields"
+    - "14-ai-development/work-items/*/manifest.yaml legacy work_item.proposed_id fields"
+  observed_max_on_main: "AID-2026-325"
+  observed_max_in_pull_requests: "AID-2026-326"
+  conflict_result: >-
+    No AID-2026-341 directory, manifest, or pull-request mention was found in
+    the scanned ranges.
+  allocation_method: NON_ATOMIC_SCAN
+  reservation_status: NOT_RESERVED
+  shared_allocator: NOT_PRESENT
+  allocation_rule: >-
+    The repository has no shared allocation ledger or atomic allocator at the
+    scanned commit. The number was chosen by scanning the work-items tree and
+    all-state pull requests. That scan proves only the absence of a conflict in
+    the scanned ranges; it is not an atomic reservation and does not prove
+    concurrent-allocation safety.
+  recheck_rule: >-
+    Re-scan the work-items tree and the all-state pull-request listing
+    immediately before opening or updating the pull request.
+scope:
+  objective: >-
+    Replace the tree-only work-item uniqueness verdict with a manifest-identity
+    rule: a violation is a duplicate declaration of one work-item id at distinct
+    record paths, an identity conflict between a record's path and its content,
+    or a newly introduced id already claimed by another pull request. Modifying
+    or deleting a record at the same path, and adding auxiliary files inside an
+    existing work-item directory, are not uniqueness violations.
+  changes:
+    - path: "scripts/ci/check_work_item_uniqueness.py"
+      detail: >-
+        Enumerate canonical work-item manifests, read each id from content
+        across the supported legacy shapes, reject duplicate declarations and
+        identity conflicts, and keep the claim ledger authoritative on the
+        target tree only. Replaces the tree-only directory-diff verdict merged
+        by PR #1477: deleting a record path or adding an auxiliary file inside
+        an existing work-item directory is no longer a uniqueness failure.
+    - path: "scripts/ci/test_work_item_uniqueness.py"
+      detail: >-
+        Cover canonical and legacy record discovery, duplicate declarations,
+        identity conflicts, claim-ledger trust boundaries, same-path
+        modifications, deletions, race replay, merge-candidate evaluation,
+        workflow contracts, and the pinned first-parent regression window.
+    - path: "scripts/ci/fixtures/legacy_shared_id_rule_1413.py"
+      detail: >-
+        Verbatim copy of the #1413 rule as the regression oracle. Historical
+        evidence only; not production code.
+    - path: ".github/workflows/document-management.yml"
+      detail: >-
+        Add the missing merge_group trigger, use merge_group.head_sha and
+        merge_group.base_sha, serialize on merge_group.base_ref, and fail
+        closed on unrecognized events.
+    - path: "14-ai-development/work-items/AID-2026-341/"
+      detail: "Record the implementation contract, evidence, prompt snapshot and session evidence."
+    - path: "14-ai-development/work-items/INDEX.md"
+      detail: "Register AID-2026-341."
+  untouched:
+    - "all existing work-item records"
+    - "GitHub merge queue and branch protection settings"
+    - "Issue #1341 and every other Issue body"
+    - "pull requests other than this carrier"
+non_goals:
+  - "Enabling the merge queue or changing branch protection through the API"
+  - "Introducing a shared allocation ledger or atomic allocator"
+  - "Proving a real merge-queue run with two candidates before the queue is enabled"
+  - "Deciding whether deleting a work item is legitimate: the uniqueness gate no longer judges deletion at all"
+evidence:
+  record: "14-ai-development/work-items/AID-2026-341/evidence.md"
+  prompt: "14-ai-development/work-items/AID-2026-341/prompt-v1.md"
+  session: "14-ai-development/work-items/AID-2026-341/session-evidence.md"
+documentation:
+  - path: "scripts/ci/check_work_item_uniqueness.py"
+    relationship: implementation
+  - path: "scripts/ci/test_work_item_uniqueness.py"
+    relationship: implementation
+  - path: ".github/workflows/document-management.yml"
+    relationship: implementation
+  - path: "14-ai-development/work-items/AID-2026-341/evidence.md"
+    relationship: evidence
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1341"
+    implementing_ai_session: "UNIQ-1432"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-341/prompt-v1.md"
+    executed_prompt_sha256: "8d269e25ee950a36804ef729e1fe24c6d2ae39061ecb81f29a2e884089708a36"
+    executed_prompt_bytes: 3043
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-341/session-evidence.md"
+implementation:
+  status: IN_PROGRESS
+  summary: >-
+    The gate now enumerates canonical work-item manifests, reads each identity
+    from content across the supported legacy shapes, and rejects duplicate
+    declarations, missing or mismatched identities, and newly introduced ids
+    blocked by another pull request's target-tree claim. Shared-id modifications
+    and deletions pass. The workflow evaluates the merge-group candidate against
+    the merge-group base and no longer reads a stale pull_request base SHA.
+  files_changed:
+    - "scripts/ci/check_work_item_uniqueness.py"
+    - "scripts/ci/test_work_item_uniqueness.py"
+    - "scripts/ci/fixtures/legacy_shared_id_rule_1413.py"
+    - ".github/workflows/document-management.yml"
+    - "14-ai-development/work-items/AID-2026-341/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-341/evidence.md"
+    - "14-ai-development/work-items/AID-2026-341/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-341/session-evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "Duplicate: two work-item directories declaring one id must VIOLATION."
+    - "Duplicate: a merge candidate holding the base record and a second path must VIOLATION."
+    - "Identity: a record with no supported identity field must VIOLATION."
+    - "Identity: a record whose id disagrees with its directory must VIOLATION."
+    - "Ledger: another pull request's CLAIMED entry must VIOLATION; ABANDONED must not."
+    - "Ledger: a candidate-supplied ledger must be INCOMPLETE, never authoritative."
+    - "Ledger: --pull-request without --repository must be INCOMPLETE."
+    - "Shared id: same-path modification and deletion must PASS."
+    - "Regression: the pinned eight-commit window must keep the two measured old-rule rejections and pass all eight under the new rule."
