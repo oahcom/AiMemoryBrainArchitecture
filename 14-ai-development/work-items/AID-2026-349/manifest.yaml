@@ -1,0 +1,147 @@
+work_item_id: AID-2026-349
+title: "Disclose that the Phase 3.5 forget-suppression contract is unsubmitted and not restored"
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Documentation-only disclosure correction across six existing Markdown files.
+  Two canonical runtime documents and four mirrors stop presenting a nonexistent
+  file as the authoritative location of a contract. No normative requirement is
+  added, removed or reinterpreted; the sentence already present in
+  runtime-overview.md is applied to the two sibling documents. The only new
+  obligation is the mandated DM-15 steward field on the six changed documents.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "b5dbe22ea7ea8a62f4efc21815bbdbeb033b3302"
+tracking_issue: "#1564"
+
+scope:
+  summary: >-
+    05-memory-runtime/retrieval-engine.md and 05-memory-runtime/working-set-and-cache.md
+    both named "Phase 3.5 Runtime Forget Suppression and Typed Cursor Consumer
+    Contract" as the detailed contract and linked it as if it existed. The file
+    does not exist anywhere in the tree. runtime-overview.md was already
+    corrected to disclose this in AID-2026-340; the two siblings were not. This
+    change applies the same disclosure to both canonical documents and adds the
+    corresponding disclosure sentence to their four mirrors.
+  in_scope:
+    - "05-memory-runtime/retrieval-engine.md: retarget the title link and state that the contract is unsubmitted and not restored."
+    - "05-memory-runtime/working-set-and-cache.md: the same."
+    - "docs/en/05-memory-runtime/retrieval-engine.md and docs/en/05-memory-runtime/working-set-and-cache.md: add the disclosure sentence."
+    - "docs/zh-CN/05-memory-runtime/retrieval-engine.md and docs/zh-CN/05-memory-runtime/working-set-and-cache.md: add the disclosure sentence."
+    - "Add the mandated DM-15 steward field to the six changed documents."
+    - "Register the work item and its INDEX.md row."
+  files_out_of_scope:
+    - "Restoring the Phase 3.5 contract file."
+    - "Changing any constraint, requirement or conformance case in the two documents."
+    - "Gate scripts, baselines, workflows."
+    - "Any other document that references the same file."
+  change_boundary: >-
+    Six sentences and six metadata lines across six existing files. The
+    normative content of both documents is unchanged: the same contract name,
+    the same supersession sentence, and the same subject matter. Only the link
+    destination and the disclosure clause differ.
+
+evidence:
+  - "Issue #1564: memory-runtime documents still present the Phase 3.5 forget-suppression contract as an existing file."
+  - "git ls-tree -r --name-only origin/main has no phase-3.5-forget-suppression-and-cursor-consumption.md."
+  - "05-memory-runtime/runtime-overview.md was corrected to the same disclosure pattern in AID-2026-340; the two siblings were not."
+  - "check_bilingual_docs.py: PASS with 6 changed paths inspected."
+  - "check_document_management.py --require-changed origin/main: PASS (incremental)."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-349/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-349/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-349/session-evidence.md"
+    relationship: evidence
+
+acceptance_criteria:
+  - id: AC1
+    description: >-
+      No in-scope document presents the Phase 3.5 forget-suppression contract as
+      an existing file.
+    measurement: >-
+      Run:
+      git grep -n -F 'phase-3.5-forget-suppression-and-cursor-consumption.md' -- 05-memory-runtime docs/en/05-memory-runtime docs/zh-CN/05-memory-runtime
+    expected_result: "Zero hits."
+
+  - id: AC2
+    description: >-
+      Every in-scope document states that the contract is unsubmitted and not
+      restored.
+    measurement: >-
+      Run:
+      git grep -n -F 'unsubmitted and not restored' -- 05-memory-runtime docs/en/05-memory-runtime
+      git grep -n -F '未提交、未恢复' -- docs/zh-CN/05-memory-runtime
+    expected_result: "The canonical and English copies hit twice each; the Chinese copies hit twice each."
+
+  - id: AC3
+    description: >-
+      The six documents remain bilingual-paired and structurally valid.
+    measurement: >-
+      Run:
+      BASE_SHA=origin/main HEAD_SHA=HEAD PR_BODY="BILINGUAL-MANIFEST: COMPLETE" python scripts/check_bilingual_docs.py
+      python scripts/check_document_management.py --require-changed origin/main
+    expected_result: "Both PASS."
+
+  - id: AC4
+    description: >-
+      No constraint, requirement or conformance case in either document changes.
+    measurement: >-
+      Run:
+      git diff --unified=0 origin/main..HEAD -- 05-memory-runtime docs/
+    expected_result: "Only the two reference sentences and the six steward lines differ."
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    Independent review has not been assigned or recorded. No independent
+    reviewer approval or review completion is claimed.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: NOT_ASSIGNED
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    Six REPLACE blocks were applied mechanically from the recorded authoring
+    session, each OLD string required to match exactly once. The disclosure
+    wording follows the sentence already accepted in runtime-overview.md under
+    AID-2026-340, so no new disclosure vocabulary is introduced.
+  pull_request: PENDING
+  merge_commit: ""
+  implementation_commit: "2a718d395755152a1555f56a942792e218abc5e6"
+  ci_status: NOT_CLAIMED
+  files_changed:
+    - "05-memory-runtime/retrieval-engine.md"
+    - "05-memory-runtime/working-set-and-cache.md"
+    - "docs/en/05-memory-runtime/retrieval-engine.md"
+    - "docs/en/05-memory-runtime/working-set-and-cache.md"
+    - "docs/zh-CN/05-memory-runtime/retrieval-engine.md"
+    - "docs/zh-CN/05-memory-runtime/working-set-and-cache.md"
+  tests:
+    - "check_bilingual_docs.py: PASS, 6 changed paths."
+    - "check_document_management.py --require-changed origin/main: PASS (incremental)."
+    - "git diff --numstat: 1 insertion and 1 deletion per file."
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1564"
+    implementing_ai_session: "6b0a73b9-597c-83ec-979e-e5346ab1f9f6"
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-349/prompt-v1.md
+    executed_prompt_sha256: 31d353a0782d9cd7da4a49fe1424d1d2d27d2286c6cb2fe784faee801afc9567
+    executed_prompt_bytes: 11495
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: "RECORDED"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-349/session-evidence.md

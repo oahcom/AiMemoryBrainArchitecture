@@ -2,6 +2,7 @@
 document_metadata:
   domain: memory-runtime
   role: design-specification
+  steward: "user-authorized operator (delegated by account owner)"
   lifecycle:
     approval:
       decision_status: Draft
@@ -141,7 +142,7 @@ Working Set admission occurs only after request authorization and session bindin
 
 ## Phase 3.5 — Forget Fence and Permission Invalidation Addendum (normative supplement)
 
-The detailed contract and conformance cases are in [Phase 3.5 Runtime Forget Suppression and Typed Cursor Consumer Contract](phase-3.5-forget-suppression-and-cursor-consumption.md). This addendum supersedes earlier provisional wording where inconsistent.
+The detailed contract and conformance cases are in [Phase 3.5 Runtime Forget Suppression and Typed Cursor Consumer Contract](../docs/governance/documentation-gaps.md) (unsubmitted and not restored; see [documentation gaps](../docs/governance/documentation-gaps.md)). This addendum supersedes earlier provisional wording where inconsistent.
 
 ### Required cache/Working Set binding
 
