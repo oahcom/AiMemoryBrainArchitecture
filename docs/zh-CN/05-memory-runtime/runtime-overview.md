@@ -2,6 +2,7 @@
 document_metadata:
   domain: memory-runtime
   role: design-specification
+  steward: "user-authorized operator (delegated by account owner)"
   lifecycle:
     approval:
       decision_status: Draft
@@ -56,7 +57,7 @@ document_metadata:
 - 对应英文：[Memory Runtime Overview](../../en/05-memory-runtime/runtime-overview.md)
 - 状态：权威/安全边界已 DECIDED；拓扑为 CANDIDATE；数值预算为 TO_VALIDATE
 - 基线：main at e443b23f8a179ad12c163722ad93bc646fd3a80a
-- Phase 3.5 依赖审查：D/E/I/G/H/C/B Owner 分支契约已存在，并在 phase-3.5-forget-suppression-and-cursor-consumption.md 记录的精确 HEAD 上重新读取。F 的 Consumer Semantics 已 DECIDED；可调用的跨模块 Schema、Storage 实现和 Runtime Conformance 仍为 OPEN。本文不冻结 Wire Schema。
+- Phase 3.5 依赖审查：D/E/I/G/H/C/B Owner 分支契约已存在，并在历史记录于 phase-3.5-forget-suppression-and-cursor-consumption.md 的精确 HEAD 上重新读取（该文件未提交、未恢复，见 [GAP-01](../../governance/documentation-gaps.md)）。F 的 Consumer Semantics 已 DECIDED；可调用的跨模块 Schema、Storage 实现和 Runtime Conformance 仍为 OPEN。本文不冻结 Wire Schema。
 
 ## 1. 目的
 

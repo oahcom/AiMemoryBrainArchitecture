@@ -1,0 +1,236 @@
+work_item_id: AID-2026-013
+title: "Prevent document-management concurrency from silently dropping required context"
+class: GATE/CI
+risk: R1
+risk_rationale: >-
+  The change is limited to the concurrency group and its explanatory comments
+  in one workflow. It does not modify triggers, jobs, steps, job names,
+  permissions, or the required-context-producing implementation. The change
+  separates pull-request concurrency groups to prevent pending runs from
+  replacing one another while retaining cancel-in-progress: false.
+status: DISPATCHED
+id_status: PROVISIONAL
+
+sponsor: Repository maintainers
+accountable_owner: Repository maintainers
+acceptance_authority: Repository owner
+attribution: AI-assisted implementation; human-directed
+
+date: "2026-11-28"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "3d9b32bef6775974117ea0ab925179acf43c6ecb"
+tracking_issue: "#1484"
+
+scope:
+  summary: >-
+    Give each pull request its own document-management workflow concurrency
+    group so that a later pull request cannot replace another pull request's
+    pending workflow run and silently eliminate its required GOV-DOC-002
+    metadata checks context.
+  in_scope:
+    - >-
+      Change the document-management workflow concurrency group to include
+      github.workflow, github.event_name, and the pull-request number or
+      fallback ref name.
+    - Preserve cancel-in-progress: false.
+    - Replace the existing concurrency comments with an accurate explanation
+      of the concurrency trade-off and freshness mechanism.
+    - Preserve the document-management job name and every job and step.
+    - Record the implementation evidence and session evidence.
+    - Register AID-2026-013 in the work-item index.
+  files_out_of_scope:
+    - .github/workflows/document-management.yml job definitions other than concurrency
+    - .github/workflows/document-management.yml steps and step names
+    - .github/workflows/document-management.yml job name
+    - .github/workflows/document-management.yml on triggers
+    - Branch protection configuration
+    - Required status-check configuration
+    - Other workflow files
+    - CI checker implementations
+  change_boundary: >-
+    The workflow change is restricted to the existing concurrency comment
+    block and the group expression. cancel-in-progress remains false.
+    No trigger, job, step, name, permission, or required-context definition
+    is changed. Four work-item documentation files and one INDEX row are
+    added as registration materials. prompt-v1.md is copied verbatim by the
+    coordinator from the delivered prompt.
+
+evidence:
+  baseline:
+    repository: oahcom/AiMemoryBrainArchitecture
+    base_branch: main
+    base_commit_sha: "3d9b32bef6775974117ea0ab925179acf43c6ecb"
+    date: "2026-11-28"
+  defect:
+    total_cancelled_runs: 281
+    document_management_cancelled_runs: 9
+    affected_pull_request: 1443
+    affected_pull_request_head: "938e160f"
+    affected_run_id: "45963399555"
+    missing_required_context: GOV-DOC-002 metadata checks
+    competing_pull_request: 1448
+    competing_run_result: success
+    competing_run_timing: Same second, same concurrency group
+    open_pull_requests_examined: 19
+    remote_branches_examined: 1155
+    conflicting_changes_found: false
+  concurrency_decision:
+    old_group: >-
+      ${{ github.workflow }}-${{ github.event.pull_request.base.ref || github.ref_name }}
+    new_group: >-
+      ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref_name }}
+    cancel_in_progress: false
+    abandoned_property: >-
+      Global serialization of decisions across all pull requests targeting
+      the same branch. This serialization never actually held because the
+      concurrency group had only one pending slot and a later run could
+      replace an earlier pending run.
+    retained_property: >-
+      A new run for the same pull request does not cancel an already running
+      decision. Different pull requests have independent concurrency groups.
+  freshness:
+    required_context: Branch freshness vs base
+    behavior: >-
+      The freshness check rejects a head that does not contain the current
+      target base. The pull request must synchronize with the target base.
+      The resulting synchronize event reruns this workflow and its required
+      contexts.
+    strict_branch_protection: false
+    strict_used_as_rationale: false
+  job:
+    name: GOV-DOC-002 metadata checks
+    permissions: "contents: read"
+    read_only: true
+    step_target_base_fetch: >-
+      Enforce work-item uniqueness against the current target base
+    target_base_evaluation: >-
+      Fetches the current target branch using git fetch and evaluates the
+      generated merge candidate rather than relying on a stale pull-request
+      event base SHA.
+  required_contexts:
+    - GOV-DOC-001 structural checks
+    - Branch freshness vs base
+    - audit
+    - GOV-DOC-002 metadata checks
+    - BMCP protocol index (hard gate)
+    - BMCP conformance suite (hard gate)
+    - Schema non-empty audit (hard gate)
+    - Bilingual docs coverage (ratchet)
+    - Rust clippy (hard gate)
+    - Repository hygiene (hard gate)
+    - Rust format (hard gate)
+    - Rust doctests (hard gate)
+    - Session Evidence
+    - Session Evidence self-test (base)
+    - Session Evidence self-test (head)
+    - rust-workspace-test
+  local_gates:
+    - 'python -c "import yaml;d=yaml.safe_load(open(''.github/workflows/document-management.yml'',encoding=''utf-8''));print(d[''jobs''][''document-management''][''name'']);print(d[''concurrency''])"'
+    - python scripts/ci/check_manifest_parse.py
+    - python scripts/check_traceability.py --index-only
+    - python scripts/check_document_management.py --require-changed origin/main
+    - python scripts/ci/check_work_item_uniqueness.py --base origin/main --head HEAD
+    - python scripts/check_declared_check_contexts.py
+
+documentation:
+  - path: .github/workflows/document-management.yml
+    relationship: implementation
+  - path: 14-ai-development/work-items/AID-2026-013/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-013/session-evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-013/prompt-v1.md
+    relationship: reference
+
+acceptance_criteria:
+  - id: AC-01
+    requirement: >-
+      The concurrency group expression is exactly
+      ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref_name }}.
+    verification: Inspect the workflow and compare the expression byte-for-byte.
+  - id: AC-02
+    requirement: cancel-in-progress remains false.
+    verification: Parse the workflow YAML and assert concurrency.cancel-in-progress is false.
+  - id: AC-03
+    requirement: >-
+      Pull requests targeting the same branch use distinct concurrency groups
+      based on their pull-request numbers.
+    verification: Evaluate the group expression for two different pull-request numbers.
+  - id: AC-04
+    requirement: >-
+      Non-pull-request events use github.ref_name as the event-specific
+      concurrency identifier.
+    verification: Evaluate the fallback expression for a non-pull-request event.
+  - id: AC-05
+    requirement: >-
+      The document-management job name remains GOV-DOC-002 metadata checks.
+    verification: Parse YAML and assert the exact job name.
+  - id: AC-06
+    requirement: No job, step, step name, or workflow trigger is changed.
+    verification: Compare the workflow diff against the authorized change boundary.
+  - id: AC-07
+    requirement: All 16 declared required contexts remain unchanged.
+    verification: Run check_declared_check_contexts.py.
+  - id: AC-08
+    requirement: The workflow uniqueness decision continues to fetch and evaluate the current target base.
+    verification: Inspect the unchanged uniqueness-enforcement step.
+  - id: AC-09
+    requirement: The six declared local gates are executed and their actual results recorded.
+    verification: Record command exit statuses and outputs in implementation evidence.
+  - id: AC-10
+    requirement: Work-item metadata and index registration satisfy repository checks.
+    verification: Run manifest parsing, traceability, and document-management checks.
+  - id: AC-11
+    requirement: Session identity and executed-prompt provenance are not represented as independently verified.
+    verification: Check session-evidence and manifest verification fields.
+
+review:
+  status: NOT_ASSIGNED
+  independent_review: NOT_RECORDED
+  notes: No independent review is claimed by this work-item submission.
+
+acceptance:
+  status: PENDING
+  owner_acceptance: NOT_RECORDED
+  ci_acceptance: NOT_CLAIMED
+  merge_acceptance: NOT_RECORDED
+
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1484"
+    implementing_ai_session: "6b0a1d78-71d8-83ec-85bd-7dd9870c0816"
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-013/prompt-v1.md
+    executed_prompt_sha256: "9d6996a04fa158a72bc31b386236ad279bcd2118bde1bf0be14cf6554efb37eb"
+    executed_prompt_bytes: 14969
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-013/session-evidence.md
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    Only the document-management concurrency group and its explanatory
+    comments are changed. The job name and every step remain unchanged.
+    cancel-in-progress: false is preserved. The pull-request number is
+    pending coordinator backfill after PR creation; pull_request remains 0
+    until that update is made.
+  files_changed:
+    - .github/workflows/document-management.yml
+    - 14-ai-development/work-items/AID-2026-013/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-013/evidence.md
+    - 14-ai-development/work-items/AID-2026-013/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-013/prompt-v1.md
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - 'python -c "import yaml;d=yaml.safe_load(open(''.github/workflows/document-management.yml'',encoding=''utf-8''));print(d[''jobs''][''document-management''][''name'']);print(d[''concurrency''])"'
+    - python scripts/ci/check_manifest_parse.py
+    - python scripts/check_traceability.py --index-only
+    - python scripts/check_document_management.py --require-changed origin/main
+    - python scripts/ci/check_work_item_uniqueness.py --base origin/main --head HEAD
+    - python scripts/check_declared_check_contexts.py
+  pull_request: 1481
+  pull_request_note: Backfilled from PR #1481 after creation.
+  ci_status: NOT_CLAIMED
+  merge_commit: ""

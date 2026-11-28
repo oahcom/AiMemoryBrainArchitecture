@@ -1,16 +1,20 @@
 name: Architecture document management gate
 
-# Work-item uniqueness is a shared target-branch invariant, not a
-# per-candidate invariant. PRs targeting the same branch must not run this
-# gate in independent concurrency groups. Do not cancel a running decision
-# when another candidate arrives.
+# This job is read-only and re-fetches the current target base before evaluating
+# uniqueness, so concurrent pull requests do not need a global serial decision.
+# Branch freshness vs base requires an out-of-date PR to catch up and rerun
+# this workflow, including its required contexts, after synchronization.
+# We abandon global serialization, which never actually held: the single pending
+# slot replaced queued runs. Keep running decisions safe within each pull request.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.base.ref || github.ref_name }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref_name }}
   cancel-in-progress: false
 
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+  merge_group:
+    types: [checks_requested]
   push:
     branches: [main]
 
@@ -43,29 +47,60 @@ jobs:
       # advances, closing the interval between this check and a later merge.
       - name: Enforce work-item uniqueness against the current target base
         env:
+          EVENT_NAME: ${{ github.event_name }}
           PR_BASE: ${{ github.event.pull_request.base.sha }}
           BASE_REF: ${{ github.event.pull_request.base.ref }}
+          MG_BASE: ${{ github.event.merge_group.base_sha }}
+          MG_HEAD: ${{ github.event.merge_group.head_sha }}
           PUSH_BEFORE: ${{ github.event.before }}
           CANDIDATE_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
 
-          if [ -n "$BASE_REF" ] && [ -n "$PR_BASE" ]; then
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            if [ -z "$BASE_REF" ] || [ -z "$CANDIDATE_SHA" ]; then
+              echo "::error::pull_request has no usable base ref or candidate SHA; uniqueness verdict is INCOMPLETE"
+              exit 2
+            fi
+
             git fetch origin "+refs/heads/${BASE_REF}:refs/remotes/origin/${BASE_REF}"
             python3 scripts/ci/check_work_item_uniqueness.py \
               --base "refs/remotes/origin/$BASE_REF" \
               --head "$CANDIDATE_SHA"
-          elif [ -n "$PUSH_BEFORE" ] && [ "$PUSH_BEFORE" != "0000000000000000000000000000000000000000" ]; then
+
+          elif [ "$EVENT_NAME" = "merge_group" ]; then
+            if ! [[ "$MG_BASE" =~ ^[0-9a-fA-F]{40}$ ]] || [ "$MG_BASE" = "0000000000000000000000000000000000000000" ]; then
+              echo "::error::merge_group carries no usable base_sha; uniqueness verdict is INCOMPLETE"
+              exit 2
+            fi
+
+            if ! [[ "$MG_HEAD" =~ ^[0-9a-fA-F]{40}$ ]] || [ "$MG_HEAD" = "0000000000000000000000000000000000000000" ]; then
+              echo "::error::merge_group carries no usable head_sha; uniqueness verdict is INCOMPLETE"
+              exit 2
+            fi
+
+            python3 scripts/ci/check_work_item_uniqueness.py \
+              --base "$MG_BASE" \
+              --head "$MG_HEAD"
+
+          elif [ "$EVENT_NAME" = "push" ]; then
+            if ! [[ "$PUSH_BEFORE" =~ ^[0-9a-fA-F]{40}$ ]] || [ "$PUSH_BEFORE" = "0000000000000000000000000000000000000000" ]; then
+              echo "::error::push has no usable before SHA; uniqueness verdict is INCOMPLETE"
+              exit 2
+            fi
+
             python3 scripts/ci/check_work_item_uniqueness.py \
               --base "$PUSH_BEFORE" \
               --head "$CANDIDATE_SHA"
+
           else
-            python3 scripts/ci/check_work_item_uniqueness.py
+            echo "::error::unsupported event '$EVENT_NAME'; uniqueness verdict is INCOMPLETE"
+            exit 2
           fi
 
       - name: Emit steward adoption census (baseline evidence)
         env:
-          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_BASE: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_sha || github.event.pull_request.base.sha }}
         run: |
           PIN="${PR_BASE:-$GITHUB_SHA}"
           set +e
@@ -82,7 +117,7 @@ jobs:
       # diffs against github.event.before (GAP-02).
       - name: Validate document metadata (changed files must be classified)
         env:
-          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_BASE: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_sha || github.event.pull_request.base.sha }}
           PUSH_BEFORE: ${{ github.event.before }}
         run: |
           REF=""
