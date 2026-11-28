@@ -57,12 +57,14 @@ document_metadata:
 
 ## Decision recorded
 
-1. One deployment has one logical Brain authority. Tenant and shard are partition boundaries within that authority.
-2. `CanonicalCommitCursor` is partitioned per tenant/shard. There is no total order across shards.
-3. A cross-shard transaction produces one cursor entry per participating shard and is atomic all-or-none.
-4. Authority identity and epoch/incarnation are explicit. Cursors from different authorities are not comparable.
-5. Aggregate revisions and lifecycle cursors remain separate cursor domains.
-6. `ForgetFence`, `ProducerRegistrationHighWater`, and similar fences are per-authority and carry authority identity so a fence from one shard cannot be interpreted as covering another.
+1. One deployment has one logical Brain authority; tenant and shard are partition boundaries within that authority, not separate authorities.
+2. `CanonicalCommitCursor` is partitioned per tenant/shard. There is no total order across tenants or shards. A globally ordered cursor across tenants is rejected because it would require a global serialization point or distributed consensus not specified by this architecture.
+3. Cursor entries are ordered only within their own tenant/shard partition.
+4. Authority identity and epoch/incarnation are explicit parts of cursor identity. Rollover is an epoch change. Cursors from different authorities or epochs are not comparable; comparison across them is an error, never a numeric ordering.
+5. A cross-shard transaction produces one cursor entry per participating shard, ordered within each shard. The transaction is atomic all-or-none; atomicity does not imply a cross-shard total order, and no API may imply one.
+6. Aggregate revisions and lifecycle cursors remain separate domains.
+7. `ForgetFence`, `ProducerRegistrationHighWater`, and similar fences are per-authority and carry authority identity plus applicable target/partition scope so a fence from one shard cannot be read as covering another.
+8. Required negative cases: `cursor_comparison_across_authority_rejected` and `cross_shard_commit_exposes_no_total_order`.
 
 ## Base-tree evidence
 
@@ -76,9 +78,9 @@ At base commit `31c1e5d83e7dad326dbd4b69d4a8e19534718ff1`:
 ## Branch result
 
 - Branch: `docs/aid-2026-326-d10-cursor-authority`
-- Canonical source updated with section 15; new source blob: `025b00bbbd253882ee019a834f817ece772ca59d`.
-- English mirror updated and pinned to the new canonical source blob; mirror blob: `855f549691d5176a4f353c1630c848b684bd7160`.
-- Chinese mirror updated and pinned to the new canonical source blob; mirror blob: `33b83f60f0c8a6fa763214e5e558a2b06b9c0a5a`.
+- Canonical source updated with section 15; new source blob: `42b2411048b53ebe6c7947075427665cdfb2d30c`.
+- English mirror updated and pinned to the new canonical source blob; mirror blob: `ea8e291a2b25d2c2dd9dd4456ceba5ea3d237e69`.
+- Chinese mirror updated and pinned to the new canonical source blob; mirror blob: `65432c147ef3ee991a19f822849f6064fd12c2e3`.
 - The canonical source's approval remains Draft and evidence verification remains Unverified. No formal document approval is claimed.
 - No code, API, schema, DDL, test, workflow, branch-protection, Issue-body, or runtime change is included.
 
