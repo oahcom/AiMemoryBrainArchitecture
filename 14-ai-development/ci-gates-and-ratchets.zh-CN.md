@@ -2,6 +2,7 @@
 document_metadata:
   domain: ai-development
   role: guide
+  steward: "Architecture Governance"
   lifecycle:
     approval:
       decision_status: Draft
@@ -255,6 +256,15 @@ runner，因此从未执行过。clippy 曾是这个 Job 的独立价值。
 `HISTORICAL — not a gate input`。既不等于权威、又未标注的副本一律判红，第二个通过条件因此
 无法悄悄出现。`81` 是历史值：它是 `c58878f` 上 81 条审查快照的条目数
 （`reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md`），从来不是本基线今天的条目数。
+
+### 4.1 基线信任边界
+
+用于评估候选的基线 MUST 从可信基版本读取，不得从候选检出树读取。候选 MUST NOT 使用由自身
+提供或修改的基线来评估自身。
+对 Pull Request，可信版本 MUST 是该 Pull Request 的 base commit；对合并队列候选，MUST 是该
+merge group 的 base commit。
+`gates.yml` 按 `merge_group.head_sha || pull_request.head.sha` 检出（`:145`），因此棘轮今天从
+候选树读取基线。没有任何检查验证基线来源；此要求 **not yet enforced by a check**。
 
 仅在失败集合确实发生变化时重新生成基线：
 

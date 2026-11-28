@@ -1,0 +1,129 @@
+work_item_id: AID-2026-380
+prompt_sha256: "12dd52d824952a7df811802d3c759536f070faa43de5ab7984d5b29af19bb52b"
+prompt_file: "14-ai-development/work-items/AID-2026-380/prompt-v1.md"
+prompt_file_blob_sha: "26d4207df9f7d187ba902bc0567024e1ebc13782"
+prompt_commit_trace_initial_registration: true
+title: "Complete GOV-DOC-002 steward metadata and Context Versioning bilingual mirrors"
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  This work updates governed documentation metadata and supplies complete
+  English and Simplified Chinese mirrors of the existing Context Versioning
+  source. It does not change executable code, validation rules, CI workflows,
+  branch protection, gate semantics or policy decisions. The changes preserve
+  the existing normative source and provide synchronized documentation
+  counterparts only.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "895d5dcbc8d2f00b3403a5173781ee22566fcfe3"
+tracking_issue: "#1507"
+
+scope:
+  summary: >-
+    Preserve the five existing GOV-DOC-002 probe changes, add complete
+    English and Simplified Chinese mirrors for Context Versioning, remove
+    the resolved bilingual-gap entry from both synchronized baselines,
+    update the two descriptive GOV-DOC-001 count comments to match the
+    resulting baseline count, and register the work under AID-2026-380
+    with complete evidence.
+  in_scope:
+    - "Preserve the five existing probe changes in Commit 1: 06-memory-context/context-versioning.md; 14-ai-development/adr/OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001.md; 14-ai-development/ci-gates-and-ratchets.en.md; 14-ai-development/ci-gates-and-ratchets.zh-CN.md; and 14-ai-development/reports/steward-adoption-baseline.json."
+    - "Add the complete English mirror at docs/en/06-memory-context/context-versioning.md and the complete Simplified Chinese mirror at docs/zh-CN/06-memory-context/context-versioning.md, both corresponding to the exact source committed in Commit 1."
+    - "Remove the resolved bilingual-gap baseline entry for 06-memory-context/context-versioning.md from scripts/bilingual-baseline.txt and scripts/ci/baselines/bilingual-docs.txt; keep both baseline files consistent."
+    - "Update only the two descriptive GOV-DOC-001 count comments in .github/workflows/gates.yml from 77 to 76 to match the synchronized bilingual baseline entry count; do not change executable workflow content."
+    - "Add the AID-2026-380 manifest, evidence.md, prompt-v1.md, prompt-v1-executed.md, and session-evidence.md, and register AID-2026-380 with one row in 14-ai-development/work-items/INDEX.md."
+    - "Do not modify checker implementation, bilingual gate logic, executable workflow behavior, branch protection, required contexts, or gate semantics."
+  files_out_of_scope:
+    - "scripts/check_bilingual_docs.py"
+    - "scripts/check_document_management.py"
+    - "All workflow files and executable workflow content, except the two explicitly authorized descriptive count-comment lines in .github/workflows/gates.yml"
+    - "Branch protection configuration"
+    - "Required status-check configuration"
+  change_boundary: >-
+    This work is documentation and governance-record maintenance only.
+    It preserves the existing source document and its normative meaning.
+    It permits exactly two descriptive count-comment updates in
+    .github/workflows/gates.yml: the GOV-DOC-001 full-scan count and its
+    baseline-count explanation, both changing from 77 to 76.
+    It does not alter checker implementation, executable workflow behavior,
+    workflow triggers, jobs, steps, commands, permissions, branch protection,
+    required contexts, or gate semantics, and it does not introduce a
+    bilingual catch-up exception.
+
+evidence:
+  - "Issue #1507: Complete GOV-DOC-002 steward metadata and Context Versioning bilingual mirrors"
+  - "Probe source commit: e43e84c365ed4f41f4f62dda864ae4c19fe6a6bb"
+  - "Work Item starting base: origin/main 895d5dcbc8d2f00b3403a5173781ee22566fcfe3; this remains the declared base_commit_sha because it is the actual task-start base and is an ancestor of the later origin/main 3894677073191bf6b7ac113e9baf5874c864fffb; the two intervening commits 1641ea16b and 389467707 changed none of this work item's nine pre-existing paths."
+  - "The source/probe commit is the first implementation commit in the AID-2026-380 change sequence; its final Git object ID is intentionally not pinned because the branch is subject to rebase."
+  - "The bilingual-mirror commit is the second implementation commit and depends on the source/probe commit; its final Git object ID is intentionally not pinned because the branch is subject to rebase."
+  - "English mirror: docs/en/06-memory-context/context-versioning.md; 562 lines; 38,775 bytes."
+  - "Simplified Chinese mirror: docs/zh-CN/06-memory-context/context-versioning.md; 537 lines; 36,917 bytes."
+  - "Mirror structural comparison: heading hierarchy 37/37/37; CV identifiers 48/48; table rows 77/77; MUST occurrences 57/57."
+  - "The 21-line difference between the English and Chinese mirrors is due to hard-wrapped paragraphs being combined in Chinese; it is not omitted content."
+  - "Resolved bilingual-gap baseline entry removed from scripts/bilingual-baseline.txt and scripts/ci/baselines/bilingual-docs.txt; both baselines now report 76 frozen entries and 0 new gaps."
+  - "With PR_BODY containing BILINGUAL-MANIFEST: COMPLETE, the bilingual documentation and prompt gate reports PASS (9 changed paths inspected), exit 0."
+  - "The intended final change set consists of five probe-file revisions, two complete mirrors, two synchronized baseline-file updates, five AID-2026-380 work-item files, and one INDEX registration row."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-380/manifest.yaml"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-380/prompt-v1.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-380/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-380/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-380/prompt-v1-executed.md"
+    relationship: evidence
+    path_must_exist_in_git_tree: true
+
+implementation:
+  status: IMPLEMENTED
+  summary: "The implementation consists of a source/probe commit followed by a dependent bilingual-mirror commit. Their Git object IDs are intentionally not embedded in this work-item record because the branch is subject to rebase."
+  pull_request: PENDING
+  merge_commit: ""
+  implementation_commit: ""
+  ci_status: NOT_RUN
+  files_changed:
+    - "06-memory-context/context-versioning.md"
+    - "14-ai-development/adr/OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001.md"
+    - "14-ai-development/ci-gates-and-ratchets.en.md"
+    - "14-ai-development/ci-gates-and-ratchets.zh-CN.md"
+    - "14-ai-development/reports/steward-adoption-baseline.json"
+    - "docs/en/06-memory-context/context-versioning.md"
+    - "docs/zh-CN/06-memory-context/context-versioning.md"
+    - "scripts/bilingual-baseline.txt"
+    - "scripts/ci/baselines/bilingual-docs.txt"
+    - "14-ai-development/work-items/AID-2026-380/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-380/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-380/prompt-v1-executed.md"
+    - "14-ai-development/work-items/AID-2026-380/evidence.md"
+    - "14-ai-development/work-items/AID-2026-380/session-evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "python scripts/check_document_management.py --require-changed"
+    - "python scripts/check_document_management.py --strict"
+    - "python scripts/check_bilingual_docs.py"
+    - "python scripts/check_line_endings.py"
+    - "python scripts/check_repository_hygiene.py"
+    - "python scripts/check_traceability.py"
+    - "git diff --check"
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1507"
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-380/prompt-v1-executed.md
+    executed_prompt_sha256: 5f93713c13aea5b46002d2b5d463d0c2c24873ecefbee0097c1a8735f19aa4b7
+    executed_prompt_bytes: 12046
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-380/session-evidence.md

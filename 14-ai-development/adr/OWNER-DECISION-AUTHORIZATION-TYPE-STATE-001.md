@@ -2,6 +2,7 @@
 document_metadata:
   domain: domain-model
   role: decision-record
+  steward: "Architecture Governance"
 
   lifecycle:
     approval:
@@ -13,7 +14,7 @@ document_metadata:
         value: "3375f59e78a2960c700b9800593c857f263bc3c94438358561d45ceafce2ddc0"
       approval_scope:
         type: Full-document
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "Issue #751 comment 7097692424 — owner ruling that the five DECIDED records must agree with their own bodies"
         - "14-ai-development/adr/OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001.md — the DECIDED line in this document names the decider and the date"
@@ -21,7 +22,7 @@ document_metadata:
     evidence_verification:
       verification_status: Unverified
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Pending-Reapproval
     supersession:
       supersedes:
         - 14-ai-development/work-items/I-OWNER-DECISION-AUTHORIZATION-DECISION-001.md
@@ -118,6 +119,8 @@ So the current state is: **every `FactRevision` in existence asserts an I author
 **D5. `FactRevision::initial` must keep a constructor that requires authorization**, and gain one that does not. Removing the required-argument constructor would let every existing call site silently become `Absent`, converting a compile-time guarantee into a runtime surprise. The existing 11 call sites keep compiling unchanged; the new constructor is opt-in.
 
 **D6. The presence gate is a domain invariant, not a compiler concern.** `validate()` must reject `Absent` when `outcome == FactOutcome::Attested`. An attested fact with no authorization is the exact thing DM2-06 says must not publish, and it must be rejected where the fact is constructed, not three crates later.
+
+**D7. The authorization port is the only thing a storage boundary may trust.** A protected storage write MUST receive a decision bound to `principal`, `operation`, `scope_set`, `epoch` and `decision_ref`, and MUST verify that binding against the resource and operation it is about to perform. The port MUST NOT be a caller-constructed data structure treated as proof — that is D4's rule applied at the boundary. `memory-storage` and `memory-event-store` MUST NOT depend on `memory-compiler` to obtain or validate a decision; the dependency direction is fixed here. When the decision source is unavailable, a protected write MUST fail closed rather than proceed on the caller's declared scope.
 
 ## 4. What `dm2_06` becomes
 
