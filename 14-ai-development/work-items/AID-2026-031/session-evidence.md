@@ -50,6 +50,12 @@ document_metadata:
 
 # Session Evidence — AID-2026-031
 
+## Session role / use case
+
+- Session role: IMPLEMENTER.
+- Use case: Authoring and preparing the AID-2026-031 work-item registration and its supporting governance records, based on the supplied work package for correcting the session-identity ratchet violation in AID-2026-297.
+- This records the role and use case of the authoring session; it does not claim that the coordinator's subsequent repository operations, CI execution, commit, push, or pull-request creation were performed by this session.
+
 ## Actual AI input
 
 This authoring session received a work package concerning the session-identity ratchet in `oahcom/AiMemoryBrainArchitecture`, including:
