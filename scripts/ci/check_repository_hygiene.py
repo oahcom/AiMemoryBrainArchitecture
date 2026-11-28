@@ -79,6 +79,7 @@ ALLOWED_DATA_PATHS = frozenset({
     "14-ai-development/reports/work-item-manifest-ac4-baseline.json",
     "14-ai-development/reports/steward-adoption-baseline.json",
     "14-ai-development/work-items/AID-2026-291/baseline.json",
+    "scripts/ci/baselines/protection-fingerprint.json",
 })
 
 REQUIREMENTS_FILE_RE = re.compile(r"requirements(?:-[A-Za-z0-9_.-]+)?\.txt\Z")
