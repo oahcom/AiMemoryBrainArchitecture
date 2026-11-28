@@ -42,8 +42,8 @@ from pathlib import PurePosixPath
 # anywhere else in the repository. The version is advanced to .3 because the
 # merged checker contains both independently versioned rule changes.
 #
-# The same merged .3 also carries the AID-2026-342 rule change: admit only the
-# exact AID-2026-342 carrier-data.yaml path; other YAML files remain denied.
+# The same merged .3 also carries the AID-2026-345 rule change: admit only the
+# exact AID-2026-345 carrier-data.yaml path; other YAML files remain denied.
 CHECK_VERSION = "2026-11-28.3"
 
 # Repository-root-relative paths, written with a leading slash.
@@ -108,10 +108,10 @@ ALLOWED_DATA_PATHS = frozenset({
     "scripts/ci/baselines/protection-fingerprint.json",
 })
 
-# AID-2026-342: admit only the carrier data file required by this work item.
+# AID-2026-345: admit only the carrier data file required by this work item.
 # This is deliberately an exact path, not a work-item-wide YAML allowance.
 AID_293_CARRIER_DATA_PATH = (
-    "14-ai-development/work-items/AID-2026-342/carrier-data.yaml"
+    "14-ai-development/work-items/AID-2026-345/carrier-data.yaml"
 )
 
 REQUIREMENTS_FILE_RE = re.compile(r"requirements(?:-[A-Za-z0-9_.-]+)?\.txt\Z")

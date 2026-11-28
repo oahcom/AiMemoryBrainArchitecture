@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-342/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-345/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified

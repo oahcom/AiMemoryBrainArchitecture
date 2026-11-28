@@ -10,14 +10,14 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "ci"))
 
-from aid_2026_342_carrier_validation import validate
+from aid_2026_345_carrier_validation import validate
 
 
 def valid_data():
     risk_ids = [f"R-{i:02d}" for i in range(1, 11)]
     module_ids = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "Storage"]
     return {
-        "work_item_id": "AID-2026-342",
+        "work_item_id": "AID-2026-345",
         "risks": [
             {
                 "id": rid,
@@ -79,7 +79,7 @@ class CarrierRulesTest(unittest.TestCase):
             repo_root
             / "14-ai-development"
             / "work-items"
-            / "AID-2026-342"
+            / "AID-2026-345"
             / "carrier-data.yaml"
         )
         self.assertTrue(carrier_path.is_file(), f"missing real carrier file: {carrier_path}")
@@ -92,7 +92,7 @@ class CarrierRulesTest(unittest.TestCase):
         result = subprocess.run(
             [
                 sys.executable,
-                str(repo_root / "scripts" / "ci" / "aid_2026_342_carrier_validation.py"),
+                str(repo_root / "scripts" / "ci" / "aid_2026_345_carrier_validation.py"),
                 "--root",
                 str(repo_root),
                 "--data",
@@ -103,7 +103,7 @@ class CarrierRulesTest(unittest.TestCase):
             text=True,
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("AID-2026-342 CARRIER CHECK PASS", result.stdout)
+        self.assertIn("AID-2026-345 CARRIER CHECK PASS", result.stdout)
 
     def test_negative_r1_wrong_work_item(self):
         data = valid_data()

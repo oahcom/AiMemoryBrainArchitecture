@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Structural and source-evidence validator for AID-2026-342.
+"""Structural and source-evidence validator for AID-2026-345.
 
 Exit codes:
   0: all carrier rules pass
@@ -468,9 +468,9 @@ def validate(data: Any, root: Path | None = None) -> list[str]:
     if not isinstance(data, dict):
         return [issue("R1_WORK_ITEM_ID", "document", "root must be a mapping")]
 
-    if data.get("work_item_id") != "AID-2026-342":
-        errors.append(issue("R1_WORK_ITEM_ID", "AID-2026-342",
-                            "work_item_id must equal AID-2026-342"))
+    if data.get("work_item_id") != "AID-2026-345":
+        errors.append(issue("R1_WORK_ITEM_ID", "AID-2026-345",
+                            "work_item_id must equal AID-2026-345"))
 
     risks = data.get("risks")
     if not isinstance(risks, list):
@@ -621,7 +621,7 @@ def main(argv: list[str] | None = None) -> int:
             print(item)
         return 1
 
-    print("AID-2026-342 CARRIER CHECK PASS")
+    print("AID-2026-345 CARRIER CHECK PASS")
     print("R1-R12: 12/12 structural and source-evidence rules satisfied")
     return 0
 
