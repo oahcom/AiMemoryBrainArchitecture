@@ -476,5 +476,11 @@ session_evidence:
 
 
 
+
+    def test_diff_non_git_root_exits_two(self):
+        result = self.run_checker("--diff-base", "HEAD")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("cannot verify diff base", result.stderr)
+
 if __name__ == "__main__":
     unittest.main()
