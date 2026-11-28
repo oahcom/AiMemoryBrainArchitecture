@@ -87,7 +87,7 @@ modules:
   - path_line: 01-system-architecture/component-interactions.md:240
     quote: '- Forget creates a durable governance job/fence before asynchronous derivative cleanup.'
     supports: 'concurrency_state: 持久化 governance job/fence 与异步 derivative cleanup 之间存在明确先后关系，说明治理状态必须跨异步清理过程维持。'
-  evidence_gap: 'EVIDENCE_GAP: irreversibility: 候选清单内无直接说明治理变更不可逆性或回滚代价的行。建议执行但尚未执行：rg -n -i ''rollback|irreversible|retract|supersed|restore|compensat'' 00-governance 01-system-architecture，检索治理决策、架构治理与系统边界中的回滚、撤销和补偿语义。'
+  evidence_gap: 'EVIDENCE_GAP: irreversibility: 检索已执行（git grep on origin/main，184 命中），已逐条检查候选行 1–2，无一行支撑该维度；未穷尽全部 184 命中。'
 - id: B
   scores:
     change_surface: 5
@@ -103,7 +103,10 @@ modules:
   - path_line: 02-domain-model/core-entities.md:125
     quote: FactRevision is immutable and references exact ClaimRevisionRef, Evidence, Provenance, Scope, Attestor, Method/Version and I AuthorizationDecisionRef values.
     supports: 'coupling: FactRevision 显式引用 ClaimRevisionRef、Evidence、Provenance、Scope、Attestor、Method/Version 和 AuthorizationDecisionRef，形成多个领域对象之间的强引用关系。irreversibility: FactRevision 被明确规定为 immutable，表明其断言版本不能作为普通可变状态原地改写。'
-  evidence_gap: 'EVIDENCE_GAP: concurrency_state: 候选清单内无直接描述并发提交、竞争更新、序列化或状态转换冲突的行。建议执行但尚未执行：rg -n -i ''concurrent|race|serialization|revision conflict|CAS|commit cursor'' 02-domain-model 06-memory-context，检索领域修订与 Context 精确版本引用中的并发和提交一致性约束。'
+  - path_line: 02-domain-model/domain-model-overview.md:510
+    quote: '- concurrent proposals must not silently overwrite one another.'
+    supports: 'concurrency_state: 并发提案不得静默覆盖彼此，明确要求竞争更新不能以无冲突方式覆盖已有提案状态，直接体现并发状态冲突约束。'
+  evidence_gap: null
 - id: C
   scores:
     change_surface: 4

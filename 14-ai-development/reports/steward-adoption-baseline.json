@@ -1,5 +1,5 @@
 {
-  "classified": 788,
+  "classified": 789,
   "governed": 1158,
   "missing": [
     "00-governance/architecture-document-management-policy.md",
@@ -80,7 +80,6 @@
     "14-ai-development/AI-EXEC-INDEPENDENCE-RULING-001.md",
     "14-ai-development/AI-EXEC-ROLLOUT-001.md",
     "14-ai-development/PR-GOVERNANCE-001.md",
-    "14-ai-development/adr/OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001.md",
     "14-ai-development/adr/OWNER-DECISION-BMCP-MCP-DISPATCH-001.md",
     "14-ai-development/adr/OWNER-DECISION-EMBEDDED-BILINGUAL-001.md",
     "14-ai-development/adr/OWNER-DECISION-EVENT-TIMESTAMP-PROVENANCE-001.md",
@@ -92,8 +91,6 @@
     "14-ai-development/adr/OWNER-DECISION-TYPED-OBJECT-REF-001.md",
     "14-ai-development/adr/OWNER-RULING-ATTESTOR-ISSUER-SEPARATION-031.md",
     "14-ai-development/adr/OWNER-RULING-AUTHORIZATION-PRESENCE-GATE-025.md",
-    "14-ai-development/ci-gates-and-ratchets.en.md",
-    "14-ai-development/ci-gates-and-ratchets.zh-CN.md",
     "14-ai-development/governance-register/EX-20261123-01.md",
     "14-ai-development/governance-register/GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004.en.md",
     "14-ai-development/governance-register/GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004.md",
@@ -572,6 +569,6 @@
     "docs/zh-CN/14-ai-development/work-items/AID-2026-210/evidence.md",
     "docs/zh-CN/14-ai-development/work-items/AID-2026-240/evidence.md"
   ],
-  "pin": "159095f3cc5dca9d40ad3856aaa493b164c0ca2e",
-  "present": 219
+  "pin": "31c1e5d83e7dad326dbd4b69d4a8e19534718ff1",
+  "present": 223
 }
