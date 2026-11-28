@@ -1,0 +1,276 @@
+import copy
+import subprocess
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+import yaml
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "ci"))
+
+from aid_2026_345_carrier_validation import validate
+
+
+def valid_data():
+    risk_ids = [f"R-{i:02d}" for i in range(1, 11)]
+    module_ids = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "Storage"]
+    return {
+        "work_item_id": "AID-2026-345",
+        "risks": [
+            {
+                "id": rid,
+                "evidence_state": "PENDING_SEARCH_EXECUTION",
+                "planned_search_command": "git grep -n pattern baseline -- docs",
+            }
+            for rid in risk_ids
+        ],
+        "modules": [
+            {
+                "id": mid,
+                "scores": {
+                    "change_surface": 3,
+                    "coupling": 3,
+                    "irreversibility": 3,
+                    "concurrency_state": 3,
+                },
+                "evidence_gap": (
+                    "EVIDENCE_GAP: "
+                    "change_surface: fixture intentionally lacks source proof; "
+                    "coupling: fixture intentionally lacks source proof; "
+                    "irreversibility: fixture intentionally lacks source proof; "
+                    "concurrency_state: fixture intentionally lacks source proof."
+                ),
+            }
+            for mid in module_ids
+        ],
+        "statuses": {
+            "ac3": "CONFIRMED_BY_COORDINATOR",
+            "ac4": "PENDING_SOURCE_EVIDENCE",
+            "ac6": "EXECUTED_BY_COORDINATOR_NOT_IN_CI",
+            "ac6_negative_cases": "EXECUTED_BY_COORDINATOR_NOT_IN_CI",
+            "ac8": "PENDING_INDEPENDENT_REVIEW",
+            "ac8_independent_review": "PENDING_INDEPENDENT_REVIEW",
+        },
+    }
+
+
+class CarrierRulesTest(unittest.TestCase):
+    def assert_rule(self, data, rule, root=None):
+        errors = validate(data, root=root)
+        self.assertTrue(any(item.startswith(rule + " ") for item in errors), errors)
+
+    def path_line_fixture(self, temp_root, path_line, quote):
+        data = valid_data()
+        data["risks"][0] = {
+            "id": "R-01",
+            "evidence_state": "PATH_LINE",
+            "path_line": path_line,
+            "quote": quote,
+        }
+        return data
+
+    def test_positive(self):
+        self.assertEqual(validate(valid_data()), [])
+
+        repo_root = Path(__file__).resolve().parents[2]
+        carrier_path = (
+            repo_root
+            / "14-ai-development"
+            / "work-items"
+            / "AID-2026-345"
+            / "carrier-data.yaml"
+        )
+        self.assertTrue(carrier_path.is_file(), f"missing real carrier file: {carrier_path}")
+        carrier_data = yaml.safe_load(carrier_path.read_text(encoding="utf-8"))
+        self.assertEqual(validate(carrier_data, root=repo_root), [])
+
+        # The validator must also pass when run as CI would run it: through the
+        # CLI entry point, on the committed carrier file, not only through the
+        # in-process helper above.
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(repo_root / "scripts" / "ci" / "aid_2026_345_carrier_validation.py"),
+                "--root",
+                str(repo_root),
+                "--data",
+                carrier_path.relative_to(repo_root).as_posix(),
+            ],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("AID-2026-345 CARRIER CHECK PASS", result.stdout)
+
+    def test_negative_r1_wrong_work_item(self):
+        data = valid_data()
+        data["work_item_id"] = "AID-2026-999"
+        self.assert_rule(data, "R1_WORK_ITEM_ID")
+
+    def test_negative_r2_missing_risk(self):
+        data = valid_data()
+        data["risks"].pop()
+        self.assert_rule(data, "R2_RISK_REGISTER")
+
+    def test_negative_r3_no_evidence_without_executed_search(self):
+        data = valid_data()
+        data["risks"][0] = {
+            "id": "R-01",
+            "evidence_state": "NO_EVIDENCE_FOUND",
+            "search_command": "git grep -n token",
+            "search_scope": "docs/",
+            "search_executed": False,
+        }
+        self.assert_rule(data, "R3_RISK_EVIDENCE_STATE")
+
+    def test_negative_r11_no_evidence_search_command_must_be_git_grep(self):
+        data = valid_data()
+        data["risks"][0] = {
+            "id": "R-01",
+            "evidence_state": "NO_EVIDENCE_FOUND",
+            "search_command": "echo nothing",
+            "search_scope": "an unrelated scope that does not constrain the command",
+            "search_executed": True,
+        }
+
+        self.assert_rule(
+            data,
+            "R11_B_VARIANT_REQUIRES_ZERO_HITS",
+            root=REPO_ROOT,
+        )
+
+    def test_positive_r11_git_grep_returns_zero_hits(self):
+        data = valid_data()
+        data["risks"][0] = {
+            "id": "R-01",
+            "evidence_state": "NO_EVIDENCE_FOUND",
+            "search_command": (
+                'git grep -n "pattern-that-cannot-exist-293" '
+                "-- 00-governance"
+            ),
+            "search_scope": "Repository path 00-governance",
+            "search_executed": True,
+        }
+
+        errors = validate(data, root=REPO_ROOT)
+        self.assertFalse(
+            any(
+                item.startswith("R11_B_VARIANT_REQUIRES_ZERO_HITS ")
+                for item in errors
+            ),
+            errors,
+        )
+
+    def test_negative_r4_missing_module(self):
+        data = valid_data()
+        data["modules"].pop()
+        self.assert_rule(data, "R4_MODULE_COVERAGE")
+
+    def test_negative_r5_out_of_range_score(self):
+        data = valid_data()
+        data["modules"][0]["scores"]["coupling"] = 6
+        self.assert_rule(data, "R5_FOUR_DIMENSION_SCORES")
+
+    def test_negative_r6_missing_module_evidence(self):
+        data = valid_data()
+        data["modules"][0].pop("evidence_gap")
+        self.assert_rule(data, "R6_MODULE_EVIDENCE")
+
+    def test_negative_r12_module_dimension_not_named(self):
+        data = valid_data()
+        module = data["modules"][0]
+
+        module["evidence"] = [
+            {
+                "supports": (
+                    "change_surface: fixture evidence for change surface. "
+                    "coupling: fixture evidence for coupling. "
+                    "concurrency_state: fixture evidence for concurrency state."
+                )
+            }
+        ]
+
+        # R6 accepts this non-empty EVIDENCE_GAP, but it does not identify
+        # irreversibility as the dimension for which evidence is missing.
+        module["evidence_gap"] = (
+            "EVIDENCE_GAP: fixture gap without an explicit dimension label."
+        )
+
+        self.assert_rule(
+            data,
+            "R12_MODULE_DIMENSION_COVERAGE",
+        )
+
+    def test_positive_r12_each_dimension_is_evidenced_or_gapped(self):
+        data = valid_data()
+        module = data["modules"][0]
+
+        module["evidence"] = [
+            {
+                "supports": (
+                    "change_surface: fixture evidence for change surface. "
+                    "coupling: fixture evidence for coupling."
+                )
+            }
+        ]
+
+        module["evidence_gap"] = (
+            "EVIDENCE_GAP: "
+            "irreversibility: fixture intentionally lacks source proof; "
+            "concurrency_state: fixture intentionally lacks source proof."
+        )
+
+        errors = validate(data)
+        self.assertFalse(
+            any(
+                item.startswith("R12_MODULE_DIMENSION_COVERAGE ")
+                for item in errors
+            ),
+            errors,
+        )
+
+    def test_negative_r7_false_pending_state(self):
+        data = valid_data()
+        data["statuses"]["ac8_independent_review"] = "APPROVED"
+        self.assert_rule(data, "R7_AC6_AC8_PENDING")
+
+    def test_negative_r8_source_file_missing(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            data = self.path_line_fixture(
+                root,
+                "missing/source.md:1",
+                "A source line that does not exist.",
+            )
+            self.assert_rule(data, "R8_PATH_EXISTS", root=root)
+
+    def test_negative_r9_line_out_of_range(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "source.md"
+            source.write_text("The only source line.\n", encoding="utf-8")
+            data = self.path_line_fixture(
+                root,
+                "source.md:2",
+                "The only source line.",
+            )
+            self.assert_rule(data, "R9_LINE_IN_RANGE", root=root)
+
+    def test_negative_r10_quote_not_equal_to_whole_line(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "source.md"
+            source.write_text("The complete source line has extra words.\n", encoding="utf-8")
+            data = self.path_line_fixture(
+                root,
+                "source.md:1",
+                "The complete source line",
+            )
+            self.assert_rule(data, "R10_QUOTE_MATCHES_LINE", root=root)
+
+
+if __name__ == "__main__":
+    unittest.main()
