@@ -1,5 +1,6 @@
 ---
 document_metadata:
+  steward: "A — Principal Integration / Architecture Governance"
   domain: security-governance
   role: normative-standard
   lifecycle:
