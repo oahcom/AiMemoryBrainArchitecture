@@ -47,7 +47,7 @@ session_evidence:
 implementation:
   status: IMPLEMENTED
   implementation_commit_sha: "3cdbf702bde3149cb0d9041dc48289637699e7ac"
-  merge_commit_sha: "2878317ed1c9acbdd6cdf4c77654ed62aa416e48"
+  merge_commit_sha: ""
   merge_commit_kind: PR_HEAD_TRACE_TARGET_NOT_MERGED
   summary: "Documentation-only decision recording in the canonical System Boundaries source and EN/ZH-CN mirrors. No executable behavior or downstream D/F/G consumer document was changed."
   files_changed:
