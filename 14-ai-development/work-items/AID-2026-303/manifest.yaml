@@ -132,5 +132,5 @@ implementation:
     - "python3 scripts/ci/check_manifest_parse.py"
     - "python3 scripts/check_traceability.py --index-only"
 
-pull_request: 1479
-pull_request_url: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1479"
+pull_request: 1496
+pull_request_url: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1496"
