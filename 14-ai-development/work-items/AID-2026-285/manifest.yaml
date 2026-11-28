@@ -1,0 +1,117 @@
+work_item_id: AID-2026-285
+title: "Serialize the work-item uniqueness gate at merge time and make its tests locally runnable"
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  The change closes two residual acceptance gaps in the existing work-item
+  uniqueness gate: local test execution must use the active Python interpreter,
+  and pull-request enforcement must evaluate the generated merge candidate
+  against the latest fetched target branch. It uses the existing
+  GOV-DOC-002 job and does not claim a change to branch protection or required
+  contexts. Workflow execution and merge-time behavior have not been verified
+  on a GitHub Actions runner.
+status: IN_PROGRESS
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner acceptance not recorded"
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "7ecf2a8e7d1e40a13f6af6d4335a6766a222194f"
+
+scope:
+  objective: >-
+    Close the two residual acceptance rows of Issue #1341 by making the
+    work-item uniqueness test suite runnable through the current Python
+    interpreter on Windows and other platforms, and by serializing
+    pull-request uniqueness decisions per target branch while evaluating
+    the generated GitHub merge candidate against the latest fetched target
+    branch commit.
+  issue: "#1341"
+  branch: fix/aid279-merge-time-serialization
+  planned_pr_title: "fix(ci): make the work-item uniqueness gate merge-time serialized and locally runnable (AID-2026-285)"
+  constraints:
+    - Preserve the existing checker semantics for newly introduced work-item directories.
+    - Preserve acceptance of additive files beneath a work-item directory already present at merge-base.
+    - Use sys.executable when the test suite invokes the checker.
+    - Serialize candidates by target branch, not by candidate SHA or source branch.
+    - Set cancel-in-progress to false for the target-branch concurrency group.
+    - Fetch the current target branch in the enforcement step before invoking the checker.
+    - Pass the fetched remote-tracking target branch as --base.
+    - Pass github.sha as the candidate head for pull_request enforcement.
+    - Preserve the existing GOV-DOC-002 job name and job topology.
+    - Preserve the push-before path for push events.
+    - Do not add merge_group as an enforcing path when the repository has no merge queue.
+    - Do not claim that strict branch protection or the workflow itself was newly verified by a GitHub Actions run.
+    - Do not claim merge, independent review, or Owner acceptance.
+    - Use only the Python standard library in the checker and its deterministic tests.
+    - Keep the implementation and verification evidence distinct from executor-run evidence.
+  acceptance_rows:
+    - "1. The checker continues to reject a newly introduced AID work-item directory when that directory is already occupied on the supplied target base."
+    - "2. The test suite is runnable using the active Python interpreter and the workflow serializes candidates by target branch, does not cancel an in-progress decision, and fetches the target branch before the checker consumes it."
+    - "3. Files added beneath a work-item directory already present at merge-base remain additive changes and are accepted."
+    - "4. Missing refs, Git failures, unreadable objects, and subprocess failures remain INCOMPLETE rather than being reported as PASS."
+    - "5. A fresh-base replay of a competing candidate rejects the second claim after the first candidate occupies the directory, while the same candidate evaluated against the stale base does not establish that collision."
+    - "6. The workflow retains the existing GOV-DOC-002 job and its self-check and uniqueness self-test ordering; no new required context or job is introduced."
+    - "7. Pull-request enforcement evaluates github.sha, the generated merge candidate, rather than github.event.pull_request.head.sha."
+    - "8. The enforcement step uses the freshly fetched target branch as --base; the existing push-before path remains available, and no merge_group enforcement path is introduced in the absence of a merge queue."
+  files_changed:
+    - scripts/ci/check_work_item_uniqueness.py
+    - scripts/ci/test_work_item_uniqueness.py
+    - .github/workflows/document-management.yml
+    - 14-ai-development/work-items/AID-2026-285/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-285/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-285/evidence.md
+    - 14-ai-development/work-items/AID-2026-285/session-evidence.md
+    - 14-ai-development/work-items/INDEX.md
+
+evidence: 14-ai-development/work-items/AID-2026-285/evidence.md
+
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-285/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-285/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-285/session-evidence.md
+    relationship: evidence
+
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1341"
+    implementing_ai_session: "6b092534-81b4-83ec-a4de-49c5c6ecaa8b"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-285/session-evidence.md
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-285/prompt-v1.md
+    executed_prompt_sha256: "faa0aff9a9c24082a76ff09f9f57c385f9cbc1d615b2b6686536a109b12ed04d"
+    executed_prompt_bytes: 13681
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: "RECORDED"
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    The checker, deterministic test suite, and document-management workflow
+    were revised for the two residual Issue #1341 acceptance gaps. The test
+    suite invokes the checker through sys.executable. Pull-request runs share
+    a concurrency group keyed by target branch with cancel-in-progress false;
+    the enforcement step fetches that target branch and checks github.sha
+    against the fetched remote-tracking ref. The executor reported eight
+    tests passing on Windows and supplied two real repository base/head
+    checks that passed. The GitHub Actions workflow itself was not executed,
+    and no CI, merge, independent review, or Owner acceptance is claimed.
+  files_changed:
+    - scripts/ci/check_work_item_uniqueness.py
+    - scripts/ci/test_work_item_uniqueness.py
+    - .github/workflows/document-management.yml
+    - 14-ai-development/work-items/AID-2026-285/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-285/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-285/evidence.md
+    - 14-ai-development/work-items/AID-2026-285/session-evidence.md
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - "python -X utf8 scripts/ci/test_work_item_uniqueness.py — executor-executed on Windows; 8 tests passed."
+    - "python -X utf8 scripts/ci/check_work_item_uniqueness.py --base 6306a858 --head 7ecf2a8e — executor-executed real repository history check; PASS, introduced=1 occupied=0."
+    - "python -X utf8 scripts/ci/check_work_item_uniqueness.py --base 7ecf2a8e --head ece472aa — executor-executed real repository history check; PASS, introduced=0 occupied=0."
+    - "GitHub Actions workflow execution — NOT RUN."

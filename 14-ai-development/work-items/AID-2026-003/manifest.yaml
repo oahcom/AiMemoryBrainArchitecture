@@ -80,3 +80,15 @@ policy_unification_ruling:
   instruction_sha256: NOT_VERIFIED
   instruction_sha256_note: No exact raw-message byte stream or local hashing facility is exposed in this session; no synthetic digest or identifier was fabricated
   historical_prompt_hashes: preserved unchanged; no retroactive reconstruction or reclassification
+
+documentation:
+  - path: "14-ai-development/AI-EXEC-001.md"
+    relationship: reference
+  - path: "14-ai-development/AI-EXEC-002.md"
+    relationship: reference
+  - path: "14-ai-development/ai-development-standard.md"
+    relationship: reference
+  - path: "14-ai-development/iteration-lifecycle.md"
+    relationship: reference
+  - path: "14-ai-development/PR-GOVERNANCE-001.md"
+    relationship: reference

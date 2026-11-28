@@ -6,6 +6,9 @@ concurrency:
 
 on:
   pull_request:
+  # `audit` is a required context; the queue only sees `merge_group` checks.
+  merge_group:
+    types: [checks_requested]
   push:
     branches: [main]
 

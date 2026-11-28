@@ -272,3 +272,11 @@ latest_applied_evidence_blob: "273efdd1b02bd9302fc968f07c6d094da2582a6e"
 context_version_source_status: "ContextVersion Immutability Decision is Draft/Unverified/Informative; G acceptance pending."
 applied_evidence_source_status: "Applied Evidence Contract is Draft/Unverified/Informative; C/G/H acceptance pending."
 post_merge_source_sync_status: "FOLLOWUP_PR_REQUIRED; matrix I-09/I-10 and DEC-11 pins added in follow-up PR; no Owner acceptance inferred."
+
+documentation:
+  - path: "00-governance/implementation-evidence/2026-11-26-20-decision-acceptance-register.md"
+    relationship: reference
+  - path: "00-governance/implementation-evidence/2026-11-26-a-i-storage-acceptance-matrix.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-093/evidence.md"
+    relationship: reference

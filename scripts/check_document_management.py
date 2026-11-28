@@ -422,10 +422,42 @@ def _parse_seq(tokens, pos: int, indent: int):
         if body.startswith("- "):
             raise ParseError(f"line {lineno}: nested sequences are not supported")
         if not body.startswith(("'", '"')) and SEQ_MAPPING_RE.match(body):
-            raise ParseError(
-                f"line {lineno}: sequence item looks like a mapping "
-                f"({body!r}); mappings inside sequences are not supported"
-            )
+            # Support one flat mapping per sequence item. Nested mappings and
+            # nested sequences remain deliberately outside this YAML subset.
+            item = {}
+            key, _, raw_rest = body.partition(":")
+            key, rest = key.strip(), raw_rest.strip()
+            if not KEY_RE.match(key):
+                raise ParseError(f"line {lineno}: invalid sequence mapping key {key!r}")
+            if rest and not raw_rest.startswith(" "):
+                raise ParseError(f"line {lineno}: mapping ':' must be followed by a space: {body!r}")
+            item[key] = _scalar(rest, lineno) if rest else None
+            pos += 1
+            child_indent = indent + 2
+            while pos < len(tokens) and tokens[pos][1] == child_indent:
+                child_line, _, child_text = tokens[pos]
+                if child_text.startswith("- ") or child_text == "-" or ":" not in child_text:
+                    raise ParseError(
+                        f"line {child_line}: sequence mapping entries must be flat 'key: value' pairs"
+                    )
+                child_key, _, child_raw_rest = child_text.partition(":")
+                child_key, child_rest = child_key.strip(), child_raw_rest.strip()
+                if not KEY_RE.match(child_key):
+                    raise ParseError(f"line {child_line}: invalid sequence mapping key {child_key!r}")
+                if child_key in item:
+                    raise ParseError(f"line {child_line}: duplicate key {child_key!r}")
+                if child_rest and not child_raw_rest.startswith(" "):
+                    raise ParseError(
+                        f"line {child_line}: mapping ':' must be followed by a space: {child_text!r}"
+                    )
+                item[child_key] = _scalar(child_rest, child_line) if child_rest else None
+                pos += 1
+            if pos < len(tokens) and tokens[pos][1] > indent and tokens[pos][1] != child_indent:
+                raise ParseError(
+                    f"line {tokens[pos][0]}: nested mappings inside sequence items are not supported"
+                )
+            items.append(item)
+            continue
         items.append(_scalar(body, lineno))
         pos += 1
     return items, pos
@@ -869,7 +901,10 @@ def check_schema_keys(loaded: dict) -> list[str]:
     walk(loaded.get("fields"), "")
     return problems
 
-def check_kinds(node, spec: dict, errors: list[str], where: str = "") -> None:
+def check_kinds(
+    node, spec: dict, errors: list[str], where: str = "",
+    deferred_required: frozenset[str] = frozenset(),
+) -> None:
     """Enforce the schema's declared kind for every present field.
 
     Without this, the schema is a description of the gate rather than a
@@ -893,7 +928,7 @@ def check_kinds(node, spec: dict, errors: list[str], where: str = "") -> None:
             # made `approval_scope: required true` unenforceable while
             # REQUIRED_FIELDS never listed it -- the schema and the gate
             # disagreed and neither noticed.
-            if sub.get("required") is True:
+            if sub.get("required") is True and f"{where}{name}" not in deferred_required:
                 errors.append(f"DM-01 missing required field: {where}{name}")
             continue
         path = f"{where}{name}"
@@ -904,7 +939,7 @@ def check_kinds(node, spec: dict, errors: list[str], where: str = "") -> None:
             )
             continue
         if isinstance(value, dict):
-            check_kinds(value, sub, errors, path + ".")
+            check_kinds(value, sub, errors, path + ".", deferred_required)
         elif isinstance(value, list):
             item_kind = sub.get("items")
             if item_kind is not None:
@@ -963,7 +998,9 @@ def check_document(path: Path, text: str, root: Path | None = None) -> tuple[lis
     # declares `mapping` is a type error, not merely a missing leaf that DM-03
     # happens to tolerate; an absent field the schema marks required is equally
     # an error, not an optional omission.
-    check_kinds(meta, schema(root), errors)
+    # Steward is schema-required for new/changed documents, while DM-15b tracks
+    # the grandfathered classified corpus against its committed census.
+    check_kinds(meta, schema(root), errors, deferred_required=frozenset({"steward"}))
     lifecycle = as_map(meta.get("lifecycle"), "lifecycle", errors)
     authority = as_map(meta.get("authority"), "authority", errors)
     errors += unknown_keys(lifecycle, LIFECYCLE_KEYS, "lifecycle")
@@ -2253,6 +2290,33 @@ def added_paths(root: Path, ref: str) -> set[str]:
     added.update(p for p in untracked.split("\0") if p)
     return added
 
+STEWARD_BASELINE = "14-ai-development/reports/steward-adoption-baseline.json"
+
+
+def steward_baseline_errors(root: Path, missing: list[str]) -> list[str]:
+    """DM-15b: the committed census must match the measured missing set."""
+    path = root / STEWARD_BASELINE
+    if not path.is_file():
+        return []  # Bootstrap commit: the first Actions census creates this file.
+    try:
+        baseline = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        return [f"DM-15b cannot read steward adoption baseline: {exc}"]
+    current_pin = git(root, "rev-parse", "HEAD^1")
+    if current_pin and baseline.get("pin") != current_pin:
+        return []  # The base advanced; the census step emits a fresh pin for refresh.
+    recorded = baseline.get("missing") if isinstance(baseline, dict) else None
+    if not isinstance(recorded, list) or any(not isinstance(item, str) for item in recorded):
+        return ["DM-15b baseline missing must be a string array"]
+    if sorted(recorded) != sorted(missing):
+        return [
+            "DM-15b steward adoption baseline is stale: "
+            f"recorded {len(recorded)} missing path(s), measured {len(missing)}; "
+            "refresh the baseline in this change"
+        ]
+    return []
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", default=".", help="repository root")
@@ -2265,7 +2329,12 @@ def main() -> int:
         help="require metadata on every governed file changed since REF "
              "(incremental: does NOT claim the whole tree is classified)",
     )
+    parser.add_argument("--list-missing", action="store_true")
+    parser.add_argument("--json", action="store_true")
+    parser.add_argument("--pin", default=None)
     args = parser.parse_args()
+    if args.json and not args.list_missing:
+        parser.error("--json requires --list-missing")
 
     # Two different verdicts, and they must not be confused:
     #   --require-changed REF  incremental. The backlog may stay, it may not
@@ -2367,7 +2436,7 @@ def main() -> int:
             continue
         file_errors, meta = check_document(path, text, root)
         errors.extend(f"{rel}: {err}" for err in file_errors)
-        if (rel in newly_added and meta is not None
+        if (rel in required and meta is not None
                 and not str(meta.get("steward") or "").strip()):
             errors.append(
                 f"{rel}: DM-15 new governed document must declare a non-empty steward"
@@ -2425,6 +2494,18 @@ def main() -> int:
         rel for rel, meta in docs.items()
         if not str(meta.get("steward") or "").strip()
     )
+    errors.extend(steward_baseline_errors(root, steward_missing))
+    present = len(docs) - len(steward_missing)
+    if args.list_missing:
+        if args.json:
+            pin = args.pin or git(root, "rev-parse", "HEAD") or "UNRESOLVED"
+            print(json.dumps({
+                "pin": pin, "governed": total, "classified": len(docs),
+                "present": present, "missing": steward_missing,
+            }, ensure_ascii=False, sort_keys=True))
+        else:
+            for rel in steward_missing:
+                print(rel)
     print(
         f"DM-15 steward adoption baseline: {len(steward_missing)} classified "
         f"document(s) missing steward"

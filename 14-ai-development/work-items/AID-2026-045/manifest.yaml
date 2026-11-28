@@ -122,3 +122,7 @@ findings:
   - id: F-BMCP-ACCEPTED-SOCKET-CLEANUP-001
     severity: P2
     feedback_destination: "PR #614; close after RAII child cleanup and exact-head Windows test evidence are recorded."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-045/prompt-v1.md"
+    relationship: reference

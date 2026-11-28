@@ -47,3 +47,7 @@ acceptance:
 limits:
   - Does not execute SqliteMemoryStorage Rust adapter.
   - Does not prove power-loss, kernel-crash, media-corruption, backup/restore, multi-host linearizability, or production readiness.
+
+documentation:
+  - path: "scripts/verification/sqlite_process_conformance.py"
+    relationship: code

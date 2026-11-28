@@ -8,7 +8,7 @@ risk_rationale: >-
   already was, and on a GBK console the nine false DM-10 "did not exist" verdicts
   disappear. A read that cannot be decoded now stops the run as INCOMPLETE (2)
   instead of becoming a content finding (1) or a crash.
-status: DISPATCHED
+status: MERGED
 id_status: PROVISIONAL
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -63,6 +63,8 @@ carrier:
   branch: fix/2026-11-27-git-decode-locale
   pull_request: 1354
   draft: false
+  merge_commit_sha: 980e54d9b17af04eaaf754f160c3068eb0adc6fa
+  merged_at: "2026-11-26T18:52:59Z"
   merge_authorization: >-
     Only after all 16 required contexts succeed on the exact final PR head,
     branch freshness is rechecked, and any conflicts are resolved.
@@ -86,3 +88,12 @@ session_evidence:
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-204/session-evidence.md"
+
+post_merge_correction:
+  date: "2026-11-27"
+  basis: "GitHub API GET /pulls/1354 returned merged=true; the merge commit is reachable from origin/main. This block records the correction so the original value stays auditable."
+  original_values:
+    - "carrier.merge_commit_sha: ABSENT"
+    - "status: DISPATCHED"
+  corrected_values:
+    - "PR #1354 merged; see implementation/carrier above"
