@@ -54,6 +54,25 @@ def resolve():
 
         return verified
 
+    if event_name == "merge_group":
+        base = os.environ.get("GITHUB_EVENT_MERGE_GROUP_BASE_SHA", "")
+        if not re.fullmatch(r"[0-9a-fA-F]{40}", base):
+            raise ResolutionError(
+                "merge_group requires a full GITHUB_EVENT_MERGE_GROUP_BASE_SHA"
+            )
+        parents = git("rev-list", "--parents", "-n", "1", candidate).split()
+        if len(parents) != 3:
+            raise ResolutionError(
+                "merge_group GITHUB_SHA is not a two-parent merge candidate"
+            )
+        first_parent = parents[1]
+        verified = git("rev-parse", "--verify", f"{first_parent}^{{commit}}")
+        if verified != base.lower():
+            raise ResolutionError(
+                "merge_group base SHA does not match candidate first parent"
+            )
+        return verified
+
     if event_name == "push":
         before = os.environ.get("GITHUB_EVENT_BEFORE", "")
         if not re.fullmatch(r"[0-9a-fA-F]{40}", before):

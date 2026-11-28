@@ -59,9 +59,21 @@ session_evidence:
       - "#1151"
     implementing_ai_session: NOT_RECORDED
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-090/prompt-v1.md
-    executed_prompt_sha256: 32e5a263ab34d2806110ba09500c3b750613360c20cb082eb1e69fd3cd3fe3a3
-    executed_prompt_bytes: 2034
+    executed_prompt_sha256: 79288220c2196f5af81e0e5a62bf2264b6874b8814614757e08c61764b808d6c
+    executed_prompt_bytes: 1976
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-090/session-evidence.md
     session_reference_reason: "The exact current ChatGPT session identifier is not exposed in this execution context; historical identifiers were not substituted."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-090/prompt-v1.md"
+    relationship: reference
+  - path: "06-memory-context/context-version-immutability-decision.md"
+    relationship: reference
+  - path: "docs/en/06-memory-context/context-version-immutability-decision.md"
+    relationship: reference
+  - path: "docs/zh-CN/06-memory-context/context-version-immutability-decision.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-090/session-evidence.md"
+    relationship: reference

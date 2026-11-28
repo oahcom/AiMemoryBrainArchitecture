@@ -1,0 +1,116 @@
+work_item_id: AID-2026-311
+title: "Preserve work-item claim identity across Update branch in the uniqueness gate"
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  Strengthens only the existing work-item uniqueness checker and its unit
+  suite. No workflow, branch-protection, or merge-queue setting is touched.
+  The merge_group wiring that this work item originally also carried has
+  already landed on main through #1436 and is therefore not part of this PR.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 460f437eb3496e10737b9ef20f4b816e34d155c4
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: 460f437eb3496e10737b9ef20f4b816e34d155c4
+  assigned_id: AID-2026-311
+  allocation_rule: >-
+    Checked the work-items directory on main and all pages of
+    pulls?state=all&per_page=100 (pages 1 through 11); no AID-2026-311 through
+    AID-2026-318 directory or PR title/body occurrence was found. Rechecked on
+    main at 460f437e: the directory still does not exist on main.
+  recheck_rule: >-
+    Recheck the directory and all-state PR listing immediately before opening
+    or updating the PR; use only the reserved 311-318 range if reassignment is
+    required.
+scope:
+  objective: >-
+    Keep a candidate's original work-item claim commit visible after GitHub
+    Update branch merges the advanced target into the candidate, so a duplicate
+    AID claim is rejected instead of being reclassified as an additive change
+    against a moved merge-base.
+  changes:
+    - path: "scripts/ci/check_work_item_uniqueness.py"
+      detail: >-
+        Derive claims from candidate-only non-merge commits and each commit's
+        first-parent tree instead of from merge-base..candidate; keep the
+        existing CLI, exit codes, Incomplete semantics and verdict format.
+    - path: "scripts/ci/test_work_item_uniqueness.py"
+      detail: >-
+        Retain every existing test and add Update-branch, merge-group
+        reconstruction, unoccupied-claim, duplicate-claim and retry
+        determinism mutations, each asserting the legacy merge-base result is
+        a false PASS.
+    - path: "14-ai-development/work-items/AID-2026-311/"
+      detail: "Record implementation contract, evidence, prompt snapshot and session evidence."
+    - path: "14-ai-development/work-items/INDEX.md"
+      detail: "Register AID-2026-311."
+  untouched:
+    - "all .github/workflows files (merge_group wiring landed through #1436)"
+    - "GitHub merge queue and branch protection settings"
+    - "Issue #1341 state and body"
+    - "all existing work-item records"
+non_goals:
+  - "Re-adding merge_group triggers or workflow edits; #1436 already merged them"
+  - "Enabling merge queue or changing branch protection through the API"
+  - "Claim identity preservation across a rebase that rewrites the original claim commit"
+  - "Claiming a real GitHub end-to-end race test without an enabled merge queue"
+evidence:
+  record: "14-ai-development/work-items/AID-2026-311/evidence.md"
+  prompt: "14-ai-development/work-items/AID-2026-311/prompt-v1.md"
+  session: "14-ai-development/work-items/AID-2026-311/session-evidence.md"
+documentation:
+  - path: "scripts/ci/check_work_item_uniqueness.py"
+    relationship: implementation
+  - path: "scripts/ci/test_work_item_uniqueness.py"
+    relationship: implementation
+  - path: "14-ai-development/work-items/AID-2026-311/evidence.md"
+    relationship: evidence
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1341"
+    implementing_ai_session: "ChatGPT-GPT-6"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-311/prompt-v1.md"
+    executed_prompt_sha256: "5a0d7d057a150fe009f97d07b8384934c297fcbfe6d149ffa8a5a2ab7bf17c7e"
+    executed_prompt_bytes: 2821
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-311/session-evidence.md"
+implementation:
+  status: IN_PROGRESS
+  summary: >-
+    The checker now resolves claims per candidate-only commit against that
+    commit's first-parent tree, so the original claim survives an Update-branch
+    merge that moves the merge-base. The unit suite keeps all pre-existing
+    cases and adds five mutations that fail on the merge-base algorithm and
+    pass on the first-parent one. Scope was reduced after #1436 merged the
+    merge_group workflow wiring, which this PR no longer carries.
+  files_changed:
+    - "scripts/ci/check_work_item_uniqueness.py"
+    - "scripts/ci/test_work_item_uniqueness.py"
+    - "14-ai-development/work-items/AID-2026-311/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-311/evidence.md"
+    - "14-ai-development/work-items/AID-2026-311/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-311/session-evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "Positive: a new unoccupied directory must PASS."
+    - "Negative: a candidate claim already occupied on the supplied base must VIOLATION."
+    - "Additive: adding a file beneath an established directory must PASS."
+    - "Update branch: A lands first, B merges the advanced base, B must VIOLATION even though merge-base moved to A's commit."
+    - "Merge-group reconstruction: the synthetic queue candidate for B must VIOLATION."
+    - "Unoccupied Update branch: a claim on a free ID stays PASS."
+    - "Duplicate claims: two candidate-only commits creating the same ID must VIOLATION."
+    - "Determinism: repeated runs on the same base and candidate emit identical output."
+    - "Missing base must return INCOMPLETE."

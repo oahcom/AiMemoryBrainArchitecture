@@ -11,7 +11,7 @@ risk_rationale: >-
   committed byte, because PR #1281 removed two frontmatter keys from their prompt snapshots and
   repinned only its own. Both are corrected by recomputation from the committed bytes, with every
   superseded value recorded rather than overwritten.
-status: PR_OPEN
+status: MERGED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -297,9 +297,11 @@ acceptance_criteria:
     table or in the corrections block.
 
 implementation:
-  status: PR_OPEN
+  status: IMPLEMENTED
   branch: gov/aid-116-pin-and-attribution
   pull_request: 1321
+  merge_commit_sha: a7cf5256e975ff25fd2f75b3b5051b16d8d77d36
+  merged_at: "2026-11-27T05:13:19Z"
 
 review:
   status: NOT_ASSIGNED
@@ -323,3 +325,13 @@ session_evidence:
       Issue row to map to YES with. The OD-A3 path permits PR-scope evidence with empty
       issue_refs, and the Issue row is declared LEGACY_UNDECLARED with N/A for the same reason
       AID-2026-101's was.
+
+post_merge_correction:
+  date: "2026-11-27"
+  basis: "GitHub API GET /pulls/1321 returned merged=true; the merge commit is reachable from origin/main. This block records the correction so the original value stays auditable."
+  original_values:
+    - "implementation.status: PR_OPEN"
+    - "implementation.merge_commit_sha: ABSENT"
+    - "status: PR_OPEN"
+  corrected_values:
+    - "PR #1321 merged; see implementation/carrier above"

@@ -119,3 +119,7 @@ findings:
   - id: F-REQ08-MCP-TOOL-RESULT-001
     severity: P1
     feedback_destination: "Issue #617; close only after CallToolResult shape, tool-error semantics, structural tests and exact-head verification are complete."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-044/prompt-v1.md"
+    relationship: reference

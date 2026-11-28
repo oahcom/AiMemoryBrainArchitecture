@@ -125,8 +125,16 @@ session_evidence:
       - "#262"
     implementing_ai_session: session-wo01-r47-coordinator
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-075/prompt-v1.md
-    executed_prompt_sha256: e85f9ae067792717fbe989322dfee804091c776b2ad4317a03f2a95970ee4d83
-    executed_prompt_bytes: 4961
+    executed_prompt_sha256: 0a1b6f82484207b81736a230ef51507de1dc83ed90bfcbd4fdd19b9554a2d0df
+    executed_prompt_bytes: 4903
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-075/session-evidence-262.md
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-075/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-075/session-evidence-262.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference

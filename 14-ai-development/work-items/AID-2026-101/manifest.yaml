@@ -274,3 +274,11 @@ session_evidence:
       INDEX cell cites - and none of them is in MANIFEST_FIELDS, so they do not conflict with
       this block. The digest and byte count are repeated here because entry #1 has to pin the
       snapshot it executed; they are the same measurement, not a second source of truth.
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-101/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-101/session-evidence-1244.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference

@@ -17,9 +17,9 @@ document_metadata:
     evidence_verification:
       verification_status: Unverified
       last_verified_date: "2026-11-27"
-      last_verification_note: "Structured capture of the dispatched task contract; not a byte-for-byte platform transcript or frozen prompt snapshot."
+      last_verification_note: "Structured snapshot, not a byte-for-byte transcript; prompt provenance is NOT_VERIFIED."
     usage_status: Active
-    modification_status: Modified
+    modification_status: Active-Modified
     supersession:
       supersedes: []
       supersession_reason: null
@@ -28,90 +28,48 @@ document_metadata:
       archived_date: null
       archival_reason: null
       archival_reference: null
+  steward: "user-authorized operator (delegated by account owner)"
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: null
-    canonical_scope_id: null
+    canonical_scope: "Structured prompt snapshot for AID-2026-284"
+    canonical_scope_id: "ai-development/aid-2026-284-prompt"
     canonical_scope_keywords:
-      - "manifest-blob-pins"
-      - "negative-fixture-assertion"
-      - "event-aware-base-resolution"
+      - "req-04"
+      - "aid-2026-284"
+      - "prompt-snapshot"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
-  bilingual_counterpart:
-    source: null
-    en: null
-    zh-CN: null
-  steward: "user-authorized operator (delegated by account owner)"
 ---
 
-# AID-2026-284 — Structured task capture
+# AID-2026-284 — REQ-04 AC1 scope confirmation
 
-## Capture metadata
+## Role
+Act as the delegated documentation operator for repository oahcom/AiMemoryBrainArchitecture. Record the bounded REQ-04 scope statement without impersonating a natural-person Owner.
 
-- Work item: AID-2026-284
-- Date: 2026-11-27
-- Repository: `oahcom/AiMemoryBrainArchitecture`
-- Issues: #1349 and #1350
-- Implementing branch: `fix/aid268-negative-assertion`
-- Base commit: `7fc4ddabe1ea3b216b4536c0f5cb0a0c84306f19`
-- Fix commit: `ccb22465`
-- Prompt status: `RECORDED_NOT_FROZEN`
-- Capture provenance: `STRUCTURED_TASK_CAPTURE`
+## Objective
+Create one auditable work-item carrier that supersedes the ineffective AC8 exclusion in AID-2026-260 while preserving AC8 as in scope and ABSENT. Do not modify AID-2026-260, Issue #265's body, unrelated work items, code, tests, workflows, or branch protection.
 
-This file is a structured record of the dispatched task contract and its material constraints. It is not represented as a byte-for-byte transcript of the platform prompt, and it is not a frozen prompt snapshot.
+## Authoritative inputs
+- Base: main at cbdaf78313404fc24a6c250dc06faa72d4d0b97c.
+- AID-2026-260 scope-confirmation blob: e6425787d2ae3c8aa3e2eb21e1adf7cc1542611a.
+- AID-2026-280 decision blob: 3cde57f77fa9c93a702eaab0f3164f27c70c4573.
+- Governance policy: 00-governance/architecture-document-management-policy.md.
+- Issue #265 and Issue #305 comment 7042461592 are GitHub-hosted facts; preserve their API read references and do not claim they are offline-recomputable.
 
-## Task
+## Authority and constraints
+- Attribution: user-authorized operator (delegated by account owner).
+- Decision character: 代理裁决，非自然人 Owner 签署.
+- Approval remains Under-Review; approver remains null; verification remains Unverified.
+- AID-2026-260 is immutable in this task. Do not write superseded_by into it.
+- Do not PATCH Issue #265. After merge, add exactly one comment only.
+- Exactly one PR for AID-2026-284. Do not create a second carrier.
+- Use only six paths: this work item's manifest.yaml, scope-confirmation.md, evidence.md, session-evidence.md, prompt-v1.md, and work-items/INDEX.md with exactly one appended AID-2026-284 row.
+- Do not mark AC1 or AC9 passed. Keep AC2/AC5/AC7 SATISFIED and AC3/AC4/AC6 PARTIAL without expanding their completion.
+- Copy the specified AC8 disposition verbatim into scope-confirmation.md.
 
-Implement the bounded CI correctness fix associated with issues #1349 and #1350 in `oahcom/AiMemoryBrainArchitecture`.
+## Required outcome
+Record AC8 as in scope, not excluded, not satisfied, status ABSENT, direct-measurement carrier NO_CARRIER_FOUND. Retain AID-2026-254 as optional out-of-scope proxy observation only. AC9 remains NOT YET JUDGEABLE and follows: merge this carrier, disposition AC3/AC4/AC6 residuals, then Owner records AC9.
 
-The change must make the manifest blob-pin negative assertion capable of detecting a false acceptance and must make the workflow select the correct base commit for the event being evaluated.
-
-## Required behavior
-
-1. The immutable negative fixture must be checked by an assertion that verifies the checker rejects it with the expected evidence. A checker invocation that exits successfully without rejecting the fixture must fail the assertion.
-2. The base commit used for the workflow's base scan must be resolved from the event context:
-   - For `pull_request`, validate the merge-candidate ref and commit, verify that the merge candidate has two parents, and select its first parent.
-   - For `push`, use the event's `before` SHA supplied to the resolver.
-   - Unsupported events and invalid or unavailable inputs must fail closed.
-3. The workflow must use the resolved base SHA for the base measurement and `GITHUB_SHA` for the candidate measurement and ratchet invocation.
-4. Preserve the existing repository-hygiene job identity and job name.
-5. Do not add a new job, required status context, dependency, or branch-protection change.
-6. Do not modify `scripts/ci/baselines/manifest-blob-pins.txt`.
-7. Add unit coverage for the resolver and negative assertion.
-
-## Scope
-
-The implementation is limited to:
-
-- `.github/workflows/repository-hygiene.yml`
-- `scripts/ci/resolve_manifest_blob_pin_base.py`
-- `scripts/ci/assert_manifest_blob_pin_negative.py`
-- `scripts/ci/test_resolve_manifest_blob_pin_base.py`
-- `scripts/ci/test_assert_manifest_blob_pin_negative.py`
-
-The workflow change replaces the measurement step, changes the ratchet's `--commit` target from `HEAD` to `$GITHUB_SHA`, and adds one self-check step. The workflow's existing job ID and job name remain unchanged.
-
-## Implementation result
-
-The implementation was committed as:
-
-- Commit: `ccb22465`
-- Subject: `fix(ci): make the blob-pin negative sample and base binding able to fail (AID-2026-284)`
-- Branch: `fix/aid268-negative-assertion`
-
-The fix adds event-aware base resolution and an assertion for the immutable negative sample. The assertion requires the fixture to be rejected with the expected summary and mismatch evidence; an unexpected clean result is a violation.
-
-## Verification contract
-
-Local verification includes:
-
-- Resolver unit tests.
-- Negative assertion unit tests.
-- Existing blob-pin checker unit tests.
-- Offline workflow-step proof comparing the pre-fix and delivered step behavior with a deliberately silent, successful checker.
-- Offline base-selection proof comparing the prior event-time-base behavior with the merge-candidate first-parent behavior.
-- Verification that the baseline file remains unchanged.
-
-GitHub Actions execution, pull-request review, and Owner acceptance are separate pending events and must not be represented as completed by this capture.
+## Verification and reporting
+Record source blob identities, exact source line locations, reproducible git/API read commands, and the distinction between offline-recomputable repository blobs and GitHub Issue/comment facts. Preserve the prompt snapshot's actual byte count and SHA-256 in the manifest.

@@ -1,0 +1,72 @@
+work_item_id: AID-2026-302
+title: "Enforce the PR body digest binding in the session-evidence workflow shape gate"
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  Extends an existing required repository-hygiene guard using Python standard
+  library checks. It does not modify the workflow being inspected, introduce
+  dependencies, or add required contexts.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: user-authorized operator (delegated by account owner)
+accountable_owner: user-authorized operator (delegated by account owner)
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-26
+renumbering_reason: >-
+  AID-2026-281 was already taken by #1409, so this work item was renumbered to
+  AID-2026-302 under the one-AID-one-PR rule. The original branch
+  fix/2026-11-27-aid281-session-evidence-body-digest-reader at head ca9eb5b3 is
+  kept for reference; only identifiers changed, no implementation text did.
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: cb5b3dcd23ff86e10a354bb27b668dce19e95f62
+prompt_status: RECORDED_NOT_FROZEN
+prompt_file: 14-ai-development/work-items/AID-2026-302/prompt-v1.md
+scope:
+  objective: >-
+    Make the existing Repository hygiene hard gate reject removal or weakening
+    of the PR-body digest binding in the session-evidence workflow.
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-302/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-302/evidence.md
+  files_to_modify:
+    - scripts/check_session_evidence_workflow_shape.py
+    - scripts/test_check_session_evidence_workflow_shape.py
+  carrier: PLACEHOLDER_PR
+evidence:
+  record: 14-ai-development/work-items/AID-2026-302/evidence.md
+  primary_record: 14-ai-development/work-items/AID-2026-302/evidence.md
+  session: 14-ai-development/work-items/AID-2026-302/session-evidence.md
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-302/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-302/session-evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-302/prompt-v1.md
+    relationship: reference
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1246"
+    prompt_id: AID-2026-302-PROMPT
+    prompt_version: 1
+    executed_prompt_sha256: e551f793b2a2638af8d4998b307e6ded832cdd9bfa69ce9514a0362d3864d810
+    executed_prompt_bytes: 6021
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    implementing_ai_session: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-302/session-evidence.md
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-302/prompt-v1.md
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    Extend the existing workflow shape checker with independent PR-body digest
+    step, always-condition, summary-write and hexadecimal-validation assertions.
+  files_changed:
+    - scripts/check_session_evidence_workflow_shape.py
+    - scripts/test_check_session_evidence_workflow_shape.py
+  tests:
+    - python3 scripts/test_check_session_evidence_workflow_shape.py
+    - Three required body-digest mutations must exit 1 with mutation-specific diagnostics.
+    - Existing workflow shape checks must retain their behavior.

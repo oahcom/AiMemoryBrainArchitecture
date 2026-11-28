@@ -97,7 +97,8 @@ carrier:
   branch: "docs/aid-2026-150-restore-d-normative-roots"
   pull_request: "1320"
   pull_request_url: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1320"
-  merge_commit_sha: "PENDING"
+  merge_commit_sha: "6ab36b3697a0994d8de449d2b9c344f23aac0fda"
+  merged_at: "2026-11-26T14:02:52Z"
 session_evidence:
   - role: "IMPLEMENTATION_SESSION"
     issue_refs:
@@ -108,3 +109,11 @@ session_evidence:
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-150/session-evidence.md"
+
+post_merge_correction:
+  date: "2026-11-27"
+  basis: "GitHub API GET /pulls/1320 returned merged=true; the merge commit is reachable from origin/main. This block records the correction so the original value stays auditable."
+  original_values:
+    - "carrier.merge_commit_sha: PENDING"
+  corrected_values:
+    - "PR #1320 merged; see implementation/carrier above"

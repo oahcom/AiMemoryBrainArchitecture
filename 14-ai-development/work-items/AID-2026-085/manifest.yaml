@@ -203,8 +203,16 @@ session_evidence:
       - "#925"
     implementing_ai_session: a925-opencode-author
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-085/prompt-v1.md
-    executed_prompt_sha256: 17a8cd7583b88aaa348024bf445c9c3bbb86e463c38e49495df9d07edbb3f35e
-    executed_prompt_bytes: 7689
+    executed_prompt_sha256: 80a1ecb80d093c69b3a1921eb7146852df44a0bf4aa5da775f8907fd4f5447f9
+    executed_prompt_bytes: 7631
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-085/session-evidence-925.md
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-085/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-085/session-evidence-925.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference

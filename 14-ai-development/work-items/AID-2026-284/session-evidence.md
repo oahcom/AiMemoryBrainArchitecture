@@ -12,14 +12,14 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-284/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-284/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
       last_verified_date: "2026-11-27"
-      last_verification_note: "This record distinguishes local unit and offline proof execution from GitHub Actions execution, which remains pending."
+      last_verification_note: "Session record; implementing session identifier is not exposed by platform."
     usage_status: Active
-    modification_status: Modified
+    modification_status: Active-Modified
     supersession:
       supersedes: []
       supersession_reason: null
@@ -28,56 +28,37 @@ document_metadata:
       archived_date: null
       archival_reason: null
       archival_reference: null
+  steward: "user-authorized operator (delegated by account owner)"
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: null
-    canonical_scope_id: null
+    canonical_scope: "AI session evidence for AID-2026-284"
+    canonical_scope_id: "ai-development/aid-2026-284-session-evidence"
     canonical_scope_keywords:
+      - "req-04"
+      - "aid-2026-284"
       - "session-evidence"
-      - "manifest-blob-pins"
-      - "implementation-provenance"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
-  bilingual_counterpart:
-    source: null
-    en: null
-    zh-CN: null
-  steward: "user-authorized operator (delegated by account owner)"
 ---
 
-# AID-2026-284 — Session evidence
+# Session Evidence — AID-2026-284
 
-## Session and attribution
+## Session role / use case
 
-- Date: 2026-11-27
-- Repository: `oahcom/AiMemoryBrainArchitecture`
-- Work item: AID-2026-284
-- Implementing session: `ChatGPT-GPT-6`
-- Attribution: `USER-PRINCIPAL-DELEGATED`
-- Authorized operator: `user-authorized operator (delegated by account owner)`
+Role: delegated documentation operator for the REQ-04 AC1 scope carrier. Use case: reconcile the conflicting AID-2026-260 and AID-2026-280 AC8 dispositions in one auditable work item, without changing the Issue body or the superseded source carrier. The platform does not expose a stable implementing-session identifier; no identifier is invented.
 
-## Reservation
+## Actual AI input
 
-The work-item identifier was reserved on the `aid-ledger` branch at commit `6ce3c08` using the single-writer protocol. The reservation push succeeded.
+The user supplied the AID-2026-284 task specification, including the exact six-path boundary, the mandatory AC8 text, the required metadata values, the evidence sources, the one-PR rule, the merge requirements, and the instruction to leave Issue #265's body unchanged. The user then corrected the policy path to `00-governance/architecture-document-management-policy.md` and confirmed the current main prefix as `cbdaf783`.
 
-## Implementation identity
+## AI-visible output
 
-- Branch: `fix/aid268-negative-assertion`
-- Base commit: `7fc4ddabe1ea3b216b4536c0f5cb0a0c84306f19`
-- Fix commit: `ccb22465`
-- Commit subject: `fix(ci): make the blob-pin negative sample and base binding able to fail (AID-2026-284)`
-
-## Local verification performed
-
-The following unit suites were executed from the branch root:
-
-1. `python3 scripts/ci/test_resolve_manifest_blob_pin_base.py` — 7 tests passed.
-2. `python3 scripts/ci/test_assert_manifest_blob_pin_negative.py` — 7 tests passed.
-3. `python3 scripts/ci/test_check_manifest_blob_pins.py` — 8 tests passed.
-
-The offline workflow-step proof extracted the pre-fix and delivered workflow steps and ran them with a checker test double that printed nothing and exited 0. The pre-fix step exited 0; the delivered step exited 1 and reported that the negative sample had not been rejected.
-
-The offline base-selection proof used a fixture with an event-time base without a pin and an advanced merge-candidate first parent containing the pin. The old logic returned verdict exit 0; the new logic returned verdict exit 1.
-
-The baseline unchanged check was executed:
+- Fetched main at `cbdaf78313404fc24a6c250dc06faa72d4d0b97c`.
+- Read the policy file and verified its actual anchors: decision_status at line 166, verification_status at line 212, supersession single-direction rule at line 248, and M-02 at line 435.
+- Read AID-2026-260 scope blob `e6425787d2ae3c8aa3e2eb21e1adf7cc1542611a` and AID-2026-280 decision blob `3cde57f77fa9c93a702eaab0f3164f27c70c4573`.
+- Read Issue #265 body and Issue #305 comment 7042461592 through GitHub API; these are GitHub-hosted evidence, not offline-recomputable Git blobs.
+- Attempted the prescribed shallow clone. Three attempts failed with the raw GnuTLS handshake error recorded in the operator session; no partial-clone worktree was used.
+- Created only the branch `feat/aid-2026-284-req04-ac1-scope` from the observed main commit. No other PR or Issue comment is created by this session evidence.
+- Updated PR #1440's description with the required three-column per-Issue mapping table. The validator classified Issue #265 as historical and undeclared, so its mapping is `LEGACY_UNDECLARED` with `N/A`; the PR-level AI-assisted declaration and session evidence reference remain present. The preceding validation identified the mapping-table requirement and then the historical-Issue status requirement.
+- No test, merge, required-context success, branch-protection state, or Owner acceptance is claimed here.

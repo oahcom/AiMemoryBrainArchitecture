@@ -96,6 +96,21 @@ class ResolveManifestBlobPinBaseTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("GITHUB_REF", result.stderr)
 
+    def test_merge_group_uses_and_validates_candidate_first_parent(self):
+        result = self.resolve(
+            GITHUB_EVENT_NAME="merge_group",
+            GITHUB_EVENT_MERGE_GROUP_BASE_SHA=self.base,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), self.base)
+
+        mismatch = self.resolve(
+            GITHUB_EVENT_NAME="merge_group",
+            GITHUB_EVENT_MERGE_GROUP_BASE_SHA=self.head,
+        )
+        self.assertEqual(mismatch.returncode, 2)
+        self.assertIn("does not match", mismatch.stderr)
+
     def test_push_uses_pre_push_tip(self):
         result = self.resolve(
             GITHUB_EVENT_NAME="push",

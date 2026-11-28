@@ -104,3 +104,13 @@ findings:
   - id: AID-2026-048-F2
     severity: P3
     feedback_destination: "Delivery PR conversation. AckOutcome carries both Late with superseded_by and StaleAttempt. The specification says only 'late ACK'; the two are genuinely different (the delivery object changed versus the attempt of the same delivery is obsolete), and StaleAttempt was not requested. Recorded as a design judgement rather than a silent addition."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-048/prompt-v1.md"
+    relationship: reference
+  - path: "06-memory-context/context-versioning.md"
+    relationship: reference
+  - path: "06-memory-context/context-implementation-coverage.md"
+    relationship: reference
+  - path: "06-memory-context/context-implementation-coverage.zh-CN.md"
+    relationship: reference
