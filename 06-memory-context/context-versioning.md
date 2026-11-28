@@ -1,3 +1,47 @@
+---
+document_metadata:
+  domain: memory-context
+  role: normative-standard
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: null
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Normative
+  bilingual_counterpart:
+    source: null
+    en: "docs/en/06-memory-context/context-versioning.md"
+    zh-CN: "docs/zh-CN/06-memory-context/context-versioning.md"
+  steward: "Architecture Governance"
+---
+
 # Context Versioning and Change Sets
 
 **Status:** DECIDED invariants; CANDIDATE object encoding and serialization policy  
@@ -511,3 +555,10 @@ Applied is an immutable historical observation, not a permanent authorization le
 - Repeated ACKs do not create a new Applied record or alter the current pointer.
 - Context head advances once per successfully committed ChangeSet. A stale BaseVersion returns conflict and requires re-read/re-plan; no implicit merge.
 - The G head/version visibility transition for canonical-derived artifacts remains gated by D's dependency registration and PublishDerivedIfFenceCurrent semantics. **CV-48** — The physical transaction/recoverable realization is governed by §13.3 as a subordinate constraint: the ordering is normative and DECIDED, while the physical realization remains an implementation-conformance gate that D and Storage/Consistency MUST specify and independently prove before public visibility is enabled. Until that proof exists, stage privately and do not publish/send. §13.3 controls this relationship; this subsection does not restate it as an open normative choice.
+
+### 14.6 ChangeSet admission vs. transactional integrity
+
+Admission and commit integrity are separate requirements. Passing entry admission MUST NOT be treated as proof that the transaction, version graph or delivery state is complete or valid.
+- At the `commit_change_set` entry, admission MUST validate the authenticated Principal and the applicable Context/operation authority before any commit side effect. This check MUST NOT stand in for transaction or version-graph validation. Enforcement: **not yet enforced**.
+- At the transaction boundary, committing a ChangeSet MUST atomically persist the committed record, the immutable TargetVersion and its parent relationship, and the Context-head transition. A failed or stale commit MUST NOT leave a partial committed state. Enforcement: **not yet enforced**.
+- In the delivery state machine, an ACK MUST be validated against its authenticated Adapter instance, DeliveryId, AttemptId and ACK identity; ACK processing MUST remain idempotent and MUST NOT itself create a new Applied record or advance the Context head. Enforcement: §14.5.
