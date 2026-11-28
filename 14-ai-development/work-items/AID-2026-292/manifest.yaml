@@ -1,0 +1,152 @@
+schema_version: 2
+
+work_item_id: AID-2026-292
+title: "In-suite regression self-check for symlink-unavailable skips"
+
+class: TEST
+risk: LOW
+risk_rationale: >-
+  The change adds one regression test case to the existing test runner.
+  It exercises existing skip classification and result-recording behavior
+  under a simulated symlink-unavailable condition. It does not change
+  production behavior, governance, CI configuration, branch protection,
+  or required status contexts.
+
+status: IN_PROGRESS
+id_status: ASSIGNED
+
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner acceptance not recorded"
+attribution: "user-authorized operator (delegated by account owner)"
+
+date: 2026-11-27
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "561e9f2471d09828cf7a91dc5b24bbfe82b2e213"
+
+tracking_issue:
+  - "#1268"
+
+scope:
+  objective: >-
+    Add the in-suite regression case T129 that proves symlink-unavailable
+    skips do not erase independent test cases executed by the same runner
+    functions. The eight symlink-dependent sites themselves were landed
+    by AID-2026-324 and are explicitly outside this work item's scope.
+
+  constraints:
+    - >-
+      Do not modify AID-2026-324's _create_symlink_or_skip helper or
+      any of its eight registered call sites.
+    - >-
+      Do not modify CI jobs, branch protection, or the 16 required contexts.
+    - Do not add dependencies.
+    - Do not weaken skip() or ALLOWED_SKIPS.
+    - Do not wire the standalone verification script into CI.
+    - Do not change production code or unrelated test behavior.
+    - Keep the change limited to the T129 regression case and its runner registration.
+    - Preserve existing result, skip, and unexpected-skip accounting semantics.
+
+  untouched:
+    - >-
+      AID-2026-324 helper:
+      _create_symlink_or_skip(name, link, target, *, target_is_directory=False)
+    - T49
+    - T50
+    - T51
+    - T51b
+    - T58
+    - T59
+    - T60
+    - T128
+    - skip()
+    - ALLOWED_SKIPS
+    - .github/workflows/*
+    - Branch protection configuration
+    - The 16 required status contexts
+    - verify_full_suite_symlink_unavailable.py
+
+evidence: 14-ai-development/work-items/AID-2026-292/evidence.md
+
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-292/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-292/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-292/session-evidence.md
+    relationship: evidence
+
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1268"
+    implementing_ai_session: "6b0a1a5f-5ff4-83ec-a5d9-347c06a48cdd"
+    session_evidence_ref: >-
+      14-ai-development/work-items/AID-2026-292/session-evidence.md
+    executed_prompt_snapshot_file: >-
+      14-ai-development/work-items/AID-2026-292/prompt-v1.md
+    executed_prompt_sha256: "a62a86fc75fd7c83502aacc589fce5820a76d60c5a01eee9c3a066146c15bd34"
+    executed_prompt_bytes: 3556
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+
+implementation:
+  status: IN_PROGRESS
+  summary: >-
+    T129 has been implemented in
+    scripts/test_check_document_management.py and measured on the
+    implementation branch fix/2026-11-27-aid-292-in-suite-skip-selfcheck,
+    based on origin/main at 561e9f24. Normal run, forced symlink-unavailable
+    run, unregistered-skip negative control and the erasure mutation were all
+    executed. The implementation has not yet been merged. All measurements
+    are tied to the exact tested file SHA-256 and must be repeated
+    after any rebase or source modification.
+
+  files_changed:
+    - scripts/test_check_document_management.py
+
+  tests:
+    - >-
+      python scripts/test_check_document_management.py, normal platform:
+      372/372 passed, 1 skipped (T68c), exit 0.
+    - >-
+      Same suite with Path.symlink_to forced to raise OSError(1314) for the
+      whole of main(): exit 0, 360/360 passed, 13 skipped, 13 registered of
+      13 allowed, UNEXPECTED_SKIPS empty, no skipped name in RESULTS_BY_NAME,
+      T129 True.
+    - >-
+      Negative control: pop T49 from ALLOWED_SKIPS under the same forced
+      failure: exit 1, 359/360, FAIL line names T49, T129 False.
+    - >-
+      Erasure mutation: make run_scan_boundary() return immediately after the
+      T49 skip: exit 1, 358 results, 10 skips, and T129 is the single failing
+      case. Source restored byte-identically afterwards.
+    - >-
+      Verify the test-runner diff and runner tuple: T129 is the only case
+      added, with no other test cases or unrelated runner changes.
+
+review:
+  status: NOT_RECORDED
+  reviewer: NOT_RECORDED
+  result: NOT_RECORDED
+
+acceptance:
+  status: NOT_RECORDED
+  authority: "Owner acceptance not recorded"
+
+governance:
+  status: NOT_APPLICABLE
+  notes: >-
+    This is a test-suite regression change, not a governance change.
+
+verification:
+  status: MEASURED_NOT_REVIEWED
+  limitations:
+    - Measurements apply only to the exact tested file SHA-256.
+    - Measurements must be repeated after rebase.
+    - No CI execution is claimed.
+    - No merge is claimed.
+    - No independent review is claimed.
+    - No Owner acceptance is claimed.
