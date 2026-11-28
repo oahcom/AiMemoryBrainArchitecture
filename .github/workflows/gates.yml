@@ -479,16 +479,6 @@ jobs:
           print(f"BASE_SHA: {os.environ.get('BASE_SHA', 'see workflow env')}")
           PY
 
-      - name: Upload immutable snapshot artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: prompt-commit-trace-snapshots
-          path: |
-            ${{ runner.temp }}/main-baseline.json
-            ${{ runner.temp }}/pr-snapshot.json
-            ${{ runner.temp }}/main-summary.json
-            ${{ runner.temp }}/pr-summary.json
-          if-no-files-found: error
       - name: Reproduce the historical #1453 false-new-manifest failure
         shell: bash
         run: |
@@ -533,7 +523,6 @@ jobs:
           path: |
             ${{ runner.temp }}/main-baseline.json
             ${{ runner.temp }}/pr-snapshot.json
-            ${{ runner.temp }}/baseline-seed.json
             ${{ runner.temp }}/main-summary.json
             ${{ runner.temp }}/pr-summary.json
           if-no-files-found: error
