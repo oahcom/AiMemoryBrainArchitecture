@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 """Self-check for check_session_evidence_workflow_shape.
 
-Run from `scripts/`: this module imports its checker by bare name.
+Run with: python3 scripts/test_check_session_evidence_workflow_shape.py
 
 Each case builds a throwaway tree so the mutation is the only thing that can
-move the verdict, and each asserts on the message text, not only the exit code
--- a guard that fails for an unrelated reason would otherwise look like a
-guard that works. The incomplete cases are the point: a checker that cannot
-find its input must say INCOMPLETE (2), never PASS (0).
+move the verdict, and each asserts on message text, not only the exit code.
+The incomplete cases must say INCOMPLETE (2), never PASS (0).
 """
 
 import io
@@ -20,7 +18,6 @@ from pathlib import Path
 import check_session_evidence_workflow_shape as checker
 
 REPO = Path(__file__).resolve().parent.parent
-
 WORKFLOW_PATH = ".github/workflows/session-evidence.yml"
 
 WORKFLOW = """\
@@ -56,6 +53,20 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.base.sha }}
+      - name: Bind the verdict to the body it judged
+        if: always()
+        run: |
+          if ! digest=$(curl example | python3 -c 'import hashlib')
+          then
+            exit 1
+          fi
+          if ! printf '%s' "$digest" | grep -Eq '^[0-9a-f]{64}$'; then
+            exit 1
+          fi
+          echo "AI-SESSION-EVIDENCE-BODY-SHA256: $digest" >> "$GITHUB_STEP_SUMMARY"
+      - name: Ensure job summary contains a verdict
+        if: always()
+        run: echo "AI-SESSION-EVIDENCE: PRESENT" >> "$GITHUB_STEP_SUMMARY"
 """
 
 
@@ -70,7 +81,7 @@ class SessionEvidenceWorkflowShapeTest(unittest.TestCase):
         path.write_text(text, encoding="utf-8")
 
     def run_checker(self):
-        """(exit code, stderr) for the tree built by this test."""
+        """Return the exit code and stderr for this test tree."""
         errors = io.StringIO()
         with redirect_stdout(io.StringIO()), redirect_stderr(errors):
             code = checker.main(self.root)
@@ -104,16 +115,20 @@ jobs:
     def test_deleting_the_head_job_names_that_job(self):
         lines = WORKFLOW.splitlines()
         start = next(
-            i for i, line in enumerate(lines) if line.startswith("  self-test-pr-head:")
+            i for i, line in enumerate(lines)
+            if line.startswith("  self-test-pr-head:")
         )
-        end = next(i for i, line in enumerate(lines) if line.startswith("  validate:"))
+        end = next(
+            i for i, line in enumerate(lines)
+            if line.startswith("  validate:")
+        )
         self.write("\n".join(lines[:start] + lines[end:]))
         code, message = self.run_checker()
         self.assertEqual(code, 1)
         self.assertIn("self-test-pr-head", message)
 
     def test_head_job_checkout_with_ref_is_a_violation(self):
-        self.write(WORKFLOW.replace(
+        mutated = WORKFLOW.replace(
             "      - name: Checkout PR head\n"
             "        uses: actions/checkout@v4\n"
             "        with:\n"
@@ -123,17 +138,15 @@ jobs:
             "        with:\n"
             "          ref: ${{ github.event.pull_request.base.sha }}\n"
             "          persist-credentials: false\n",
-        ))
+        )
+        self.write(mutated)
         code, message = self.run_checker()
         self.assertEqual(code, 1)
         self.assertIn("self-test-pr-head", message)
         self.assertIn("ref:", message)
 
     def test_head_job_checkout_with_ref_names_the_ref_line(self):
-        # The bare `ref:` token also appears in the prose of the message, so the
-        # assertion above held even when the parenthetical quoted the correct
-        # `uses:` line. Pin the value, not the token.
-        self.write(WORKFLOW.replace(
+        mutated = WORKFLOW.replace(
             "      - name: Checkout PR head\n"
             "        uses: actions/checkout@v4\n"
             "        with:\n"
@@ -143,7 +156,8 @@ jobs:
             "        with:\n"
             "          ref: ${{ github.event.pull_request.base.sha }}\n"
             "          persist-credentials: false\n",
-        ))
+        )
+        self.write(mutated)
         code, message = self.run_checker()
         self.assertEqual(code, 1)
         self.assertIn(
@@ -153,7 +167,8 @@ jobs:
     def test_validate_needs_is_a_violation(self):
         self.write(WORKFLOW.replace(
             "  validate:\n    name: Session Evidence\n",
-            "  validate:\n    name: Session Evidence\n    needs: self-test-pr-head\n",
+            "  validate:\n    name: Session Evidence\n"
+            "    needs: self-test-pr-head\n",
         ))
         code, message = self.run_checker()
         self.assertEqual(code, 1)
@@ -161,10 +176,6 @@ jobs:
         self.assertIn("needs:", message)
 
     def test_validate_block_form_needs_is_a_violation_naming_the_needs_line(self):
-        # #1058. YAML block form puts the value on the following lines, so the
-        # key line ends at the colon. A regex that requires a token after the
-        # colon matches only the flow form and lets the block form through,
-        # silently -- the dependency it forbids is exactly as present.
         block = WORKFLOW.replace(
             "  validate:\n    name: Session Evidence\n",
             "  validate:\n    name: Session Evidence\n"
@@ -174,7 +185,6 @@ jobs:
         code, message = self.run_checker()
         self.assertEqual(code, 1)
         self.assertIn("`needs:`", message)
-
         needs_line = next(
             i for i, line in enumerate(block.splitlines(), 1)
             if line.strip() == "needs:"
@@ -183,15 +193,10 @@ jobs:
             i for i, line in enumerate(block.splitlines(), 1)
             if line.strip() == "validate:"
         )
-        # The line number, not the job name, is what locates the offending key.
         self.assertIn(f"(line {needs_line}: needs:)", message)
         self.assertNotIn(f"(line {job_line}:", message)
 
     def test_ref_violation_quotes_the_ref_line_and_not_the_uses_line(self):
-        # #1045. The step's `uses:` line is the one line in a checkout step that
-        # is already correct, so quoting it sends the reader to look for a
-        # `ref:` that is not there. The negative assertion is the direction:
-        # naming `ref:` in the prose of the message is not enough.
         ref = "ref: ${{ github.event.pull_request.head.sha }}"
         mutated = WORKFLOW.replace(
             "      - name: Checkout PR head\n"
@@ -207,7 +212,6 @@ jobs:
         self.write(mutated)
         code, message = self.run_checker()
         self.assertEqual(code, 1)
-
         ref_line = next(
             i for i, line in enumerate(mutated.splitlines(), 1)
             if line.strip() == ref
@@ -216,11 +220,10 @@ jobs:
         self.assertNotIn("uses: actions/checkout@v4", message)
 
     def test_deleting_the_validate_job_names_it_as_required(self):
-        # Hole 2: REQUIRED_JOB_IDS decides whether the verdict job must exist at
-        # all. Deleting "validate" from that constant must turn this red.
         lines = WORKFLOW.splitlines()
         start = next(
-            i for i, line in enumerate(lines) if line.startswith("  validate:")
+            i for i, line in enumerate(lines)
+            if line.startswith("  validate:")
         )
         self.write("\n".join(lines[:start]))
         code, message = self.run_checker()
@@ -228,7 +231,6 @@ jobs:
         self.assertIn("job id 'validate' is missing", message)
 
     def test_ref_in_the_base_job_is_allowed(self):
-        # The base job SHALL read the base revision; only the head job may not.
         self.write(WORKFLOW)
         self.assertIn(
             "ref: ${{ github.event.pull_request.base.sha }}",
@@ -237,9 +239,6 @@ jobs:
         self.assertEqual(self.run_checker()[0], 0)
 
     def test_trigger_without_edited_is_a_violation_naming_edited_and_its_line(self):
-        # #1074. The validator reads the PR body live, so a trigger that does not
-        # re-run on `edited` leaves a verdict describing text that no longer
-        # exists. The default set omits `edited`, so the key must say so.
         mutated = WORKFLOW.replace(
             "    types: [opened, synchronize, reopened, edited]\n",
             "    types: [opened, synchronize, reopened]\n",
@@ -249,7 +248,6 @@ jobs:
         code, message = self.run_checker()
         self.assertEqual(code, 1)
         self.assertIn("edited", message)
-
         types_line = next(
             i for i, line in enumerate(mutated.splitlines(), 1)
             if line.strip() == "types: [opened, synchronize, reopened]"
@@ -264,9 +262,6 @@ jobs:
         self.assertNotIn("::error::", message)
 
     def test_trigger_with_edited_in_block_form_passes(self):
-        # The anti-regression case for #1045's bug class. A guard that reads only
-        # the flow form would reject this correct file, which is the failure the
-        # `needs:` regex already had once in this same script.
         block = WORKFLOW.replace(
             "    types: [opened, synchronize, reopened, edited]\n",
             "    types:\n"
@@ -299,9 +294,103 @@ jobs:
         self.write("name: Session Evidence Gate\non:\n  pull_request:\n")
         self.assertEqual(self.run_checker()[0], 2)
 
-    def test_the_repository_itself_passes(self):
-        # The shape is a claim about this tree; hold it to that.
+    def test_repository_itself_passes(self):
         self.assertEqual(checker.main(REPO), 0)
+
+    def test_body_digest_step_is_required(self):
+        mutated = WORKFLOW.replace(
+            "      - name: Bind the verdict to the body it judged\n"
+            "        if: always()\n"
+            "        run: |\n"
+            "          if ! digest=$(curl example | python3 -c 'import hashlib')\n"
+            "          then\n"
+            "            exit 1\n"
+            "          fi\n"
+            "          if ! printf '%s' \"$digest\" | grep -Eq '^[0-9a-f]{64}$'; then\n"
+            "            exit 1\n"
+            "          fi\n"
+            "          echo \"AI-SESSION-EVIDENCE-BODY-SHA256: $digest\" >> \"$GITHUB_STEP_SUMMARY\"\n",
+            "",
+        )
+        self.assertNotEqual(mutated, WORKFLOW)
+        self.write(mutated)
+        code, message = self.run_checker()
+        self.assertEqual(code, 1)
+        self.assertIn("mutation 1", message)
+        self.assertIn("Bind the verdict to the body it judged", message)
+        self.assertIn("line", message)
+
+    def test_body_digest_always_condition_is_required(self):
+        mutated = WORKFLOW.replace(
+            "        if: always()\n        run: |\n",
+            "        if: success()\n        run: |\n",
+            1,
+        )
+        self.assertNotEqual(mutated, WORKFLOW)
+        self.write(mutated)
+        code, message = self.run_checker()
+        self.assertEqual(code, 1)
+        self.assertIn("mutation 2", message)
+        self.assertIn("always()", message)
+        self.assertIn("line", message)
+
+    def test_body_digest_expression_always_condition_passes(self):
+        mutated = WORKFLOW.replace(
+            "        if: always()\n        run: |\n",
+            "        if: ${{ always() }}\n        run: |\n",
+            1,
+        )
+        self.assertNotEqual(mutated, WORKFLOW)
+        self.write(mutated)
+        code, message = self.run_checker()
+        self.assertEqual(code, 0, message)
+        self.assertNotIn("mutation 2", message)
+
+    def test_body_digest_rejects_non_always_expressions(self):
+        for condition in (
+            "success()",
+            "failure()",
+            "${{ success() }}",
+            "${{ failure() }}",
+        ):
+            with self.subTest(condition=condition):
+                mutated = WORKFLOW.replace(
+                    "        if: always()\n        run: |\n",
+                    f"        if: {condition}\n        run: |\n",
+                    1,
+                )
+                self.assertNotEqual(mutated, WORKFLOW)
+                self.write(mutated)
+                code, message = self.run_checker()
+                self.assertEqual(code, 1)
+                self.assertIn("mutation 2", message)
+                self.assertIn("always()", message)
+                self.assertIn("line", message)
+
+    def test_body_digest_write_is_required(self):
+        mutated = WORKFLOW.replace(
+            'echo "AI-SESSION-EVIDENCE-BODY-SHA256: $digest" >> "$GITHUB_STEP_SUMMARY"',
+            'echo "AI-SESSION-EVIDENCE: PRESENT" >> "$GITHUB_STEP_SUMMARY"',
+        )
+        self.assertNotEqual(mutated, WORKFLOW)
+        self.write(mutated)
+        code, message = self.run_checker()
+        self.assertEqual(code, 1)
+        self.assertIn("mutation 3", message)
+        self.assertIn("AI-SESSION-EVIDENCE-BODY-SHA256", message)
+        self.assertIn("line", message)
+
+    def test_body_digest_hex_validation_is_independent(self):
+        mutated = WORKFLOW.replace(
+            "          if ! printf '%s' \"$digest\" | grep -Eq '^[0-9a-f]{64}$'; then\n",
+            "          if ! printf '%s' \"$digest\" | grep -Eq '^[0-9a-f]{63}$'; then\n",
+        )
+        self.assertNotEqual(mutated, WORKFLOW)
+        self.write(mutated)
+        code, message = self.run_checker()
+        self.assertEqual(code, 1)
+        self.assertIn("64 lowercase hexadecimal", message)
+        self.assertIn("line", message)
 
 
 if __name__ == "__main__":
