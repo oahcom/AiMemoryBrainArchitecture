@@ -1,3 +1,52 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-342/manifest.yaml"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-28"
+      last_verification_note: "Local command output is recorded verbatim; exact-head CI evidence is pending."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Implementation and verification record for AID-2026-342."
+    canonical_scope_id: "ai-development/aid-2026-342-evidence"
+    canonical_scope_keywords:
+      - "AID-2026-342"
+      - "memory-brain-guide"
+      - "source revision pointer"
+      - "DM-12"
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+  steward: "user-authorized operator (delegated by account owner)"
+---
+
 # Evidence — AID-2026-342
 
 ## 1. Baseline and affected findings
@@ -140,8 +189,8 @@ The two new accurate pointers are the corrected memory-brain-guide records; the 
 ### Document management checker
 
 ```text
-GOV-DOC-002: 1213 governed documents, 845 classified, 368 unclassified
-DM-15 steward adoption baseline: 543 classified document(s) missing steward
+GOV-DOC-002: 1238 governed documents, 872 classified, 366 unclassified
+DM-15 steward adoption baseline: 542 classified document(s) missing steward
 DM-10 out-of-scope stale bindings: 0
 ```
 

@@ -18,10 +18,10 @@ repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
 base_commit_sha: 3da2e32cf
 
-prompt_sha256: PIN_PROMPT_SHA256
+prompt_sha256: 80b4d432775b34dfde0fc17f8d5632ac51faf016b480cdab30ee5ca52439ae97
 prompt_file: "14-ai-development/work-items/AID-2026-342/prompt-v1.md"
-prompt_file_blob_sha: PIN_PROMPT_BLOB
-prompt_file_commit_sha: PIN_PROMPT_COMMIT
+prompt_file_blob_sha: 7f44c597c32e62324cce1250ab3ee232defca959
+prompt_file_commit_sha: ffceb31ee89a6d30b99a5fc9bb039c4fdd79dd89
 
 scope:
   objective: >-
@@ -80,13 +80,13 @@ session_evidence:
     implementing_ai_session: "6b08ffa5-bccc-83ec-ae24-ea58c1d913b9"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-342/session-evidence.md"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-342/prompt-v1.md"
-    executed_prompt_sha256: PIN_PROMPT_SHA256
+    executed_prompt_sha256: 80b4d432775b34dfde0fc17f8d5632ac51faf016b480cdab30ee5ca52439ae97
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
 
 implementation:
   status: IN_PROGRESS
-  implementation_commit_sha: "PIN_IMPL_COMMIT"
+  implementation_commit_sha: "ffceb31ee89a6d30b99a5fc9bb039c4fdd79dd89"
   summary: >-
     Establish a classified root-level canonical memory-brain-guide document
     and close the DM-12 relationship among the canonical document and its
