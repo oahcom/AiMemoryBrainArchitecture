@@ -125,6 +125,41 @@ evidence:
     - "14-ai-development/work-items/AID-2026-016/prompt-v2.md"
   session: "14-ai-development/work-items/AID-2026-016/session-evidence.md"
 
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-016/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-016/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-016/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-016/prompt-v2.md"
+    relationship: reference
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    Implements exact UTF-8 rendered-content SHA-256 verification for
+    ContextEntryVersion and edit-entry validation, preserves the FNV-1a 64
+    snapshot hash algorithm, adds regression coverage for incorrect, stale,
+    empty, and Unicode-distinct content hashes, and updates brain-cli to use
+    the canonical memory-context content hash producer. This records the
+    implementation already described in this manifest and its evidence;
+    it does not claim Owner acceptance, merge, or Issue #1145 closure.
+  files_changed:
+    - "crates/memory-context/src/lib.rs"
+    - "crates/memory-context/tests/content_hash_integrity.rs"
+    - "crates/brain-cli/src/main.rs"
+  tests:
+    - "cargo test -p memory-context --no-fail-fast"
+    - "cargo test -p brain-cli --no-fail-fast"
+    - "cargo test -p agent-integration --no-fail-fast"
+    - "cargo clippy -p memory-context -p brain-cli --all-targets -- -D warnings"
+    - "cargo fmt --all -- --check"
+    - "python scripts/ci/check_manifest_parse.py"
+    - "python scripts/check_document_management.py --require-changed origin/main"
+    - "python scripts/check_traceability.py --index-only"
+    - "cargo test -p memory-context --test content_hash_integrity"
+
 non_goals:
   - "Selecting or authorizing an encryption algorithm."
   - "Changing encryption policy."
