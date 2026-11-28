@@ -230,3 +230,26 @@ acceptance:
     ac6: PENDING_COORDINATOR_NEGATIVE_CASE_EXECUTION_AND_OWNER_ACCEPTANCE
     ac8: PENDING_INDEPENDENT_REVIEW
   ac8_reviewer_disposition: TO_BE_FILLED_BY_INDEPENDENT_REVIEWER
+
+# Initial registration only:
+# permits this newly introduced Work Item to enter main before its
+# implementation commit is reachable from the target branch.
+prompt_file: "14-ai-development/work-items/AID-2026-293/prompt-v1.md"
+
+# SHA-256 of the exact prompt-v1.md bytes.
+# The checker independently recalculates this from both the head file
+# and the immutable Git blob.
+prompt_sha256: "c1dc5334d5f16b79a84200540657ee6f680f952aae420648d64e96ae7295a626"
+
+# Git blob object ID of the exact same prompt-v1.md bytes.
+# This is a blob OID, not a commit SHA.
+prompt_file_blob_sha: "7653e98669afbe364d9713849cd03f4ef73f272d"
+
+# Explicitly declares this as the narrowly scoped first-registration state.
+prompt_commit_trace_initial_registration: true
+
+# IMPORTANT:
+# Do not add prompt_file_commit_sha here.
+# Do not add implementation.implementation_commit_sha here.
+# Do not add implementation.merge_commit_sha here.
+# The initial-registration exception rejects those pins.
