@@ -287,3 +287,7 @@ entries:
       FREE 1). AID-2026-340 is the highest occupied identifier. AID-2026-341
       through AID-2026-350 are absent from refs, open PR heads, and ledger.
       AID-2026-341 is the first identifier in that verified free range.
+  - id: AID-2026-333
+    state: RESERVED
+    carrier: "branch fix/aid-race-invariant (PR #1515 open)"
+    note: "2026-11-28 scan (origin/main 389467707): main carries 325, 326 and 340 above 324; origin/aid-ledger carries AID-2026-331 as a directory and ledger entries for 281-287, 312, 313 and 332; scanned all 1180 origin/* refs for AID-2026-333 with no hit. The fix/aid-race-invariant branch now carries the AID-2026-333 manifest and PR #1515 is open. Scope: close the work-item uniqueness merge race by adding a two-parent duplicate-claim history detector and wiring it into the existing GOV-DOC-002 push path, while preserving the tree-only uniqueness checker and the restored pull_request and merge_group candidate checks. Row 6 remains GAP pending owner-side strict branch protection and a successful live two-PR qualification."
