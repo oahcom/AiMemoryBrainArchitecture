@@ -1,0 +1,294 @@
+work_item_id: AID-2026-269
+title: >-
+  Establish a reusable, independently executable Exact-Head Independent Review
+  Protocol and apply it once to #1278 (AID-2026-092): lock the candidate commit,
+  recompute the declared prompt digest and byte count from committed Git objects,
+  enumerate the reachable history for the declared value, and grade the findings —
+  without repairing the reviewed work item
+class: DOC/GOVERNANCE + GATE/PROTOCOL
+risk: R1
+risk_rationale: >-
+  Additions only: one reusable protocol document, one review case, one evidence
+  record, one session-evidence record, one prompt snapshot and one appended INDEX
+  row. No production gate, workflow, required context, branch protection, schema,
+  checker, baseline or normative root is changed, and no existing manifest or INDEX
+  row is edited. The residual risk is evidentiary, not operational: a review record
+  that reads as a repair of #1278, or a verdict that is silently attributed to this
+  work item instead of to the reviewed declaration, would recreate the very defect
+  class the protocol exists to catch. The manifest therefore states the three
+  statuses separately — review execution, reviewed declaration, remediation — and
+  records them as different things.
+status: IMPLEMENTED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 987d26021affbb5ba6d651e0fb5985d6bd4026a5
+tracking_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1278
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+prompt_id: AID-2026-269-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-269/prompt-v1.md
+prompt_sha256: b2ddd33dee27df4d4c88e01c796f4d70d7a4e663d4504441615f1099e7162170
+prompt_bytes: 16877
+
+identifier_allocation:
+  id_status: PROVISIONAL
+  assigned_id: AID-2026-269
+  previous_id: "268"
+  observed_main: a588cd9914949c2c9db7b2c5704d906fd3f05b70
+  observed_at_utc: "2026-11-27T04:37:25Z"
+  renumber_authority: >-
+    Owner ruling, section 1 of
+    chatgpt-session-ops/scripts/accounts/acct3/replies/reply-6b08fa9b-124545.md:
+    "载体 ID 顺延为 AID-2026-269；上一轮 268→269 的预授权适用于已关闭但未合并的 PR
+    分支占用，因为仓库约定明确将分支空间也纳入占用检查。"
+  scan_at_268_allocation:
+    note: >-
+      These five observations were taken by the allocation pass that first claimed 268,
+      at the time and against the main recorded above. They are reproduced as recorded,
+      not re-run here; the branch-space finding below is what overrides them.
+    commands:
+      - command: git fetch origin --prune
+        result: >-
+          completed; two remote branches advanced during the fetch
+          (fix/aid-268-manifest-blob-pins and w10/aid-253-ac3-ac4-r2), so the scan
+          was taken after the fetch, not before it.
+      - command: git for-each-ref --format=%(refname)
+        result: every origin/* and pull/* ref enumerated.
+      - command: git ls-tree -r --name-only origin/main -- 14-ai-development/work-items
+        result: >-
+          work-item directories in the 240-299 range present on main: 240, 242, 251,
+          252, 254, 260, 279. No 268 work-item directory on main.
+      - command: grep for the 268 identifier on origin/main:14-ai-development/work-items/INDEX.md
+        result: absent; no registration row for 268 on main.
+      - command: git ls-tree -r --name-only <ref> for every ref, filtered on the 268 identifier
+        result: >-
+          two refs carried the string — origin/fix/aid-268-manifest-blob-pins and
+          refs/remotes/pull/1371. PR #1371 is state=closed, merged=false,
+          merged_at=null. On main and in INDEX.md, 268 was free; in branch space it
+          was not.
+  branch_space_check:
+    note: >-
+      The claim that 268 was free did not survive the repository's own occupancy rule,
+      which counts branches as well as trees and INDEX rows. Measured on this branch
+      after the renumber ruling; the commands are recorded for what they assert, not as
+      reproduced console output.
+    commands:
+      - command: git rev-parse refs/remotes/pull/1371
+        result: efac9a1c — the head of closed-unmerged PR #1371.
+      - command: git ls-tree -r --name-only refs/remotes/origin/fix/aid-268-manifest-blob-pins -- 14-ai-development/work-items
+        result: >-
+          four committed paths under the 268 work-item directory ( (manifest.yaml, prompt-snapshot.md,
+          evidence.md, session-evidence.md). The directory exists in branch space even
+          though the PR was closed unmerged.
+    rule_source: >-
+      AID-2026-240 identifier_allocation fixes the convention: the number is taken if
+      it is observed "in any pull-request title, branch, body or tree path". A closed
+      PR does not unpublish its branch, so 268 stays occupied.
+  observed_occupied: [240, 242, 251, 252, 254, 260, 279]
+  observed_occupied_branch_space: [268]
+  allocation_rule: >-
+    268 was free as a registration — absent from main's tree, absent from INDEX.md and
+    not carried by any open pull request — but a closed-unmerged PR still publishes an
+    268 work-item directory on its branch, and branch space counts as occupied under
+    AID-2026-240. The unit therefore moved to 269 instead of writing a second
+    268 work-item directory that a closed PR already carries. 269 itself is not carried
+    by any tree, INDEX row or branch at the time of this record.
+  recheck_rule: >-
+    Immediately before opening the pull request, repeat the tree, INDEX and
+    all-ref checks and re-read the all-state pull-request listing. If 269 has become an
+    open, merged or branch-space claim by then, renumber the whole Work Item to 270 and
+    then 271 in that order; do not claim AID-2026-260 or AID-2026-261, and do not split
+    the package across two identifiers.
+
+scope:
+  objective: >-
+    Produce a protocol that any independent session can execute against a fixed
+    commit and a declaration, and demonstrate it once on #1278 so the method is
+    shown to work on a real, machine-recomputable declaration rather than asserted.
+  changes:
+    - path: "14-ai-development/work-items/AID-2026-269/manifest.yaml"
+      detail: "This file: identity, scope, acceptance, limits."
+    - path: "14-ai-development/work-items/AID-2026-269/prompt-v1.md"
+      detail: "Executed instruction snapshot: header plus the verbatim WP-2 block of the L1 ruling."
+    - path: "14-ai-development/work-items/AID-2026-269/exact-head-review-protocol-v1.md"
+      detail: "Reusable Exact-Head Independent Review Protocol v1 (L2-A)."
+    - path: "14-ai-development/work-items/AID-2026-269/review-case-1278.md"
+      detail: "#1278 as the first executed case (L2-B)."
+    - path: "14-ai-development/work-items/AID-2026-269/independent-review-report.md"
+      detail: "Independent re-measurement of the case: F4 version counts, the F9 attribution finding, head-scoped INDEX locators and Head D (post-#1452)."
+    - path: "14-ai-development/work-items/AID-2026-269/evidence.md"
+      detail: "Raw commands, outputs, digests and the machine-readable verdict (L2-B)."
+    - path: "14-ai-development/work-items/AID-2026-269/session-evidence.md"
+      detail: "One section per executing session (L2-C)."
+    - path: "14-ai-development/work-items/INDEX.md"
+      detail: "One appended registration row for AID-2026-269; no other row touched."
+  untouched:
+    - "AID-2026-092 manifest, prompt and INDEX history values"
+    - "AID-2026-079 and AID-2026-116 original files"
+    - "AID-2026-260/ and AID-2026-261/ and their branches"
+    - "scripts/ci/check_blob_pin_integrity.py and its tests and workflow"
+    - "simple-gate, AID-2026-211, RC-1/RC-2 files, #1361/#1364 closeout records"
+    - "every existing workflow, checker, baseline and normative root"
+
+deliverables:
+  protocol: 14-ai-development/work-items/AID-2026-269/exact-head-review-protocol-v1.md
+  review_case: 14-ai-development/work-items/AID-2026-269/review-case-1278.md
+  evidence: 14-ai-development/work-items/AID-2026-269/evidence.md
+  independent_review_report: 14-ai-development/work-items/AID-2026-269/independent-review-report.md
+
+non_goals:
+  - "Repairing the AID-2026-092 declaration, its manifest, its prompt or its INDEX row"
+  - "Closing #1278, or reading a review finding as a completed fix"
+  - "Implementing a blob-pin checker or any other new software checker"
+  - "Adding a work-item uniqueness gate or any new production gate"
+  - "Asserting Owner acceptance or an independent verdict on this work item"
+
+verification:
+  status: PASSED
+  command: >-
+    cd D:\code\wt-aid268
+    ; python -c "import yaml;d=yaml.safe_load(open('14-ai-development/work-items/AID-2026-269/manifest.yaml',encoding='utf-8'));print(d['work_item_id'])"
+    ; python -c "import hashlib;b=open('14-ai-development/work-items/AID-2026-269/prompt-v1.md','rb').read();print(len(b),hashlib.sha256(b).hexdigest())"
+    ; git status --short
+  note: >-
+    The prompt digest and byte count are recomputed from the written file, never
+    copied from an earlier print. A stale digest fails the Session Evidence gate.
+  not_run:
+    - "The full R2 acceptance table (R2-01..R2-20) is not executed by this record; R2-05/R2-06/R2-07/R2-08 belong to the L2-B evidence and R2-20 to L3."
+
+evidence:
+  record: 14-ai-development/work-items/AID-2026-269/evidence.md
+  prompt: 14-ai-development/work-items/AID-2026-269/prompt-v1.md
+  session: 14-ai-development/work-items/AID-2026-269/session-evidence.md
+  protocol: 14-ai-development/work-items/AID-2026-269/exact-head-review-protocol-v1.md
+  review_case: 14-ai-development/work-items/AID-2026-269/review-case-1278.md
+
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-269/exact-head-review-protocol-v1.md
+    relationship: design
+  - path: 14-ai-development/work-items/AID-2026-269/review-case-1278.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-269/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-269/session-evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-269/prompt-v1.md
+    relationship: reference
+
+session_evidence:
+  - role: "GOVERNANCE_RECORDS_AUTHOR"
+    issue_refs:
+      - "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1278"
+    implementing_ai_session: "NOT_EXPOSED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-269/prompt-v1.md"
+    executed_prompt_sha256: "b2ddd33dee27df4d4c88e01c796f4d70d7a4e663d4504441615f1099e7162170"
+    executed_prompt_bytes: 16877
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "NOT_AVAILABLE"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-269/session-evidence.md"
+
+session_evidence_container:
+  note: >-
+    The WP-2 deliverable list names exactly one session-evidence file, so the four
+    sessions (L2-A, L2-B, L2-C, L3) are recorded as four sections inside it. A
+    per-session manifest entry would need a distinct session_evidence_ref per entry
+    (scripts/governance/session_evidence/validate.py check_09 rejects a shared ref),
+    which would require per-session files the deliverable list does not authorise.
+    This note records the deviation instead of hiding it; splitting into
+    session-evidence-<role>.md is a one-file-per-session change for the coordinator.
+  sessions: [L2-A, L2-B, L2-C, L3]
+  executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-269/prompt-v1.md
+  executed_prompt_sha256: b2ddd33dee27df4d4c88e01c796f4d70d7a4e663d4504441615f1099e7162170
+  executed_prompt_bytes: 16877
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    Three deliverable documents exist (protocol, review case, evidence), the prompt
+    snapshot is written and pinned, and the INDEX row is appended. The manifest
+    status reads IMPLEMENTED because both non-manifest deliverables were present on
+    disk when this field was written; it asserts file presence, not review success
+    and not acceptance.
+  files_changed:
+    - 14-ai-development/work-items/AID-2026-269/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-269/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-269/session-evidence.md
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - command: python -c "import yaml;yaml.safe_load(open('14-ai-development/work-items/AID-2026-269/manifest.yaml',encoding='utf-8'))"
+      result: exit 0
+    - command: python scripts/ci/check_work_item_manifest_schema.py
+      result: "reported for this manifest: no violation"
+    - command: python -c "import hashlib;b=open('14-ai-development/work-items/AID-2026-269/prompt-v1.md','rb').read();print(len(b),hashlib.sha256(b).hexdigest())"
+      result: "16877 b2ddd33dee27df4d4c88e01c796f4d70d7a4e663d4504441615f1099e7162170"
+
+carrier:
+  branch: review/2026-11-27-aid269-exact-head-review
+  pull_request: 1425
+  merge_sha: PENDING
+  merge_method: merge
+  required_contexts: PENDING
+  note: >-
+    The INDEX row's Status cell says DRAFT - PR PENDING because no pull request exists
+    yet. That is a carrier fact, not a contradiction of status: IMPLEMENTED above,
+    which asserts only that the three deliverable documents are on disk.
+
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  l3_status: PENDING
+  verdict_scope: >-
+    The verdict recorded in the review case is about the reviewed declaration
+    (AID-2026-092's prompt digest and byte count as declared), not about this work
+    item. This work item is reviewed for protocol completeness and evidence
+    fidelity; it is not reviewed for whether #1278 is a defect.
+
+acceptance:
+  status: PENDING
+  record_ref: NOT_RECORDED
+  note: >-
+    No Owner acceptance decision is asserted, and no pull request exists yet. The
+    three statuses stay separate: review execution, reviewed declaration,
+    remediation.
+
+limits:
+  - "Does not remediate #1278: no repair to the AID-2026-092 declaration is proposed or performed here."
+  - "Does not modify AID-2026-092: its manifest, prompt and INDEX history values are read, never written."
+  - "The review verdict is about the reviewed declaration, not about this work item; a FAIL finding is a completed review, not a failed work item."
+  - "No production gate, workflow, required context, checker or baseline is added or changed."
+  - "No independent review or Owner acceptance is claimed; L3 is PENDING."
+
+notes:
+  - >-
+    Baseline drift: this branch was cut at 987d26021affbb5ba6d651e0fb5985d6bd4026a5,
+    and origin/main had advanced to a588cd9914949c2c9db7b2c5704d906fd3f05b70 by the
+    time of the identifier scan. The base_commit_sha stays at the cut point; the
+    observed main is recorded separately in identifier_allocation.
+  - >-
+    prompt-v1.md is a header plus the L1 ruling's `## R2 工作包 WP-2` block. One
+    substitution was made in that block: the work-item identifier advanced from
+    268 to AID-2026-269 under the Owner's renumber ruling
+    (reply-6b08fa9b-124545.md §1), matching the convention used when AID-2026-240
+    absorbed its renumber. Every other character of the block is unchanged, so the
+    snapshot is not a byte-verbatim copy of the source slice and is not claimed to be.
+    The ruling's own `## R2 自设评估标准` and `## R2 下一轮方向` sections are excluded
+    because they are the ruling's self-assessment and next-round direction, not this
+    work item's executed instruction.
+  - >-
+    Renumber: the branch moved from its provisional 268 name to
+    review/2026-11-27-aid269-exact-head-review, and the work-item directory took the
+    269 path, in the same change as the identifier, so no artifact names a branch or
+    path that does not exist. The worktree path D:\code\wt-aid268 is left as it is: it
+    is a local checkout name, not a governance identifier.
+  - >-
+    The retired identifier is written as bare 268 wherever it still has to be named
+    (prompt header, identifier_allocation, INDEX status cell), never with its
+    AID-2026- prefix, so a repository-wide grep for that retired identifier string
+    returns nothing while the renumber history stays readable.

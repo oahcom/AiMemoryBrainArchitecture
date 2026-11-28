@@ -70,8 +70,8 @@ The self-check:
 ## 4. Reported measurements
 
 Tested source state: `scripts/test_check_document_management.py`
-SHA-256 `95dd65594d3d56a9e53c12e4f7559170ff30d8da499a0cad29933f7c9ade2159`,
-233085 bytes, measured 2026-11-28 by the coordinating operator.
+SHA-256 `0d64f7114447020dc354623884d659e2888403aa52c4ee0aefd82350d49a9879`,
+234166 bytes, measured 2026-11-28 by the coordinating operator.
 
 Environment:
 
@@ -88,7 +88,7 @@ Command:
 
 Reported outcome:
 
-- 372/372 passed
+- 377/377 passed
 - 1 skipped
 - T68c was the skipped case
 - Exit code 0
@@ -102,7 +102,7 @@ Execution condition:
 Reported outcome:
 
 - Exit code 0
-- 360/360 passed
+- 365/365 passed
 - 13 skipped
 - 13 registered of 13 allowed
 - UNEXPECTED_SKIPS empty
@@ -118,7 +118,7 @@ case exists to catch.
 Observed outcome:
 
 - Exit code 1
-- 358 results, 357 passed, 1 failed
+- 363 results, 362 passed, 1 failed
 - 10 skips (T50, T51 and T51b never ran)
 - The single failing case was
   `T129 symlink-unavailable cases skip without erasing independent cases`

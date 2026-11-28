@@ -110,18 +110,18 @@ implementation:
   tests:
     - >-
       python scripts/test_check_document_management.py, normal platform:
-      372/372 passed, 1 skipped (T68c), exit 0.
+      377/377 passed, 1 skipped (T68c), exit 0.
     - >-
       Same suite with Path.symlink_to forced to raise OSError(1314) for the
-      whole of main(): exit 0, 360/360 passed, 13 skipped, 13 registered of
+      whole of main(): exit 0, 365/365 passed, 13 skipped, 13 registered of
       13 allowed, UNEXPECTED_SKIPS empty, no skipped name in RESULTS_BY_NAME,
       T129 True.
     - >-
       Negative control: pop T49 from ALLOWED_SKIPS under the same forced
-      failure: exit 1, 359/360, FAIL line names T49, T129 False.
+      failure: exit 1, 364/365, FAIL line names T49, T129 False.
     - >-
       Erasure mutation: make run_scan_boundary() return immediately after the
-      T49 skip: exit 1, 358 results, 10 skips, and T129 is the single failing
+      T49 skip: exit 1, 363 results, 10 skips, and T129 is the single failing
       case. Source restored byte-identically afterwards.
     - >-
       Verify the test-runner diff and runner tuple: T129 is the only case
