@@ -99,6 +99,19 @@ No source code, executable implementation, CI workflow, test logic, enforcement 
 
 The existing English-language text in docs/zh-CN was treated as existing corpus content and was not translated or linguistically remediated.
 
+## Actual AI input
+
+The requester supplied the following substantive constraints for this task:
+
+- The four referenced files are absent from `origin/main`; their status is recorded as `UNDECIDED / U-OWNER-DECISION` in `AID-2026-107/evidence.md`, which also states that no missing path was restored.
+- The repair is limited to disclosure: change "maintained in / recorded in" wording to a historical reference that states the file is unsubmitted and not restored.
+- Link targets are restricted to `docs/governance/documentation-gaps.md` and the AID-2026-107 evidence file.
+- No new normative content may be introduced; no missing file may be restored; no constraint semantics may change.
+- Canonical, `docs/en` and `docs/zh-CN` must carry the same sentence in the same change set.
+- `05-memory-runtime/retrieval-engine.md` and `working-set-and-cache.md` are out of scope because their mirrors contain no corresponding sentence and adding one would require new translation.
+- The existing English body inside `docs/zh-CN` is treated as pre-existing corpus content and is not remediated here.
+- Output must be verbatim edit blocks; no claim of execution, test pass, CI success, review or acceptance is permitted.
+
 ## Verification and status
 
 The operator reports:
@@ -110,7 +123,7 @@ These results are recorded as operator-provided execution observations, not inde
 
 Current recorded status:
 
-- Implementation commit: `655ae3a7e098bac991a9d3e2084cb6f55a015670`.
+- Implementation commit: not asserted here; the branch head is the pull request head.
 - Pull request: PENDING.
 - CI status: NOT_CLAIMED.
 - Independent review: NOT_ASSIGNED.
