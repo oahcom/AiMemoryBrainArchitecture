@@ -19,13 +19,14 @@ scope:
     - "Record the final Owner D-10 cursor partitioning and cross-shard transaction semantics in the canonical System Boundaries source."
     - "Synchronize the English and Chinese mirrors and pin both to the updated canonical source blob."
     - "Create evidence, prompt, and session records and register this Work Item in INDEX."
+    - "Maintain PR #1475 body declarations required by repository gates: bilingual manifest, related issue mapping, session evidence reference, and exact-head validation status."
     - "Explicitly preserve the open implementation boundary for multi-shard transaction representation and F/G consistent-snapshot semantics."
   excluded:
     - "Reopen, reinterpret, or replace the final Owner decision in Issue #1210."
     - "Edit detailed D/F/G consumer documents; their reconciliation is follow-up work."
     - "Define a wire schema for multi-shard transaction cursor entries or a consistent snapshot/cut protocol."
     - "Implement code, runtime, API, schema, DDL, tests, workflows, branch protection, or deployment behavior."
-    - "Edit Issue #1210 or any PR body."
+    - "Edit Issue #1210 body or unrelated PR bodies; PR #1475 body may carry only the required governance and validation declarations for this Work Item."
     - "Claim formal approval of the System Boundaries document or downstream consumer acceptance."
 
 evidence: "14-ai-development/work-items/AID-2026-326/evidence.md"
