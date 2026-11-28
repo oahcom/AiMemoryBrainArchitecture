@@ -38,7 +38,7 @@ document_metadata:
 - 文档 ID：SYS-BOUNDARIES-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../01-system-architecture/system-boundaries.md)
-- 源版本：025b00bbbd253882ee019a834f817ece772ca59d
+- 源版本：42b2411048b53ebe6c7947075427665cdfb2d30c
 - 对应英文：[System Boundaries](../../en/01-system-architecture/system-boundaries.md)
 - 状态：明确标记的部分为 DECIDED；CANDIDATE/OPEN 项仍不具规范约束力
 
@@ -266,24 +266,28 @@ D 的规范契约 [01-system-architecture/forget-fence-and-completion-contract.m
 
 ### 15.1 权威与分区边界
 
-- 每个部署对应一个逻辑 Brain authority。
-- Tenant 与 shard 是该 authority 内部的分区边界。
-- `CanonicalCommitCursor` 在该 authority 内按 tenant 和 shard 分区；不同 shard 之间不存在全序。
-- Authority identity 与 epoch/incarnation 必须显式成为游标身份的一部分。不同 authority 的游标不可比较。
-- Aggregate revision 与 lifecycle cursor 属于独立游标域，不得替代 `CanonicalCommitCursor`，也不得与其比较。
+- 每个部署对应一个逻辑 Brain authority。Tenant 与 shard 是该 authority 内部的分区边界，不是独立 authority。
+- `CanonicalCommitCursor` 按 tenant/shard 分区。不同 tenant 或 shard 之间不存在全序。拒绝跨 tenant 的全局有序游标：它需要全局串行化点或本架构尚未定义的分布式共识。
+- 游标条目只在各自的 tenant/shard 分区内排序。
+- Authority identity 与 epoch/incarnation 必须显式成为游标身份的一部分。Rollover 表示 epoch 变更。不同 authority 或 epoch 的游标不可比较；跨越它们的比较必须显式报错，不能转换成数值顺序。
 
 ### 15.2 跨 shard 事务
 
-- 一个跨 shard 事务对每个参与的 shard 各产生一个 `CanonicalCommitCursor` 条目。
+- 一个跨 shard 事务对每个参与 shard 各产生一个 `CanonicalCommitCursor` 条目，并且只在各自 shard 内排序。
 - 事务具有原子性：所有参与 shard 的条目要么全部提交，要么全部不提交。
-- 该原子性不意味着 shard 之间存在全序。
+- 全部提交或全部回滚不意味着跨 shard 存在全序；任何 API 都不得暗示这种全序。
 
 ### 15.3 Authority fence 范围
 
 - `ForgetFence`、`ProducerRegistrationHighWater` 及类似 fence 均按 authority 归属。
-- 它们必须携带 authority identity，避免将一个 shard 的 fence 误认为覆盖另一个 shard。
+- 它们必须携带 authority identity 及适用的 target/partition scope，避免将一个 shard 的 fence 误认为覆盖另一个 shard。
 
-### 15.4 尚待明确的实现边界
+### 15.4 必须拒绝的情况
 
-本决议没有定义跨 shard 事务游标条目的序列化表示，也没有定义 F/G 消费者使用的一致快照/一致切面协议。这些细节仍须由相应 D/F/G 契约明确；不得从单一标量游标中自行推导。
+- `cursor_comparison_across_authority_rejected`：跨 authority identity 或 epoch/incarnation 的比较必须显式拒绝，不得强制转换为数值排序。
+- `cross_shard_commit_exposes_no_total_order`：跨 shard 提交只能暴露各 shard 的游标条目及原子提交结果，不得暴露跨 shard 全序关系。
+
+### 15.5 尚待明确的实现边界
+
+本决议没有定义跨 shard 事务游标条目集合的序列化表示，也没有定义 F/G 消费者使用的一致快照/一致切面协议。这些细节仍须由相应 D/F/G 契约明确；不得从单一标量游标中自行推导。本记录不授权代码或运行时实现。
 
