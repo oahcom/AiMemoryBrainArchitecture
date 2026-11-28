@@ -92,7 +92,7 @@ documentation:
 session_evidence:
   - role: "IMPLEMENTATION_SESSION"
     issue_refs:
-      - "#1453"
+      - "#134"
     implementing_ai_session: "9router-hermes / MQ-FIX-01"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-294/prompt-v1.md"
     executed_prompt_sha256: "056b9208fb9425913d3fa57cc8f30414423119b2a98908d706a58f0ed138de55"
