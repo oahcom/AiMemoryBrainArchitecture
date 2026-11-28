@@ -78,6 +78,10 @@ ALLOWED_SKIPS = {
         "symlink creation unavailable on this platform",
 }
 
+# Current document-management count contract: executed cases plus registered skips.
+# The additional symlink-unavailable regression case belongs to #1438.
+EXPECTED_AGGREGATE = 377
+
 
 def doc(body: str) -> str:
     return f"---\ndocument_metadata:\n{body}\n---\n\n# Title\n"
@@ -5386,26 +5390,25 @@ def main() -> int:
             RESULTS.append(False)
             RESULTS_BY_NAME[failure_name] = False
 
-    passed, total = sum(RESULTS), len(RESULTS)
-    print(f"{passed}/{total} passed")
-    if SKIPPED:
-        # Printed separately, and deliberately not folded into the total: a
-        # skipped case is coverage the run did not have, and `n/n passed` would
-        # read as if it did.
-        print(f"{len(SKIPPED)} skipped, {len(SKIPPED) - len(UNEXPECTED_SKIPS)} "
+    passed, executed = sum(RESULTS), len(RESULTS)
+    skipped = len(SKIPPED)
+    total = executed + skipped
+    print(f"{passed}/{executed};{skipped} skipped")
+    if skipped:
+        print(f"{skipped} skipped, {skipped - len(UNEXPECTED_SKIPS)} "
               f"registered of {len(ALLOWED_SKIPS)} allowed: " + "; ".join(SKIPPED))
-    # Three ways to be green while proving less than claimed, all refused:
-    # a failure, an unregistered skip, and a run in which nothing executed.
-    # The last one is the reason `total` is checked: `0/0 passed` is arithmetically
-    # a pass and evidentially nothing.
-    if total == 0:
+    if executed == 0:
         print("FAIL: no cases executed")
         return 1
     if UNEXPECTED_SKIPS:
         print(f"FAIL: {len(UNEXPECTED_SKIPS)} unregistered skip(s): "
               + "; ".join(UNEXPECTED_SKIPS))
         return 1
-    return 0 if passed == total else 1
+    if total != EXPECTED_AGGREGATE:
+        print(f"FAIL: expected {EXPECTED_AGGREGATE} executed and skipped "
+              f"cases, got {total} ({executed} executed, {skipped} skipped)")
+        return 1
+    return 0 if passed == executed else 1
 
 
 if __name__ == "__main__":
