@@ -1,24 +1,8 @@
 #!/usr/bin/env python3
-"""Merge-time uniqueness gate for newly introduced AID work-item directories.
+"""Compare work-item directory contents using only the base and candidate trees.
 
-A claim is a work-item directory that a candidate-only commit created: the
-commit added a file under that directory and its own first-parent tree did not
-contain the directory yet. The claim is rejected if the directory already
-exists on the latest target-branch commit supplied by the caller, or if the
-candidate declares the same AID from more than one candidate-only commit.
-
-Claims are derived from candidate-only, non-merge commits and each commit's
-first-parent tree. This keeps the original claim commit visible after GitHub
-"Update branch" merges the advanced target into the candidate, which moves the
-merge-base past that commit.
-
-Files added beneath a directory already present in the claim commit's
-first-parent tree are additive changes, not new claims.
-
-Missing refs, Git failures, unreadable objects, and subprocess failures are
-INCOMPLETE, never PASS.
-
-Exit codes: 0 PASS; 1 VIOLATION; 2 INCOMPLETE.
+No commit ancestry, merge-base, branch name, or commit ordering participates in
+the verdict. Exit codes: 0 PASS; 1 VIOLATION/DELETION; 2 INCOMPLETE.
 """
 from __future__ import annotations
 
@@ -33,12 +17,12 @@ TIMEOUT = 30
 
 
 class Incomplete(RuntimeError):
-    pass
+    """An input tree or required Git object cannot be read."""
 
 
-def run_git(*args: str) -> subprocess.CompletedProcess[str]:
+def run_git(*args: str) -> str:
     try:
-        return subprocess.run(
+        result = subprocess.run(
             ["git", *args],
             capture_output=True,
             text=True,
@@ -47,220 +31,87 @@ def run_git(*args: str) -> subprocess.CompletedProcess[str]:
             timeout=TIMEOUT,
         )
     except (OSError, subprocess.SubprocessError, UnicodeError) as exc:
-        raise Incomplete(
-            f"git {args!r}: {type(exc).__name__}: {exc}"
-        ) from exc
-
-
-def git(*args: str) -> str:
-    result = run_git(*args)
+        raise Incomplete(f"git {args!r}: {type(exc).__name__}: {exc}") from exc
     if result.returncode:
         raise Incomplete(
-            f"git {args!r} exited {result.returncode}: "
-            f"{result.stderr.strip()}"
+            f"git {args!r} exited {result.returncode}: {result.stderr.strip()}"
         )
     return result.stdout.strip()
 
 
-def resolve_commit(ref: str, label: str) -> str:
+def resolve_tree(ref: str, label: str) -> str:
     if not ref:
         raise Incomplete(f"{label} ref is empty")
-    return git("rev-parse", "--verify", f"{ref}^{{commit}}")
+    return run_git("rev-parse", "--verify", f"{ref}^{{tree}}")
 
 
-def exists(commit: str, path: str) -> bool:
-    result = run_git("cat-file", "-e", f"{commit}:{path}")
-    if result.returncode == 0:
-        return True
-
-    # A missing path is an ordinary absence only after the commit itself
-    # has been verified as readable.
-    git("cat-file", "-e", f"{commit}^{{commit}}")
-
-    listing = run_git(
-        "ls-tree",
-        "-r",
-        "--name-only",
-        commit,
-        "--",
-        path,
-    )
-    if listing.returncode:
-        raise Incomplete(
-            f"cannot inspect {path} on {commit}: "
-            f"{listing.stderr.strip()}"
-        )
-
-    return bool(listing.stdout.strip())
-
-
-def tree_ids(commit: str) -> set[str]:
-    return {
-        match.group(1)
-        for name in git("ls-tree", "-r", "--name-only", commit, "--", ROOT).splitlines()
-        if (match := PATTERN.match(name))
-    }
-
-
-def first_parent(commit: str) -> str | None:
-    fields = git("rev-list", "--parents", "-n", "1", commit).split()
-    if not fields or fields[0] != commit:
-        raise Incomplete(f"cannot read the parent list of commit {commit}")
-    return fields[1] if len(fields) > 1 else None
-
-
-def claim_commits(
-    base: str, head: str, candidate_ids: set[str]
-) -> dict[str, list[str]]:
-    """Map each candidate ID to the candidate-only commits that created it.
-
-    The range excludes every commit reachable from the supplied base. Merge
-    commits are excluded, so an Update-branch merge itself can neither erase
-    nor invent a claim; the original non-merge claim commit stays visible.
-    """
-    claims = {item_id: [] for item_id in sorted(candidate_ids)}
-    commits = git(
-        "rev-list", "--no-merges", "--reverse", f"{base}..{head}"
-    ).splitlines()
-
-    for commit in commits:
-        parent = first_parent(commit)
-
-        if parent is None:
-            added = git(
-                "diff-tree",
-                "--root",
-                "--no-commit-id",
-                "--name-only",
-                "--diff-filter=A",
-                "--no-renames",
-                "-r",
-                commit,
-                "--",
-                ROOT,
-            ).splitlines()
-        else:
-            # Verify the parent object before using its tree.
-            git("cat-file", "-e", f"{parent}^{{commit}}")
-            added = git(
-                "diff-tree",
-                "--no-commit-id",
-                "--name-only",
-                "--diff-filter=A",
-                "--no-renames",
-                "-r",
-                parent,
-                commit,
-                "--",
-                ROOT,
-            ).splitlines()
-
-        added_ids = {
-            match.group(1) for name in added if (match := PATTERN.match(name))
-        }
-
-        for item_id in sorted(added_ids & candidate_ids):
-            directory = f"{ROOT}/{item_id}"
-
-            if parent is None or not exists(parent, directory):
-                claims[item_id].append(commit)
-
-    return claims
+def item_paths(tree: str) -> dict[str, set[str]]:
+    """Return each AID's tracked file paths relative to its directory."""
+    paths: dict[str, set[str]] = {}
+    for name in run_git("ls-tree", "-r", "--name-only", tree, "--", ROOT).splitlines():
+        match = PATTERN.match(name)
+        if match:
+            item_id = match.group(1)
+            prefix = f"{ROOT}/{item_id}/"
+            paths.setdefault(item_id, set()).add(name[len(prefix):])
+    return paths
 
 
 def check(base_ref: str, head_ref: str) -> int:
     try:
-        base = resolve_commit(base_ref, "base")
-        head = resolve_commit(head_ref, "candidate")
-
-        git("cat-file", "-e", f"{base}^{{commit}}")
-        git("cat-file", "-e", f"{head}^{{commit}}")
-
-        candidate_ids = tree_ids(head)
-        claims = claim_commits(base, head, candidate_ids)
-
-        introduced = sorted(
-            item_id for item_id, commits in claims.items() if commits
-        )
-        occupied = [
-            (f"{ROOT}/{item_id}", claims[item_id])
-            for item_id in introduced
-            if exists(base, f"{ROOT}/{item_id}")
-        ]
-        duplicated = [
-            (item_id, commits)
-            for item_id, commits in claims.items()
-            if len(commits) > 1
-        ]
-        unidentifiable = [
-            item_id for item_id in candidate_ids
-            if not claims[item_id] and not exists(base, f"{ROOT}/{item_id}")
-        ]
-
+        base_tree = resolve_tree(base_ref, "base")
+        candidate_tree = resolve_tree(head_ref, "candidate")
+        base_items = item_paths(base_tree)
+        candidate_items = item_paths(candidate_tree)
     except Incomplete as exc:
         print(f"WORK-ITEM UNIQUENESS: INCOMPLETE ({exc})")
         return 2
 
-    if unidentifiable:
+    violations: list[tuple[str, list[str]]] = []
+    deletions: list[str] = []
+
+    for item_id in sorted(base_items.keys() | candidate_items.keys()):
+        if item_id not in candidate_items:
+            deletions.append(item_id)
+            continue
+        if item_id not in base_items:
+            # A new declaration is permitted. Merge queue serializes races.
+            continue
+
+        added_paths = sorted(candidate_items[item_id] - base_items[item_id])
+        if added_paths:
+            violations.append((item_id, added_paths))
+
+    for item_id, added_paths in violations:
         print(
-            "WORK-ITEM UNIQUENESS: INCOMPLETE "
-            f"(no candidate-only commit created {ROOT}/{unidentifiable[0]}; "
-            f"the claim cannot be identified) "
-            f"base={base} candidate={head}"
+            f"VIOLATION: {ROOT}/{item_id} "
+            f"new_paths={','.join(added_paths)}"
         )
-        return 2
+    for item_id in deletions:
+        print(f"DELETION: {ROOT}/{item_id} exists_on_base=true absent_on_candidate=true")
 
-    if occupied or duplicated:
-        for path, commits in occupied:
-            print(
-                f"VIOLATION: {path} already exists on target base {base} "
-                f"(candidate claim commits {','.join(commits)})"
-            )
-
-        for item_id, commits in duplicated:
-            print(
-                f"VIOLATION: {ROOT}/{item_id} is claimed by multiple "
-                f"candidate-only commits {','.join(commits)}"
-            )
-
+    if violations or deletions:
+        verdict = "VIOLATION" if violations else "DELETION"
         print(
-            "WORK-ITEM UNIQUENESS: VIOLATION "
-            f"(base={base} candidate={head} "
-            f"introduced={len(introduced)} occupied={len(occupied)} "
-            f"duplicate_claims={len(duplicated)})"
+            f"WORK-ITEM UNIQUENESS: {verdict} "
+            f"(base_tree={base_tree} candidate_tree={candidate_tree} "
+            f"violations={len(violations)} deletions={len(deletions)})"
         )
         return 1
 
     print(
         "WORK-ITEM UNIQUENESS: PASS "
-        f"(base={base} candidate={head} "
-        f"introduced={len(introduced)} occupied=0)"
+        f"(base_tree={base_tree} candidate_tree={candidate_tree} "
+        f"violations=0 deletions=0)"
     )
     return 0
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--base", help="latest target-branch commit")
-    parser.add_argument("--head", help="exact candidate commit")
+    parser.add_argument("--base", required=True, help="baseline commit or tree")
+    parser.add_argument("--head", required=True, help="candidate commit or tree")
     args = parser.parse_args(argv)
-
-    if not args.base or not args.head:
-        missing = [
-            name
-            for name, value in (
-                ("--base", args.base),
-                ("--head", args.head),
-            )
-            if not value
-        ]
-
-        print(
-            "WORK-ITEM UNIQUENESS: INCOMPLETE "
-            f"(missing required ref(s): {', '.join(missing)})"
-        )
-        return 2
-
     return check(args.base, args.head)
 
 

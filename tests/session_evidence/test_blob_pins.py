@@ -440,6 +440,96 @@ class BlobPinContractTests(unittest.TestCase):
             {"items": [{"evidence_file": "docs/evidence.md"}]},
         )
 
+    def test_mapping_plain_scalar_continuation_is_folded(self):
+        from scripts.governance.session_evidence.blob_pins import (
+            _parse_yaml_subset,
+        )
+
+        manifest = (
+            "authorization:\n"
+            "  platform_state_change: NONE - no branch-protection payload, required context or repository\n"
+            "    setting is touched.\n"
+            "  architecture_spec_change: NONE - no ADR is modified.\n"
+        )
+
+        document = _parse_yaml_subset(manifest)
+
+        self.assertEqual(
+            document["authorization"]["platform_state_change"],
+            "NONE - no branch-protection payload, required context or repository setting is touched.",
+        )
+        self.assertEqual(
+            document["authorization"]["architecture_spec_change"],
+            "NONE - no ADR is modified.",
+        )
+
+    def test_sequence_plain_scalar_continuation_is_folded(self):
+        from scripts.governance.session_evidence.blob_pins import (
+            _parse_yaml_subset,
+        )
+
+        manifest = (
+            "out_of_scope:\n"
+            "  - Independent migration, outbox, corruption, PITR, ACK, or other findings except\n"
+            "    where a dependency must be recorded to explain a boundary or safety assumption.\n"
+            "  - Treating reference-model PASS as production proof.\n"
+        )
+
+        document = _parse_yaml_subset(manifest)
+
+        self.assertEqual(
+            document["out_of_scope"],
+            [
+                "Independent migration, outbox, corruption, PITR, ACK, or other findings except where a dependency must be recorded to explain a boundary or safety assumption.",
+                "Treating reference-model PASS as production proof.",
+            ],
+        )
+
+    def test_sequence_mapping_plain_scalar_continuation_preserves_sibling(self):
+        from scripts.governance.session_evidence.blob_pins import (
+            _parse_yaml_subset,
+        )
+
+        manifest = (
+            "basis:\n"
+            "  - target: 14-ai-development/work-items/INDEX.md\n"
+            "    field: AID-2026-092 prompt cell\n"
+            "    prior_value: old value\n"
+            "    new_value: corrected value, with the superseded\n"
+            "      pair and the fact that it matched nothing stated in the cell.\n"
+            "    basis: the cell quotes the manifest; correcting one and not the other would create the same\n"
+            "      disagreement in a second place.\n"
+        )
+
+        document = _parse_yaml_subset(manifest)
+        item = document["basis"][0]
+
+        self.assertEqual(item["target"], "14-ai-development/work-items/INDEX.md")
+        self.assertEqual(item["new_value"], "corrected value, with the superseded pair and the fact that it matched nothing stated in the cell.")
+        self.assertEqual(item["basis"], "the cell quotes the manifest; correcting one and not the other would create the same disagreement in a second place.")
+
+    def test_plain_scalar_continuation_does_not_consume_next_sequence_item(self):
+        from scripts.governance.session_evidence.blob_pins import (
+            _parse_yaml_subset,
+        )
+
+        manifest = (
+            "non_goals:\n"
+            "  - Fixing the misplaced table, which is a\n"
+            "    pre-existing layout defect and not a count or provenance claim\n"
+            "  - Closing or reopening any Issue\n"
+        )
+
+        document = _parse_yaml_subset(manifest)
+
+        self.assertEqual(
+            document["non_goals"],
+            [
+                "Fixing the misplaced table, which is a pre-existing layout defect and not a count or provenance claim",
+                "Closing or reopening any Issue",
+            ],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

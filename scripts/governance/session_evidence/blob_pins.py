@@ -558,6 +558,21 @@ def _parse_block_scalar(
     return (" " if folded else "\n").join(collected), index
 
 
+def _parse_plain_scalar(lines, index, parent_indent, value):
+    """Fold indented continuation lines into a YAML plain scalar."""
+    parts = [value]
+
+    while index < len(lines):
+        current_indent, content, _line_number, _content_start = lines[index]
+        if current_indent <= parent_indent:
+            break
+
+        parts.append(content.strip())
+        index += 1
+
+    return " ".join(parts), index
+
+
 def _parse_mapping(lines, index, indent, initial=None):
     result = {} if initial is None else dict(initial)
 
@@ -589,11 +604,14 @@ def _parse_mapping(lines, index, indent, initial=None):
             continue
 
         if value_text:
+            value_text, index = _parse_plain_scalar(
+                lines, index, indent, value_text
+            )
             result[key] = _scalar(
                 value_text,
                 line_number,
                 value_start,
-                value_start + len(value_text),
+                value_start + len(content[value_offset:]),
             )
             continue
 
@@ -659,11 +677,14 @@ def _parse_sequence(lines, index, indent):
                     value_text.startswith(">"),
                 )
             elif value_text:
+                value_text, index = _parse_plain_scalar(
+                    lines, index, indent + 2, value_text
+                )
                 initial[key] = _scalar(
                     value_text,
                     line_number,
                     value_start,
-                    value_start + len(value_text),
+                    value_start + len(remainder[value_offset:]),
                 )
             elif (
                 index < len(lines)
@@ -691,12 +712,15 @@ def _parse_sequence(lines, index, indent):
             result.append(item)
             continue
 
+        remainder, index = _parse_plain_scalar(
+            lines, index, indent, remainder
+        )
         result.append(
             _scalar(
                 remainder,
                 line_number,
                 remainder_start,
-                remainder_start + len(remainder),
+                remainder_start + len(content[remainder_offset:]),
             )
         )
 
