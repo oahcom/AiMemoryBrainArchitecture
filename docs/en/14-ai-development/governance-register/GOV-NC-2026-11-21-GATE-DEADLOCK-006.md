@@ -2,6 +2,7 @@
 document_metadata:
   domain: ai-development
   role: work-record
+  steward: "user-authorized operator (delegated by account owner)"
   lifecycle:
     approval:
       decision_status: Draft
@@ -44,7 +45,7 @@ document_metadata:
 # GOV-NC-2026-11-21-GATE-DEADLOCK-006 — The gate deadlocks itself on main: no PR can pass
 
 - Register ID: GOV-NC-2026-11-21-GATE-DEADLOCK-006
-- Status: `ACCEPTED` / `F-2_APPROVED; F-1_EQUIVALENT_FOR_TEMPLATE_ONLY` (Owner ruling 2026-11-21, section 14) / the empty diff returned `EXIT=2` from `ae37a419` until `81dd9a72d2` (section 12)
+- Status: `RESOLVED_ON_MAIN` / `F-2_APPROVED; F-1_EQUIVALENT_FOR_TEMPLATE_ONLY` (Owner ruling 2026-11-21, section 14) / resolved by a self-review merge (section 12)
 - Found at: 2026-11-21T05:05Z (last verified 2026-11-21T05:40Z @ `7d2233a5be`)
 - Introducing commit: `ae37a41900f1` (2026-11-21T04:50:35Z, **pushed straight to main, no PR**)
 - Prior register: GOV-NC-2026-11-20-CI-NOT-EXECUTED-005 (36 hours of zero gate executions)
@@ -276,7 +277,7 @@ PY
 # after adding docs/en/<path> + docs/zh-CN/<path>, NEW goes to zero
 ```
 
-**Register status**: `ACCEPTED` / `F-2_APPROVED` / empty diff on main is permanently `EXIT=2` / the dividing line is "did the PR supply two-sided mirrors", not "which file did it touch" (§2.1) / introduced by direct push with no PR / recommended fix F-2 approved by the Owner, not executed
+**Register status**: `RESOLVED_ON_MAIN` / `F-2_APPROVED; F-1_EQUIVALENT_FOR_TEMPLATE_ONLY` / the empty diff on main has been resolved since `81dd9a72d2` (section 12) / the dividing line is "did the PR supply two-sided mirrors", not "which file did it touch" (§2.1) / introduced by direct push with no PR / recommended fix F-2 approved by the Owner but not executed; F-1 was actually executed (section 14)
 
 Owner ruling (2026-11-21), summarised:
 
