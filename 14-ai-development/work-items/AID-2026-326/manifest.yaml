@@ -46,11 +46,11 @@ documentation:
 
 session_evidence:
   - role: DECISION_RECORDING
-    issue_refs: []
+    issue_refs:
     implementing_ai_session: "NOT_RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-326/session-evidence.md"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-326/prompt-v1.md"
-    executed_prompt_sha256: "63ac5dad68ff74de6e127301814f5c0d503345003294626d47a4b13d205e09ac"
+    executed_prompt_sha256: "7a9c1a688e82702160451d657bef77d34de2cbef51a5a45d46b26d4817a8e957"
     executed_prompt_bytes: 3205
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_RECORDED"
