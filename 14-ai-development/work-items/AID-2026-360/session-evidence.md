@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-344/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-360/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -30,10 +30,10 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "Implementation-session identity, actual input/output provenance, and validation record for AID-2026-344."
+    canonical_scope: "Implementation-session identity, actual input/output provenance, and validation record for AID-2026-360."
     canonical_scope_id: "ai-development/aid-2026-295-session-evidence"
     canonical_scope_keywords:
-      - "AID-2026-344"
+      - "AID-2026-360"
       - "merge-group candidate"
       - "session evidence"
     canonical_conflict_status: None
@@ -48,7 +48,7 @@ document_metadata:
 
 # Session role / use case
 
-Implementation session for AID-2026-344: close GAP-03 and GAP-04 by validating
+Implementation session for AID-2026-360: close GAP-03 and GAP-04 by validating
 the whole merge-group candidate instead of its tail pull request. The session
 produced the shared candidate resolver, the merge-group branch of the verdict
 script, the two workflow integrations and the offline test suites.

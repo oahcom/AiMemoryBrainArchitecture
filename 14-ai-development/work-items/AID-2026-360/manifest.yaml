@@ -1,4 +1,4 @@
-work_item_id: AID-2026-344
+work_item_id: AID-2026-360
 title: "Validate the whole merge-group candidate and every candidate PR"
 class: GATE/TEST
 risk: R1
@@ -28,10 +28,10 @@ scope:
     - "Ancestry is decided through the GitHub Compare API because the verdict job checks out the base with a shallow history."
     - "INCOMPLETE (exit 2) and VIOLATION (exit 1) are separate verdicts; an incomplete member prevents a PRESENT total."
     - "Member verdict lines never carry the AI-SESSION-EVIDENCE prefix; only the total verdict line does."
-evidence: 14-ai-development/work-items/AID-2026-344/evidence.md
-prompt_file: 14-ai-development/work-items/AID-2026-344/prompt-v1.md
-prompt_sha256: "54e1b9b8f20b4a7d6d6690ca512dd44026973c4ff91887ce11a2b91610a0295c"
-prompt_file_blob_sha: "2de2ee2cfb9d9f13f65fda5dc1868879d5868816"
+evidence: 14-ai-development/work-items/AID-2026-360/evidence.md
+prompt_file: 14-ai-development/work-items/AID-2026-360/prompt-v1.md
+prompt_sha256: "00adf0891c62e3732efa4afa7af46d708af678f3a2eb99195437799014d38d83"
+prompt_file_blob_sha: "42079eb9ab8a4a174f54f0e2065de84777551165"
 prompt_commit_trace_initial_registration: true
 documentation:
   - path: scripts/governance/merge_group/candidate.py
@@ -48,20 +48,20 @@ documentation:
     relationship: reference
   - path: tests/merge_group/test_validate_integration.py
     relationship: reference
-  - path: 14-ai-development/work-items/AID-2026-344/evidence.md
+  - path: 14-ai-development/work-items/AID-2026-360/evidence.md
     relationship: evidence
-  - path: 14-ai-development/work-items/AID-2026-344/session-evidence.md
+  - path: 14-ai-development/work-items/AID-2026-360/session-evidence.md
     relationship: evidence
-  - path: 14-ai-development/work-items/AID-2026-344/prompt-v1.md
+  - path: 14-ai-development/work-items/AID-2026-360/prompt-v1.md
     relationship: evidence
 session_evidence:
   - role: IMPLEMENTATION_SESSION
     issue_refs:
       - "#1517"
     implementing_ai_session: "6b0a2ee9-fb48-83ec-aa21-92dfde632944"
-    session_evidence_ref: 14-ai-development/work-items/AID-2026-344/session-evidence.md
-    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-344/prompt-v1.md
-    executed_prompt_sha256: "54e1b9b8f20b4a7d6d6690ca512dd44026973c4ff91887ce11a2b91610a0295c"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-360/session-evidence.md
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-360/prompt-v1.md
+    executed_prompt_sha256: "00adf0891c62e3732efa4afa7af46d708af678f3a2eb99195437799014d38d83"
     executed_prompt_bytes: 3358
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
@@ -82,10 +82,10 @@ implementation:
     - tests/merge_group/test_candidate.py
     - tests/merge_group/test_validate_integration.py
     - 14-ai-development/work-items/INDEX.md
-    - 14-ai-development/work-items/AID-2026-344/manifest.yaml
-    - 14-ai-development/work-items/AID-2026-344/evidence.md
-    - 14-ai-development/work-items/AID-2026-344/session-evidence.md
-    - 14-ai-development/work-items/AID-2026-344/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-360/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-360/evidence.md
+    - 14-ai-development/work-items/AID-2026-360/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-360/prompt-v1.md
   tests:
     - "python -m unittest discover -s tests/merge_group -p \"test_*.py\" -v"
     - "python -m unittest discover -s tests/session_evidence -p \"test_*.py\""

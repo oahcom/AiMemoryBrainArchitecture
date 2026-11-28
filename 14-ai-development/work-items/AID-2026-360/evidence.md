@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-344/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-360/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -30,10 +30,10 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "Execution and audit evidence for the AID-2026-344 merge-group candidate validation."
+    canonical_scope: "Execution and audit evidence for the AID-2026-360 merge-group candidate validation."
     canonical_scope_id: "ai-development/aid-2026-295-execution-evidence"
     canonical_scope_keywords:
-      - "AID-2026-344"
+      - "AID-2026-360"
       - "merge-group candidate"
       - "GAP-03"
       - "GAP-04"
@@ -47,7 +47,7 @@ document_metadata:
   steward: "user-authorized operator (delegated by account owner)"
 ---
 
-# AID-2026-344 evidence
+# AID-2026-360 evidence
 
 ## Objective
 

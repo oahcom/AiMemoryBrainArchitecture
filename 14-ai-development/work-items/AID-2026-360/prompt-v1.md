@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-344/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-360/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -30,10 +30,10 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "Task input for AID-2026-344: the merge-group candidate validation gap."
+    canonical_scope: "Task input for AID-2026-360: the merge-group candidate validation gap."
     canonical_scope_id: "ai-development/aid-2026-295-prompt-snapshot"
     canonical_scope_keywords:
-      - "AID-2026-344"
+      - "AID-2026-360"
       - "merge-group candidate"
       - "prompt snapshot"
     canonical_conflict_status: None
@@ -46,7 +46,7 @@ document_metadata:
   steward: "user-authorized operator (delegated by account owner)"
 ---
 
-# Executed prompt snapshot - AID-2026-344
+# Executed prompt snapshot - AID-2026-360
 
 Role: implementation session for the merge-group candidate validation gap.
 
