@@ -55,9 +55,9 @@ document_metadata:
 | Work item | AID-2026-336 |
 | Repository | `oahcom/AiMemoryBrainArchitecture` |
 | Branch | `aid-2026-336` |
-| Rebased base | `origin/main` at supplied abbreviated commit `daa935f7a` |
-| Implementation commit | `d8512eee5` |
-| Parent commit | `daa935f7a` |
+| Base commit | `c72ba09685eff8f4e00cbf05182dcfdf5d1815a4` |
+| Implementation commit | `6f75baceae2242e665e62b234d816df8eca86f32` |
+| Parent commit | `c72ba09685eff8f4e00cbf05182dcfdf5d1815a4` |
 | Merge status | `NOT_MERGED` |
 | Acceptance status | `PENDING` |
 
@@ -100,7 +100,7 @@ Measured result:
 
 ```text
 rc=0
-main=d8512eee59e8bfdfec5e280e4a3a01fc62c61074 manifests=161 pins=12 ok=12 mismatch=0 path_missing=0 incomplete=0 excluded=163 unbound=0
+main=6f75baceae2242e665e62b234d816df8eca86f32 manifests=165 pins=12 ok=12 mismatch=0 path_missing=0 incomplete=0 excluded=166 unbound=0
 ```
 
 The measured `pins=12` consists of:
@@ -197,7 +197,7 @@ python scripts/ci/check_manifest_parse.py
 Measured result:
 
 ```text
-161/161 passed
+165/165 passed
 ```
 
 ### 6.2 Work-item manifest schema and legacy ratchet

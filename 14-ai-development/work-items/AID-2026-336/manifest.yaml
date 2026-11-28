@@ -20,7 +20,7 @@ attribution: >-
 date: "2026-11-27"
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: "daa935f7a"
+base_commit_sha: "c72ba09685eff8f4e00cbf05182dcfdf5d1815a4"
 tracking_issue: "#1350"
 
 scope:
@@ -71,9 +71,9 @@ scope:
 
 evidence:
   - "Rebased implementation branch: aid-2026-336."
-  - "Implementation commit: d8512eee5; supplied parent commit: daa935f7a."
+  - "Implementation commit: 6f75baceae2242e665e62b234d816df8eca86f32; base commit: c72ba09685eff8f4e00cbf05182dcfdf5d1815a4."
   - "The implementation changes seven existing implementation, test, baseline, workflow, and migration files."
-  - "The checker at the implementation commit reports manifests=161, pins=12, ok=12, mismatch=0, path_missing=0, incomplete=0, excluded=163, unbound=0."
+  - "The checker at the implementation commit reports main=6f75baceae2242e665e62b234d816df8eca86f32 manifests=165 pins=12 ok=12 mismatch=0 path_missing=0 incomplete=0 excluded=166 unbound=0."
   - "The checker result above includes 10 AID-336 in-scope pins and two bound blob_sha256 declarations."
   - "python scripts/ci/test_check_manifest_blob_pins.py: 35 tests passed."
   - "python scripts/ci/test_assert_manifest_blob_pin_negative.py: 7 tests passed."
@@ -81,7 +81,7 @@ evidence:
   - "The fixed negative fixture assertion passed for commit 9a2063ae1fa5d905b3817cd4eddba065a06daa73."
   - "The negative fixture summary is manifests=108, pins=14, ok=7, mismatch=1, path_missing=0, incomplete=0, excluded=146, unbound=4."
   - "The negative fixture emitted four UNBOUND_BLOB_SHA256 findings and one REFERENCE_MODE_MISSING_OR_INVALID finding, with zero MISMATCH, PATH_MISSING, or INCOMPLETE-prefixed findings."
-  - "check_manifest_parse.py passed for 161 manifests."
+  - "check_manifest_parse.py passed for 165 manifests at the implementation commit."
   - "check_work_item_manifest_schema.py --tree HEAD --baseline 14-ai-development/reports/work-item-manifest-ac4-baseline.json returned rc 0 with Legacy ratchet new regressions: 0."
   - "AID-2026-100 migration adds reference_mode: historical to related_evidence[0]; its digest is unchanged."
   - "The measured AID-2026-100 in-scope count after migration is pins=10, ok=10."
@@ -129,7 +129,7 @@ created_at: "2026-11-27"
 updated_at: "2026-11-27"
 implementation_branch: "aid-2026-336"
 implementation_commits:
-  - "d8512eee5"
+  - "6f75baceae2242e665e62b234d816df8eca86f32"
 changed_paths:
   - "scripts/ci/check_manifest_blob_pins.py"
   - "scripts/ci/test_check_manifest_blob_pins.py"
@@ -148,7 +148,7 @@ changed_paths:
 
 verification:
   status: RECORDED
-  commit_sha: "d8512eee5"
+  commit_sha: "6f75baceae2242e665e62b234d816df8eca86f32"
   commands:
     - "python scripts/ci/check_manifest_blob_pins.py --commit HEAD"
     - "python scripts/ci/test_check_manifest_blob_pins.py"
@@ -172,7 +172,7 @@ evidence_tiering:
     Executable checker and CI-gating behavior changed. Local test and checker
     results are recorded, including a fixed negative fixture. Independent
     review and Owner acceptance have not been recorded.
-  base_head: "daa935f7a"
+  base_head: "c72ba09685eff8f4e00cbf05182dcfdf5d1815a4"
   classification_basis: "Checker, test, fixture assertion, and workflow changes"
   classification_confirmed_by: NOT_ASSIGNED
   classification_record: ""

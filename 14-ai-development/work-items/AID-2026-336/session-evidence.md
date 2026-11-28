@@ -62,13 +62,13 @@ D:\code\_wt-aid336
 The recorded implementation commit is:
 
 ```text
-d8512eee5
+6f75baceae2242e665e62b234d816df8eca86f32
 ```
 
 Its supplied parent commit is:
 
 ```text
-daa935f7a
+c72ba09685eff8f4e00cbf05182dcfdf5d1815a4
 ```
 
 This evidence document records the role and supplied evidence boundary. It
@@ -349,14 +349,18 @@ session_evidence:
 
 
 ## AI-visible output
+The payload above is preserved verbatim as the executed input. It records the pre-rebase
+commit `d8512eee5`, which the rebase onto `c72ba09685eff8f4e00cbf05182dcfdf5d1815a4` rewrote to `6f75baceae2242e665e62b234d816df8eca86f32`. The
+measured results below were re-run at the rebased implementation commit.
+
 
 The implementation evidence supplied for this record reports:
 
 - Branch `aid-2026-336`, rebased onto the supplied `origin/main` state.
-- Implementation commit `d8512eee5`, parent `daa935f7a`.
+- Implementation commit `6f75baceae2242e665e62b234d816df8eca86f32`, parent `c72ba09685eff8f4e00cbf05182dcfdf5d1815a4`.
 - Seven changed implementation, test, baseline, workflow, and migration files.
 - Checker result at `HEAD`:
-  `manifests=161 pins=12 ok=12 mismatch=0 path_missing=0 incomplete=0 excluded=163 unbound=0`,
+  `main=6f75baceae2242e665e62b234d816df8eca86f32 manifests=165 pins=12 ok=12 mismatch=0 path_missing=0 incomplete=0 excluded=166 unbound=0`,
   rc 0.
 - Checker test suite: 35 tests passed.
 - Negative assertion test suite: 7 tests passed.
@@ -366,7 +370,7 @@ The implementation evidence supplied for this record reports:
 - The negative fixture emitted four `UNBOUND_BLOB_SHA256` findings and one
   `REFERENCE_MODE_MISSING_OR_INVALID` finding, with zero
   `MISMATCH `, `PATH_MISSING `, or `INCOMPLETE ` findings.
-- Manifest parse validation: 161/161 passed.
+- Manifest parse validation: 165/165 passed at the implementation commit.
 - Work-item schema validation: rc 0 and zero legacy-ratchet new regressions.
 - AID-2026-100 after migration: `pins=10 ok=10`, with its existing digest
   unchanged.
