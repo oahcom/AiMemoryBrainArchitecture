@@ -1,3 +1,49 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-292/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-28"
+      last_verification_note: "Operator-executed measurements are recorded below; this evidence document has not been independently validated."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Execution evidence and verification status for AID-2026-292 in-suite symlink-unavailable self-check."
+    canonical_scope_id: "ai-development/aid-2026-292-evidence"
+    canonical_scope_keywords:
+      - "AID-2026-292"
+      - "evidence"
+    canonical_conflict_status: None
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+  steward: "user-authorized operator (delegated by account owner)"
+---
+
 # AID-2026-292 — Evidence
 
 ## 1. Scope
