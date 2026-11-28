@@ -12,7 +12,7 @@ document_metadata:
         value: "e467d7cf3e8feb0457843b5f4f0fd038b01608c32a9fbe35e585cc41e49c665a"
       approval_scope:
         type: Full-document
-      approval_applicability: Applicable-To-Current-Version
+      approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
         - "14-ai-development/work-items/AID-2026-096/approval-evidence.md"
       revocation: null
@@ -21,7 +21,7 @@ document_metadata:
       last_verified_date: null
       last_verification_note: "Usual role: principles constraining subsystem design"
     usage_status: Active
-    modification_status: Unchanged
+    modification_status: Pending-Reapproval
     supersession:
       supersedes: []
       supersession_reason: null
@@ -46,6 +46,7 @@ document_metadata:
   bilingual_counterpart:
     source: "00-governance/design-principles.md"
     zh-CN: "docs/zh-CN/00-governance/design-principles.md"
+  steward: "user-authorized operator (delegated by account owner)"
 ---
 
 # Design Principles
@@ -53,7 +54,7 @@ document_metadata:
 - Document ID: GOV-PRINCIPLES-001
 - Version: 1.0
 - Source: [Normative source specification](../../../00-governance/design-principles.md)
-- Source revision: 9792e189d63fbbc3694ab891fc4aeba5143b3b1c
+- Source revision: 9fb729a4bd6ebcfa9576e5318804a65e2a95abe2
 - Chinese counterpart: [设计原则](../../zh-CN/00-governance/design-principles.md)
 - Status: APPROVED / Normative — new approval event dated 2026-11-26. This does not certify implementation conformity with P-01 through P-16.
 
