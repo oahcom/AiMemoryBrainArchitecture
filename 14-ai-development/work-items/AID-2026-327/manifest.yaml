@@ -13,8 +13,9 @@ date: "2026-11-28"
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
 base_commit_sha: "4a6cdd0e7c5dc0db53be37a2f945e02c59d5abf9"
-prompt_status: NOT_RECORDED
+prompt_status: SNAPSHOT_RECORDED
 prompt_provenance: NOT_VERIFIED
+prompt_file: "14-ai-development/work-items/AID-2026-327/prompt-v1.md"
 evidence: "14-ai-development/work-items/AID-2026-327/evidence.md"
 documentation:
   - path: "14-ai-development/work-items/AID-2026-327/prompt-v1.md"
