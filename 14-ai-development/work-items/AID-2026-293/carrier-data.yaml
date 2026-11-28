@@ -1,49 +1,154 @@
 work_item_id: AID-2026-293
 
 risks:
-  - {id: R-01, evidence_state: PENDING_SEARCH_EXECUTION, planned_search_command: "git grep -n -i -E 'serialization authority|linearization point|serializable' <baseline> -- 01-system-architecture 03-memory-brain 04-memory-compiler"}
-  - {id: R-02, evidence_state: PENDING_SEARCH_EXECUTION, planned_search_command: "git grep -n -i -E 'Fact/Claim|valid-time|recorded-time|Evidence' <baseline> -- 01-system-architecture 03-memory-brain"}
-  - {id: R-03, evidence_state: PENDING_SEARCH_EXECUTION, planned_search_command: "git grep -n -i -E 'ForgetFence|no-resurrection|backup restore' <baseline> -- 03-memory-brain 04-memory-compiler 05-memory-runtime 06-memory-context 09-security-governance"}
-  - {id: R-04, evidence_state: PENDING_SEARCH_EXECUTION, planned_search_command: "git grep -n -i -E 'Applied acknowledgement|Provider Outcome|CanonicalCommitReceipt' <baseline> -- 01-system-architecture 04-memory-compiler 06-memory-context"}
-  - {id: R-05, evidence_state: PENDING_SEARCH_EXECUTION, planned_search_command: "git grep -n -i -E 'schema revision|validator revision|Blob|compatibility' <baseline> -- 01-system-architecture 04-memory-compiler 09-security-governance"}
-  - {id: R-06, evidence_state: PENDING_SEARCH_EXECUTION, planned_search_command: "git grep -n -i -E 'Principal|Scope|Actor|Environment|PermissionEpoch' <baseline> -- 01-system-architecture 03-memory-brain 09-security-governance"}
-  - {id: R-07, evidence_state: PENDING_SEARCH_EXECUTION, planned_search_command: "git grep -n -i -E 'replay|recovery cutoff|cursor monotonicity|manifest' <baseline> -- 01-system-architecture 03-memory-brain 04-memory-compiler"}
-  - {id: R-08, evidence_state: PENDING_SEARCH_EXECUTION, planned_search_command: "git grep -n -i -E 'authorization receipt|policy epoch|revocation' <baseline> -- 01-system-architecture 09-security-governance"}
-  - {id: R-09, evidence_state: PENDING_SEARCH_EXECUTION, planned_search_command: "git grep -n -i -E 'RPO|RTO|disaster recovery|restore drill' <baseline> -- 01-system-architecture 09-security-governance"}
-  - {id: R-10, evidence_state: PENDING_SEARCH_EXECUTION, planned_search_command: "git grep -n -i -E 'governance cost|contract complexity|deprecation' <baseline> -- reviews docs 14-ai-development"}
+  - id: R-01
+    evidence_state: PATH_LINE
+    path_line: "03-memory-brain/forget-fence-operation-and-publication-gate.md:101"
+    quote: "- **Linearization point:** durable commit of registry version/status in authoritative D registry. Work admission must observe a committed enabled version."
+    additional_evidence:
+      - path_line: "03-memory-brain/forget-fence-operation-and-publication-gate.md:120"
+        quote: "- **Linearization point:** one durable canonical transaction/serializable commit that makes the fence effective and captures producer-registration high-water under the same admission/fence serialization order. The installation CanonicalCommitCursor is audit order, not fence generation."
+
+  - id: R-02
+    evidence_state: PATH_LINE
+    path_line: "01-system-architecture/component-interactions.md:138"
+    quote: "| Consolidation & Conflict | Candidate claims, canonical candidates, evidence | Consolidation proposal, conflict set, resolution proposal | Work-item state; not final canonical authority unless delegated explicitly | Silently overwrite conflicting claims |"
+
+  - id: R-03
+    evidence_state: PATH_LINE
+    path_line: "03-memory-brain/forget-fence-operation-and-publication-gate.md:120"
+    quote: "- **Linearization point:** one durable canonical transaction/serializable commit that makes the fence effective and captures producer-registration high-water under the same admission/fence serialization order. The installation CanonicalCommitCursor is audit order, not fence generation."
+
+  - id: R-04
+    evidence_state: PATH_LINE
+    path_line: "01-system-architecture/data-flows.md:230"
+    quote: "| Adapter Applied acknowledgement | Async report after boundary application | Exact context/version/boundary evidence | Report may be delayed; state not inferred |"
+    additional_evidence:
+      - path_line: "01-system-architecture/component-interactions.md:274"
+        quote: "| Adapter failure | No Applied acknowledgement; retry/reconcile later |"
+
+  - id: R-05
+    evidence_state: PATH_LINE
+    path_line: "01-system-architecture/forget-fence-and-completion-contract.md:53"
+    quote: "- Source revision: canonical root restored by AID-2026-089; exact Blob is recorded on the Draft PR Head."
+    additional_evidence:
+      - path_line: "01-system-architecture/component-interactions.md:288"
+        quote: "| H — BMCP / Adapter | Message envelope, auth, capability negotiation, ack state names, error codes, compatibility |"
+
+  - id: R-06
+    evidence_state: PATH_LINE
+    path_line: "01-system-architecture/component-interactions.md:52"
+    quote: "- Every external boundary performs identity, Scope, Permission, schema, and resource-limit checks."
+
+  - id: R-07
+    evidence_state: PATH_LINE
+    path_line: "01-system-architecture/data-flows.md:54"
+    quote: "8. Async work must be observable, retryable, and replay-safe; accepted source data must not be lost because a downstream stage is unavailable."
+
+  - id: R-08
+    evidence_state: PATH_LINE
+    path_line: "01-system-architecture/system-boundaries.md:239"
+    quote: "| Authorization and revocation | Owner I | Owner I for authorization / PermissionEpoch state | Each affected subsystem at its access boundary | Versioned authorization or revocation record plus enforcement evidence from each affected boundary; a policy record alone is not proof of enforcement |"
+
+  - id: R-09
+    evidence_state: NO_EVIDENCE_FOUND
+    search_command: 'git grep -n -i -E "RPO|RTO|disaster recovery|restore drill" 31c1e5d83e7dad326dbd4b69d4a8e19534718ff1 -- 01-system-architecture 03-memory-brain 04-memory-compiler 05-memory-runtime 06-memory-context 09-security-governance reviews docs'
+    search_scope: "Baseline commit 31c1e5d83e7dad326dbd4b69d4a8e19534718ff1; paths: 01-system-architecture, 03-memory-brain, 04-memory-compiler, 05-memory-runtime, 06-memory-context, 09-security-governance, reviews, docs"
+    search_executed: true
+    hits: 392
+    result: NO_SUPPORTING_LINE
+    search_interpretation: "The search returned 392 keyword matches; none was identified as a supporting source line for this risk."
+
+  - id: R-10
+    evidence_state: PATH_LINE
+    path_line: "reviews/architecture-breakthrough/memory-ir-compiler/memory-ir-compiler-en.md:143"
+    quote: "1. Does IR reduce transformation complexity? **Not proven.** It may reduce repeated interpretation but adds stages and version-governance cost."
 
 modules:
   - id: A
-    scores: {change_surface: 4, coupling: 5, irreversibility: 3, concurrency_state: 4}
-    evidence_gap: "EVIDENCE_GAP: module-specific source line not revalidated for this four-dimensional score."
+    scores:
+      change_surface: 4
+      coupling: 5
+      irreversibility: 3
+      concurrency_state: 4
+    evidence_gap: "EVIDENCE_GAP: No A-specific source line has been revalidated to substantiate the change-surface score for module A."
+
   - id: B
-    scores: {change_surface: 5, coupling: 5, irreversibility: 4, concurrency_state: 4}
-    evidence_gap: "EVIDENCE_GAP: module-specific source line not revalidated for this four-dimensional score."
+    scores:
+      change_surface: 5
+      coupling: 5
+      irreversibility: 4
+      concurrency_state: 4
+    evidence_gap: "EVIDENCE_GAP: The available consolidation interaction entry in 01-system-architecture/component-interactions.md:138 does not establish a module-B-specific basis for all four scores."
+
   - id: C
-    scores: {change_surface: 4, coupling: 5, irreversibility: 4, concurrency_state: 5}
-    evidence_gap: "EVIDENCE_GAP: module-specific source line not revalidated for this four-dimensional score."
+    scores:
+      change_surface: 4
+      coupling: 5
+      irreversibility: 4
+      concurrency_state: 5
+    evidence_gap: "EVIDENCE_GAP: The forget-fence linearization evidence in 03-memory-brain/forget-fence-operation-and-publication-gate.md:120 is not a revalidated module-C-specific score justification."
+
   - id: D
-    scores: {change_surface: 5, coupling: 5, irreversibility: 5, concurrency_state: 5}
-    evidence_gap: "EVIDENCE_GAP: module-specific source line not revalidated for this four-dimensional score."
+    scores:
+      change_surface: 5
+      coupling: 5
+      irreversibility: 5
+      concurrency_state: 5
+    evidence_gap: "EVIDENCE_GAP: The adapter acknowledgement entry in 01-system-architecture/data-flows.md:230 does not provide a D-specific source line connecting the four scores to module D."
+
   - id: E
-    scores: {change_surface: 5, coupling: 5, irreversibility: 4, concurrency_state: 5}
-    evidence_gap: "EVIDENCE_GAP: module-specific source line not revalidated for this four-dimensional score."
+    scores:
+      change_surface: 5
+      coupling: 5
+      irreversibility: 4
+      concurrency_state: 5
+    evidence_gap: "EVIDENCE_GAP: The completion-contract entry in 01-system-architecture/forget-fence-and-completion-contract.md:53 records source-revision provenance, not an E-specific four-dimensional scoring rationale."
+
   - id: F
-    scores: {change_surface: 4, coupling: 5, irreversibility: 4, concurrency_state: 5}
-    evidence_gap: "EVIDENCE_GAP: module-specific source line not revalidated for this four-dimensional score."
+    scores:
+      change_surface: 4
+      coupling: 5
+      irreversibility: 4
+      concurrency_state: 5
+    evidence_gap: "EVIDENCE_GAP: The external-boundary checks in 01-system-architecture/component-interactions.md:52 do not identify an F-specific change surface or substantiate F's four scores."
+
   - id: G
-    scores: {change_surface: 4, coupling: 5, irreversibility: 4, concurrency_state: 5}
-    evidence_gap: "EVIDENCE_GAP: module-specific source line not revalidated for this four-dimensional score."
+    scores:
+      change_surface: 4
+      coupling: 5
+      irreversibility: 4
+      concurrency_state: 5
+    evidence_gap: "EVIDENCE_GAP: The asynchronous-work rule in 01-system-architecture/data-flows.md:54 is a general requirement and has not been tied to a G-specific four-dimensional assessment."
+
   - id: H
-    scores: {change_surface: 4, coupling: 5, irreversibility: 5, concurrency_state: 5}
-    evidence_gap: "EVIDENCE_GAP: module-specific source line not revalidated for this four-dimensional score."
+    scores:
+      change_surface: 4
+      coupling: 5
+      irreversibility: 5
+      concurrency_state: 5
+    evidence_gap: "EVIDENCE_GAP: The BMCP/Adapter interaction entry in 01-system-architecture/component-interactions.md:288 identifies interface concerns but does not establish an H-specific rationale for each score."
+
   - id: I
-    scores: {change_surface: 5, coupling: 5, irreversibility: 5, concurrency_state: 5}
-    evidence_gap: "EVIDENCE_GAP: module-specific source line not revalidated for this four-dimensional score."
+    scores:
+      change_surface: 5
+      coupling: 5
+      irreversibility: 5
+      concurrency_state: 5
+    evidence_gap: "EVIDENCE_GAP: The authorization and revocation entry in 01-system-architecture/system-boundaries.md:239 describes a boundary responsibility but does not provide an I-specific four-dimensional scoring trace."
+
   - id: Storage
-    scores: {change_surface: 5, coupling: 5, irreversibility: 5, concurrency_state: 5}
-    evidence_gap: "EVIDENCE_GAP: module-specific source line not revalidated for this four-dimensional score."
+    scores:
+      change_surface: 5
+      coupling: 5
+      irreversibility: 5
+      concurrency_state: 5
+    evidence_gap: "EVIDENCE_GAP: The verified risk excerpts do not include a Storage-specific physical persistence, recovery, or state-transition source line supporting these four scores."
 
 statuses:
+  ac3: EVIDENCE_ATTACHED_PENDING_INDEPENDENT_CONFIRMATION
+  ac4: CARRIER_CONTENT_PRESENT_PENDING_ACCEPTANCE
+  ac6: CARRIER_CHECK_PASS_PENDING_COORDINATOR_NEGATIVE_CASE_EXECUTION
   ac6_negative_cases: PENDING_COORDINATOR_EXECUTION
+  ac8: REVIEW_TEMPLATE_PRESENT_PENDING_INDEPENDENT_REVIEW
   ac8_independent_review: PENDING_INDEPENDENT_REVIEW
