@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-293/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-342/manifest.yaml"
     evidence_verification:
       verification_status: Unverified
       last_verified_date: null
@@ -29,10 +29,10 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "AID-2026-293 implementing AI session record, including its input snapshot, actions, visible outputs and explicit non-performed activities."
+    canonical_scope: "AID-2026-342 implementing AI session record, including its input snapshot, actions, visible outputs and explicit non-performed activities."
     canonical_scope_id: "ai-development/aid-2026-293-session-evidence"
     canonical_scope_keywords:
-      - "AID-2026-293"
+      - "AID-2026-342"
       - "implementing AI session"
       - "session evidence"
     canonical_conflict_status: None
@@ -44,9 +44,9 @@ document_metadata:
     zh-CN: null
   steward: "user-authorized operator (delegated by account owner)"
 ---
-# AID-2026-293 Session Evidence
+# AID-2026-342 Session Evidence
 
-- Work item: AID-2026-293
+- Work item: AID-2026-342
 - Repository: `oahcom/AiMemoryBrainArchitecture`
 - Baseline: `31c1e5d83e7dad326dbd4b69d4a8e19534718ff1`
 - Session date: 2026-11-27
@@ -59,18 +59,18 @@ The implementing AI session inspected the target documentation and repository go
 
 ## Actual AI input
 
-The executed prompt body is preserved verbatim in `14-ai-development/work-items/AID-2026-293/prompt-v1.md`, following its document-metadata front-matter. The measurements below identify the original executed prompt body only; they are not the SHA-256 digest or byte length of the complete Markdown file.
+The executed prompt body is preserved verbatim in `14-ai-development/work-items/AID-2026-342/prompt-v1.md`, following its document-metadata front-matter. The measurements below identify the original executed prompt body only; they are not the SHA-256 digest or byte length of the complete Markdown file.
 
 - Original prompt body SHA-256: `c1dc5334d5f16b79a84200540657ee6f680f952aae420648d64e96ae7295a626`
 - Original prompt body bytes: `1543`
 
 The manifest's `executed_prompt_sha256` and `executed_prompt_bytes` fields identify the complete committed `prompt-v1.md` Git blob, including its front-matter.
 
-The prompt directed the session to prepare the AID-2026-293 carriers for Issue #262, covering AC3 risk-register evidence states, AC4 four-dimensional complexity assessment, AC6 checker and tests, and AC8 bilingual review templates. The snapshot file is the authoritative record of the complete executed prompt.
+The prompt directed the session to prepare the AID-2026-342 carriers for Issue #262, covering AC3 risk-register evidence states, AC4 four-dimensional complexity assessment, AC6 checker and tests, and AC8 bilingual review templates. The snapshot file is the authoritative record of the complete executed prompt.
 
 ## AI-visible output
 
-This session produced proposed carrier content for the AID-2026-293 work item, including:
+This session produced proposed carrier content for the AID-2026-342 work item, including:
 
 - `carrier-data.yaml`
 - The AC6 Python carrier checker and its unittest fixtures

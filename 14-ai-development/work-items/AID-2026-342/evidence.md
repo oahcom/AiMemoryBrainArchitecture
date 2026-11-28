@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-293/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-342/manifest.yaml"
     evidence_verification:
       verification_status: Unverified
       last_verified_date: null
@@ -29,10 +29,10 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "AID-2026-293 evidence record for the documentation and validation carriers addressing Issue #262 AC3, AC4, AC6 and AC8."
+    canonical_scope: "AID-2026-342 evidence record for the documentation and validation carriers addressing Issue #262 AC3, AC4, AC6 and AC8."
     canonical_scope_id: "ai-development/aid-2026-293-evidence-record"
     canonical_scope_keywords:
-      - "AID-2026-293"
+      - "AID-2026-342"
       - "Issue #262"
       - "evidence record"
     canonical_conflict_status: None
@@ -44,7 +44,7 @@ document_metadata:
     zh-CN: null
   steward: "user-authorized operator (delegated by account owner)"
 ---
-# AID-2026-293 Evidence Record
+# AID-2026-342 Evidence Record
 
 ## Baseline
 

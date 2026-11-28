@@ -23,10 +23,10 @@ from pathlib import PurePosixPath
 #
 # 2026-11-28.1 is a rule change: one exact path,
 # `00-governance/schemas/work-item-registry.schema.json`, joins the admission
-# allowlist for the canonical work-item registry (AID-2026-293). The schema is
+# allowlist for the canonical work-item registry (AID-2026-342). The schema is
 # JSON, and JSON was admitted only at named configuration paths, so the new file
 # could not land without this line.
-# 2026-11-28.2 is a rule change on top of .1: admit only the exact AID-2026-293
+# 2026-11-28.2 is a rule change on top of .1: admit only the exact AID-2026-342
 # carrier-data.yaml path; other YAML files remain denied.
 CHECK_VERSION = "2026-11-28.2"
 
@@ -90,10 +90,10 @@ ALLOWED_DATA_PATHS = frozenset({
     "scripts/ci/baselines/protection-fingerprint.json",
 })
 
-# AID-2026-293: admit only the carrier data file required by this work item.
+# AID-2026-342: admit only the carrier data file required by this work item.
 # This is deliberately an exact path, not a work-item-wide YAML allowance.
 AID_293_CARRIER_DATA_PATH = (
-    "14-ai-development/work-items/AID-2026-293/carrier-data.yaml"
+    "14-ai-development/work-items/AID-2026-342/carrier-data.yaml"
 )
 
 REQUIREMENTS_FILE_RE = re.compile(r"requirements(?:-[A-Za-z0-9_.-]+)?\.txt\Z")
@@ -197,7 +197,7 @@ ARCHITECTURE_METADATA_SCHEMA_RE = re.compile(
     r"00-governance/architecture-document-metadata\.schema\.yaml"
 )
 DOCUMENT_SCOPE_REGISTRY_RE = re.compile(r"00-governance/document-scope-registry\.yaml")
-# AID-2026-293: the canonical work-item registry record schema. One exact path,
+# AID-2026-342: the canonical work-item registry record schema. One exact path,
 # for the same reason as the two governance singletons above: JSON is admitted
 # only at named configuration paths, and a sibling `.schema.json` in the same
 # directory is a different document, not this one.

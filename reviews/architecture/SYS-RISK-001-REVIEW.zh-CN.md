@@ -1,12 +1,12 @@
 # SYS-RISK-001 独立审查记录
 
 - 审查状态：`PENDING_INDEPENDENT_REVIEW`
-- 工作项：AID-2026-293
+- 工作项：AID-2026-342
 - 仓库：`oahcom/AiMemoryBrainArchitecture`
 - 基线 Commit：`31c1e5d83e7dad326dbd4b69d4a8e19534718ff1`
 - 审查日期：`TO_BE_FILLED_BY_INDEPENDENT_REVIEWER`
 - 审查者身份：`TO_BE_FILLED_BY_INDEPENDENT_REVIEWER`
-- 审查者角色：独立会话；不是 AID-2026-293 的作者/产出者
+- 审查者角色：独立会话；不是 AID-2026-342 的作者/产出者
 - GitHub 身份一致性：审查者必须在仓库审查、PR Review 和本记录中使用同一 GitHub 身份。产出者不代为声明或确认该身份。
 
 ## 被审对象
