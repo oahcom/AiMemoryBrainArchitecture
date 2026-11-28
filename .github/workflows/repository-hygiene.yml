@@ -7,6 +7,10 @@ concurrency:
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+  # `Repository hygiene (hard gate)` is required; the queue only reports checks
+  # produced by `merge_group`.
+  merge_group:
+    types: [checks_requested]
   push:
     branches: [main]
 
@@ -37,8 +41,10 @@ jobs:
       # then run together in this one step.
       - name: Check committed repository hygiene and new-file admission
         env:
-          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
-          HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          # merge_group: the range is the queue candidate against the queue
+          # base; pull_request: the PR head against its base; push: event.before.
+          BASE_SHA: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_sha || github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event_name == 'merge_group' && github.event.merge_group.head_sha || github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
         run: |
           python3 scripts/ci/check_repository_hygiene.py \
             --base "$BASE_SHA" \
@@ -60,22 +66,34 @@ jobs:
 
       - name: Measure manifest blob-pin baseline and negative sample
         env:
-          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          GITHUB_EVENT_BEFORE: ${{ github.event.before || '' }}
+          GITHUB_EVENT_MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha || '' }}
+        shell: bash
         run: |
           set -euo pipefail
-          git fetch --no-tags origin refs/pull/1220/head:refs/remotes/origin/pr/1220
-          test "$(git rev-parse 9a2063ae1fa5d905b3817cd4eddba065a06daa73^{commit})" = "9a2063ae1fa5d905b3817cd4eddba065a06daa73"
+          BASE_SHA="$(python3 scripts/ci/resolve_manifest_blob_pin_base.py)"
+          echo "Resolved merge-candidate base: $BASE_SHA"
+
           set +e
           python3 scripts/ci/check_manifest_blob_pins.py --commit "$BASE_SHA"
           base_status=$?
-          python3 scripts/ci/check_manifest_blob_pins.py --commit 9a2063ae1fa5d905b3817cd4eddba065a06daa73
+          python3 scripts/ci/assert_manifest_blob_pin_negative.py \
+            --commit 9a2063ae1fa5d905b3817cd4eddba065a06daa73
           negative_status=$?
-          python3 scripts/ci/check_manifest_blob_pins.py --commit HEAD
+          python3 scripts/ci/check_manifest_blob_pins.py --commit "$GITHUB_SHA"
           candidate_status=$?
           set -e
-          if [ "$base_status" -gt 1 ] || [ "$negative_status" -gt 1 ] || [ "$candidate_status" -gt 1 ]; then
+
+          if [ "$base_status" -gt 1 ] || \
+             [ "$negative_status" -gt 1 ] || \
+             [ "$candidate_status" -gt 1 ]; then
             echo "INCOMPLETE: at least one requested scan could not be completed"
             exit 2
+          fi
+
+          if [ "$negative_status" -ne 0 ]; then
+            echo "VIOLATION: immutable negative sample was not rejected with expected evidence"
+            exit 1
           fi
 
       - name: Ratchet manifest blob pins
@@ -87,6 +105,13 @@ jobs:
 
       - name: Self-check manifest blob pin verification
         run: python3 scripts/ci/test_check_manifest_blob_pins.py
+
+      - name: Self-check manifest blob-pin base resolution and negative assertion
+        run: |
+          set -euo pipefail
+          python3 -m unittest \
+            scripts/ci/test_resolve_manifest_blob_pin_base.py \
+            scripts/ci/test_assert_manifest_blob_pin_negative.py
 
       - name: Self-check the line-ending gate
         run: python3 scripts/test_check_line_endings.py
@@ -199,6 +224,25 @@ jobs:
           set -euo pipefail
           cd scripts
           python3 -m unittest -v test_check_declared_check_contexts
+
+      # A declared context produced by a workflow that never subscribes to
+      # `merge_group` is absent from every queue candidate, and the declared-
+      # contexts gate cannot see it: it compares names, not event wiring.
+      # #1453 dropped the `merge_group` block from document-management.yml and
+      # `GOV-DOC-002 metadata checks` left the queue silently. This holds the
+      # declaration to the wiring, and document-management.yml to target-branch
+      # serialization (`queue: max`, `merge_group.base_ref`).
+      - name: Check platform-required contexts are wired to merge_group
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/check_required_contexts_merge_group.py
+
+      - name: Self-check the merge_group wiring gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd scripts
+          python3 -m unittest -v test_check_required_contexts_merge_group
 
       - name: Probe declared-check-contexts exit contracts
         run: python3 scripts/probe_declared_check_contexts.py

@@ -1,0 +1,81 @@
+work_item_id: AID-2026-012
+title: "Protection fingerprint workflow and checker"
+class: Infrastructure
+risk: Medium
+risk_rationale: >-
+  The work observes and reports branch-protection configuration. The workflow
+  is deliberately not a required check because its GITHUB_TOKEN cannot access
+  the full branch-protection endpoint. Summary-mode degradation is explicit
+  and must not be interpreted as verification of all protection fields.
+status: IN_PROGRESS
+id_status: ASSIGNED
+sponsor: oahcom
+accountable_owner: oahcom
+acceptance_authority: Architecture Governance
+attribution:
+  ai_assisted_work: YES
+  implementing_ai_session: "6b0935f1-14d8-83ec-92e4-31725a7c96a7"
+date: "2026-11-28"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: b333ad1cf0e86992621d41cc1dac87eb3141353c
+tracking_issue: NONE
+scope:
+  - "Add the Protection fingerprint scheduled and manually dispatched workflow."
+  - "Add a checker supporting full and summary branch endpoints with automatic fallback."
+  - "Record the Protection fingerprint baseline and its experiment provenance."
+  - "Document the fingerprint ratchet and degraded-mode rationale."
+  - "Register the existing implementation as work item AID-2026-012."
+evidence:
+  - "Dispatch-provided branch facts identify branch feat/2026-11-27-protection-fingerprint and post-rebase HEAD 355b0ccf8."
+  - "Dispatch reports 60 passing offline unit tests from: cd scripts/ci; python -m unittest test_check_protection_fingerprint."
+  - "Dispatch reports a no-token local run in degraded mode: 3 fields verifiable, 11 unverifiable, exit code 0."
+  - "These measurements have not been independently rerun as part of this artifact-authoring response."
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-012/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-012/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-012/session-evidence.md
+    relationship: evidence
+  - path: 14-ai-development/design/protection-fingerprint-ratchet.md
+    relationship: design
+  - path: 14-ai-development/PR-GOVERNANCE-001.md
+    relationship: reference
+session_evidence:
+  - role: implementing_ai
+    issue_refs:
+      - "#134"
+    implementing_ai_session: "6b0935f1-14d8-83ec-92e4-31725a7c96a7"
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-012/prompt-v1.md
+    executed_prompt_sha256: 3ee3b43c42559f57ddfc16630a1c14fcedcaa5aa5fb605b8784f9c15ef74cc8b
+    executed_prompt_bytes: 24844
+    executed_prompt_provenance: VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-012/session-evidence.md
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    The assigned branch is reported to contain the Protection fingerprint
+    workflow, checker, schema-version-4 baseline, design documentation, unit
+    tests, and governance declaration changes. This registration package
+    records that implementation; it does not claim review, acceptance, merge,
+    deployment, or Issue closure.
+  files_changed:
+    - path: .github/workflows/protection-fingerprint.yml
+      relationship: workflow
+    - path: 14-ai-development/PR-GOVERNANCE-001.md
+      relationship: governance declaration
+    - path: 14-ai-development/design/protection-fingerprint-ratchet.md
+      relationship: design
+    - path: scripts/ci/baselines/protection-fingerprint.json
+      relationship: baseline
+    - path: scripts/ci/check_protection_fingerprint.py
+      relationship: implementation
+    - path: scripts/ci/test_check_protection_fingerprint.py
+      relationship: tests
+  tests:
+    - command: "cd scripts/ci; python -m unittest test_check_protection_fingerprint"
+      result: "60 tests passed; dispatch-provided result, not independently rerun for this registration package"
+    - command: "Local checker run without a token"
+      result: "DEGRADED MODE — 3 field(s) verifiable, 11 unverifiable; exit code 0; dispatch-provided result, not independently rerun for this registration package"

@@ -193,7 +193,7 @@ session_evidence:
       - "#1278"
     implementing_ai_session: owner-proxy-2026-11-26
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-102/prompt-v1.md
-    executed_prompt_sha256: df3c53282d858ecc7302ba86b4fb419bf6a31c8030d30cee256b64840b4e4e7a
+    executed_prompt_sha256: 468a1d4fd8f43d81c8ffba081afd46497b54a2b427849838946163785716072d
     executed_prompt_bytes: 4470
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
@@ -205,3 +205,13 @@ session_evidence:
       prompt_sha256 / prompt_bytes fields above are a different schema -- the prompt pin the
       INDEX cell cites -- and none is in MANIFEST_FIELDS, so they do not conflict with this
       block.
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-102/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-102/session-evidence-1278.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-092/prompt-v1.md"
+    relationship: reference

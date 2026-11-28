@@ -10,7 +10,7 @@ risk_rationale: >-
   exist to refuse that shape. The residual risk is the second-order one: a case that passes but
   no longer bites is indistinguishable from one that does, which is why the counterfactual in
   AC1 is an acceptance criterion and not a note.
-status: DISPATCHED
+status: MERGED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -61,9 +61,19 @@ acceptance_criteria:
       with its own diagnostic, not raised as a traceback, and the case fails when that refusal is
       removed.
     measurement: >-
-      With the seam patched the suite is 318/318 passed; with `except OSError` in `git()`
-      neutralised it is 317/318 with exactly `[FAIL] T92a git() spawn failure is refused by the
-      caller, not raised`. Both runs on the rebased head.
+      Baseline measurement on commit 229c0a6b51f4c761ed969337f6ddf7d0bbbb7d0c, dated 2026-11-27,
+      with the same test and gate blobs on both platforms. Windows 11 / Python 3.12: command
+      `python scripts/test_check_document_management.py`, exit 0, 371/371 passed and one
+      registered T68c skip (`1 skipped, 1 registered of 5 allowed`). Ubuntu latest / required
+      context `GOV-DOC-002 metadata checks`: command
+      `python3 scripts/test_check_document_management.py`, exit 0, 372/372 passed, where T68c
+      executes and the suite emits no skip summary. The counterfactual is measured on Windows on
+      the same tree: neutralising `except OSError` in `git()` to `except ZeroDivisionError` and
+      restoring the file afterwards makes the command exit 1 with 370/371 passed and exactly
+      `[FAIL] T92a git() spawn failure is refused by the caller, not raised`. The corresponding
+      Ubuntu counterfactual, 371/372, is arithmetic only and not a measurement: one successful
+      T92a case is removed while the denominator remains 372. These are commit- and
+      platform-scoped observations, not timeless suite totals.
   - id: AC2
     criterion: >-
       A governed path that cannot be resolved while the target set is built leaves a DM-01
@@ -91,8 +101,16 @@ acceptance_criteria:
       Every case restores its patch in a finally, and the suite is green on the rebased tree with
       main's restored guards present and the registered skip set unchanged.
     measurement: >-
-      `python3 scripts/test_check_document_management.py` exits 0 with `318/318 passed` and
-      `1 skipped, 1 registered of 1 allowed`; T93a-T93h run in the same invocation.
+      Operator-supplied baseline measurements dated 2026-11-27 on commit
+      229c0a6b51f4c761ed969337f6ddf7d0bbbb7d0c. Windows 11 / Python 3.12, command
+      `python scripts/test_check_document_management.py`: exit 0, 371/371 passed, and
+      `1 skipped, 1 registered of 5 allowed`, namely T68c. Ubuntu latest / required context
+      `GOV-DOC-002 metadata checks`, command `python3 scripts/test_check_document_management.py`:
+      exit 0, 372/372 passed, where T68c executes and no suite-level skip summary is emitted.
+      T93a-T93h run in the same invocation on both platforms. The permitted skip remains T68c and
+      the one-case total difference is caused by the existing geteuid/root conditional. The
+      command and the commit are part of the measurement: totals must be remeasured when the
+      tested tree changes.
 
 findings:
   - id: F1
@@ -132,10 +150,11 @@ findings:
       AID-2026-079 is registered here; the body now says so instead of repeating the argument.
 
 implementation:
-  status: IMPLEMENTED_IN_BRANCH
+  status: IMPLEMENTED
   branch: test/T92-fault-injection
   pull_request: 1078
-  merge_commit_sha: NOT_MERGED
+  merge_commit_sha: 6314a65bd8be48c1a4bb0768e9960c4c808110ab
+  merged_at: "2026-11-25T21:02:20Z"
   note: >-
     The four cases were authored on the branch before this registration; this session rebased them
     onto 1f5ba824, registered the work item and corrected the pull request body. No assertion was
@@ -158,8 +177,25 @@ session_evidence:
       - "#827"
     implementing_ai_session: a1078-pr1078-rebase-session
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-079/prompt-v1.md
-    executed_prompt_sha256: a2d216ee647954b02a6487349716191403e67171d63a82acd7ab15c9feafc81f
-    executed_prompt_bytes: 5790
+    executed_prompt_sha256: af8ad57de5eddf104c3d1ff4eb40e377e352c8ab62e98f86d422139b3b5e03a8
+    executed_prompt_bytes: 5732
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-079/session-evidence-827.md
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-079/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-079/session-evidence-827.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
+
+post_merge_correction:
+  date: "2026-11-27"
+  basis: "GitHub API GET /pulls/1078 returned merged=true; the merge commit is reachable from origin/main. This block records the correction so the original value stays auditable."
+  original_values:
+    - "implementation.status: IMPLEMENTED_IN_BRANCH"
+    - "implementation.merge_commit_sha: NOT_MERGED"
+    - "status: DISPATCHED"
+  corrected_values:
+    - "PR #1078 merged; see implementation/carrier above"

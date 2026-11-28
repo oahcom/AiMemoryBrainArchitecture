@@ -100,3 +100,15 @@ findings:
   - id: AID-2026-047-F1
     severity: P3
     feedback_destination: "Delivery PR conversation. The dispatched spec asked for a test rejecting a retry whose predecessor belongs to a different delivery, but DeliveryAttempt::retry takes only the predecessor, so the callee cannot observe a second delivery. The delivered test forks the chain from one predecessor and asserts the fork is rejected with ContextMismatch. Recorded rather than silently narrowed."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-047/prompt-v1.md"
+    relationship: reference
+  - path: "06-memory-context/context-implementation-coverage.md"
+    relationship: reference
+  - path: "06-memory-context/context-implementation-coverage.zh-CN.md"
+    relationship: reference
+  - path: "06-memory-context/phase-3.7-g-local-lifecycle-producer-derivative-queue-recall-context-restore.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/GAP-10-IMPLEMENTATION-FRONTIER.md"
+    relationship: reference

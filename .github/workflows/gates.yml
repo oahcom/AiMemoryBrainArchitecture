@@ -53,12 +53,17 @@ concurrency:
 on:
   pull_request:
     branches: [main]
+  # Seven required contexts live in this file. The queue only reports checks
+  # produced by `merge_group`, so every job here must also run for it.
+  merge_group:
+    types: [checks_requested]
   push:
     branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
+  issues: read
 
 jobs:
   protocol-index:
@@ -135,7 +140,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # merge_group: github.sha is the queue candidate head; pull_request:
+          # the PR head. Never the base.
+          ref: ${{ github.event.merge_group.head_sha || github.event.pull_request.head.sha || github.sha }}
 
       # HARD GATE, not a ratchet. GAP-09 is closed: `6897e53c` registered all
       # 5599 constraints across the 32 schemas, and this audit now exits 0 on
@@ -333,10 +340,200 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
       - name: Install the repository's pinned YAML parser
         run: python -m pip install PyYAML==6.0.2
-      - name: Validate all Work Item manifests without migration
-        run: python scripts/ci/check_work_item_manifest_schema.py
+      - name: Test sequence-of-mapping support in GOV-DOC parser
+        run: python3 scripts/test_check_document_management_sequence_mapping.py
+      - name: Test AC4 fixtures and AID-2026-251 compliance
+        run: python3 scripts/test_check_work_item_manifest_schema.py
+      - name: Enforce manifest schema and legacy ratchet
+        run: python scripts/ci/check_work_item_manifest_schema.py --tree HEAD --baseline "14-ai-development/reports/work-item-manifest-ac4-baseline.json"
+      - name: Report all four historical cohort migration batches
+        run: python scripts/ci/check_work_item_manifest_schema.py --tree HEAD --baseline "14-ai-development/reports/work-item-manifest-ac4-baseline.json" --batch-report
+
+  prompt-commit-trace:
+    name: Prompt-to-commit trace (ratchet)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install pinned YAML parser
+        run: python -m pip install PyYAML==6.0.2
+      - name: Resolve comparison base (current main for PR; pre-push main for push)
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "push" && "$EVENT_BEFORE" =~ ^[0-9a-f]{40}$ ]]; then
+            BASE_SHA="$EVENT_BEFORE"
+          else
+            git fetch --no-tags origin main
+            BASE_SHA="$(git rev-parse FETCH_HEAD)"
+          fi
+          echo "BASE_SHA=$BASE_SHA" >> "$GITHUB_ENV"
+          echo "GITHUB_BASE_SHA=$BASE_SHA" >> "$GITHUB_ENV"
+      - name: Run prompt-to-commit trace regression tests
+        run: python -m unittest scripts.ci.test_check_prompt_commit_trace -v
+      - name: Generate auditable main and PR snapshots
+        shell: bash
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+
+          python scripts/ci/check_prompt_commit_trace.py \
+            --commit "$BASE_SHA" \
+            --base "$BASE_SHA" \
+            --emit-baseline "$RUNNER_TEMP/main-baseline.json" \
+            > "$RUNNER_TEMP/main-baseline.stdout.json"
+
+          python scripts/ci/check_prompt_commit_trace.py \
+            --commit "$HEAD_SHA" \
+            --base "$BASE_SHA" \
+            --emit-baseline "$RUNNER_TEMP/pr-snapshot.json" \
+            > "$RUNNER_TEMP/pr-snapshot.stdout.json"
+
+          # The exact base snapshot is the comparison baseline for both
+          # audits. New-item admission is decided by the checker itself,
+          # using the manifest and immutable prompt blob at the audited head.
+          python scripts/ci/check_prompt_commit_trace.py \
+            --commit "$BASE_SHA" \
+            --base "$BASE_SHA" \
+            --baseline "$RUNNER_TEMP/main-baseline.json" \
+            --base-snapshot "$RUNNER_TEMP/main-baseline.json" \
+            --json \
+            > "$RUNNER_TEMP/main-summary.json"
+
+          python scripts/ci/check_prompt_commit_trace.py \
+            --commit "$HEAD_SHA" \
+            --base "$BASE_SHA" \
+            --baseline "$RUNNER_TEMP/main-baseline.json" \
+            --base-snapshot "$RUNNER_TEMP/main-baseline.json" \
+            --json \
+            > "$RUNNER_TEMP/pr-summary.json"
+
+          python - "$RUNNER_TEMP/main-summary.json" "$RUNNER_TEMP/pr-summary.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, os, sys
+
+          for label, path in (
+              ("Main baseline", sys.argv[1]),
+              ("PR head", sys.argv[2]),
+          ):
+              data = json.load(open(path, encoding="utf-8"))
+
+              print(f"## {label}: prompt-to-commit trace")
+              print(
+                  f"Commit: "
+                  f"{os.environ['BASE_SHA'] if label == 'Main baseline' else os.environ['HEAD_SHA']}"
+              )
+              print(f"Manifest count: {data['manifest_count']}")
+
+              print("### Five primary states")
+              for name, count in data["primary_status"].items():
+                  print(f"- {name}: {count}")
+
+              print("### 3×4 prompt × commit matrix")
+              for prompt, commits in data["matrix"].items():
+                  for commit, count in commits.items():
+                      print(f"- {prompt} × {commit}: {count}")
+
+              if label == "PR head":
+                  row = next(
+                      (
+                          x for x in data["manifests"]
+                          if x["work_item_id"] == "AID-2026-047"
+                      ),
+                      None,
+                  )
+                  print("AID-2026-047: " + json.dumps(row, sort_keys=True))
+
+                  print("### Initial-registration evidence")
+                  for row in data["manifests"]:
+                      if row.get("initial_registration_eligible"):
+                          print(
+                              f"- {row['work_item_id']}: "
+                              "verified immutable prompt blob; "
+                              "initial NO_TRACE admission"
+                          )
+
+                  print("### Ratchet violations")
+                  for violation in data["ratchet_violations"]:
+                      print(f"- {violation}")
+
+              print()
+
+          print(f"BASE_SHA: {os.environ.get('BASE_SHA', 'see workflow env')}")
+          PY
+
+      - name: Reproduce the historical #1453 false-new-manifest failure
+        shell: bash
+        run: |
+          set -euo pipefail
+          REGRESSION_HEAD=bdb4b0d4
+          REGRESSION_BASE=460f437e
+          git cat-file -e "$REGRESSION_HEAD^{commit}"
+          git cat-file -e "$REGRESSION_BASE^{commit}"
+          git show "$REGRESSION_BASE:14-ai-development/work-items/AID-2026-291/baseline.json" > "$RUNNER_TEMP/historical-committed-baseline.json"
+          python scripts/ci/check_prompt_commit_trace.py \
+            --commit "$REGRESSION_BASE" --base "$REGRESSION_BASE" \
+            --emit-baseline "$RUNNER_TEMP/historical-base-snapshot.json" \
+            > "$RUNNER_TEMP/historical-base-snapshot.stdout.json"
+          set +e
+          python scripts/ci/check_prompt_commit_trace.py \
+            --commit "$REGRESSION_HEAD" --base "$REGRESSION_BASE" \
+            --baseline "$RUNNER_TEMP/historical-committed-baseline.json" \
+            --base-snapshot "$RUNNER_TEMP/historical-base-snapshot.json" \
+            > "$RUNNER_TEMP/historical-ratchet.stdout.txt" 2>&1
+          rc=$?
+          set -e
+          cat "$RUNNER_TEMP/historical-ratchet.stdout.txt"
+          if grep -Fq "RATCHET NEW_NON_TRACEABLE AID-2026-265" "$RUNNER_TEMP/historical-ratchet.stdout.txt"; then
+            echo "::error::AID-2026-265 was incorrectly classified as new"
+            exit 1
+          fi
+          if grep -Fq "RATCHET NEW_NON_TRACEABLE AID-2026-291" "$RUNNER_TEMP/historical-ratchet.stdout.txt"; then
+            echo "::error::base-existing AID-2026-291 NO_TRACE was incorrectly classified as new"
+            exit 1
+          fi
+          if [ "$rc" -ne 0 ]; then
+            echo "::error::historical ratchet invocation exited $rc"
+            exit "$rc"
+          fi
+          echo "RATCHET ASSERT NEW_NON_TRACEABLE AID-2026-265=ABSENT"
+          echo "RATCHET ASSERT NEW_NON_TRACEABLE AID-2026-291=ABSENT (base-present NO_TRACE retained)"
+          echo "HISTORICAL_RATCHET_REGRESSION: PASS"
+      - name: Upload immutable snapshot artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: prompt-commit-trace-snapshots
+          path: |
+            ${{ runner.temp }}/main-baseline.json
+            ${{ runner.temp }}/pr-snapshot.json
+            ${{ runner.temp }}/main-summary.json
+            ${{ runner.temp }}/pr-summary.json
+          if-no-files-found: error
+      - name: Enforce committed baseline ratchet
+        shell: bash
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test -s 14-ai-development/work-items/AID-2026-291/baseline.json || {
+            echo "::error::Committed prompt-commit-trace baseline is missing; review and commit the main-baseline artifact before merge."
+            exit 1
+          }
+          python scripts/ci/check_prompt_commit_trace.py --commit "$HEAD_SHA" --base "$BASE_SHA" --baseline 14-ai-development/work-items/AID-2026-291/baseline.json --base-snapshot "$RUNNER_TEMP/main-baseline.json"

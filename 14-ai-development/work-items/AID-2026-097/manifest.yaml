@@ -92,8 +92,18 @@ session_evidence:
     issue_refs:
     implementing_ai_session: session-283-f02-residuals
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-097/prompt-v1.md
-    executed_prompt_sha256: 4e3dbbd35d002403849329a14d2f5c6357f695ea835327ff56c151cde00fed56
-    executed_prompt_bytes: 4283
+    executed_prompt_sha256: 70f4eb79f8c4203f2d657e28c715d390a5a15ac2b54366c1db5e460302554d91
+    executed_prompt_bytes: 4225
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-097/session-evidence.md
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-097/prompt-v1.md"
+    relationship: reference
+  - path: "00-governance/reports/bilingual-baseline-remediation-report.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-097/session-evidence.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference

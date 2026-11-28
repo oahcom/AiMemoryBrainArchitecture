@@ -85,3 +85,30 @@ Manifests with no top-level status field (6, deliberately untouched): AID-2026-0
 - python scripts/check_document_management.py --root . → INCOMPLETE: no rule violations in 654 classified documents, but 371 governed documents are still unclassified (the 371 backlog predates this change; exit 1 is the pre-existing INCOMPLETE state).
 - git diff --stat → 14 files, 32 insertions / 32 deletions.
 - Full before/after text is recoverable from the commit diff; no note text was deleted.
+
+## Post-merge backfill (2026-11-27)
+
+- Carrier PR #1380 merged as `46dac1b1e198c8d88daff5a34faf759ecb075869` at 2026-11-27T05:27:58Z, from exact head `b1c0ab0e` with 17/17 required contexts SUCCESS and `mergeStateStatus=CLEAN`.
+- This backfill changes exactly two fields: `implementation.status` DRAFT_PR to MERGED, and `implementation.merge_commit_sha` PENDING to the merge commit above. No other field, file or claim is changed.
+- Readback on the base commit of this PR: the AID-2026-256 INDEX row exists exactly once; the 13 manifest top-level `status` fields and the 19 INDEX Status prefixes landed by #1380 all read back as MERGED.
+- Residual, deliberately not rewritten here: `registration_status: CARRIER_PR_DRAFT` still names the registration-stage label of the carrier PR; `review.status: NOT_ASSIGNED` and `acceptance.status: NOT_GRANTED` remain, because a merged carrier is not an acceptance.
+
+## Merge-fact correction batch (2026-11-27)
+
+Seven manifests recorded a merge fact that contradicted GitHub. Each is corrected from `GET /pulls/<n>` (`merged=true`, `merge_commit_sha`, `merged_at`) and each keeps a `post_merge_correction` block holding the original value so nothing is silently overwritten.
+
+| AID | field | original | corrected |
+| --- | --- | --- | --- |
+| AID-2026-079 | `implementation.status` / `merge_commit_sha` | `IMPLEMENTED_IN_BRANCH` / `NOT_MERGED` | `IMPLEMENTED` / `6314a65bd8be48c1a4bb0768e9960c4c808110ab` (PR #1078) |
+| AID-2026-082 | `implementation.status` / `merge_commit_sha` | `IN_PROGRESS` / `NOT_MERGED` | `IMPLEMENTED` / `71548b7b9d8efae4ee605a0fb4c9d1d97236138c` (PR #1265) |
+| AID-2026-250 | `implementation.status` / `merge_commit_sha` | `IN_PROGRESS` / `NOT_MERGED` | `IMPLEMENTED` / `652aeaaea9cc77db959e6241f65184b4bf21c9c8` (PR #1388) |
+| AID-2026-150 | `carrier.merge_commit_sha` | `PENDING` | `6ab36b3697a0994d8de449d2b9c344f23aac0fda` (PR #1320) |
+| AID-2026-172 | `carrier.merge_commit_sha` | absent | `1e9341da603dec78377fed240f4d6dbabaa8838e` (PR #1327) |
+| AID-2026-204 | `carrier.merge_commit_sha` | absent | `980e54d9b17af04eaaf754f160c3068eb0adc6fa` (PR #1354) |
+| AID-2026-116 | `implementation.status` / `merge_commit_sha` | `PR_OPEN` / absent | `IMPLEMENTED` / `a7cf5256e975ff25fd2f75b3b5051b16d8d77d36` (PR #1321) |
+
+`AID-2026-059` was reported as having no merge SHA, but it records the same fact under `implementation_commit_sha`, which equals the merge commit `ebadbe843eb69e0e3e2db84b4956d9e8e635e5a8`. It is not edited: the key differs, the fact does not.
+
+Top-level `status` is set to `MERGED` only where the key already existed. `AID-2026-150` has no top-level `status` and none is invented, consistent with the rule applied in #1380.
+
+`implementation.status` is set to `IMPLEMENTED`, not `MERGED`: the work-item manifest schema enum is `NOT_STARTED / IN_PROGRESS / IMPLEMENTED / BLOCKED / NOT_APPLICABLE` and contains no `MERGED`, so writing `MERGED` there is a schema violation and the gate rejects newly introduced ones. The merge fact lives in `merge_commit_sha` / `merged_at`; the top-level `status` (where the key already existed) records `MERGED`.

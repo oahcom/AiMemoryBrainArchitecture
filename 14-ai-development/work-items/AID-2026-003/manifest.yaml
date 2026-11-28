@@ -43,7 +43,7 @@ prompt_file: 14-ai-development/work-items/AID-2026-003/prompt-v1.md
 prompt_companion_file: 14-ai-development/work-items/AID-2026-003/prompt-v1-errata.md
 prompt_provenance_tier: T1 (repo-file prompt, AI-EXEC-002 §2 v1.1)
 prompt_sha256: NOT_VERIFIED
-prompt_bytes: NOT_VERIFIED
+prompt_bytes: 3154
 prompt_file_commit_sha: bb1ac7a59619e56769ac1e69c272a772f8c96b02
 prompt_file_blob_sha: 71332a2b8f412d1bb58d4d53bdb25880dc2f1431
 prompt_companion_commit_sha: 1822f98ea95dc163caf1b82f2b80b13135d48d60
@@ -80,3 +80,15 @@ policy_unification_ruling:
   instruction_sha256: NOT_VERIFIED
   instruction_sha256_note: No exact raw-message byte stream or local hashing facility is exposed in this session; no synthetic digest or identifier was fabricated
   historical_prompt_hashes: preserved unchanged; no retroactive reconstruction or reclassification
+
+documentation:
+  - path: "14-ai-development/AI-EXEC-001.md"
+    relationship: reference
+  - path: "14-ai-development/AI-EXEC-002.md"
+    relationship: reference
+  - path: "14-ai-development/ai-development-standard.md"
+    relationship: reference
+  - path: "14-ai-development/iteration-lifecycle.md"
+    relationship: reference
+  - path: "14-ai-development/PR-GOVERNANCE-001.md"
+    relationship: reference

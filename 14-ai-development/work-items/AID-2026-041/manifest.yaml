@@ -105,3 +105,9 @@ findings:
   - id: F-BILINGUAL-SHALLOW-PROVENANCE-001
     severity: P1
     feedback_destination: "PR #521 closeout; close when the shallow-clone EXIT=2 behavior and all 21 full-history snapshot pairs remain verified"
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-041/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference

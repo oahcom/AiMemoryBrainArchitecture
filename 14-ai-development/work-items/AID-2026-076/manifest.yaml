@@ -91,8 +91,16 @@ session_evidence:
       - "#1074"
     implementing_ai_session: session-w1088-edited-trigger
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-076/prompt-v1.md
-    executed_prompt_sha256: 06ee5615ab9fc696afa769183141d637ec5287776b60cc0b06afd117a024f6b2
-    executed_prompt_bytes: 5525
+    executed_prompt_sha256: 6974846995878c7d76dac9f7fad320bc26613e598d48b68f023564dd66a424c0
+    executed_prompt_bytes: 5467
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-076/session-evidence-1074.md
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-076/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-076/session-evidence-1074.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
