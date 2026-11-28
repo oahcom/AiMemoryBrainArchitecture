@@ -56,7 +56,7 @@ This work item implements the count contract assigned to Issue #1268.
 
 The current-main baseline was measured on the Windows host after the branch
 was cleanly rebased onto `origin/main` at
-`31c1e5d83e7dad326dbd4b69d4a8e19534718ff1`, using:
+`4a6cdd0e7c5dc0db53be37a2f945e02c59d5abf9`, using:
 
 ```powershell
 $env:PYTHONUTF8 = "1"
@@ -87,7 +87,7 @@ the sum of executed and skipped cases: `376 + 1 = 377`.
 
 The baseline repository head for this measurement was:
 
-`31c1e5d83e7dad326dbd4b69d4a8e19534718ff1`
+`4a6cdd0e7c5dc0db53be37a2f945e02c59d5abf9`
 
 The earlier `371` executed, `371/371 passed`, and `372` aggregate figures
 were measured before the rebase. They are pre-rebase historical values and
@@ -104,7 +104,7 @@ and return block was at lines 5233–5252.
 ## Rebase and re-measurement
 
 The implementation branch was cleanly rebased onto `origin/main` at
-`31c1e5d83e7dad326dbd4b69d4a8e19534718ff1`. The post-rebase `main()` structure
+`4a6cdd0e7c5dc0db53be37a2f945e02c59d5abf9`. The post-rebase `main()` structure
 differs from the pre-rebase structure: runner execution is organized through
 a `runners` tuple, each runner is invoked under an individual `try/except`,
 and the `run_steward_baseline_ratchet` runner has been added. The count
