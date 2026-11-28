@@ -112,6 +112,18 @@ The requester supplied the following substantive constraints for this task:
 - The existing English body inside `docs/zh-CN` is treated as pre-existing corpus content and is not remediated here.
 - Output must be verbatim edit blocks; no claim of execution, test pass, CI success, review or acceptance is permitted.
 
+## AI-visible output
+
+The authoring session returned, in machine-readable form:
+
+1. Sixteen `REPLACE` edit blocks covering the five canonical documents and their ten mirror counterparts, each with a verbatim `OLD` line taken from the supplied text and a `NEW` line that restates the reference as historical, unsubmitted and not restored, plus a link to `docs/governance/documentation-gaps.md`.
+2. Four `SKIP` blocks: two for `05-memory-runtime/retrieval-engine.md` and `working-set-and-cache.md` (no counterpart sentence in either mirror) and three for the `Source revision` pointers in the English mirrors of `responsibility-matrix.md`, `system-boundaries.md` and `design-principles.md` (body still differs, so a pointer-only update would create false provenance).
+3. The work-item bundle recorded in this directory: `manifest.yaml`, `evidence.md`, this session record, and one appended `INDEX.md` row.
+
+The operator applied the sixteen `REPLACE` blocks mechanically and verified each `OLD` string occurred exactly once before applying. Blocks that would have required new translated content were not applied; the two `05-memory-runtime` files were reverted to the base version and excluded from the pull request.
+
+No test execution, CI result, review verdict or acceptance decision is claimed as AI output. The output is authoring text only.
+
 ## Verification and status
 
 The operator reports:
