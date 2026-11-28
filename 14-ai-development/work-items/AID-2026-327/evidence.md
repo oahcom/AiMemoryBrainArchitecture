@@ -20,7 +20,7 @@ document_metadata:
     evidence_verification:
       verification_status: Unverified
       last_verified_date: "2026-11-27"
-      last_verification_note: "Contains coordinator-supplied execution observations and authoring-session corrections. Revised files have not yet been executed by the coordinator."
+      last_verification_note: "Coordinator-local execution (not CI): the targeted scripts/ci/test_check_prompt_commit_trace.py suite ran 11 tests and passed; repository-wide discovery ran 116 tests and failed (8 failures, 2 errors, exit 1), with the same 10 test_work_item_uniqueness failures on origin/main (188 tests, exit 1), an existing Windows python3 PATH issue. Strict audit: 143 manifests, TRACEABLE=0, exit 0. Traceability index: 0 requirements / 142 work items / 0 errors / 121 warnings, exit 0. Manifest schema: 0 new violations, exit 0. Document management: 1179 governed / 809 classified / 370 unclassified, exit 2; the unclassified state is pre-existing and not introduced by this PR."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -168,6 +168,6 @@ Expected strict `TRACEABLE` count: 0, based on the supplied absence of immutable
 
 `verification_status` is `Unverified`.
 
-No revised checker execution, revised test execution, PR creation, merge, or Owner acceptance is claimed by this record.
+Coordinator-local execution (not CI) is recorded above. PR #1494 has been opened. No merge or Owner acceptance is claimed by this record.
 
 The coordinator must supply the actual exit codes and output from the revised commands before any verification status is changed.

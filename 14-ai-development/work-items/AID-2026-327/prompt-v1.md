@@ -150,4 +150,4 @@ Audit command:
 
 `python scripts/ci/check_prompt_commit_trace.py --root . --commit cc5d22b9126e00e3f93ffe71282554309908bc89 --base cc5d22b9126e00e3f93ffe71282554309908bc89 --audit-only`
 
-All execution results remain `PENDING_COORDINATOR_EXECUTION`.
+Coordinator-local execution (not CI): targeted unittest module — 11 tests, OK, exit 0; repository-wide discovery — 116 tests, FAILED (8 failures, 2 errors), exit 1; the same 10 test_work_item_uniqueness failures occurred on origin/main (188 tests, exit 1), an existing Windows python3 PATH issue; strict audit — 143 manifests, TRACEABLE=0, exit 0; traceability index — 0 requirements / 142 work items / 0 errors / 121 warnings, exit 0; manifest schema — 0 new violations, exit 0; document management — 1179 governed / 809 classified / 370 unclassified, exit 2, pre-existing and not introduced by this PR.

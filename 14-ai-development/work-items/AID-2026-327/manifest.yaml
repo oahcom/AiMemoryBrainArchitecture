@@ -35,7 +35,7 @@ scope:
 evidence:
   verification_status: Unverified
   coordinator_execution:
-    status: PENDING_COORDINATOR_EXECUTION
+    status: EXECUTED_BY_COORDINATOR_NOT_IN_CI
     environment: "Windows, CPython 3.12, PYTHONUTF8=1"
     supplied_worktree_head: cc5d22b9126e00e3f93ffe71282554309908bc89
     prior_checker_result:
@@ -59,7 +59,7 @@ evidence:
       expected_traceable_count: 0
       rationale: "The supplied coordinator run reports no immutable execution-time pin for the three MATCH/A cohort rows."
   tests:
-    status: PENDING_COORDINATOR_EXECUTION
+    status: EXECUTED_BY_COORDINATOR_NOT_IN_CI
     direct_script_command: "python scripts/ci/test_check_prompt_commit_trace.py -v"
     unittest_module_command: "python -m unittest scripts.ci.test_check_prompt_commit_trace -v"
     audit_command: "python scripts/ci/check_prompt_commit_trace.py --root . --commit cc5d22b9126e00e3f93ffe71282554309908bc89 --base cc5d22b9126e00e3f93ffe71282554309908bc89 --audit-only"
