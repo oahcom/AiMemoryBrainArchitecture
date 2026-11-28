@@ -81,6 +81,11 @@ session_evidence:
     issue_refs:
       - "#265"
     implementing_ai_session: "ChatGPT authoring session; platform session identifier NOT_EXPOSED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-341/prompt-v1.md"
+    executed_prompt_sha256: "abb006235afa894a590677910daa6ed36218a4432eff735e21614e0f0541180d"
+    executed_prompt_bytes: 6867
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-341/session-evidence.md"
 
 implementation:
