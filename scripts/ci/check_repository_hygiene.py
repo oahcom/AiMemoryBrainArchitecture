@@ -28,17 +28,25 @@ from pathlib import PurePosixPath
 # migration artifacts by exact path (D21, AID-2026-297). No existing path
 # changes verdict.
 #
-# 2026-11-28.2 is a rule change for the canonical work-item registry
-# (AID-2026-293). It preserves the exact-path admission for
-# `00-governance/schemas/work-item-registry.schema.json` and adds
-# fixture-only admission for direct children of
-# `00-governance/schemas/fixtures/` ending in `.yaml` or `.expected.json`.
-# These are separate, explicitly scoped asset classes. This does not
-# admit arbitrary JSON or YAML files elsewhere under `00-governance/schemas/`
-# or anywhere else in the repository.
 #
-# 2026-11-28.3 adds the two registry migration artifacts by exact path
-# (D21, AID-2026-297), on top of the 2026-11-28.2 fixture admission.
+# 2026-11-28.3 is a combined rule change incorporating two independently
+# developed admission changes that both used 2026-11-28.2 on their respective
+# branches. It admits the exact legacy work-item ledger report paths
+# `14-ai-development/reports/work-item-legacy-cohort.json` and
+# `14-ai-development/reports/work-item-legacy-disposition.json` for the
+# repository hygiene legacy ledger workflow. It also preserves exact-path
+# admission for `00-governance/schemas/work-item-registry.schema.json` and
+# adds fixture-only admission for direct children of
+# `00-governance/schemas/fixtures/` ending in `.yaml` or `.expected.json`.
+# These are separately scoped asset classes; the fixture rule does not admit
+# arbitrary JSON or YAML files elsewhere under `00-governance/schemas/` or
+# anywhere else in the repository. The version is advanced to .3 because the
+# merged checker contains both independently versioned rule changes.
+#
+# 2026-11-28.3 also carries the two registry migration artifacts by exact path
+# (D21, AID-2026-297): `00-governance/registry-adjudications/schema.json` and
+# `00-governance/registry-migration/inventory.yaml`. Exact paths, not directory
+# patterns, so a second JSON or YAML in those directories stays refused.
 CHECK_VERSION = "2026-11-28.3"
 
 # Repository-root-relative paths, written with a leading slash.
@@ -97,6 +105,8 @@ ALLOWED_CONFIG_PATHS = frozenset({
 ALLOWED_DATA_PATHS = frozenset({
     "14-ai-development/reports/work-item-manifest-ac4-baseline.json",
     "14-ai-development/reports/steward-adoption-baseline.json",
+    "14-ai-development/reports/work-item-legacy-cohort.json",
+    "14-ai-development/reports/work-item-legacy-disposition.json",
     "14-ai-development/work-items/AID-2026-291/baseline.json",
     "scripts/ci/baselines/protection-fingerprint.json",
 })

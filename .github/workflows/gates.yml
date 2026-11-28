@@ -208,11 +208,20 @@ jobs:
       # asserts the comment and that file agree, so change both together.
       # Red on main, so ratchet rather than gate.
       - name: Ratchet the GOV-DOC-001 full scan
+        env:
+          BASELINE_REF: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
         shell: bash
         run: |
           set -euo pipefail
+          test -n "$BASELINE_REF" || {
+            echo "INCOMPLETE: event has no authoritative base commit"
+            exit 2
+          }
+          git fetch --no-tags origin "$BASELINE_REF"
           python3 scripts/ci/gate_ratchet.py \
+            --baseline-id bilingual-docs \
             --baseline scripts/ci/baselines/bilingual-docs.txt \
+            --baseline-ref "$BASELINE_REF" \
             --format paths \
             --command "python3 scripts/check_bilingual_docs_full.py"
 
@@ -348,10 +357,14 @@ jobs:
           python-version: "3.13"
       - name: Install the repository's pinned YAML parser
         run: python -m pip install PyYAML==6.0.2
+      - name: Install the repository's pinned pytest runner
+        run: python -m pip install pytest==8.3.5
       - name: Test sequence-of-mapping support in GOV-DOC parser
         run: python3 scripts/test_check_document_management_sequence_mapping.py
       - name: Test AC4 fixtures and AID-2026-251 compliance
         run: python3 scripts/test_check_work_item_manifest_schema.py
+      - name: Test legacy ledger builder
+        run: python -m pytest -q scripts/test_build_legacy_ledger.py
       - name: Enforce manifest schema and legacy ratchet
         run: python scripts/ci/check_work_item_manifest_schema.py --tree HEAD --baseline "14-ai-development/reports/work-item-manifest-ac4-baseline.json"
       - name: Report all four historical cohort migration batches
