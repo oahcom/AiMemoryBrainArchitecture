@@ -147,7 +147,7 @@ session_evidence:
     executed_prompt_sha256: f4c0c02f7d3766241d1dc3f64849c4dd59e0d892431e66b4867c9127a8558e61
     executed_prompt_bytes: 3450
     executed_prompt_provenance: NOT_VERIFIED
-    session_reference_status: RECORDED
+    session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-109/session-evidence.md
 
 documentation:
