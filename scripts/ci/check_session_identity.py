@@ -567,7 +567,7 @@ def _diff_base_check(root: Path, base_ref: str, current_violations: list[Violati
         finally:
             import shutil
             shutil.rmtree(base_root, ignore_errors=True)
-    except (OSError, UnicodeError, ValueError, RuntimeError) as exc:
+    except (OSError, UnicodeError, ValueError, RuntimeError, tarfile.TarError) as exc:
         print(f"ERROR: cannot verify diff base {base_ref!r}: {exc}", file=sys.stderr)
         return 2
 
