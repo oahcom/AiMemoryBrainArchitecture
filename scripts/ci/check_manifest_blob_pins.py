@@ -36,6 +36,7 @@ class Violation(Exception):
 class Git:
     def __init__(self, root: Path):
         self.root = root
+        self._path_history_cache = {}
 
     def run(self, *args: str) -> bytes:
         try:
@@ -65,6 +66,82 @@ class Git:
         if p.returncode:
             raise Violation(f"PATH_MISSING path={path}")
         return p.stdout
+
+    def path_history_blob_oids(self, commit: str, path: str) -> frozenset[str]:
+        """Return blob OIDs found at exactly path in commit's reachable path history."""
+        if not isinstance(commit, str) or not re.fullmatch(r"[0-9a-fA-F]{7,40}", commit):
+            raise Incomplete(f"invalid or absent source commit for {path}: {commit!r}")
+        if not nonempty(path):
+            raise Incomplete("historical path is empty")
+
+        try:
+            resolved = self.run(
+                "rev-parse", "--verify", f"{commit}^{{commit}}"
+            ).decode("ascii", "replace").strip()
+        except Incomplete as exc:
+            raise Incomplete(
+                f"source commit unavailable for historical path {path}: {commit}"
+            ) from exc
+
+        if not HEX40.fullmatch(resolved):
+            raise Incomplete(
+                f"source commit did not resolve uniquely for historical path {path}: {commit}"
+            )
+
+        key = (resolved, path)
+        cached = self._path_history_cache.get(key)
+        if cached is not None:
+            return cached
+
+        try:
+            revisions = self.run(
+                "log", "--format=%H", resolved, "--", path
+            ).decode("ascii", "strict").splitlines()
+        except (Incomplete, UnicodeError) as exc:
+            raise Incomplete(
+                f"cannot enumerate reachable path history for {path}: {exc}"
+            ) from exc
+
+        blob_oids = set()
+        for revision in revisions:
+            if not HEX40.fullmatch(revision):
+                raise Incomplete(
+                    f"invalid revision in path history for {path}: {revision!r}"
+                )
+
+            # A path may be absent at a deletion commit. That is normal:
+            # continue and inspect other commits in the path's reachable history.
+            p = subprocess.run(
+                ["git", "rev-parse", "--verify", f"{revision}:{path}"],
+                cwd=self.root,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+            )
+            if p.returncode:
+                continue
+
+            oid = p.stdout.decode("ascii", "strict").strip()
+            if not HEX40.fullmatch(oid):
+                raise Incomplete(
+                    f"invalid object ID for {revision}:{path}: {oid!r}"
+                )
+
+            try:
+                object_type = self.run("cat-file", "-t", oid).decode(
+                    "ascii", "strict"
+                ).strip()
+            except (Incomplete, UnicodeError) as exc:
+                raise Incomplete(
+                    f"cannot inspect historical object {oid} for {path}: {exc}"
+                ) from exc
+
+            if object_type == "blob":
+                blob_oids.add(oid)
+
+        result = frozenset(blob_oids)
+        self._path_history_cache[key] = result
+        return result
 
 
 def git_blob_sha(data: bytes) -> str:
@@ -130,13 +207,17 @@ def verify(root: Path, commit: str, verbose: bool = True):
     ok = mismatch = missing = incomplete = pins = unbound = 0
     problems = []
 
-    def check(path, declared, source_commit, kind, algorithm="git"):
+    def check(path, declared, source_commit, kind, algorithm="git",
+              reference_mode="current"):
         nonlocal ok, mismatch, missing, incomplete, pins
+
         # Empty/null placeholders are not blob identities and are outside this
         # checker's scope. A non-empty malformed declaration is INCOMPLETE.
         if declared is None or (isinstance(declared, str) and not declared.strip()):
             return
+
         pins += 1
+
         if algorithm == "bytes":
             if isinstance(declared, bool) or not isinstance(declared, (int, str)) or str(declared).strip() == "":
                 incomplete += 1
@@ -146,10 +227,75 @@ def verify(root: Path, commit: str, verbose: bool = True):
             incomplete += 1
             problems.append(f"INCOMPLETE {kind}: invalid digest declaration {declared!r}")
             return
+
         if not nonempty(path):
             missing += 1
             problems.append(f"PATH_MISSING {kind} path=<not-declared> declared={declared}")
             return
+
+        if reference_mode not in ("current", "historical"):
+            incomplete += 1
+            problems.append(
+                f"INCOMPLETE {kind} path={path}: invalid reference_mode "
+                f"{reference_mode!r}"
+            )
+            return
+
+        if reference_mode == "historical":
+            # Historical mode is specifically a Git blob-OID assertion.
+            if algorithm != "git":
+                incomplete += 1
+                problems.append(
+                    f"INCOMPLETE {kind} path={path}: historical reference_mode "
+                    f"requires a Git blob OID"
+                )
+                return
+
+            if not isinstance(declared, str) or not HEX40.fullmatch(declared.strip()):
+                incomplete += 1
+                problems.append(
+                    f"INCOMPLETE {kind} path={path}: historical declaration "
+                    f"is not a full Git blob OID: {declared!r}"
+                )
+                return
+
+            try:
+                historical_oids = git.path_history_blob_oids(source_commit, path)
+            except Incomplete as exc:
+                incomplete += 1
+                problems.append(f"INCOMPLETE {kind} path={path}: {exc}")
+                return
+
+            expected_oid = declared.strip().lower()
+            if expected_oid in historical_oids:
+                ok += 1
+                return
+
+            if not historical_oids:
+                missing += 1
+                problems.append(
+                    f"PATH_MISSING {kind} path={path}: "
+                    f"no blob exists at this path in reachable history; "
+                    f"declared={expected_oid}"
+                )
+                return
+
+            # Preserve a useful actual value in diagnostics when the path also
+            # exists in the current tree. The comparison itself is against the
+            # complete set of historical OIDs, not this current value.
+            try:
+                current_data = git.object_bytes(source_commit, path)
+                actual = git_blob_sha(current_data)
+            except Violation:
+                actual = "<not-present-at-source-commit>"
+
+            mismatch += 1
+            problems.append(
+                f"MISMATCH {kind} path={path} declared={expected_oid} "
+                f"actual={actual} historical_oids={','.join(sorted(historical_oids))}"
+            )
+            return
+
         try:
             data = git.object_bytes(source_commit, path)
         except Violation as exc:
@@ -160,8 +306,10 @@ def verify(root: Path, commit: str, verbose: bool = True):
             incomplete += 1
             problems.append(f"INCOMPLETE {kind} path={path}: {exc}")
             return
+
         actual = (hashlib.sha256(data).hexdigest() if algorithm == "sha256"
                   else git_blob_sha(data))
+
         if algorithm == "bytes":
             try:
                 expected_bytes = int(declared)
@@ -171,6 +319,7 @@ def verify(root: Path, commit: str, verbose: bool = True):
                 return
             actual = str(len(data))
             declared = str(expected_bytes)
+
         if actual != str(declared).lower():
             mismatch += 1
             problems.append(f"MISMATCH {kind} path={path} declared={declared} actual={actual}")
@@ -215,10 +364,13 @@ def verify(root: Path, commit: str, verbose: bool = True):
                 check(item.get("root"), item.get("reconstructed_root_blob"), source,
                       f"gate_a_reconstruction[{i}].root")
 
-        # B2. authored_indexes[] uses the same root and mirror pin shape
-        # as the top-level index fields, but is a list in AID-2026-100-style records.
+        # B2. authored_indexes[] records historical authorship references.
+        # A declared Git blob must have existed at this exact path in history
+        # reachable from the candidate commit; later edits do not invalidate it.
         source_evidence = as_mapping(doc.get("baseline_and_source_evidence"))
-        authored_indexes = source_evidence.get("authored_indexes", doc.get("authored_indexes", []))
+        authored_indexes = source_evidence.get(
+            "authored_indexes", doc.get("authored_indexes", [])
+        )
         for i, item in enumerate(authored_indexes or []):
             if not isinstance(item, dict):
                 continue
@@ -228,21 +380,47 @@ def verify(root: Path, commit: str, verbose: bool = True):
                 ("zh_cn_mirror", "zh_cn_mirror_blob"),
             ):
                 if digest_key in item:
-                    check(item.get(path_key), item.get(digest_key), commit,
-                          f"authored_indexes[{i}].{path_key}")
+                    check(
+                        item.get(path_key),
+                        item.get(digest_key),
+                        commit,
+                        f"authored_indexes[{i}].{path_key}",
+                        reference_mode="historical",
+                    )
 
-        # C. related_evidence[].path/blob and language mirrors.
+        # C. related_evidence[] must explicitly select current or historical
+        # reference semantics. Missing/invalid modes are INCOMPLETE and fail closed.
         for i, item in enumerate(doc.get("related_evidence", []) or []):
             if not isinstance(item, dict):
                 continue
+
+            reference_mode = item.get("reference_mode")
+            if (
+                not isinstance(reference_mode, str)
+                or reference_mode.strip() not in ("historical", "current")
+            ):
+                incomplete += 1
+                problems.append(
+                    f"INCOMPLETE related_evidence[{i}]: "
+                    f"missing or invalid reference_mode={reference_mode!r}; "
+                    "expected 'historical' or 'current'"
+                )
+                continue
+
+            reference_mode = reference_mode.strip()
             for path_key, digest_key in (
                 ("path", "blob"),
                 ("en_mirror", "en_mirror_blob"),
                 ("zh_cn_mirror", "zh_cn_mirror_blob"),
             ):
                 if digest_key in item:
-                    check(item.get(path_key), item.get(digest_key), commit,
-                          f"related_evidence[{i}].{path_key}")
+                    check(
+                        item.get(path_key),
+                        item.get(digest_key),
+                        commit,
+                        f"related_evidence[{i}].{path_key}",
+                        reference_mode=reference_mode,
+                    )
 
         # D. Execution evidence file/blob pair.
         if "evidence_blob" in doc:

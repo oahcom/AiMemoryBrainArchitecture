@@ -175,6 +175,7 @@ declared_exceptions:
 
 related_evidence:
   - path: "14-ai-development/work-items/AID-2026-100/evidence.md"
+    reference_mode: historical
     evidence_role: "#1037 evidence capture: full-clone read-only checker comparison and fresh frontmatter census"
     provenance: "MERGED_IN_MAIN_BEFORE_THIS_REGISTRATION (PR #1284)"
     blob: "ae46c7a4424778d0c8e4c5b21c6535023a9b460d"

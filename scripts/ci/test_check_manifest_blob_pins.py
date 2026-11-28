@@ -298,6 +298,7 @@ class BlobPinsTest(unittest.TestCase):
             },
             "related_evidence": [
                 {
+                    "reference_mode": "current",
                     "path": "related-path.md",
                     "blob": sha("related-path.md"),
                     "en_mirror": "related-en.md",
@@ -357,6 +358,7 @@ class BlobPinsTest(unittest.TestCase):
             "work_item_id": "AID-2026-900",
             "related_evidence": [
                 {
+                    "reference_mode": "current",
                     "en_mirror": "related-en.md",
                     "en_mirror_blob": digest_zh,
                     "zh_cn_mirror": "related-zh.md",
@@ -381,6 +383,204 @@ class BlobPinsTest(unittest.TestCase):
         )
         self.assertNotIn("MISMATCH related_evidence[0].zh_cn_mirror", out)
         self.assertNotIn("MISMATCH related_evidence[0].en_mirror path=related-zh.md", out)
+
+
+    def test_authored_index_accepts_blob_from_reachable_path_history(self):
+        original = b"authored original bytes\n"
+        original_oid = self.blob_sha(original)
+
+        source = commit_tree(self.root, {
+            "docs/authored.md": original,
+        })
+
+        changed = b"later edited bytes\n"
+        candidate = commit_tree(self.root, {
+            "docs/authored.md": changed,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml": (
+                "work_item_id: AID-2026-900\n"
+                "baseline_and_source_evidence:\n"
+                "  authored_indexes:\n"
+                "    - root: docs/authored.md\n"
+                f"      root_blob: \"{original_oid}\"\n"
+            ),
+        })
+
+        code, out, err = self.run_gate(candidate)
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=1 ok=1 mismatch=0 path_missing=0 incomplete=0", out)
+        self.assertNotIn("MISMATCH authored_indexes", out)
+
+        # Prove that the pin is historical, not the current file's blob.
+        self.assertNotEqual(original_oid, self.blob_sha(changed))
+        self.assertEqual(
+            git(self.root, "rev-parse", f"{source}:docs/authored.md"),
+            original_oid,
+        )
+
+    def test_authored_index_rejects_blob_from_another_path(self):
+        authored = b"authored path bytes\n"
+        unrelated = b"unrelated path bytes\n"
+        unrelated_oid = self.blob_sha(unrelated)
+
+        commit_tree(self.root, {
+            "docs/authored.md": authored,
+            "other/unrelated.md": unrelated,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml": (
+                "work_item_id: AID-2026-900\n"
+                "baseline_and_source_evidence:\n"
+                "  authored_indexes:\n"
+                "    - root: docs/authored.md\n"
+                f"      root_blob: \"{unrelated_oid}\"\n"
+            ),
+        })
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 1, out + err)
+        self.assertIn("MISMATCH authored_indexes[0].root", out)
+        self.assertIn(f"declared={unrelated_oid}", out)
+        self.assertIn(f"actual={self.blob_sha(authored)}", out)
+        self.assertNotIn("PATH_MISSING authored_indexes", out)
+
+    def test_authored_index_rejects_blob_from_unreachable_commit(self):
+        reachable_data = b"reachable path history\n"
+        source = commit_tree(self.root, {
+            "docs/authored.md": reachable_data,
+        })
+
+        # Create a real commit containing the same path, but on an orphan
+        # history that is not reachable from the candidate commit.
+        git(self.root, "checkout", "--orphan", "unreachable-history")
+        git(self.root, "rm", "-rf", ".")
+        unreachable_data = b"unreachable path history\n"
+        commit_tree(self.root, {
+            "docs/authored.md": unreachable_data,
+        })
+        unreachable_oid = git(
+            self.root, "rev-parse", "HEAD:docs/authored.md"
+        )
+        self.assertEqual(
+            git(self.root, "cat-file", "-t", unreachable_oid),
+            "blob",
+        )
+
+        # Candidate descends from source, not from unreachable-history.
+        git(self.root, "checkout", "-b", "candidate", source)
+        commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml": (
+                "work_item_id: AID-2026-900\n"
+                "baseline_and_source_evidence:\n"
+                "  authored_indexes:\n"
+                "    - root: docs/authored.md\n"
+                f"      root_blob: \"{unreachable_oid}\"\n"
+            ),
+        })
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 1, out + err)
+        self.assertIn("MISMATCH authored_indexes[0].root", out)
+        self.assertIn(f"declared={unreachable_oid}", out)
+        self.assertNotIn("PATH_MISSING authored_indexes", out)
+
+    def test_related_evidence_current_mode_checks_current_bytes(self):
+        data = b"current related evidence\n"
+        digest = self.blob_sha(data)
+
+        commit_tree(self.root, {
+            "related.md": data,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml": (
+                "work_item_id: AID-2026-900\n"
+                "related_evidence:\n"
+                "  - reference_mode: current\n"
+                "    path: related.md\n"
+                f"    blob: \"{digest}\"\n"
+            ),
+        })
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=1 ok=1 mismatch=0 path_missing=0 incomplete=0", out)
+
+    def test_related_evidence_historical_mode_checks_reachable_path_history(self):
+        original = b"related evidence original\n"
+        original_oid = self.blob_sha(original)
+
+        commit_tree(self.root, {
+            "related.md": original,
+        })
+
+        changed = b"related evidence revised\n"
+        candidate = commit_tree(self.root, {
+            "related.md": changed,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml": (
+                "work_item_id: AID-2026-900\n"
+                "related_evidence:\n"
+                "  - reference_mode: historical\n"
+                "    path: related.md\n"
+                f"    blob: \"{original_oid}\"\n"
+            ),
+        })
+
+        code, out, err = self.run_gate(candidate)
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=1 ok=1 mismatch=0 path_missing=0 incomplete=0", out)
+        self.assertNotEqual(original_oid, self.blob_sha(changed))
+
+    def test_related_evidence_missing_reference_mode_is_incomplete(self):
+        data = b"related evidence\n"
+        digest = self.blob_sha(data)
+
+        commit_tree(self.root, {
+            "related.md": data,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml": (
+                "work_item_id: AID-2026-900\n"
+                "related_evidence:\n"
+                "  - path: related.md\n"
+                f"    blob: \"{digest}\"\n"
+            ),
+        })
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 2, out + err)
+        self.assertIn("INCOMPLETE related_evidence[0]", out)
+        self.assertIn("reference_mode=None", out)
+        self.assertIn("pins=0 ok=0 mismatch=0 path_missing=0 incomplete=1", out)
+
+    def test_related_evidence_invalid_reference_mode_is_incomplete(self):
+        data = b"related evidence\n"
+        digest = self.blob_sha(data)
+
+        commit_tree(self.root, {
+            "related.md": data,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml": (
+                "work_item_id: AID-2026-900\n"
+                "related_evidence:\n"
+                "  - reference_mode: latest\n"
+                "    path: related.md\n"
+                f"    blob: \"{digest}\"\n"
+            ),
+        })
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 2, out + err)
+        self.assertIn("INCOMPLETE related_evidence[0]", out)
+        self.assertIn("reference_mode='latest'", out)
+        self.assertIn("pins=0 ok=0 mismatch=0 path_missing=0 incomplete=1", out)
+
+    def test_related_evidence_requires_reference_mode_even_without_digest_pairs(self):
+        commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml": (
+                "work_item_id: AID-2026-900\n"
+                "related_evidence:\n"
+                "  - description: evidence without a digest pair\n"
+            ),
+        })
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 2, out + err)
+        self.assertIn("INCOMPLETE related_evidence[0]", out)
+        self.assertIn("reference_mode=None", out)
+        self.assertIn("pins=0 ok=0 mismatch=0 path_missing=0 incomplete=1", out)
+
 
 
 class UnboundBlobSha256Test(unittest.TestCase):
