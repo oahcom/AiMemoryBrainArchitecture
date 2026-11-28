@@ -3,9 +3,22 @@
 # A baseline addition is a failure, even when the underlying checker reports it.
 # Manifest blob pin ratchet baseline.
 # Measured against main bf7fd91cbb3ccad4d2dba5662b14b849e446d706.
-# This is the history-scan anchor for the append-only manifest pin ledger.
-# Pin transitions before this commit are historical context, not new ledger entries.
-# The two PATH_MISSING entries below are intentional AID-2026-261 sentinels.
+# Historical adjudication snapshot: daa935f7a7ecc808f1775be8cf153cf715961b08.
+# At that snapshot, the adjudication accounted for:
+#   superseded by current manifest values:              11
+#   duplicate legacy-format entries removed:             2
+#   transferred to standalone defect records:            6
+#   retained in pending historical review ledger:        18
+#   active ratchet findings at that snapshot:              4
+# These figures record the historical disposition, not the current baseline size.
+# Subsequent update: PR #1512 repinned the AID-2026-101 and AID-2026-102
+# prompt declarations from 4470 bytes to the current 4412-byte files.
+# Their two MISMATCH findings are therefore no longer active and are not retained.
+# The two AID-2026-261 PATH_MISSING entries remain intentional sentinels.
 # Do not remove or alter them without an explicit owner decision.
+# Current main checker also reports an INCOMPLETE manifest-pin-ledger finding:
+# its recorded repin commit is not an ancestor of the current target.
+# That ledger reachability failure is an upstream blocker and is not baselined here.
+# The current active baseline contains exactly the two PATH_MISSING entries below.
 PATH_MISSING path=14-ai-development/work-items/AID-2026-261/prompt-v1.md; declared=0000000000000000000000000000000000000000000000000000000000000000
 PATH_MISSING path=14-ai-development/work-items/AID-2026-261/prompt-v1.md; declared=0
