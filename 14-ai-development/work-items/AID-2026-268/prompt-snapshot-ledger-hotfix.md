@@ -1,3 +1,49 @@
+---
+document_metadata:
+  steward: "user-authorized operator (delegated by account owner)"
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-268/manifest.yaml"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-28"
+      last_verification_note: "Reconstructed prompt record from conversation excerpts; not a byte-for-byte export of the original user message. Provenance remains NOT_VERIFIED."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Reconstructed prompt record for the AID-2026-268 ledger ancestry hotfix session"
+    canonical_scope_id: "ai-development/aid-2026-268-ledger-hotfix-prompt-record"
+    canonical_scope_keywords:
+      - "prompt"
+      - "manifest"
+      - "blob-pin"
+      - "ledger"
+      - "ancestry"
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+---
+
 # Prompt snapshot — AID-2026-268 ledger hotfix
 
 <!--
