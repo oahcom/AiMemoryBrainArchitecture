@@ -187,4 +187,4 @@ session_evidence:
     executed_prompt_bytes: 6069
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
-    session_evidence_ref: session-evidence.md
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-297/session-evidence.md
