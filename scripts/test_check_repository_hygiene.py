@@ -188,6 +188,30 @@ class RepositoryHygieneTests(unittest.TestCase):
 
         self.assert_admission_passes(base, head)
 
+    def test_work_item_legacy_cohort_report_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/reports/work-item-legacy-cohort.json": (
+                '{"schema_version":1,"baseline_commit":"'
+                '0000000000000000000000000000000000000000",'
+                '"cohort":[]}\\n'
+            ),
+        })
+
+        self.assert_admission_passes(base, head)
+
+    def test_work_item_legacy_disposition_ledger_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/reports/work-item-legacy-disposition.json": (
+                '{"schema_version":1,"baseline_commit":"'
+                '0000000000000000000000000000000000000000",'
+                '"cohort":[],"generated_by":"test","entries":[]}\\n'
+            ),
+        })
+
+        self.assert_admission_passes(base, head)
+
     def test_steward_adoption_baseline_report_is_admitted(self):
         base = self.seed_base()
         head = self.commit({

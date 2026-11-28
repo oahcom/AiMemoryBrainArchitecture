@@ -20,7 +20,7 @@ from pathlib import PurePosixPath
 # closed when either side of the relation is absent, where it used to return no
 # violations over an empty set (AID-2026-199, #1212). The two versions are
 # separate numbers on purpose -- one changed the contract, the other the rules.
-CHECK_VERSION = "2026-11-27.2"
+CHECK_VERSION = "2026-11-27.3"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -78,6 +78,8 @@ ALLOWED_CONFIG_PATHS = frozenset({
 ALLOWED_DATA_PATHS = frozenset({
     "14-ai-development/reports/work-item-manifest-ac4-baseline.json",
     "14-ai-development/reports/steward-adoption-baseline.json",
+    "14-ai-development/reports/work-item-legacy-cohort.json",
+    "14-ai-development/reports/work-item-legacy-disposition.json",
     "14-ai-development/work-items/AID-2026-291/baseline.json",
     "scripts/ci/baselines/protection-fingerprint.json",
 })
