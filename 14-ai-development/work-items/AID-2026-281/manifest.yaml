@@ -147,3 +147,12 @@ review:
   natural_person_owner_acceptance: NOT_RECORDED
 acceptance:
   gate: PENDING
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-281/evidence-05-index.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-281/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-281/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-281/session-evidence.md
+    relationship: evidence

@@ -152,3 +152,10 @@ carrier:
     Only after all 16 required contexts succeeded on the exact final PR head, branch freshness
     was rechecked, and no conflict remained.
   closeout_pull_request: PENDING
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-198/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-198/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-198/session-evidence.md
+    relationship: evidence

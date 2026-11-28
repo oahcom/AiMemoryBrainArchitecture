@@ -247,3 +247,16 @@ prohibitions:
   - "DO_NOT_PROMOTE_RECONSTRUCTED_DOCUMENTS_TO_APPROVED_OR_NORMATIVE"
 
 disposition: "EXCLUDED_FROM_PR_1220; the four 04-memory-compiler root documents (compiler-stage-contract.md, consolidation-and-conflict-resolution.md, event-ingestion-engine.md, evidence-and-provenance.md) and the three source-restore-matrix files are to be restored by the external restoration line under a new AID; other 04-memory-compiler, 05-memory-runtime, and 09-security-governance documents are supplied by already-merged external PRs and are not claimed or duplicated by this PR."
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-100/evidence-source-restore.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-100/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-100/owner-decision-merge-authorization.md
+    relationship: design
+  - path: 14-ai-development/work-items/AID-2026-100/owner-delegation-record.md
+    relationship: design
+  - path: 14-ai-development/work-items/AID-2026-100/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-100/session-evidence-source-restore.md
+    relationship: evidence

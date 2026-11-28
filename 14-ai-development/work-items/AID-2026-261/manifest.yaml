@@ -89,3 +89,8 @@ acceptance:
 # The exact prompt payload was available in the conversation but was not snapshotted
 # verbatim at dispatch time. The absent path and zero digest/bytes are sentinels only;
 # NOT_VERIFIED / NOT_RECORDED are the operative evidence states, not a prompt hash claim.
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-261/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-261/session-evidence.md
+    relationship: evidence

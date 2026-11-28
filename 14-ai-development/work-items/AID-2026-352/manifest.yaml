@@ -1,0 +1,89 @@
+work_item_id: AID-2026-352
+title: "Close the AC4 data gap and the AC6 reverse-index gap for Issue #266"
+class: GATE/TEST
+risk: R2
+risk_rationale: >-
+  Touches 36 work-item manifests, adds one generator with a committed artifact,
+  and adds one rule inside an existing gate. It rewrites no schema rule, adds no
+  workflow, deletes no check, and edits no ratchet baseline; the manifest schema
+  checker's legacy ratchet stays at zero new regressions.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner acceptance not recorded"
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "f0843a8f38a420883921cfda96b515204967f885"
+scope:
+  objective: >-
+    Make Issue #266's AC4 and AC6 judgeable instead of PARTIAL-by-narrative. AC4
+    already has a normative carrier and a checker; what it lacked was data, so
+    the 35 manifests without a documentation block get one from an explicit
+    per-work-item mapping, and AID-2026-284's six free-text relationships are
+    mapped back into the closed enum. AC6 already validates the forward
+    supersedes edge; what it lacked was the reverse artifact the policy declares
+    CI-derived, so DM-16 generates and checks a deterministic reverse index.
+  issue: "#266"
+  decisions:
+    - "AC4 needs no schema change: the five acceptance predicates are already implemented and enforced."
+    - "No rule requires a reference outside the work-item directory; 'relevant documents' is not 'external documents'."
+    - "AC6 takes option C: archival_reference is not re-interpreted as a supersession back-reference and is not backfilled."
+    - "superseded_by stays forbidden in source; the reverse relation lives only in the generated artifact."
+evidence: 14-ai-development/work-items/AID-2026-352/session-evidence.md
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-352/session-evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-352/prompt-v1.md
+    relationship: reference
+  - path: scripts/backfill_work_item_documentation.py
+    relationship: implementation
+  - path: scripts/generate_supersession_index.py
+    relationship: implementation
+  - path: scripts/check_document_management.py
+    relationship: implementation
+  - path: scripts/test_check_document_management.py
+    relationship: implementation
+  - path: 14-ai-development/reports/supersession-index.json
+    relationship: reference
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#266"
+    implementing_ai_session: "opencode-9router-hermes"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-352/session-evidence.md
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-352/prompt-v1.md
+    executed_prompt_sha256: "c017b530b4c0f0452808d60cdb12ae61171ca5530cf652199060382d11bcc570"
+    executed_prompt_bytes: 12146
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    AC4: 35 manifests gain a documentation block built from an explicit mapping,
+    and AID-2026-284's six free-text relationships and one self-reference are
+    corrected without widening the enum. AC6: DM-16 adds a deterministic reverse
+    index generated from the full-tree supersedes graph, its committed artifact,
+    its rule inside check_document_management.py, and three regression cases.
+  files_changed:
+    - scripts/backfill_work_item_documentation.py
+    - scripts/generate_supersession_index.py
+    - scripts/check_document_management.py
+    - scripts/test_check_document_management.py
+    - 14-ai-development/reports/supersession-index.json
+    - 14-ai-development/work-items/INDEX.md
+    - 14-ai-development/work-items/AID-2026-284/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-352/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-352/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-352/prompt-v1.md
+  tests:
+    - "python scripts/backfill_work_item_documentation.py --dry-run"
+    - "python scripts/backfill_work_item_documentation.py --apply"
+    - "python scripts/generate_supersession_index.py --write"
+    - "python scripts/generate_supersession_index.py --check"
+    - "python scripts/test_check_document_management.py"
+    - "python scripts/check_document_management.py --require-changed origin/main"
+    - "python scripts/ci/check_work_item_manifest_schema.py --tree HEAD --baseline 14-ai-development/reports/work-item-manifest-ac4-baseline.json"

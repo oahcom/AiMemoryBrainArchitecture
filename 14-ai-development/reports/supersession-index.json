@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "superseded_by": {
+    "14-ai-development/work-items/AID-2026-260/scope-confirmation.md": [
+      "14-ai-development/work-items/AID-2026-284/scope-confirmation.md"
+    ],
+    "14-ai-development/work-items/I-OWNER-DECISION-AUTHORIZATION-DECISION-001.md": [
+      "14-ai-development/adr/OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001.md"
+    ]
+  }
+}

@@ -131,3 +131,10 @@ notes:
     Both corrections are identical in the canonical and EN files of GOV-REV, whose three
     bodies were already byte-identical; the AID-2026-113 correction is English in the
     canonical and EN files and Chinese in the ZH-CN file, matching that record's own split.
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-190/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-190/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-190/session-evidence.md
+    relationship: evidence

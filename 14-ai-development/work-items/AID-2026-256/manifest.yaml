@@ -90,3 +90,10 @@ prohibitions:
   - "No claim of Owner acceptance."
   - "No change to checker semantics, required contexts or branch protection."
   - "No merge of this PR until a real session evidence reference is recorded."
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-256/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-256/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-256/session-evidence.md
+    relationship: evidence

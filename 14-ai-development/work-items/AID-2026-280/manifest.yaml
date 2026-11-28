@@ -64,3 +64,12 @@ implementation:
   tests:
     - "Source pins and body/comment text read via cache-busted GitHub API."
     - "No local test or shell command executed."
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-280/decision.md
+    relationship: design
+  - path: 14-ai-development/work-items/AID-2026-280/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-280/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-280/session-evidence.md
+    relationship: evidence

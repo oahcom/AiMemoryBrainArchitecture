@@ -69,3 +69,10 @@ implementation:
   tests:
     - "python3 scripts/ci/test_work_item_uniqueness.py — invoked by GOV-DOC-002 on PR and main push."
     - "Execution output is emitted by the required GitHub Actions job; no local execution is claimed."
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-279/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-279/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-279/session-evidence.md
+    relationship: evidence

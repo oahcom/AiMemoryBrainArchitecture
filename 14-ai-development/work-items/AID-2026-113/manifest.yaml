@@ -78,3 +78,10 @@ review:
 acceptance:
   status: "NOT_GRANTED"
   note: "Canonical path designation and restoration only; all five Canonical docs remain Draft and Informative. The overview root's OWNER_REPLACEMENT is an explicit Owner hierarchy ruling, not a natural-person signature."
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-113/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-113/restore-evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-113/session-evidence.md
+    relationship: evidence

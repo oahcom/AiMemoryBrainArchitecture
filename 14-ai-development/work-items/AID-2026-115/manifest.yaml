@@ -108,3 +108,10 @@ post_merge_verification:
   blob_readback_match: 15
   issue_1212_comment_id: 7194114609
   cache_hit_rate: NOT_YET_MEASURED
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-115/gate-performance-and-rust-cache-evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-115/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-115/session-evidence.md
+    relationship: evidence

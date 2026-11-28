@@ -71,3 +71,10 @@ session_evidence:
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-211/session-evidence.md"
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-211/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-211/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-211/session-evidence.md
+    relationship: evidence

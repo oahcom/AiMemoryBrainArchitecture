@@ -117,3 +117,10 @@ post_merge_correction:
     - "carrier.merge_commit_sha: PENDING"
   corrected_values:
     - "PR #1320 merged; see implementation/carrier above"
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-150/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-150/restore-evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-150/session-evidence.md
+    relationship: evidence

@@ -178,3 +178,10 @@ carrier:
   pull_request: PENDING
   merge_method: merge
   merge_sha: PENDING
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-268/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-268/prompt-snapshot.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-268/session-evidence.md
+    relationship: evidence

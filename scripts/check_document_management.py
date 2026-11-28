@@ -1828,6 +1828,130 @@ def check_scope_and_relations(root: Path, docs: dict[str, dict]) -> list[str]:
     return errors
 
 
+def check_supersession_index(
+    root: Path,
+    docs: dict[str, dict],
+) -> list[str]:
+    """DM-16: checked-in reverse index must match the full supersedes graph."""
+    import json
+
+    index_rel = "14-ai-development/reports/supersession-index.json"
+    index_path = root / index_rel
+
+    reverse: dict[str, set[str]] = {}
+    for source, metadata in docs.items():
+        targets = dig(
+            metadata, "lifecycle", "supersession", "supersedes"
+        )
+        if not isinstance(targets, list):
+            # DM-13 owns the malformed-list diagnostic.
+            continue
+        for target in targets:
+            if not isinstance(target, str) or not target.strip():
+                # DM-13 owns malformed path diagnostics.
+                continue
+            target = target.strip().replace("\\", "/")
+            reverse.setdefault(target, set()).add(source)
+
+    expected_reverse = {
+        target: sorted(sources)
+        for target, sources in sorted(reverse.items())
+    }
+    expected_object = {
+        "schema_version": 1,
+        "superseded_by": expected_reverse,
+    }
+    expected_bytes = (
+        json.dumps(
+            expected_object,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    ).encode("utf-8")
+
+    if not index_path.is_file():
+        errors = [
+            f"DM-16 missing reverse edge: {target} <- {source}"
+            for target, sources in expected_reverse.items()
+            for source in sources
+        ]
+        errors.append(
+            f"DM-16 generated supersession index is stale: "
+            f"missing {index_rel}"
+        )
+        return errors
+
+    try:
+        actual_bytes = index_path.read_bytes()
+        actual_object = json.loads(actual_bytes.decode("utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        return [
+            f"DM-16 generated supersession index is stale: "
+            f"{index_rel}: {type(exc).__name__}"
+        ]
+
+    if not isinstance(actual_object, dict):
+        return [
+            f"DM-16 generated supersession index is stale: "
+            f"{index_rel}: top level must be an object"
+        ]
+
+    actual_reverse = actual_object.get("superseded_by")
+    if not isinstance(actual_reverse, dict):
+        return [
+            f"DM-16 generated supersession index is stale: "
+            f"{index_rel}: superseded_by must be an object"
+        ]
+
+    errors: list[str] = []
+
+    # A missing reverse edge is reported independently from generic staleness.
+    for target, sources in expected_reverse.items():
+        actual_sources = actual_reverse.get(target, [])
+        if not isinstance(actual_sources, list):
+            actual_sources = []
+        actual_set = {
+            item for item in actual_sources if isinstance(item, str)
+        }
+        for source in sources:
+            if source not in actual_set:
+                errors.append(
+                    f"DM-16 missing reverse edge: {target} <- {source}"
+                )
+
+    # Extra edges, wrong schema version, wrong ordering, or byte drift are
+    # stale-artifact failures. Missing edges already have their own diagnostic.
+    if not errors and (
+        actual_object != expected_object or actual_bytes != expected_bytes
+    ):
+        errors.append(
+            f"DM-16 generated supersession index is stale: {index_rel}"
+        )
+    elif errors:
+        # Also identify stale data if the artifact contains unrelated extras.
+        if actual_object != expected_object:
+            expected_pairs = {
+                (target, source)
+                for target, sources in expected_reverse.items()
+                for source in sources
+            }
+            actual_pairs = set()
+            for target, sources in actual_reverse.items():
+                if isinstance(target, str) and isinstance(sources, list):
+                    actual_pairs.update(
+                        (target, source)
+                        for source in sources
+                        if isinstance(source, str)
+                    )
+            if actual_pairs - expected_pairs:
+                errors.append(
+                    f"DM-16 generated supersession index is stale: {index_rel}"
+                )
+
+    return errors
+
 # --------------------------------------------------------------------------
 # Entry point
 # --------------------------------------------------------------------------
@@ -2662,6 +2786,7 @@ def main() -> int:
 
     errors.extend(check_scope_and_relations(root, docs))
     errors.extend(check_scope_registry(root))
+    errors.extend(check_supersession_index(root, docs))
 
     # DM-04 uniqueness of revocation decision ids across the repository.
     revocations: dict[str, str] = {}

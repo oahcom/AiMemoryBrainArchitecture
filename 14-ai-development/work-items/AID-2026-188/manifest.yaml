@@ -131,3 +131,10 @@ notes:
   - >-
     Two prior dispatches of this unit failed on an upstream 429. Their failure mode is
     unrelated to the premise error, but it is the reason a third attempt arrived at all.
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-188/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-188/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-188/session-evidence.md
+    relationship: evidence

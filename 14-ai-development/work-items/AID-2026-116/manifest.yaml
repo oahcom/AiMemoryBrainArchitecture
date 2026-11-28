@@ -335,3 +335,10 @@ post_merge_correction:
     - "status: PR_OPEN"
   corrected_values:
     - "PR #1321 merged; see implementation/carrier above"
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-116/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-116/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-116/session-evidence.md
+    relationship: evidence

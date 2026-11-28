@@ -79,7 +79,7 @@ ALLOWED_SKIPS = {
 }
 
 # Aggregate contract: 386 executed and skipped test cases.
-EXPECTED_AGGREGATE = 386
+EXPECTED_AGGREGATE = 389
 
 
 def doc(body: str) -> str:
@@ -764,6 +764,22 @@ def _repo(tmp: str) -> Path:
     # would fail the fixture before the test it belongs to ran.
     (root / "docs" / "research").mkdir(parents=True, exist_ok=True)
     (root / "docs" / "research" / "backlog.md").write_text(doc(BASE), encoding="utf-8")
+    # DM-16 compares a checked-in artifact against the graph. A fixture without
+    # one is a repo whose index is missing, so the contract travels with it the
+    # same way the metadata schema does.
+    import json
+    index = root / "14-ai-development" / "reports" / "supersession-index.json"
+    index.parent.mkdir(parents=True, exist_ok=True)
+    index.write_bytes(
+        (
+            json.dumps(
+                {"schema_version": 1, "superseded_by": {}},
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n"
+        ).encode("utf-8")
+    )
     return root
 
 
@@ -5585,6 +5601,97 @@ def run_symlink_unavailable_self_check() -> None:
     )
 
 
+def run_dm16_reverse_index() -> None:
+    """DM-16: reverse edges must exist and the generated artifact must be current."""
+    import json
+
+    print("DM-16 supersession reverse index")
+
+    source_rel = "00-governance/dm16-source.md"
+    target_rel = "00-governance/dm16-target.md"
+    index_rel = "14-ai-development/reports/supersession-index.json"
+
+    source_body = BASE.replace(
+        "    approval:\n      decision_status: Draft",
+        "    supersession:\n"
+        "      supersedes:\n"
+        f"        - {target_rel}\n"
+        "    approval:\n"
+        "      decision_status: Draft",
+        1,
+    )
+
+    expected = {
+        "schema_version": 1,
+        "superseded_by": {
+            target_rel: [source_rel],
+        },
+    }
+
+    # Missing reverse edge: source metadata declares the forward edge, but
+    # the generated artifact omits it.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / source_rel).write_text(doc(source_body), encoding="utf-8")
+        (root / target_rel).write_text(doc(BASE), encoding="utf-8")
+        (root / index_rel).write_bytes(
+            (
+                json.dumps(
+                    {"schema_version": 1, "superseded_by": {}},
+                    indent=2,
+                    sort_keys=True,
+                )
+                + "\n"
+            ).encode("utf-8")
+        )
+        expect_gate(
+            "DM-16 missing reverse edge fails",
+            root,
+            1,
+            msg=f"DM-16 missing reverse edge: {target_rel} <- {source_rel}",
+        )
+
+    # Stale artifact: it contains an unrelated extra edge.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / source_rel).write_text(doc(source_body), encoding="utf-8")
+        (root / target_rel).write_text(doc(BASE), encoding="utf-8")
+        stale = {
+            "schema_version": 1,
+            "superseded_by": {
+                target_rel: [source_rel],
+                "00-governance/unrelated-old.md": [
+                    "00-governance/unrelated-new.md"
+                ],
+            },
+        }
+        (root / index_rel).write_bytes(
+            (json.dumps(stale, indent=2, sort_keys=True) + "\n").encode("utf-8")
+        )
+        expect_gate(
+            "DM-16 stale generated artifact fails",
+            root,
+            1,
+            msg=(
+                "DM-16 generated supersession index is stale: "
+                "14-ai-development/reports/supersession-index.json"
+            ),
+        )
+
+    # Normal: the artifact exactly matches the graph.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / source_rel).write_text(doc(source_body), encoding="utf-8")
+        (root / target_rel).write_text(doc(BASE), encoding="utf-8")
+        (root / index_rel).write_bytes(
+            (json.dumps(expected, indent=2, sort_keys=True) + "\n").encode("utf-8")
+        )
+        expect_gate(
+            "DM-16 current reverse index passes",
+            root,
+            0,
+        )
+
 def main() -> int:
     print("check_document_management self-check")
     runners = (
@@ -5627,6 +5734,7 @@ def main() -> int:
         run_policy_assertions,
         run_single_entry_callers,
         run_fault_injection,
+        run_dm16_reverse_index,
         run_unbound_emissions,
         run_symlink_unavailable_self_check,
         run_schema_agreement,

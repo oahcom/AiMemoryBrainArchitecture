@@ -73,3 +73,10 @@ post_merge_correction:
     - "carrier.merge_commit_sha: ABSENT"
   corrected_values:
     - "PR #1327 merged; see implementation/carrier above"
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-172/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-172/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-172/session-evidence.md
+    relationship: evidence

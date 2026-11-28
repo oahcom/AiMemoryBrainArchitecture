@@ -155,3 +155,10 @@ notes:
     to 191 and merged forward. 191 was then claimed by PRs #1342, #1345 and #1347, so the
     second forward-merge conflicted again and the unit was renumbered to 193. No file of
     any other unit was edited, renamed or removed.
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-193/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-193/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-193/session-evidence.md
+    relationship: evidence

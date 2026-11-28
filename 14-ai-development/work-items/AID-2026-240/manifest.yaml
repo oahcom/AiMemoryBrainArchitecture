@@ -148,3 +148,10 @@ notes:
     languages, and one is a work-item proposal that mentions 62 of the paths in prose
     with no list block. Only the first two can be compared entry by entry, so the gate
     declares one role per file instead of pretending all seven are the same thing.
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-240/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-240/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-240/session-evidence.md
+    relationship: evidence
