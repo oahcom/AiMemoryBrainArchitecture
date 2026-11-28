@@ -367,5 +367,114 @@ session_evidence:
         self.assertIn("already contains", result.stderr)
 
 
+
+    def test_diff_empty_increment_is_green(self):
+        self.write_session("AID-DIFF-001", "ChatGPT-GPT-6")
+        base_ref = self.commit_base_tree()
+        result = self.run_checker("--diff-base", base_ref)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("SESSION IDENTITY DIFF: violations=1 base=1 new=0", result.stdout)
+        self.assertNotIn("NEW: ", result.stdout)
+
+    def test_diff_new_violation_is_red_and_prefixed(self):
+        base_ref = self.commit_base_tree()
+        self.write_session("AID-DIFF-002", "ChatGPT-GPT-6")
+        result = self.run_checker("--diff-base", base_ref)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("NEW: SESSION_UNPARSEABLE ", result.stdout)
+        self.assertIn("SESSION IDENTITY DIFF: violations=1 base=0 new=1", result.stdout)
+
+    def test_diff_unresolvable_ref_exits_two(self):
+        self.commit_base_tree()
+        result = self.run_checker("--diff-base", "refs/heads/not-a-real-ref")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("cannot verify diff base", result.stderr)
+
+    def test_diff_shallow_repository_exits_two(self):
+        self.commit_base_tree()
+        (self.root / ".git" / "shallow").write_text(
+            self.git("rev-parse", "HEAD").stdout, encoding="utf-8"
+        )
+        result = self.run_checker("--diff-base", "HEAD")
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("shallow repository", result.stderr)
+
+    def test_diff_base_only_violation_is_not_an_increment(self):
+        self.write_session("AID-DIFF-003", "ChatGPT-GPT-6")
+        base_ref = self.commit_base_tree()
+        self.write_session("AID-DIFF-003", UUID_V8_REAL)
+        result = self.run_checker("--diff-base", base_ref)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("SESSION IDENTITY DIFF: violations=0 base=1 new=0", result.stdout)
+        self.assertNotIn("NEW: ", result.stdout)
+
+    def test_diff_head_removing_one_violation_is_green(self):
+        self.write_session("AID-DIFF-004", "ChatGPT-GPT-6")
+        base_ref = self.commit_base_tree()
+        (self.work_items / "AID-DIFF-004" / "manifest.yaml").write_text(
+            f'session_evidence:\n  - implementing_ai_session: "{UUID_V8_REAL}"\n'
+            "    session_reference_status: RECORDED\n", encoding="utf-8"
+        )
+        result = self.run_checker("--diff-base", base_ref)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("SESSION IDENTITY DIFF: violations=0 base=1 new=0", result.stdout)
+
+    def test_diff_current_yaml_invalid_is_always_red(self):
+        self.write_manifest("AID-DIFF-005", "session_evidence: [\n")
+        base_ref = self.commit_base_tree()
+        result = self.run_checker("--diff-base", base_ref)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("NEW: SESSION_YAML_INVALID ", result.stdout)
+        self.assertIn("new=1", result.stdout)
+
+    def test_diff_base_yaml_invalid_is_reported_but_not_inherited_as_new(self):
+        self.write_manifest("AID-DIFF-006", "session_evidence: [\n")
+        base_ref = self.commit_base_tree()
+        (self.work_items / "AID-DIFF-006" / "manifest.yaml").write_text(
+            "title: repaired\n", encoding="utf-8"
+        )
+        result = self.run_checker("--diff-base", base_ref)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("BASE SESSION_YAML_INVALID: 1", result.stdout)
+        self.assertIn("SESSION IDENTITY DIFF: violations=0 base=1 new=0", result.stdout)
+
+    def test_diff_does_not_read_or_require_baseline_file(self):
+        base_ref = self.commit_base_tree()
+        self.baseline.unlink(missing_ok=True)
+        result = self.run_checker("--diff-base", base_ref)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(self.baseline.exists())
+        self.assertNotIn("baseline missing", result.stderr)
+
+    def test_diff_is_mutually_exclusive_with_baseline_modes(self):
+        self.commit_base_tree()
+        write = self.run_checker("--diff-base", "HEAD", "--write-baseline")
+        bootstrap = self.run_checker(
+            "--diff-base", "HEAD", "--bootstrap-baseline", "--base-ref", "HEAD"
+        )
+        self.assertEqual(write.returncode, 2)
+        self.assertEqual(bootstrap.returncode, 2)
+        self.assertIn("mutually exclusive", write.stderr)
+        self.assertIn("mutually exclusive", bootstrap.stderr)
+
+    def test_diff_mutation_base_union_current_is_detected(self):
+        self.write_session("AID-DIFF-007", "ChatGPT-GPT-6")
+        base_ref = self.commit_base_tree()
+        self.write_session("AID-DIFF-007", UUID_V8_REAL)
+        result = self.run_checker("--diff-base", base_ref)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("NEW: ", result.stdout)
+        self.assertIn("new=0", result.stdout)
+
+    def test_diff_mutation_suppressing_head_increments_is_detected(self):
+        base_ref = self.commit_base_tree()
+        self.write_session("AID-DIFF-008", "ChatGPT-GPT-6")
+        result = self.run_checker("--diff-base", base_ref)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("NEW: SESSION_UNPARSEABLE ", result.stdout)
+        self.assertIn("new=1", result.stdout)
+
+
+
 if __name__ == "__main__":
     unittest.main()
