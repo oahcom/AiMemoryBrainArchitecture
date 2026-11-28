@@ -12,7 +12,11 @@ attribution: user-authorized operator (delegated by account owner)
 date: 2026-11-27
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: cc5d22b9126e00e3f93ffe71282554309908bc89
+base_commit_sha: 79b38c944480926195edd64e3d751a1ce5010fb7
+prompt_file: "14-ai-development/work-items/AID-2026-341/prompt-v1.md"
+prompt_sha256: "abb006235afa894a590677910daa6ed36218a4432eff735e21614e0f0541180d"
+prompt_file_blob_sha: "e354421418bbacf46d643042994d801fe9a98b82"
+prompt_commit_trace_initial_registration: true
 
 scope:
   in_scope:
@@ -75,13 +79,13 @@ documentation:
 session_evidence:
   - role: authoring
     issue_refs:
-      - "AID-2026-341"
+      - "#1427"
     implementing_ai_session: "ChatGPT authoring session; platform session identifier NOT_EXPOSED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-341/session-evidence.md"
 
 implementation:
   status: IN_PROGRESS
-  summary: "Checker and inline regression tests have been re-authored after coordinator execution exposed import-path, CLI-contract, prompt-path-resolution, lifecycle, and population-accounting defects. The revised commands and checks were executed locally by the coordinator (EXECUTED_BY_COORDINATOR_NOT_IN_CI) against code commit d43851732; this records coordinator-local execution, not CI verification. PR #1494 has been created and is open, but has not been merged. Independent review and Owner acceptance remain pending."
+  summary: "Checker and inline regression tests re-authored after coordinator execution exposed import-path, CLI-contract, prompt-path-resolution, lifecycle, and population-accounting defects. This rebuild re-registers the same content under AID-2026-341 because AID-2026-327 is occupied on main by #1495 (D-10 cursor authority), which shares only the directory name and no file. The rewrite restores the --emit-baseline CLI contract that .github/workflows/gates.yml requires to snapshot the comparison base. The revised commands were executed locally by the coordinator (EXECUTED_BY_COORDINATOR_NOT_IN_CI) against this branch head; PR #1494's content is rebuilt here, and the new pull request is open and not merged. Independent review and Owner acceptance remain pending."
   files_changed:
     - scripts/ci/check_prompt_commit_trace.py
     - scripts/ci/test_check_prompt_commit_trace.py
@@ -91,8 +95,8 @@ implementation:
     - 14-ai-development/work-items/AID-2026-341/prompt-v1.md
     - 14-ai-development/work-items/INDEX.md
   tests:
-    - "python -m unittest scripts.ci.test_check_prompt_commit_trace -v -> exit 0 (14 tests; OK; EXECUTED_BY_COORDINATOR_NOT_IN_CI against d43851732)"
-    - "python scripts/ci/check_prompt_commit_trace.py --root . --commit cc5d22b9126e00e3f93ffe71282554309908bc89 --base cc5d22b9126e00e3f93ffe71282554309908bc89 --audit-only -> exit 0"
-    - "python scripts/check_traceability.py --index-only -> exit 0 (0 requirements / 150 work items / 0 errors / 125 warnings; EXECUTED_BY_COORDINATOR_NOT_IN_CI against d43851732)"
-  pull_request: "PR #1494 OPEN; NOT MERGED"
+    - "python -m unittest scripts.ci.test_check_prompt_commit_trace -v -> exit 0 (14 tests; OK; EXECUTED_BY_COORDINATOR_NOT_IN_CI against this branch head)"
+    - "python scripts/ci/check_prompt_commit_trace.py --root . --commit <head> --base <head> --audit-only -> exit 0 (manifests=155; PRIMARY TRACEABLE=1)"
+    - "python scripts/ci/check_work_item_manifest_schema.py --tree HEAD --baseline 14-ai-development/reports/work-item-manifest-ac4-baseline.json -> exit 0"
+  pull_request: "PR #1494 CLOSED (content rebuilt here); NOT MERGED"
   merge_commit_sha: NOT_MERGED

@@ -60,6 +60,10 @@ document_metadata:
 - Prompt status: `NOT_RECORDED`
 - Prompt SHA-256: `NOT_VERIFIED`
 - Prompt byte count: `NOT_VERIFIED`
+- Recorded-snapshot pin: the manifest's `prompt_sha256` and
+  `prompt_file_blob_sha` pin the bytes of this recorded snapshot only. They
+  do not claim to reproduce the unrecorded original dispatch payload, whose
+  digest and byte count remain `NOT_VERIFIED`.
 
 This file is a structured snapshot of the task and coordinator corrections. It is not claimed to be a byte-for-byte archive of the original task payload.
 

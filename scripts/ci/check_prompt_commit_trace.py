@@ -476,6 +476,10 @@ def main(argv: list[str] | None = None) -> int:
         "--audit-only", action="store_true",
         help="report evidence without applying the baseline ratchet",
     )
+    parser.add_argument(
+        "--emit-baseline", type=Path,
+        help="write a reviewed baseline snapshot for the audited commit",
+    )
     parser.add_argument("--baseline", type=Path)
     parser.add_argument("--base-snapshot", type=Path)
     args = parser.parse_args(argv)
@@ -489,6 +493,28 @@ def main(argv: list[str] | None = None) -> int:
         if not base:
             raise RuntimeError(f"cannot resolve comparison base: {args.base}")
         result = summarize(audit(root, commit, base))
+
+        # The workflow snapshots the exact comparison base before the ratchet
+        # run; the snapshot shape is the ratchet input contract.
+        if args.emit_baseline:
+            snapshot = {
+                "schema_version": 1,
+                "commit": commit,
+                "source_commit": commit,
+                "manifests": {
+                    row["work_item_id"]: {
+                        "primary_status": row["primary_status"],
+                        "findings": row["findings"],
+                    }
+                    for row in result["manifests"]
+                },
+            }
+            args.emit_baseline.write_text(
+                json.dumps(snapshot, sort_keys=True, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            print(json.dumps(snapshot, sort_keys=True, indent=2))
+            return 0
 
         if args.audit_only:
             if args.json:
