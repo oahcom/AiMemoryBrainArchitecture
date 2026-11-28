@@ -1,0 +1,122 @@
+work_item_id: AID-2026-333
+title: "Close the work-item uniqueness merge race with strict branch protection and duplicate-merge evidence"
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  Adds a post-merge duplicate-claim detector and regression tests to the
+  existing GOV-DOC-002 required context. The original tree-only uniqueness
+  checker remains unchanged. Strict branch protection is an external owner
+  action and is not modified by this PR. The detector is an alarm, not a
+  prevention mechanism. No new required context is introduced.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: cc3e9ed9dbe0eb860a583bc51d6b086248624766
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: cc3e9ed9dbe0eb860a583bc51d6b086248624766
+  assigned_id: AID-2026-333
+  allocation_rule: >-
+    The operator checked the work-item tree on origin/main, aid-ledger
+    (which contains 281-287, 312, 313, 331 and 332), and all 1180
+    origin/* refs. No AID-2026-333 directory or allocation was found.
+    The nearby occupied IDs reported were 325, 326 and 340.
+  recheck_rule: >-
+    Recheck main, aid-ledger, all origin/* refs, and all-state PRs
+    immediately before opening or updating the PR.
+scope:
+  objective: >-
+    Replace the unavailable merge-queue mechanism with strict required-status
+    checks as the merge-prevention mechanism, and independently detect
+    two-parent duplicate work-item claims after a merge. Preserve the
+    deliberate tree-only design of the existing uniqueness checker.
+  changes:
+    - path: "scripts/ci/check_work_item_merge_race.py"
+      detail: >-
+        Inspect two-parent merge commits in a push range. Compare both
+        parent trees with their merge-base tree. Report IDs introduced
+        independently in both parents, including both parent SHAs and
+        commit subjects. Return 2 when required Git evidence is incomplete.
+    - path: "scripts/ci/test_work_item_uniqueness.py"
+      detail: >-
+        Retain all ten existing tests and add a workflow-wiring regression
+        and a real temporary-Git two-parent duplicate-claim regression.
+        The latter asserts both claimant identities appear in the finding.
+    - path: ".github/workflows/document-management.yml"
+      detail: >-
+        Add the post-merge detector to the existing GOV-DOC-002 required
+        context on main push events. Document that strict protection is
+        an external owner prerequisite and cannot be inspected using the
+        workflow token.
+    - path: "14-ai-development/work-items/AID-2026-333/"
+      detail: "Record the decision, experiment evidence and session evidence."
+    - path: "14-ai-development/work-items/INDEX.md"
+      detail: "Register AID-2026-333."
+  untouched:
+    - "scripts/ci/check_work_item_uniqueness.py"
+    - "GitHub merge queue and merge_group settings"
+    - "Issue #1341 body and state"
+    - "Existing required-context names"
+    - "Existing work-item records"
+non_goals:
+  - "Claiming the post-merge detector prevents a duplicate merge."
+  - "Claiming the current measured strict=false protection satisfies row 6."
+  - "Claiming the merge queue is available to this user-owned public repository."
+  - "Using ancestry in the existing tree-only uniqueness checker."
+  - "Claiming live GitHub race qualification without an actual two-PR experiment."
+evidence:
+  record: "14-ai-development/work-items/AID-2026-333/evidence.md"
+  prompt: "14-ai-development/work-items/AID-2026-333/prompt-v1.md"
+  session: "14-ai-development/work-items/AID-2026-333/session-evidence.md"
+documentation:
+  - path: "scripts/ci/check_work_item_merge_race.py"
+    relationship: implementation
+  - path: "scripts/ci/test_work_item_uniqueness.py"
+    relationship: implementation
+  - path: "14-ai-development/work-items/AID-2026-333/evidence.md"
+    relationship: evidence
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1341"
+      - "#1477"
+      - "#1497"
+    implementing_ai_session: "ChatGPT-GPT-6"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-333/prompt-v1.md"
+    executed_prompt_sha256: "3a81f756bbd5753c7ceb25ceb8d8069cd2456707b30fde1d8e52c77e0872c9bb"
+    executed_prompt_bytes: 33792
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-333/session-evidence.md"
+implementation:
+  status: IN_PROGRESS
+  summary: >-
+    The unavailable merge-queue path was rejected after a measured HTTP 422
+    ruleset response and confirmation that the repository is public and
+    user-owned. Strict required-status checks are selected as the
+    merge-prevention mechanism and require an owner-side branch-protection
+    change. A separate ancestry-based push detector reports two-parent
+    duplicate claims without changing the existing tree-only checker.
+  files_changed:
+    - "scripts/ci/check_work_item_merge_race.py"
+    - "scripts/ci/test_work_item_uniqueness.py"
+    - ".github/workflows/document-management.yml"
+    - "14-ai-development/work-items/AID-2026-333/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-333/evidence.md"
+    - "14-ai-development/work-items/AID-2026-333/session-evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "Existing ten uniqueness regression tests retained."
+    - "New workflow wiring test is expected to fail on origin/main."
+    - "New two-parent duplicate-claim detector test asserts both claimant SHAs and subjects."
+    - "Full suite expected to pass after the patch."
+    - "Live GitHub two-PR race qualification remains pending."
