@@ -53,7 +53,7 @@ document_metadata:
 
 ```yaml
 role: IMPLEMENTATION_SESSION
-issue_refs: []
+issue_refs: ["#1484"]
 implementing_ai_session: "6b0a1d78-71d8-83ec-85bd-7dd9870c0816"
 executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-013/prompt-v1.md
 executed_prompt_sha256: "9d6996a04fa158a72bc31b386236ad279bcd2118bde1bf0be14cf6554efb37eb"

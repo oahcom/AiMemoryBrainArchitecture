@@ -20,7 +20,7 @@ date: "2026-11-28"
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
 base_commit_sha: "3d9b32bef6775974117ea0ab925179acf43c6ecb"
-tracking_issue: NONE
+tracking_issue: "#1484"
 
 scope:
   summary: >-
@@ -198,7 +198,7 @@ acceptance:
 
 session_evidence:
   - role: IMPLEMENTATION_SESSION
-    issue_refs: []
+    issue_refs: ["#1484"]
     implementing_ai_session: "6b0a1d78-71d8-83ec-85bd-7dd9870c0816"
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-013/prompt-v1.md
     executed_prompt_sha256: "9d6996a04fa158a72bc31b386236ad279bcd2118bde1bf0be14cf6554efb37eb"
@@ -229,7 +229,7 @@ implementation:
     - python scripts/check_document_management.py --require-changed origin/main
     - python scripts/ci/check_work_item_uniqueness.py --base origin/main --head HEAD
     - python scripts/check_declared_check_contexts.py
-  pull_request: 0
-  pull_request_note: PR number is a placeholder and must be backfilled after PR creation.
+  pull_request: 1481
+  pull_request_note: Backfilled from PR #1481 after creation.
   ci_status: NOT_CLAIMED
   merge_commit: ""
