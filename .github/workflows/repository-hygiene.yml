@@ -232,7 +232,9 @@ jobs:
       # `GOV-DOC-002 metadata checks` left the queue silently. This holds the
       # declaration to the wiring, and document-management.yml to target-branch
       # serialization (`queue: max`, `merge_group.base_ref`).
-      - name: Check required contexts are wired to merge_group
+      - name: Check platform-required contexts are wired to merge_group
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 scripts/check_required_contexts_merge_group.py
 
       - name: Self-check the merge_group wiring gate

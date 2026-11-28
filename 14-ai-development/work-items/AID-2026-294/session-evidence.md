@@ -101,8 +101,10 @@ The session cut `fix/2026-11-28-docmgmt-merge-group` from `origin/main`
   when the conflict with AID-2026-013 surfaced; that decision is not superseded.
 - `.github/workflows/gates.yml`: `Six required contexts` corrected to `Seven`.
 - `scripts/check_required_contexts_merge_group.py`: read-only gate over the
-  sixteen declared contexts, the concurrency shape, and per-workflow
-  required-context count comments.
+  contexts live main branch protection actually requires (16; the 17th
+  declared context `Protection fingerprint` is a monitoring context and is
+  reported as exempt), the AID-2026-013 concurrency isolation, and
+  per-workflow required-context count comments.
 - `scripts/test_check_required_contexts_merge_group.py`: seven cases.
 - `.github/workflows/repository-hygiene.yml`: the gate and its self-check run
   beside the existing declared-check-contexts steps.

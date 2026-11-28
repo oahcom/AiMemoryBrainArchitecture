@@ -57,10 +57,12 @@ scope:
         declared-check-contexts steps.
     - path: "scripts/check_required_contexts_merge_group.py"
       detail: >-
-        New read-only gate: declared context -> producing workflow must subscribe
-        to merge_group with checks_requested; document-management.yml concurrency
-        must serialize by target branch; a workflow's required-context count
-        comment must match the declared contexts it produces.
+        New read-only gate: every context required by live main branch protection
+        must be produced by a workflow subscribing to merge_group with
+        checks_requested (declared-but-not-required contexts are exempt);
+        document-management.yml must keep the AID-2026-013 per-PR/event
+        concurrency isolation; a workflow's required-context count comment must
+        match the declared contexts it produces.
     - path: "scripts/test_check_required_contexts_merge_group.py"
       detail: "Regression cases for each of the three conditions, positive and negative."
     - path: "14-ai-development/work-items/AID-2026-294/"
@@ -121,7 +123,7 @@ implementation:
     - "14-ai-development/work-items/AID-2026-294/session-evidence.md"
     - "14-ai-development/work-items/INDEX.md"
   tests:
-    - "Gate self-check: 7 cases covering missing merge_group, wrong merge_group type, missing queue: max, github.ref_name, a missing push selector, and wrong/right count comments."
+    - "Gate self-check: 13 cases covering missing merge_group, wrong merge_group type, missing queue: max, github.ref_name, a missing push selector, and wrong/right count comments."
     - "Negative: the gate exits 1 on the clean pre-fix origin/main tree with five violations."
     - "Positive: the gate exits 0 on the repaired tree with all sixteen contexts."
     - "scripts/test_check_document_management.py: 376/376 passed."

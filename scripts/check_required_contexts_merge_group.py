@@ -1,15 +1,23 @@
 #!/usr/bin/env python3
-"""Hold every declared required check context to the merge-queue wiring it needs.
+"""Hold every platform-required check context to merge-queue wiring.
 
 Three conditions, each silent when broken:
 
-1. WIRING. A context declared in PR-GOVERNANCE-001.md §7 must be produced by a
-   workflow that also subscribes to `merge_group`. A context that only runs on
-   `pull_request` is never reported on a queue candidate, so the queue silently
-   loses that gate and no other check notices: `check_declared_check_contexts.py`
-   compares names, not event wiring. #1453 dropped `merge_group` from
-   document-management.yml this way; `GOV-DOC-002 metadata checks` left the
-   queue with 15/16 and nothing went red.
+1. WIRING. Every context actually required by main branch protection must be
+   produced by at least one workflow subscribing to
+   `merge_group: types: [checks_requested]`.
+
+   The governance declaration may contain additional produced contexts that are
+   not platform-required. Those extra contexts are not merge gates and do not
+   need merge_group subscriptions.
+
+   `check_declared_check_contexts.py` verifies the relationship
+   required ⊆ declared ⊆ produced. This checker verifies the separate
+   event-wiring property for the actual required set. A context that only runs
+   on `pull_request` is never reported on a queue candidate, so the queue
+   silently loses that gate and no other check notices: #1453 dropped
+   `merge_group` from document-management.yml this way and `GOV-DOC-002 metadata
+   checks` left the queue with 15/16.
 
 2. CONCURRENCY ISOLATION. document-management.yml is read-only and re-fetches
    the current target base, so it does not serialize across pull requests; it
@@ -25,7 +33,7 @@ Three conditions, each silent when broken:
 Exit codes:
     0  PASS
     1  VIOLATION   a condition above is false
-    2  INCOMPLETE  the declaration or a workflow file cannot be read
+    2  INCOMPLETE  the declaration, the platform set, or a workflow is unreadable
 """
 
 from __future__ import annotations
@@ -38,6 +46,7 @@ from check_declared_check_contexts import (
     DOC_PATH,
     WORKFLOWS,
     declared_contexts,
+    fetch_protected_contexts,
     strip_yaml_comments,
     workflow_files,
 )
@@ -221,107 +230,243 @@ def concurrency_isolation_violations(path: str, text: str) -> list[str]:
     return problems
 
 
-def main(root: Path | None = None) -> int:
+def main(
+    root: Path | None = None,
+    protection: list[str] | None = None,
+) -> int:
+    """
+    Verify merge_group wiring for platform-required contexts only.
+
+    The governance declaration may intentionally contain extra contexts
+    that are produced by monitoring or reporting workflows but are not
+    required by branch protection.
+
+    The protected set is read live from:
+        GET /repos/{repo}/branches/{branch}
+        .protection.required_status_checks.contexts
+
+    Exit codes:
+        0 PASS
+        1 VIOLATION
+        2 INCOMPLETE
+    """
     root = Path(root or ".").resolve()
     doc = root / DOC_PATH
+
     if not doc.is_file():
-        print(f"::error::INCOMPLETE: declaring document is absent: {DOC_PATH}", file=sys.stderr)
+        print(
+            f"::error::INCOMPLETE: declaring document is absent: {DOC_PATH}",
+            file=sys.stderr,
+        )
         return 2
 
     doc_text = doc.read_text(encoding="utf-8")
-    contexts = declared_contexts(doc_text)
-    if contexts is None:
+    declared = declared_contexts(doc_text)
+
+    if declared is None:
         print(
             f"::error::INCOMPLETE: no declared-context block in {DOC_PATH}",
             file=sys.stderr,
         )
         return 2
+
+    # Resolve the actual platform-required set. Never substitute the
+    # declaration for an unreadable platform response.
+    if protection is None:
+        try:
+            protection = fetch_protected_contexts()
+        except Exception as error:  # noqa: BLE001
+            print(
+                "::error::INCOMPLETE: platform required contexts could "
+                "not be read: "
+                f"{type(error).__name__}: {error}",
+                file=sys.stderr,
+            )
+            return 2
+
+    if (
+        not isinstance(protection, list)
+        or not protection
+        or not all(isinstance(context, str) and context for context in protection)
+    ):
+        print(
+            "::error::INCOMPLETE: platform required contexts are "
+            "missing, empty, or malformed",
+            file=sys.stderr,
+        )
+        return 2
+
+    if len(protection) != len(set(protection)):
+        print(
+            "::error::INCOMPLETE: platform required contexts contain "
+            "duplicates; the authoritative set is ambiguous",
+            file=sys.stderr,
+        )
+        return 2
+
+    required = protection
+
     doc_lines = doc_text.splitlines()
 
     def doc_line(context: str) -> int:
         return next(
-            (i + 1 for i, line in enumerate(doc_lines) if line.strip() == context), 0
+            (
+                i + 1
+                for i, line in enumerate(doc_lines)
+                if line.strip() == context
+            ),
+            0,
         )
 
     workflows = workflow_files(root / WORKFLOWS)
+
     if not workflows:
-        print(f"::error::INCOMPLETE: no workflows under {WORKFLOWS}", file=sys.stderr)
+        print(
+            f"::error::INCOMPLETE: no workflows under {WORKFLOWS}",
+            file=sys.stderr,
+        )
         return 2
 
-    produced: dict[str, list[tuple[str, int, tuple[int, bool] | None]]] = {}
+    produced: dict[
+        str,
+        list[tuple[str, int, tuple[int, bool] | None]],
+    ] = {}
+
     violations: list[str] = []
 
     for path in workflows:
         relative = path.relative_to(root).as_posix()
         text = path.read_text(encoding="utf-8")
         subscription = merge_group_subscription(text)
-        for context, line in job_contexts(text).items():
-            produced.setdefault(context, []).append((relative, line, subscription))
-        if path.name == ISOLATED_WORKFLOW:
-            violations.extend(concurrency_isolation_violations(relative, text))
 
-        declared_here = [c for c in contexts if any(p[0] == relative for p in produced.get(c, []))]
+        for context, line in job_contexts(text).items():
+            produced.setdefault(context, []).append(
+                (relative, line, subscription)
+            )
+
+        if path.name == ISOLATED_WORKFLOW:
+            violations.extend(
+                concurrency_isolation_violations(relative, text)
+            )
+
+        # Count comments remain tied to the complete declaration.
+        # They are documentation claims, not the MG-01 required set.
+        declared_here = [
+            context
+            for context in declared
+            if any(
+                source[0] == relative
+                for source in produced.get(context, [])
+            )
+        ]
+
         for line, claimed in count_claims(text):
             if claimed != len(declared_here):
                 violations.append(
-                    f"::error::{relative}:{line}: the comment claims {claimed} required "
-                    f"contexts, but this workflow produces {len(declared_here)} of the "
-                    f"{len(contexts)} declared in {DOC_PATH}"
+                    f"::error::{relative}:{line}: the comment claims "
+                    f"{claimed} required contexts, but this workflow "
+                    f"produces {len(declared_here)} of the "
+                    f"{len(declared)} declared in {DOC_PATH}"
                 )
 
-    for context in contexts:
+    # MG-01 applies exclusively to the live platform-required set.
+    # Additional declared/produced contexts are not merge-queue gates
+    # unless branch protection actually requires them.
+    for context in required:
         sources = produced.get(context)
         where = f"{DOC_PATH}:{doc_line(context)}"
+
         if not sources:
             violations.append(
-                f"::error::{where}: declares required context {context!r}, but no job "
-                f"under {WORKFLOWS} produces it"
+                f"::error::{where}: platform requires context "
+                f"{context!r}, but no job under {WORKFLOWS} produces it"
             )
             continue
-        if any(
-            subscription is not None and subscription[1]
-            for _, _, subscription in sources
-        ):
+
+        # Multiple workflows may produce the same context. At least one
+        # valid producer must subscribe to checks_requested.
+        valid_source = next(
+            (
+                source
+                for source in sources
+                if source[2] is not None and source[2][1]
+            ),
+            None,
+        )
+
+        if valid_source is not None:
             continue
+
         path, line, subscription = sources[0]
+
         if subscription is None:
             violations.append(
-                f"::error::{path}:{line}: produces required context {context!r} "
-                f"(declared at {where}) but the `on:` block has no `merge_group` entry; "
-                "a merge-queue candidate never reports this required context"
+                f"::error::{path}:{line}: produces platform-required "
+                f"context {context!r} (declared at {where}) but the "
+                "`on:` block has no `merge_group` entry; "
+                "a merge-group candidate never reports this context"
             )
         else:
             violations.append(
-                f"::error::{path}:{subscription[0]}: produces required context "
-                f"{context!r} (declared at {where}) but its `merge_group` entry does "
-                "not request `checks_requested`; the queue never schedules it"
+                f"::error::{path}:{subscription[0]}: produces "
+                f"platform-required context {context!r} "
+                f"(declared at {where}) but its `merge_group` entry "
+                "does not request `checks_requested`; "
+                "the queue never schedules it"
             )
 
     if violations:
         for violation in violations:
             print(violation, file=sys.stderr)
+
         print(
-            f"REQUIRED CONTEXT MERGE_GROUP WIRING: FAIL ({len(violations)} violation(s))",
+            "REQUIRED CONTEXT MERGE_GROUP WIRING: "
+            f"FAIL ({len(violations)} violation(s))",
             file=sys.stderr,
         )
         return 1
 
-    for context in contexts:
+    for context in required:
         path, line, subscription = next(
-            source for source in produced[context]
+            source
+            for source in produced[context]
             if source[2] is not None and source[2][1]
         )
+
         print(
             f"OK  {context}  {path}:{line}  "
-            f"merge_group={path}:{subscription[0]} (checks_requested)",
+            f"merge_group={path}:{subscription[0]} "
+            "(checks_requested)",
             file=sys.stderr,
         )
+
+    extra = sorted(set(declared) - set(required))
+
     print(
-        f"REQUIRED CONTEXT MERGE_GROUP WIRING: PASS ({len(contexts)} contexts)",
+        f"PLATFORM REQUIRED CONTEXTS: {len(required)}",
         file=sys.stderr,
     )
+    print(
+        f"DECLARED BUT NOT PLATFORM-REQUIRED: {len(extra)}",
+        file=sys.stderr,
+    )
+
+    for context in extra:
+        print(
+            f"INFO  {context}: declared and produced, "
+            "but not currently required by branch protection; "
+            "MG-01 merge_group wiring does not apply",
+            file=sys.stderr,
+        )
+
+    print(
+        "REQUIRED CONTEXT MERGE_GROUP WIRING: "
+        f"PASS ({len(required)} platform-required contexts)",
+        file=sys.stderr,
+    )
+
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1] if len(sys.argv) > 1 else None))
+    sys.exit(main())
