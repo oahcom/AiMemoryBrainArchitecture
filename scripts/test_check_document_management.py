@@ -78,9 +78,8 @@ ALLOWED_SKIPS = {
         "symlink creation unavailable on this platform",
 }
 
-# Current document-management count contract: executed cases plus registered skips.
-# The additional symlink-unavailable regression case belongs to #1438; main added one further case.
-EXPECTED_AGGREGATE = 378
+# Aggregate contract: 386 executed and skipped test cases.
+EXPECTED_AGGREGATE = 386
 
 
 def doc(body: str) -> str:
