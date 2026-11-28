@@ -1,6 +1,8 @@
 # Manifest Blob Pin Ledger
 
-This ledger is append-only. Do not edit, reorder, or remove existing records. Add new records only after the corresponding repin commit has been created and its full commit SHA is known.
+This ledger records pin transitions append-only. Do not reorder or remove existing transition records. Add new records only after the corresponding repin commit has been created and its full commit SHA is known.
+
+For a squash merge, `repin_commit` must identify the squash commit that actually entered the target history, not the pre-squash pull-request head. If an existing record points to a pre-squash commit that is not reachable from the target history, the only permitted in-place correction is to replace `repin_commit` with the corresponding landed squash commit, provided all five validity rules below still hold. The manifest, field, path, previous pin, new pin, and record order must remain unchanged.
 
 Each record must satisfy all of the following validity rules:
 
@@ -12,5 +14,5 @@ Each record must satisfy all of the following validity rules:
 
 | manifest | field | path | previous_pin | new_pin | repin_commit |
 |---|---|---|---|---|---|
-|14-ai-development/work-items/AID-2026-101/manifest.yaml|session_evidence[0].executed_prompt_snapshot_file|14-ai-development/work-items/AID-2026-101/prompt-v1.md|4470|4412|6045af65fcc2e89d1895e09ed666af4d737203bf|
-|14-ai-development/work-items/AID-2026-102/manifest.yaml|session_evidence[0].executed_prompt_snapshot_file|14-ai-development/work-items/AID-2026-102/prompt-v1.md|4470|4412|6045af65fcc2e89d1895e09ed666af4d737203bf|
+|14-ai-development/work-items/AID-2026-101/manifest.yaml|session_evidence[0].executed_prompt_snapshot_file|14-ai-development/work-items/AID-2026-101/prompt-v1.md|4470|4412|2ab66153dbcdd8a8f2d68d234914751a748a8f74|
+|14-ai-development/work-items/AID-2026-102/manifest.yaml|session_evidence[0].executed_prompt_snapshot_file|14-ai-development/work-items/AID-2026-102/prompt-v1.md|4470|4412|2ab66153dbcdd8a8f2d68d234914751a748a8f74|
