@@ -1,19 +1,153 @@
-# AID-2026-268 manifest blob-pin baseline
-# Current baseline contains exactly 4 observed failures.
-# The other 11 previously recorded entries have been fixed and removed.
-# Two remaining failures are historical prompt byte-count mismatches:
-# AID-2026-101 and AID-2026-102 each declare 4470 bytes, while
-# their current prompt-v1.md files contain 4412 bytes.
-# Their corresponding prompt SHA-256 mismatches are no longer present
-# in the current failure set and are therefore not retained here.
-# Two additional failures are historical PATH_MISSING entries for
-# AID-2026-261/prompt-v1.md. The path remains absent from the candidate
-# tree, while the historical declarations remain present:
-# one declares a byte count of 0 and the other declares an all-zero SHA-256.
-# These four entries remain because gate_ratchet requires the baseline
-# to equal the current failure set exactly. A fixed entry is stale;
-# removing an entry that still fails is a regression.
-MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-101/prompt-v1.md declared=4470 actual=4412
-MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-102/prompt-v1.md declared=4470 actual=4412
-PATH_MISSING path=14-ai-development/work-items/AID-2026-261/prompt-v1.md; declared=0
-PATH_MISSING path=14-ai-development/work-items/AID-2026-261/prompt-v1.md; declared=0000000000000000000000000000000000000000000000000000000000000000
+# Frozen violation list for manifest blob pins.
+#
+# This file is a ratchet baseline, not a PASS allowlist: an entry records a
+# known, accepted violation. UNRESOLVED / SCOPE_UNRESOLVABLE / INCOMPLETE are
+# never stored here; they are tracked in the separate unresolved audit ledger.
+# Generated from 6acd3a4413d4 with the registry-backed checker.
+MISMATCH manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=execution_boundary_extension.joined_contract_updated.blob_sha-b5bb0c668efd field=execution_boundary_extension.joined_contract_updated.blob_sha scope=candidate locator=14-ai-development/work-items/AID-2026-001/forget-lifecycle-joined-contract-proposal-v1.md
+MISMATCH manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=reference_model_validation.model.git_blob_sha-bc9d389f3a49 field=reference_model_validation.model.git_blob_sha scope=candidate locator=14-ai-development/work-items/AID-2026-001/reference-model/forget_model.py
+MISMATCH manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=reference_model_validation.tests.git_blob_sha-18891dc3c7ab field=reference_model_validation.tests.git_blob_sha scope=candidate locator=14-ai-development/work-items/AID-2026-001/reference-model/test_forget_model.py
+MISMATCH manifest=14-ai-development/work-items/AID-2026-026/manifest.yaml pin_id=number_allocation.evidence-0-.blob_sha-d0a82d50a1a3 field=number_allocation.evidence[0].blob_sha scope=candidate locator=14-ai-development/work-items/INDEX.md
+MISMATCH manifest=14-ai-development/work-items/AID-2026-026/manifest.yaml pin_id=prompt_original_payload_bytes-1b13415d3793 field=prompt_original_payload_bytes scope=candidate locator=14-ai-development/work-items/AID-2026-026/prompt-v2.md
+MISMATCH manifest=14-ai-development/work-items/AID-2026-029/manifest.yaml pin_id=prompt.raw_platform_message_bytes-60f91136bfa8 field=prompt.raw_platform_message_bytes scope=candidate locator=prompt-v1.md
+MISMATCH manifest=14-ai-development/work-items/AID-2026-101/manifest.yaml pin_id=session_evidence-0-.executed_prompt_bytes-fcc318f156ed field=session_evidence[0].executed_prompt_bytes scope=candidate locator=14-ai-development/work-items/AID-2026-101/prompt-v1.md
+MISMATCH manifest=14-ai-development/work-items/AID-2026-102/manifest.yaml pin_id=session_evidence-0-.executed_prompt_bytes-51ddbe3e3c24 field=session_evidence[0].executed_prompt_bytes scope=candidate locator=14-ai-development/work-items/AID-2026-102/prompt-v1.md
+MISMATCH manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml pin_id=source.selected_source_files-0-.frontmatter_blob_sha-a6da76cfaabd field=source.selected_source_files[0].frontmatter_blob_sha scope=candidate locator=09-security-governance/global-forget-target-inventory-and-completion-evidence.md
+MISMATCH manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml pin_id=source.selected_source_files-0-.restored_blob_sha-85ef0274ce54 field=source.selected_source_files[0].restored_blob_sha scope=candidate locator=09-security-governance/global-forget-target-inventory-and-completion-evidence.md
+MISMATCH manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml pin_id=source.selected_source_files-0-.source_blob_sha-b727ba55b040 field=source.selected_source_files[0].source_blob_sha scope=candidate locator=09-security-governance/global-forget-target-inventory-and-completion-evidence.md
+MISMATCH manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml pin_id=source.selected_source_files-1-.frontmatter_blob_sha-38f649aad786 field=source.selected_source_files[1].frontmatter_blob_sha scope=candidate locator=09-security-governance/forget-retention-backup-and-erasure-policy.md
+MISMATCH manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml pin_id=source.selected_source_files-1-.restored_blob_sha-fb1bcf19a53a field=source.selected_source_files[1].restored_blob_sha scope=candidate locator=09-security-governance/forget-retention-backup-and-erasure-policy.md
+MISMATCH manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml pin_id=source.selected_source_files-1-.source_blob_sha-a4f10403c961 field=source.selected_source_files[1].source_blob_sha scope=candidate locator=09-security-governance/forget-retention-backup-and-erasure-policy.md
+MISMATCH manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml pin_id=source.selected_source_files-2-.frontmatter_blob_sha-afb87fb14886 field=source.selected_source_files[2].frontmatter_blob_sha scope=candidate locator=09-security-governance/principal-actor-and-authorization-contract.md
+MISMATCH manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml pin_id=source.selected_source_files-2-.restored_blob_sha-f162c28c5471 field=source.selected_source_files[2].restored_blob_sha scope=candidate locator=09-security-governance/principal-actor-and-authorization-contract.md
+MISMATCH manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml pin_id=source.selected_source_files-2-.source_blob_sha-07ecfcef47e1 field=source.selected_source_files[2].source_blob_sha scope=candidate locator=09-security-governance/principal-actor-and-authorization-contract.md
+MISMATCH manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml pin_id=source.selected_source_files-3-.frontmatter_blob_sha-bc8755d1199b field=source.selected_source_files[3].frontmatter_blob_sha scope=candidate locator=09-security-governance/scope-and-revocation-policy.md
+MISMATCH manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml pin_id=source.selected_source_files-3-.source_blob_sha-333afdb54609 field=source.selected_source_files[3].source_blob_sha scope=candidate locator=09-security-governance/scope-and-revocation-policy.md
+MISMATCH manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml pin_id=source.selected_source_files-4-.frontmatter_blob_sha-e857ea33af9b field=source.selected_source_files[4].frontmatter_blob_sha scope=candidate locator=09-security-governance/security-and-identity-overview.md
+MISMATCH manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml pin_id=source.selected_source_files-4-.restored_blob_sha-328ff8f0b5a7 field=source.selected_source_files[4].restored_blob_sha scope=candidate locator=09-security-governance/security-and-identity-overview.md
+MISMATCH manifest=14-ai-development/work-items/AID-2026-109/manifest.yaml pin_id=source.selected_source_files-4-.source_blob_sha-371771cf3fed field=source.selected_source_files[4].source_blob_sha scope=candidate locator=09-security-governance/security-and-identity-overview.md
+MISMATCH manifest=14-ai-development/work-items/AID-2026-242/manifest.yaml pin_id=source.source_blob_sha-6e552abd56a9 field=source.source_blob_sha scope=candidate locator=03-memory-brain/canonical-memory-store.md
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=dev_baseline_integration.mainline_integration.merged_main_head-b6a1656f94d7 field=dev_baseline_integration.mainline_integration.merged_main_head scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=dev_baseline_integration.mainline_integration.pre_update_branch_-8ebe6d0b4a77 field=dev_baseline_integration.mainline_integration.pre_update_branch_head scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=dev_baseline_integration.mainline_integration.reference_model_re-19beff6cea33 field=dev_baseline_integration.mainline_integration.reference_model_readme_blob_before_append scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=dev_baseline_integration.measurement_basis.model_blob_sha256_crl-19943cc88fb4 field=dev_baseline_integration.measurement_basis.model_blob_sha256_crlf scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=dev_baseline_integration.measurement_basis.model_blob_sha256_lf-238311283caf field=dev_baseline_integration.measurement_basis.model_blob_sha256_lf scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=dev_baseline_integration.measurement_basis.tests_blob_sha256_crl-896950f0c3b4 field=dev_baseline_integration.measurement_basis.tests_blob_sha256_crlf scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=dev_baseline_integration.measurement_basis.tests_blob_sha256_lf-2633c4aad936 field=dev_baseline_integration.measurement_basis.tests_blob_sha256_lf scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=dev_baseline_integration.target_commit-50d2874543ce field=dev_baseline_integration.target_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=execution_boundary_extension.added_conformance_cases.test_matrix-d75347333e56 field=execution_boundary_extension.added_conformance_cases.test_matrix_commit_before_manifest_update scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=execution_boundary_extension.owner_contracts.sha256_or_blob_sha-f1365d24c44f field=execution_boundary_extension.owner_contracts.sha256_or_blob_sha scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=execution_boundary_extension.source_baseline-70dbf679257b field=execution_boundary_extension.source_baseline scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=follow_up_remediation.proposal_content_head_before_manifest_upda-58ac8b7d1ea7 field=follow_up_remediation.proposal_content_head_before_manifest_update scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=follow_up_remediation.target_base_head-834fa3fa823e field=follow_up_remediation.target_base_head scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=latest_reconciliation.current_main_blobs.forget_model_py-f5bc678385e8 field=latest_reconciliation.current_main_blobs.forget_model_py scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=latest_reconciliation.current_main_blobs.readme_md-32743058d76d field=latest_reconciliation.current_main_blobs.readme_md scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=latest_reconciliation.current_main_blobs.test_forget_model_py-18c0b7da5ed2 field=latest_reconciliation.current_main_blobs.test_forget_model_py scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=latest_reconciliation.current_main_blobs.workflow_yml-8c0cf94dea08 field=latest_reconciliation.current_main_blobs.workflow_yml scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=latest_reconciliation.observed_main_head_before_this_documentati-9d93176b1562 field=latest_reconciliation.observed_main_head_before_this_documentation_update scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=post_merge_manifest_validation.observed_main_head_before_followu-9eb3e2e0d263 field=post_merge_manifest_validation.observed_main_head_before_followup scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=prompt_sha256-51dedc79182c field=prompt_sha256 scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=remediation.latest_reviewed_head-bc8c8efe92f5 field=remediation.latest_reviewed_head scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=remediation.source_reviewed_head-870bcf427325 field=remediation.source_reviewed_head scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=self_review.reviewed_head_before_self_review-beb0f20b615f field=self_review.reviewed_head_before_self_review scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-003/manifest.yaml pin_id=policy_unification_ruling.effective_change_commit-6f652c40c26f field=policy_unification_ruling.effective_change_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-003/manifest.yaml pin_id=policy_unification_ruling.instruction_sha256-54dc29c6de87 field=policy_unification_ruling.instruction_sha256 scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-003/manifest.yaml pin_id=prompt_bytes-b7a6a4cf5d5c field=prompt_bytes scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml pin_id=prompt_bytes-9be2e571fd01 field=prompt_bytes scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml pin_id=prompt_sha256-f753f5f0984b field=prompt_sha256 scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml pin_id=source_translation_pairs-0-.reverified_source_blob_sha-7a6cce9b4fda field=source_translation_pairs[0].reverified_source_blob_sha scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml pin_id=source_translation_pairs-0-.reverified_translation_blob_sha-20705a6ee24b field=source_translation_pairs[0].reverified_translation_blob_sha scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml pin_id=source_translation_pairs-0-.source_blob_sha-f4aa39976830 field=source_translation_pairs[0].source_blob_sha scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml pin_id=source_translation_pairs-0-.translation_blob_sha-167f70bf2806 field=source_translation_pairs[0].translation_blob_sha scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml pin_id=source_translation_pairs-0-.translation_sha256-d3eb8307f9b6 field=source_translation_pairs[0].translation_sha256 scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml pin_id=source_translation_pairs-1-.reverified_source_blob_sha-6c219dd5bada field=source_translation_pairs[1].reverified_source_blob_sha scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml pin_id=source_translation_pairs-1-.reverified_translation_blob_sha-3c89a237e2e4 field=source_translation_pairs[1].reverified_translation_blob_sha scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml pin_id=source_translation_pairs-1-.source_blob_sha-fabf5c7eb7e4 field=source_translation_pairs[1].source_blob_sha scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml pin_id=source_translation_pairs-1-.translation_blob_sha-b7754ef73b90 field=source_translation_pairs[1].translation_blob_sha scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml pin_id=source_translation_pairs-1-.translation_sha256-da265b715093 field=source_translation_pairs[1].translation_sha256 scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml pin_id=source_translation_pairs-2-.reverified_source_blob_sha-e63bc5c2713e field=source_translation_pairs[2].reverified_source_blob_sha scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml pin_id=source_translation_pairs-2-.reverified_translation_blob_sha-e8a86709136f field=source_translation_pairs[2].reverified_translation_blob_sha scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml pin_id=source_translation_pairs-2-.source_blob_sha-ed5d5039a263 field=source_translation_pairs[2].source_blob_sha scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml pin_id=source_translation_pairs-2-.translation_blob_sha-b572e5e38158 field=source_translation_pairs[2].translation_blob_sha scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-004/manifest.yaml pin_id=source_translation_pairs-2-.translation_sha256-968f4583d11a field=source_translation_pairs[2].translation_sha256 scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-016/manifest.yaml pin_id=carrier.head_commit-e9b080075498 field=carrier.head_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-016/manifest.yaml pin_id=measurements.implementation_head-0d82d039c1fd field=measurements.implementation_head scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-016/manifest.yaml pin_id=measurements.prompt_v1_bytes-ef749fe249bf field=measurements.prompt_v1_bytes scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-016/manifest.yaml pin_id=measurements.prompt_v1_sha256-3aca7b7705e1 field=measurements.prompt_v1_sha256 scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-016/manifest.yaml pin_id=measurements.prompt_v2_bytes-542f19fe3664 field=measurements.prompt_v2_bytes scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-016/manifest.yaml pin_id=measurements.prompt_v2_sha256-38cc1167ef90 field=measurements.prompt_v2_sha256 scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-023/manifest.yaml pin_id=prompt_original_payload_sha256-3711a54a2e71 field=prompt_original_payload_sha256 scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-024/manifest.yaml pin_id=prompt.prompt_lifecycle.current.sha256-5a12776404dd field=prompt.prompt_lifecycle.current.sha256 scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-024/manifest.yaml pin_id=prompt.prompt_sha256_v1-fa49c76e064b field=prompt.prompt_sha256_v1 scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-025/manifest.yaml pin_id=baseline_evidence.formal_allocation_check.main_index.baseline-03848621fdf2 field=baseline_evidence.formal_allocation_check.main_index.baseline scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-025/manifest.yaml pin_id=repository.known_architecture_invariants-4e4278b1d4ea field=repository.known_architecture_invariants scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-026/manifest.yaml pin_id=execution_constraints.repository_baseline_reported-360ddea89600 field=execution_constraints.repository_baseline_reported scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-026/manifest.yaml pin_id=prompt_lifecycle.current.sha256-7dd1a423bb27 field=prompt_lifecycle.current.sha256 scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-026/manifest.yaml pin_id=prompt_original_payload_sha256-6cd0eb2b299d field=prompt_original_payload_sha256 scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-026/manifest.yaml pin_id=prompt_sha256_v1-236cb7bfca0d field=prompt_sha256_v1 scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-029/manifest.yaml pin_id=closeout_instruction.raw_platform_message_bytes-a9be822e1af3 field=closeout_instruction.raw_platform_message_bytes scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-029/manifest.yaml pin_id=implementation.counterpart_link_fix_commit-b883d393a301 field=implementation.counterpart_link_fix_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-029/manifest.yaml pin_id=implementation.current_head-bce93f9d03e0 field=implementation.current_head scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-029/manifest.yaml pin_id=implementation.initial_commit-a753346647c7 field=implementation.initial_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-029/manifest.yaml pin_id=implementation.rebase_commit-e35c4f7d35e2 field=implementation.rebase_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-029/manifest.yaml pin_id=implementation.scanner_regex_fix_commit-dd6d4f38085f field=implementation.scanner_regex_fix_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-040/manifest.yaml pin_id=revision_history-0-.field_corrections-2-.corrected_value-9007641086d8 field=revision_history[0].field_corrections[2].corrected_value scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-064/manifest.yaml pin_id=prompt_bytes-02dca80f67a4 field=prompt_bytes scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-064/manifest.yaml pin_id=prompt_sha256-fc836c7ea1e3 field=prompt_sha256 scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-093/manifest.yaml pin_id=branch_head_after_main_sync-0ff207c6a62c field=branch_head_after_main_sync scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-093/manifest.yaml pin_id=main_head_at_sync-f54ad6dbee19 field=main_head_at_sync scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-093/manifest.yaml pin_id=post_merge_commit_tree-74e063f597fd field=post_merge_commit_tree scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-093/manifest.yaml pin_id=verification.ci.last_completed_head-724a0881e383 field=verification.ci.last_completed_head scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-096/manifest.yaml pin_id=repository.merge_base_commit-3f2b088a8575 field=repository.merge_base_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-098/manifest.yaml pin_id=identifier_allocation.current_rebase_main-99b6945e7ba1 field=identifier_allocation.current_rebase_main scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-100/manifest.yaml pin_id=baseline_and_source_evidence.e_source_commit-b847addcd1c2 field=baseline_and_source_evidence.e_source_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-100/manifest.yaml pin_id=baseline_and_source_evidence.f_source_commit-39a035584d72 field=baseline_and_source_evidence.f_source_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-100/manifest.yaml pin_id=baseline_and_source_evidence.i_source_commit-936405034781 field=baseline_and_source_evidence.i_source_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-100/manifest.yaml pin_id=baseline_and_source_evidence.main_reconciliation_head-074cce932aad field=baseline_and_source_evidence.main_reconciliation_head scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-100/manifest.yaml pin_id=baseline_and_source_evidence.original_pr_base-9094c9174e2a field=baseline_and_source_evidence.original_pr_base scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-100/manifest.yaml pin_id=baseline_and_source_evidence.target_pr_head_before_reconciliatio-3ddc251ea6b8 field=baseline_and_source_evidence.target_pr_head_before_reconciliation scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-101/manifest.yaml pin_id=corrections-0-.new_value-7bdf53e8faf7 field=corrections[0].new_value scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-101/manifest.yaml pin_id=corrections-0-.prior_value-698267213f54 field=corrections[0].prior_value scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-102/manifest.yaml pin_id=corrections-0-.new_value-fecab1af6d57 field=corrections[0].new_value scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-102/manifest.yaml pin_id=corrections-0-.prior_value-910fca56063c field=corrections[0].prior_value scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-105/manifest.yaml pin_id=repository.initial_evidence_readback_commit-e3921f867de9 field=repository.initial_evidence_readback_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-105/manifest.yaml pin_id=repository.latest_sync_parent-8aed249d943d field=repository.latest_sync_parent scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-105/manifest.yaml pin_id=repository.merged_head_commit-d0c543cbfced field=repository.merged_head_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-107/manifest.yaml pin_id=impl2_scope_adjudication.main_baseline-01bd2e90e2b3 field=impl2_scope_adjudication.main_baseline scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-107/manifest.yaml pin_id=impl2_scope_adjudication.post_merge_validation.final_pr_head-7155f610f97c field=impl2_scope_adjudication.post_merge_validation.final_pr_head scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-107/manifest.yaml pin_id=prompt_addenda-0-.executed_prompt_bytes-b8804c705064 field=prompt_addenda[0].executed_prompt_bytes scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-107/manifest.yaml pin_id=prompt_addenda-0-.executed_prompt_sha256-af699d5daa3d field=prompt_addenda[0].executed_prompt_sha256 scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-107/manifest.yaml pin_id=source_baseline.main-36dde0185239 field=source_baseline.main scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-108/manifest.yaml pin_id=correction.original_099_baseline-16db9bb2bc59 field=correction.original_099_baseline scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-111/manifest.yaml pin_id=execution_evidence.pure_rust.normalised_digest-cb55d807bc90 field=execution_evidence.pure_rust.normalised_digest scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-111/manifest.yaml pin_id=execution_evidence.sqlite_backend.normalised_digest-a40abc4539f8 field=execution_evidence.sqlite_backend.normalised_digest scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-140/manifest.yaml pin_id=repository.original_restore_merge_commit-b8e22e3ec49c field=repository.original_restore_merge_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-150/manifest.yaml pin_id=repository.refreshed_base_commit-bc51161f64d5 field=repository.refreshed_base_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-150/manifest.yaml pin_id=source.tree-8d509d01e934 field=source.tree scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-170/manifest.yaml pin_id=owner_ruling.current_blob-0591e37dea11 field=owner_ruling.current_blob scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-170/manifest.yaml pin_id=owner_ruling.superseded_blob-e5a049aa0147 field=owner_ruling.superseded_blob scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-173/manifest.yaml pin_id=scan_scope.base-76c5d0de473e field=scan_scope.base scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-173/manifest.yaml pin_id=scan_scope.first_read-f168ba966cd9 field=scan_scope.first_read scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-188/manifest.yaml pin_id=evidence.measurements.introduced_by_commit-af467615c3f1 field=evidence.measurements.introduced_by_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-190/manifest.yaml pin_id=evidence.measured_at-03fa4d6224df field=evidence.measured_at scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-190/manifest.yaml pin_id=evidence.measurements.aid_113_restore_commit-79308aba13f5 field=evidence.measurements.aid_113_restore_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-190/manifest.yaml pin_id=evidence.measurements.gov_rev_unmerged_branch_head-6b48a9a7216a field=evidence.measurements.gov_rev_unmerged_branch_head scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-197/manifest.yaml pin_id=identifier_allocation.observed_at_merge_base-312e26cfc799 field=identifier_allocation.observed_at_merge_base scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-199/manifest.yaml pin_id=evidence.measured_at-b85962a06008 field=evidence.measured_at scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-242/manifest.yaml pin_id=identifier_allocation.latest_sync_main-9457d667fea2 field=identifier_allocation.latest_sync_main scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-242/manifest.yaml pin_id=latest_sync_main_commit-c0006ba30326 field=latest_sync_main_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-242/manifest.yaml pin_id=source.branch_head-95cdeb0933dd field=source.branch_head scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-242/manifest.yaml pin_id=source.main_en_mirror_before-277994feb6b7 field=source.main_en_mirror_before scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-242/manifest.yaml pin_id=source.main_zh_mirror_before-fc40ab3d82a9 field=source.main_zh_mirror_before scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-250/manifest.yaml pin_id=rework.exact_head_with_16_successful_required_contexts-19c3c84e1a4f field=rework.exact_head_with_16_successful_required_contexts scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-261/manifest.yaml pin_id=session_evidence-0-.executed_prompt_bytes-373d897e2a68 field=session_evidence[0].executed_prompt_bytes scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-261/manifest.yaml pin_id=session_evidence-0-.executed_prompt_sha256-135755e68f18 field=session_evidence[0].executed_prompt_sha256 scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-286/manifest.yaml pin_id=evidence.assessed_version-fcbb49816eda field=evidence.assessed_version scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-325/manifest.yaml pin_id=implementation.implementation_commit-93452cf97790 field=implementation.implementation_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-340/manifest.yaml pin_id=implementation.implementation_commit-5686bcc365d2 field=implementation.implementation_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/FIX-2026-P1-T1/manifest.yaml pin_id=remediation_carrier.final_review_head-128a2bc60e16 field=remediation_carrier.final_review_head scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/FIX-2026-P1-T1/manifest.yaml pin_id=remediation_carrier.remediation_pr_head_at_creation-fe76a35a5acb field=remediation_carrier.remediation_pr_head_at_creation scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/FIX-2026-P1-T1/manifest.yaml pin_id=review.reviewed_head-3d7a0571e0ae field=review.reviewed_head scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/FIX-2026-P1-T1/manifest.yaml pin_id=verification.evidence_commit-884979e3bd5a field=verification.evidence_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/FIX-2026-P1-T1/manifest.yaml pin_id=verification.prior_reviewed_head-a0ca84c6e47d field=verification.prior_reviewed_head scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/FIX-2026-P1-T1/manifest.yaml pin_id=verification.remediation_code_head-c25c3d0417a8 field=verification.remediation_code_head scope=none locator=none

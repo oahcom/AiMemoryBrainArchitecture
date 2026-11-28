@@ -58,8 +58,12 @@ session_evidence:
       - "#1237"
     implementing_ai_session: "ChatGPT-GPT-6-S6-C"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-261/prompt-v1.md"
-    executed_prompt_sha256: "0000000000000000000000000000000000000000000000000000000000000000"
-    executed_prompt_bytes: 0
+    executed_prompt_sha256: NOT_VERIFIED
+    executed_prompt_sha256_note: The referenced prompt snapshot file was never committed, so the digest cannot be verified
+    executed_prompt_sha256_provenance: NOT_VERIFIED
+    executed_prompt_bytes: NOT_VERIFIED
+    executed_prompt_bytes_note: The referenced prompt snapshot file was never committed, so the byte count cannot be measured
+    executed_prompt_bytes_provenance: NOT_VERIFIED
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-261/session-evidence.md"

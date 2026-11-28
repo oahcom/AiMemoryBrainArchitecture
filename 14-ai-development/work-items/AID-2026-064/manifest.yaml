@@ -85,8 +85,8 @@ verification_summary: >-
 prompt_id: AID-2026-064-PROMPT
 prompt_version: v1
 prompt_provenance_tier: T2 (coordinator-supplied task assignment, reproduced in prompt-v1.md)
-prompt_sha256: NOT_VERIFIED
-prompt_bytes: NOT_VERIFIED
+prompt_sha256: 57decec9de8752e099d6a72588fcdd00904bffbe4cecb614ddf9c34a441fdbb8
+prompt_bytes: 7188
 prompt_provenance_note: >-
   The assignment was supplied as a message in this session. A stable permalink and an
   immutable pre-execution snapshot are not available; prompt-v1.md was written after the
