@@ -1,0 +1,3239 @@
+schema_version: 2
+registry:
+  repository: oahcom/AiMemoryBrainArchitecture
+  canonical_branch: work-item-claims
+  canonical_path: 14-ai-development/work-items/registry/work-item-claims.yaml
+  policy: atomic-single-owner
+  created_at: '2026-11-28T04:38:25Z'
+  updated_at: '2026-11-28T04:38:25Z'
+claims:
+- work_item_id: AID-2026-001
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 42
+  owner_work_item: AID-2026-001
+  claimed_at: '2026-11-18T03:17:34+08:00'
+  updated_at: '2026-11-18T03:17:34+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 43b76350a7d654b3d0a3602c51ae7ddce7c81af1
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42
+    description: Merged work item; first adding commit 43b76350a on origin/main
+  history: []
+- work_item_id: AID-2026-002
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 230
+  owner_work_item: AID-2026-002
+  claimed_at: '2026-11-18T15:10:37+08:00'
+  updated_at: '2026-11-18T15:10:37+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 53aae842c390eac6d54f937af6cd2744dbe8d09d
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/230
+    description: Merged work item; first adding commit 53aae842c on origin/main
+  history: []
+- work_item_id: AID-2026-003
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 256
+  owner_work_item: AID-2026-003
+  claimed_at: '2026-11-19T01:44:58+08:00'
+  updated_at: '2026-11-19T01:44:58+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 48a556491506d25e78be47957276bf3821797a0a
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/256
+    description: Merged work item; first adding commit 48a556491 on origin/main
+  history: []
+- work_item_id: AID-2026-004
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: null
+  owner_work_item: AID-2026-004
+  claimed_at: '2026-11-19T03:05:41+08:00'
+  updated_at: '2026-11-19T03:05:41+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 6275265e08267d9e6a007b51ade5a1a1f8fce4ce
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: commit
+    reference: 6275265e08267d9e6a007b51ade5a1a1f8fce4ce
+    description: Merged work item; first adding commit 6275265e0 on origin/main
+  history: []
+- work_item_id: AID-2026-005
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: null
+  owner_work_item: AID-2026-005
+  claimed_at: '2026-11-19T10:33:07+08:00'
+  updated_at: '2026-11-19T10:33:07+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: ef00db086d9c53894f50ce7a845a9bf7210c4408
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: commit
+    reference: ef00db086d9c53894f50ce7a845a9bf7210c4408
+    description: Merged work item; first adding commit ef00db086 on origin/main
+  history: []
+- work_item_id: AID-2026-006
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: null
+  owner_work_item: AID-2026-006
+  claimed_at: '2026-11-19T11:19:43+08:00'
+  updated_at: '2026-11-19T11:19:43+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: c33a1bcd36f767c96f641d2a154f34d102ce2645
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: commit
+    reference: c33a1bcd36f767c96f641d2a154f34d102ce2645
+    description: Merged work item; first adding commit c33a1bcd3 on origin/main
+  history: []
+- work_item_id: AID-2026-007
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1488
+  owner_work_item: AID-2026-007
+  claimed_at: '2026-11-28T08:12:06+08:00'
+  updated_at: '2026-11-28T08:12:06+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: daa935f7a7ecc808f1775be8cf153cf715961b08
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1488
+    description: Merged work item; first adding commit 58bb4a3bc on origin/main
+  history: []
+- work_item_id: AID-2026-008
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: null
+  owner_work_item: AID-2026-008
+  claimed_at: '2026-11-19T20:25:36+08:00'
+  updated_at: '2026-11-19T20:25:36+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: d61f813cac6780b6bcc5c09536a8e9bee96cc362
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: commit
+    reference: d61f813cac6780b6bcc5c09536a8e9bee96cc362
+    description: Merged work item; first adding commit d61f813ca on origin/main
+  history: []
+- work_item_id: AID-2026-009
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: null
+  owner_work_item: AID-2026-009
+  claimed_at: '2026-11-19T19:37:31+08:00'
+  updated_at: '2026-11-19T19:37:31+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: cbe682ca3f2d2ae2a5c7f2fa2fb3edcf7f9fe91d
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: commit
+    reference: cbe682ca3f2d2ae2a5c7f2fa2fb3edcf7f9fe91d
+    description: Merged work item; first adding commit cbe682ca3 on origin/main
+  history: []
+- work_item_id: AID-2026-011
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: null
+  owner_work_item: AID-2026-011
+  claimed_at: '2026-11-20T14:20:06+08:00'
+  updated_at: '2026-11-20T14:20:06+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 6ef769abcdaa7d53a85693b40e548f663d53ab4a
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: commit
+    reference: 6ef769abcdaa7d53a85693b40e548f663d53ab4a
+    description: Merged work item; first adding commit 6ef769abc on origin/main
+  history: []
+- work_item_id: AID-2026-012
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1493
+  owner_work_item: AID-2026-012
+  claimed_at: '2026-11-28T08:48:18+08:00'
+  updated_at: '2026-11-28T08:48:18+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 620daa26f3329ff15b33285cebdbc6f06242568a
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1493
+    description: Merged work item; first adding commit 4f1fc57d8 on origin/main
+  history: []
+- work_item_id: AID-2026-013
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1481
+  owner_work_item: AID-2026-013
+  claimed_at: '2026-11-28T08:25:00+08:00'
+  updated_at: '2026-11-28T08:25:00+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 9c25f56fa82d579877a5a24cd1c5d08f37a207ab
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1481
+    description: Merged work item; first adding commit 0962fbdc5 on origin/main
+  history: []
+- work_item_id: AID-2026-014
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: null
+  owner_work_item: AID-2026-014
+  claimed_at: '2026-11-20T16:27:55+08:00'
+  updated_at: '2026-11-20T16:27:55+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: d1b72d41755e0ff4780694116040385437e6aa6e
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: commit
+    reference: d1b72d41755e0ff4780694116040385437e6aa6e
+    description: Merged work item; first adding commit d1b72d417 on origin/main
+  history: []
+- work_item_id: AID-2026-016
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1443
+  owner_work_item: AID-2026-016
+  claimed_at: '2026-11-28T09:08:09+08:00'
+  updated_at: '2026-11-28T09:08:09+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 257736c0f31b17911bde9bb538a359e4c41a2946
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1443
+    description: Merged work item; first adding commit 257736c0f on origin/main
+  history: []
+- work_item_id: AID-2026-023
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 354
+  owner_work_item: AID-2026-023
+  claimed_at: '2026-11-20T20:51:09+08:00'
+  updated_at: '2026-11-20T20:51:09+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 8215ec57260b5841df1b9f9aad5a7f26d3073bac
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/354
+    description: Merged work item; first adding commit 8215ec572 on origin/main
+  history: []
+- work_item_id: AID-2026-024
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 354
+  owner_work_item: AID-2026-024
+  claimed_at: '2026-11-20T20:51:09+08:00'
+  updated_at: '2026-11-20T20:51:09+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 8215ec57260b5841df1b9f9aad5a7f26d3073bac
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/354
+    description: Merged work item; first adding commit 8215ec572 on origin/main
+  history: []
+- work_item_id: AID-2026-025
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 354
+  owner_work_item: AID-2026-025
+  claimed_at: '2026-11-20T20:51:09+08:00'
+  updated_at: '2026-11-20T20:51:09+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 8215ec57260b5841df1b9f9aad5a7f26d3073bac
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/354
+    description: Merged work item; first adding commit 8215ec572 on origin/main
+  history: []
+- work_item_id: AID-2026-026
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 354
+  owner_work_item: AID-2026-026
+  claimed_at: '2026-11-20T20:51:09+08:00'
+  updated_at: '2026-11-20T20:51:09+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 8215ec57260b5841df1b9f9aad5a7f26d3073bac
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/354
+    description: Merged work item; first adding commit 8215ec572 on origin/main
+  history: []
+- work_item_id: AID-2026-029
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 356
+  owner_work_item: AID-2026-029
+  claimed_at: '2026-11-20T23:01:17+08:00'
+  updated_at: '2026-11-20T23:01:17+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 02136d14f54de48d2664e17f683a7730cb2c552b
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/356
+    description: Merged work item; first adding commit 84b125508 on origin/main
+  history: []
+- work_item_id: AID-2026-030
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 372
+  owner_work_item: AID-2026-030
+  claimed_at: '2026-11-20T23:26:29+08:00'
+  updated_at: '2026-11-20T23:26:29+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: b074b672fbe691b9a5a28c9c2a7f62afbded51e4
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/372
+    description: Merged work item; first adding commit f019ed157 on origin/main
+  history: []
+- work_item_id: AID-2026-040
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 437
+  owner_work_item: AID-2026-040
+  claimed_at: '2026-11-21T15:51:19+08:00'
+  updated_at: '2026-11-21T15:51:19+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 776f04fb694140f8663a87d593be1da2957673a4
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/437
+    description: Merged work item; first adding commit 1570a7591 on origin/main
+  history: []
+- work_item_id: AID-2026-041
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 521
+  owner_work_item: AID-2026-041
+  claimed_at: '2026-11-21T22:24:14+08:00'
+  updated_at: '2026-11-21T22:24:14+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 1a5342421a9d8314dc1ecc2d050a8f75452c3fc3
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/521
+    description: Merged work item; first adding commit 1a5342421 on origin/main
+  history: []
+- work_item_id: AID-2026-042
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 534
+  owner_work_item: AID-2026-042
+  claimed_at: '2026-11-21T23:36:29+08:00'
+  updated_at: '2026-11-21T23:36:29+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 9944d07ebabdebab48779d9aa6b70e8fc17f61b9
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/534
+    description: Merged work item; first adding commit 9944d07eb on origin/main
+  history: []
+- work_item_id: AID-2026-043
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 567
+  owner_work_item: AID-2026-043
+  claimed_at: '2026-11-22T11:21:47+08:00'
+  updated_at: '2026-11-22T11:21:47+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: caa37a7e6502e1c3a9287d5c497c4aad2e8bb9a5
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/567
+    description: Merged work item; first adding commit caa37a7e6 on origin/main
+  history: []
+- work_item_id: AID-2026-044
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 621
+  owner_work_item: AID-2026-044
+  claimed_at: '2026-11-22T14:21:32+08:00'
+  updated_at: '2026-11-22T14:21:32+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 87f54bb44d9cd2872d7faf7c5c146dd85cae6fc1
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/621
+    description: Merged work item; first adding commit 1ff9d3d2e on origin/main
+  history: []
+- work_item_id: AID-2026-045
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 625
+  owner_work_item: AID-2026-045
+  claimed_at: '2026-11-22T14:23:59+08:00'
+  updated_at: '2026-11-22T14:23:59+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 3015a68f9acec79c9e7ce02b43783e03939dfa79
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/625
+    description: Merged work item; first adding commit 6bb00f3d3 on origin/main
+  history: []
+- work_item_id: AID-2026-046
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 625
+  owner_work_item: AID-2026-046
+  claimed_at: '2026-11-22T14:24:01+08:00'
+  updated_at: '2026-11-22T14:24:01+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 3015a68f9acec79c9e7ce02b43783e03939dfa79
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/625
+    description: Merged work item; first adding commit fb1fa93ff on origin/main
+  history: []
+- work_item_id: AID-2026-047
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 646
+  owner_work_item: AID-2026-047
+  claimed_at: '2026-11-22T15:12:26+08:00'
+  updated_at: '2026-11-22T15:12:26+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 1fd6f01895544c5a107d908ef04bd1b3c543c5ce
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/646
+    description: Merged work item; first adding commit 9a71aaa63 on origin/main
+  history: []
+- work_item_id: AID-2026-048
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 636
+  owner_work_item: AID-2026-048
+  claimed_at: '2026-11-22T15:54:55+08:00'
+  updated_at: '2026-11-22T15:54:55+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: da15eeb6cbc546992db094c6b3ec924953042630
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/636
+    description: Merged work item; first adding commit da15eeb6c on origin/main
+  history: []
+- work_item_id: AID-2026-049
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 678
+  owner_work_item: AID-2026-049
+  claimed_at: '2026-11-22T19:25:04+08:00'
+  updated_at: '2026-11-22T19:25:04+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 8a599491ffbd09b8efc3ff5f201c2831ed660d2c
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/678
+    description: Merged work item; first adding commit 8a599491f on origin/main
+  history: []
+- work_item_id: AID-2026-050
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 737
+  owner_work_item: AID-2026-050
+  claimed_at: '2026-11-23T12:23:02+08:00'
+  updated_at: '2026-11-23T12:23:02+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 9544ebf0931ee302d7f19a50fc9e26df6eb43e59
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/737
+    description: Merged work item; first adding commit 9544ebf09 on origin/main
+  history: []
+- work_item_id: AID-2026-051
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 742
+  owner_work_item: AID-2026-051
+  claimed_at: '2026-11-23T13:04:45+08:00'
+  updated_at: '2026-11-23T13:04:45+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 0b166645b2c35873256baec6cf13cbbcab0225c1
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/742
+    description: Merged work item; first adding commit 0b166645b on origin/main
+  history: []
+- work_item_id: AID-2026-052
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 765
+  owner_work_item: AID-2026-052
+  claimed_at: '2026-11-23T16:50:53+08:00'
+  updated_at: '2026-11-23T16:50:53+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 0e73cc6627487d14051a38790cf98358d6e935e6
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/765
+    description: Merged work item; first adding commit 0e73cc662 on origin/main
+  history: []
+- work_item_id: AID-2026-053
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 777
+  owner_work_item: AID-2026-053
+  claimed_at: '2026-11-23T17:52:21+08:00'
+  updated_at: '2026-11-23T17:52:21+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 40a30e75880884b58a6d3a0fa3d6c278d684915d
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/777
+    description: Merged work item; first adding commit 40a30e758 on origin/main
+  history: []
+- work_item_id: AID-2026-054
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 823
+  owner_work_item: AID-2026-054
+  claimed_at: '2026-11-23T20:57:58+08:00'
+  updated_at: '2026-11-23T20:57:58+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: a3c6280aa5f9524b31a7dbad085567ab761d8a4a
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/823
+    description: Merged work item; first adding commit a3c6280aa on origin/main
+  history: []
+- work_item_id: AID-2026-055
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 896
+  owner_work_item: AID-2026-055
+  claimed_at: '2026-11-24T13:15:05+08:00'
+  updated_at: '2026-11-24T13:15:05+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 84bbe9241aef748b406a969da321e7d3fcda2dc1
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/896
+    description: Merged work item; first adding commit 5585d95ff on origin/main
+  history: []
+- work_item_id: AID-2026-056
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 908
+  owner_work_item: AID-2026-056
+  claimed_at: '2026-11-24T17:03:50+08:00'
+  updated_at: '2026-11-24T17:03:50+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 5d83b3cd248e99ee465adafe04bed70b056cafa2
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/908
+    description: Merged work item; first adding commit 5d83b3cd2 on origin/main
+  history: []
+- work_item_id: AID-2026-057
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 927
+  owner_work_item: AID-2026-057
+  claimed_at: '2026-11-24T18:38:00+08:00'
+  updated_at: '2026-11-24T18:38:00+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: b3a65e54b0b0380430cc4cf8b187d3e0c9edb7a3
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/927
+    description: Merged work item; first adding commit b3a65e54b on origin/main
+  history: []
+- work_item_id: AID-2026-058
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 934
+  owner_work_item: AID-2026-058
+  claimed_at: '2026-11-24T19:39:28+08:00'
+  updated_at: '2026-11-24T19:39:28+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 01a30140450757dc00705cf844a3362e9a2aabbc
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/934
+    description: Merged work item; first adding commit 01a301404 on origin/main
+  history: []
+- work_item_id: AID-2026-059
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 965
+  owner_work_item: AID-2026-059
+  claimed_at: '2026-11-25T05:11:31+08:00'
+  updated_at: '2026-11-25T05:11:31+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: ebadbe843eb69e0e3e2db84b4956d9e8e635e5a8
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/965
+    description: Merged work item; first adding commit ebadbe843 on origin/main
+  history: []
+- work_item_id: AID-2026-060
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 980
+  owner_work_item: AID-2026-060
+  claimed_at: '2026-11-25T03:08:37+08:00'
+  updated_at: '2026-11-25T03:08:37+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: cdf0a4b73078188d8b1b9503376c31ccd6a60096
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/980
+    description: Merged work item; first adding commit 9bc974eb6 on origin/main
+  history: []
+- work_item_id: AID-2026-061
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1027
+  owner_work_item: AID-2026-061
+  claimed_at: '2026-11-25T09:54:41+08:00'
+  updated_at: '2026-11-25T09:54:41+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 350be84b547d040d3a689ffe24fb75cca6bc10c7
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1027
+    description: Merged work item; first adding commit 9d6a03a3f on origin/main
+  history: []
+- work_item_id: AID-2026-062
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1033
+  owner_work_item: AID-2026-062
+  claimed_at: '2026-11-25T10:45:18+08:00'
+  updated_at: '2026-11-25T10:45:18+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 2570ba0c96ff0c3bf6694f2dda8d2527d73a2f24
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1033
+    description: Merged work item; first adding commit 2570ba0c9 on origin/main
+  history: []
+- work_item_id: AID-2026-063
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1040
+  owner_work_item: AID-2026-063
+  claimed_at: '2026-11-25T10:59:22+08:00'
+  updated_at: '2026-11-25T10:59:22+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 6358232963460e993ff3bf4f7cdeb71a3ede15bd
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1040
+    description: Merged work item; first adding commit 371b23687 on origin/main
+  history: []
+- work_item_id: AID-2026-064
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1046
+  owner_work_item: AID-2026-064
+  claimed_at: '2026-11-25T11:43:31+08:00'
+  updated_at: '2026-11-25T11:43:31+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 0bbb35f1a5a86cd9933bc987a7d900f6ba0d2ae3
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1046
+    description: Merged work item; first adding commit f6fe07325 on origin/main
+  history: []
+- work_item_id: AID-2026-066
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1056
+  owner_work_item: AID-2026-066
+  claimed_at: '2026-11-25T13:00:16+08:00'
+  updated_at: '2026-11-25T13:00:16+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: fbb6d31fe0e4be99b6af757d004ab926017ea417
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1056
+    description: Merged work item; first adding commit fbb6d31fe on origin/main
+  history: []
+- work_item_id: AID-2026-067
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1056
+  owner_work_item: AID-2026-067
+  claimed_at: '2026-11-25T13:00:16+08:00'
+  updated_at: '2026-11-25T13:00:16+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: fbb6d31fe0e4be99b6af757d004ab926017ea417
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1056
+    description: Merged work item; first adding commit fbb6d31fe on origin/main
+  history: []
+- work_item_id: AID-2026-068
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1056
+  owner_work_item: AID-2026-068
+  claimed_at: '2026-11-25T13:00:16+08:00'
+  updated_at: '2026-11-25T13:00:16+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: fbb6d31fe0e4be99b6af757d004ab926017ea417
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1056
+    description: Merged work item; first adding commit fbb6d31fe on origin/main
+  history: []
+- work_item_id: AID-2026-069
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1067
+  owner_work_item: AID-2026-069
+  claimed_at: '2026-11-25T13:27:34+08:00'
+  updated_at: '2026-11-25T13:27:34+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 1ae2d0706efbb9fd2f5ea5df544a90135d33d3b0
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1067
+    description: Merged work item; first adding commit ac724ef76 on origin/main
+  history: []
+- work_item_id: AID-2026-070
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1067
+  owner_work_item: AID-2026-070
+  claimed_at: '2026-11-25T13:27:34+08:00'
+  updated_at: '2026-11-25T13:27:34+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 1ae2d0706efbb9fd2f5ea5df544a90135d33d3b0
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1067
+    description: Merged work item; first adding commit ac724ef76 on origin/main
+  history: []
+- work_item_id: AID-2026-071
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1073
+  owner_work_item: AID-2026-071
+  claimed_at: '2026-11-25T14:56:37+08:00'
+  updated_at: '2026-11-25T14:56:37+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: edbc36329fbae924a7e91e46bb196efdc92e59a0
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1073
+    description: Merged work item; first adding commit 45356f6cc on origin/main
+  history: []
+- work_item_id: AID-2026-072
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1082
+  owner_work_item: AID-2026-072
+  claimed_at: '2026-11-25T16:55:03+08:00'
+  updated_at: '2026-11-25T16:55:03+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: afb0c6ceac5f4d7346c4126d2a48bc8b17ffab2e
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1082
+    description: Merged work item; first adding commit 535001713 on origin/main
+  history: []
+- work_item_id: AID-2026-073
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1085
+  owner_work_item: AID-2026-073
+  claimed_at: '2026-11-25T17:18:58+08:00'
+  updated_at: '2026-11-25T17:18:58+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 5bbdc13d84ac40beb634f89c81753d45204250bb
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1085
+    description: Merged work item; first adding commit 1f14163b2 on origin/main
+  history: []
+- work_item_id: AID-2026-074
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1088
+  owner_work_item: AID-2026-074
+  claimed_at: '2026-11-25T19:45:03+08:00'
+  updated_at: '2026-11-25T19:45:03+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 20adc016ff6a43ef49230b8c957a74e224f33223
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1088
+    description: Merged work item; first adding commit 20adc016f on origin/main
+  history: []
+- work_item_id: AID-2026-075
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1091
+  owner_work_item: AID-2026-075
+  claimed_at: '2026-11-25T22:35:52+08:00'
+  updated_at: '2026-11-25T22:35:52+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: dd3b76629cd62ff96481ad62683f69fadfa4ed44
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1091
+    description: Merged work item; first adding commit dd3b76629 on origin/main
+  history: []
+- work_item_id: AID-2026-076
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1155
+  owner_work_item: AID-2026-076
+  claimed_at: '2026-11-25T22:41:11+08:00'
+  updated_at: '2026-11-25T22:41:11+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 2733283bff2bcc744c595ec06b602aadb52c772a
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1155
+    description: Merged work item; first adding commit 95c272628 on origin/main
+  history: []
+- work_item_id: AID-2026-077
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1090
+  owner_work_item: AID-2026-077
+  claimed_at: '2026-11-25T22:57:17+08:00'
+  updated_at: '2026-11-25T22:57:17+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 8f694edf73cf79fab11c08e4cbf4b1a6c17256cd
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1090
+    description: Merged work item; first adding commit 27cbde3c8 on origin/main
+  history: []
+- work_item_id: AID-2026-078
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1158
+  owner_work_item: AID-2026-078
+  claimed_at: '2026-11-25T23:31:34+08:00'
+  updated_at: '2026-11-25T23:31:34+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 1f5ba824aa8b2e350a8d70874b0a45720fa4a441
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1158
+    description: Merged work item; first adding commit fc6a2b91f on origin/main
+  history: []
+- work_item_id: AID-2026-079
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1078
+  owner_work_item: AID-2026-079
+  claimed_at: '2026-11-26T03:00:41+08:00'
+  updated_at: '2026-11-26T03:00:41+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 6314a65bd8be48c1a4bb0768e9960c4c808110ab
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1078
+    description: Merged work item; first adding commit 07abaaabc on origin/main
+  history: []
+- work_item_id: AID-2026-080
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1215
+  owner_work_item: AID-2026-080
+  claimed_at: '2026-11-26T13:19:53+08:00'
+  updated_at: '2026-11-26T13:19:53+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 19952b0a86e38d577c7d5c2bfc8c3991ffef6c0f
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1215
+    description: Merged work item; first adding commit 19952b0a8 on origin/main
+  history: []
+- work_item_id: AID-2026-081
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1228
+  owner_work_item: AID-2026-081
+  claimed_at: '2026-11-26T13:39:15+08:00'
+  updated_at: '2026-11-26T13:39:15+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 9e54e6ccec0d07d11fcf36b2a85b888ded747cdc
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1228
+    description: Merged work item; first adding commit 3c1f39b53 on origin/main
+  history: []
+- work_item_id: AID-2026-082
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1265
+  owner_work_item: AID-2026-082
+  claimed_at: '2026-11-26T15:44:40+08:00'
+  updated_at: '2026-11-26T15:44:40+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 71548b7b9d8efae4ee605a0fb4c9d1d97236138c
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1265
+    description: Merged work item; first adding commit 62c10b0de on origin/main
+  history: []
+- work_item_id: AID-2026-084
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1274
+  owner_work_item: AID-2026-084
+  claimed_at: '2026-11-26T17:59:08+08:00'
+  updated_at: '2026-11-26T17:59:08+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 9bbef167c3fa29b981ab09f2df08db8eac150b39
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1274
+    description: Merged work item; first adding commit da813e61b on origin/main
+  history: []
+- work_item_id: AID-2026-085
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1271
+  owner_work_item: AID-2026-085
+  claimed_at: '2026-11-26T18:04:11+08:00'
+  updated_at: '2026-11-26T18:04:11+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 0b6f56c230a9993a8f65be11fabae47541828e24
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1271
+    description: Merged work item; first adding commit 8576bb021 on origin/main
+  history: []
+- work_item_id: AID-2026-089
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1232
+  owner_work_item: AID-2026-089
+  claimed_at: '2026-11-26T14:32:32+08:00'
+  updated_at: '2026-11-26T14:32:32+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: d914e8a1f8a1ba24c21c41a9249489d544388185
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1232
+    description: Merged work item; first adding commit 9eeb509c2 on origin/main
+  history: []
+- work_item_id: AID-2026-090
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1241
+  owner_work_item: AID-2026-090
+  claimed_at: '2026-11-26T14:51:12+08:00'
+  updated_at: '2026-11-26T14:51:12+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 72c9e68a158a5a0a00936fc7fc0adfc1fa024b5c
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1241
+    description: Merged work item; first adding commit e85d2fcaf on origin/main
+  history: []
+- work_item_id: AID-2026-091
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1242
+  owner_work_item: AID-2026-091
+  claimed_at: '2026-11-26T14:58:45+08:00'
+  updated_at: '2026-11-26T14:58:45+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 1e7f4d0a7baf06103dc3bd504293e25e53bd24c2
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1242
+    description: Merged work item; first adding commit 0e7e04d63 on origin/main
+  history: []
+- work_item_id: AID-2026-092
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1250
+  owner_work_item: AID-2026-092
+  claimed_at: '2026-11-26T15:04:18+08:00'
+  updated_at: '2026-11-26T15:04:18+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 587d7ca9731e50c7a4c8c9df424798f555e0a2db
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1250
+    description: Merged work item; first adding commit f61dc15a7 on origin/main
+  history: []
+- work_item_id: AID-2026-093
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1219
+  owner_work_item: AID-2026-093
+  claimed_at: '2026-11-26T15:10:13+08:00'
+  updated_at: '2026-11-26T15:10:13+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 17b05a0234d861a8bd0b78bccea799b1c11c433f
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1219
+    description: Merged work item; first adding commit 422b906da on origin/main
+  history: []
+- work_item_id: AID-2026-094
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1277
+  owner_work_item: AID-2026-094
+  claimed_at: '2026-11-26T18:06:40+08:00'
+  updated_at: '2026-11-26T18:06:40+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 73fec351c5793a33a1f6e7ed3419c6e8b5e9ca22
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1277
+    description: Merged work item; first adding commit cea14a805 on origin/main
+  history: []
+- work_item_id: AID-2026-095
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1264
+  owner_work_item: AID-2026-095
+  claimed_at: '2026-11-26T15:29:40+08:00'
+  updated_at: '2026-11-26T15:29:40+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 31385bc1aabc1599be2c8320be408c0d170057a8
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1264
+    description: Merged work item; first adding commit e3bbddfd4 on origin/main
+  history: []
+- work_item_id: AID-2026-096
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1256
+  owner_work_item: AID-2026-096
+  claimed_at: '2026-11-26T15:39:52+08:00'
+  updated_at: '2026-11-26T15:39:52+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 64bce1321a33e8f0d70949f7bb5869c5f250522a
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1256
+    description: Merged work item; first adding commit 16ec2ccb4 on origin/main
+  history: []
+- work_item_id: AID-2026-097
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1270
+  owner_work_item: AID-2026-097
+  claimed_at: '2026-11-26T17:18:11+08:00'
+  updated_at: '2026-11-26T17:18:11+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: eb94cab11f8d46b1f42d6123656b448b0b710e1e
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1270
+    description: Merged work item; first adding commit 8cf379037 on origin/main
+  history: []
+- work_item_id: AID-2026-098
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1283
+  owner_work_item: AID-2026-098
+  claimed_at: '2026-11-26T17:41:33+08:00'
+  updated_at: '2026-11-26T17:41:33+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: cdba0b7360b81ba2693c57f0d89ad2e28832272c
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1283
+    description: Merged work item; first adding commit 12c807069 on origin/main
+  history: []
+- work_item_id: AID-2026-099
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1275
+  owner_work_item: AID-2026-099
+  claimed_at: '2026-11-26T17:05:12+08:00'
+  updated_at: '2026-11-26T17:05:12+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: baca092be10eaa531be4fe19b54d644fbd56e92c
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1275
+    description: Merged work item; first adding commit 6773f526c on origin/main
+  history: []
+- work_item_id: AID-2026-100
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1284
+  owner_work_item: AID-2026-100
+  claimed_at: '2026-11-26T17:43:27+08:00'
+  updated_at: '2026-11-26T17:43:27+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: b1f9c51a7b5506bfc9384ac7a1e3188203013d1a
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1284
+    description: Merged work item; first adding commit b8e8da50f on origin/main
+  history: []
+- work_item_id: AID-2026-101
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1248
+  owner_work_item: AID-2026-101
+  claimed_at: '2026-11-26T15:46:07+08:00'
+  updated_at: '2026-11-26T15:46:07+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 6c4956688cd4bf45f08266ae54840100faccefa5
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1248
+    description: Merged work item; first adding commit 3c703170d on origin/main
+  history: []
+- work_item_id: AID-2026-102
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1279
+  owner_work_item: AID-2026-102
+  claimed_at: '2026-11-26T17:31:59+08:00'
+  updated_at: '2026-11-26T17:31:59+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: fa8268fef659891efcdab9164f3e7703e19975c0
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1279
+    description: Merged work item; first adding commit e0d6a9920 on origin/main
+  history: []
+- work_item_id: AID-2026-103
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1251
+  owner_work_item: AID-2026-103
+  claimed_at: '2026-11-26T17:50:38+08:00'
+  updated_at: '2026-11-26T17:50:38+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: f563037ad23aedee89641ab18a4c35e57e8404fe
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1251
+    description: Merged work item; first adding commit 844c08221 on origin/main
+  history: []
+- work_item_id: AID-2026-104
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1281
+  owner_work_item: AID-2026-104
+  claimed_at: '2026-11-26T18:06:14+08:00'
+  updated_at: '2026-11-26T18:06:14+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 533d8646a3fb32b0a1c9d3ed40c01bce33a76b17
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1281
+    description: Merged work item; first adding commit 44b57170b on origin/main
+  history: []
+- work_item_id: AID-2026-105
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1289
+  owner_work_item: AID-2026-105
+  claimed_at: '2026-11-26T20:10:17+08:00'
+  updated_at: '2026-11-26T20:10:17+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 69407c0781a00673852bc0dfbeef2b778d1d29fb
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1289
+    description: Merged work item; first adding commit 864ce2e36 on origin/main
+  history: []
+- work_item_id: AID-2026-106
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1291
+  owner_work_item: AID-2026-106
+  claimed_at: '2026-11-26T20:15:14+08:00'
+  updated_at: '2026-11-26T20:15:14+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 2d52b0c81dc1b779e49516fceb69d89cdc1d9c31
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1291
+    description: Merged work item; first adding commit 89868a09e on origin/main
+  history: []
+- work_item_id: AID-2026-107
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1290
+  owner_work_item: AID-2026-107
+  claimed_at: '2026-11-26T20:10:59+08:00'
+  updated_at: '2026-11-26T20:10:59+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 92a759ec1a8c748fc4091015a3a3e8aa97ddc3e3
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1290
+    description: Merged work item; first adding commit 42aaceb10 on origin/main
+  history: []
+- work_item_id: AID-2026-108
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1292
+  owner_work_item: AID-2026-108
+  claimed_at: '2026-11-26T20:21:06+08:00'
+  updated_at: '2026-11-26T20:21:06+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 3866a121fecbbdf402d50bb0cb2de0277d0275f5
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1292
+    description: Merged work item; first adding commit 147ac836d on origin/main
+  history: []
+- work_item_id: AID-2026-109
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1300
+  owner_work_item: AID-2026-109
+  claimed_at: '2026-11-26T20:58:27+08:00'
+  updated_at: '2026-11-26T20:58:27+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: e3a134de856bbb58581fd688462c9c0282631270
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1300
+    description: Merged work item; first adding commit cc7cb46de on origin/main
+  history: []
+- work_item_id: AID-2026-110
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1304
+  owner_work_item: AID-2026-110
+  claimed_at: '2026-11-26T21:16:20+08:00'
+  updated_at: '2026-11-26T21:16:20+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 7629b9de5e5832fe486ee72d101c4bc5121015e6
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1304
+    description: Merged work item; first adding commit 5ba2bf158 on origin/main
+  history: []
+- work_item_id: AID-2026-111
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1307
+  owner_work_item: AID-2026-111
+  claimed_at: '2026-11-26T21:17:04+08:00'
+  updated_at: '2026-11-26T21:17:04+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: e47dd6f03ddd143be42645beba43c54b46921962
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1307
+    description: Merged work item; first adding commit cc1055998 on origin/main
+  history: []
+- work_item_id: AID-2026-112
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1316
+  owner_work_item: AID-2026-112
+  claimed_at: '2026-11-26T21:31:14+08:00'
+  updated_at: '2026-11-26T21:31:14+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 8722a37b0cd72dc550d99c0eaebe9e7556ce2f95
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1316
+    description: Merged work item; first adding commit cc7d6877e on origin/main
+  history: []
+- work_item_id: AID-2026-113
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1314
+  owner_work_item: AID-2026-113
+  claimed_at: '2026-11-26T21:35:12+08:00'
+  updated_at: '2026-11-26T21:35:12+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: d6cad634f1341a8943aa89dd5ef8bf75f6d56199
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1314
+    description: Merged work item; first adding commit 9142698fa on origin/main
+  history: []
+- work_item_id: AID-2026-114
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1287
+  owner_work_item: AID-2026-114
+  claimed_at: '2026-11-26T21:41:45+08:00'
+  updated_at: '2026-11-26T21:41:45+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 17bfc43c2b9f2f9c91cb0eb074580141e701c0b3
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1287
+    description: Merged work item; first adding commit 17bfc43c2 on origin/main
+  history: []
+- work_item_id: AID-2026-115
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1322
+  owner_work_item: AID-2026-115
+  claimed_at: '2026-11-26T21:43:39+08:00'
+  updated_at: '2026-11-26T21:43:39+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: ac301e09799bcc094e015db4e12d2e6ff53d5010
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1322
+    description: Merged work item; first adding commit 8601c32e3 on origin/main
+  history: []
+- work_item_id: AID-2026-116
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1321
+  owner_work_item: AID-2026-116
+  claimed_at: '2026-11-26T21:32:35+08:00'
+  updated_at: '2026-11-26T21:32:35+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: a7cf5256e975ff25fd2f75b3b5051b16d8d77d36
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1321
+    description: Merged work item; first adding commit 27bfa5977 on origin/main
+  history: []
+- work_item_id: AID-2026-140
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1324
+  owner_work_item: AID-2026-140
+  claimed_at: '2026-11-26T22:12:29+08:00'
+  updated_at: '2026-11-26T22:12:29+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: f0d881a88f0f70d45e2c67e22fc372a95198c991
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1324
+    description: Merged work item; first adding commit d0cc99ade on origin/main
+  history: []
+- work_item_id: AID-2026-150
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1320
+  owner_work_item: AID-2026-150
+  claimed_at: '2026-11-26T22:02:51+08:00'
+  updated_at: '2026-11-26T22:02:51+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 6ab36b3697a0994d8de449d2b9c344f23aac0fda
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1320
+    description: Merged work item; first adding commit 6ab36b369 on origin/main
+  history: []
+- work_item_id: AID-2026-151
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1329
+  owner_work_item: AID-2026-151
+  claimed_at: '1970-01-01T00:00:00Z'
+  updated_at: '1970-01-01T00:00:00Z'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 76684cb28b132917b3f250e9bf6430713e61c362
+  reservation:
+    method: legacy-ledger
+    ref: refs/heads/aid-ledger
+    ref_commit_sha: null
+  evidence:
+  - type: legacy-ledger
+    reference: aid-ledger.yaml
+    description: legacy carrier merged
+  history: []
+- work_item_id: AID-2026-170
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1328
+  owner_work_item: AID-2026-170
+  claimed_at: '2026-11-26T22:10:15+08:00'
+  updated_at: '2026-11-26T22:10:15+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 7fba7196b95bcfa1d86fbcda01b9ebd06997506a
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1328
+    description: Merged work item; first adding commit fdc36af7d on origin/main
+  history: []
+- work_item_id: AID-2026-172
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1327
+  owner_work_item: AID-2026-172
+  claimed_at: '2026-11-26T22:06:29+08:00'
+  updated_at: '2026-11-26T22:06:29+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 1e9341da603dec78377fed240f4d6dbabaa8838e
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1327
+    description: Merged work item; first adding commit e9a649137 on origin/main
+  history: []
+- work_item_id: AID-2026-173
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1330
+  owner_work_item: AID-2026-173
+  claimed_at: '2026-11-26T22:19:04+08:00'
+  updated_at: '2026-11-26T22:19:04+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: ae446050718d7a885618c79f96132b2413c1be59
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1330
+    description: Merged work item; first adding commit d69f4041b on origin/main
+  history: []
+- work_item_id: AID-2026-174
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1329
+  owner_work_item: AID-2026-174
+  claimed_at: '2026-11-26T23:27:30+08:00'
+  updated_at: '2026-11-26T23:27:30+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 76684cb28b132917b3f250e9bf6430713e61c362
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1329
+    description: Merged work item; first adding commit 2afe24cdb on origin/main
+  history: []
+- work_item_id: AID-2026-183
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1333
+  owner_work_item: AID-2026-183
+  claimed_at: '2026-11-26T22:51:29+08:00'
+  updated_at: '2026-11-26T22:51:29+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: de9f6e9646c5140fe9c9767b1fd2fe15cc38b022
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1333
+    description: Merged work item; first adding commit 3a2682dfb on origin/main
+  history: []
+- work_item_id: AID-2026-186
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1335
+  owner_work_item: AID-2026-186
+  claimed_at: '2026-11-26T22:53:42+08:00'
+  updated_at: '2026-11-26T22:53:42+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 6306a858afc378f27448f8796c6b6604dfa240bb
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1335
+    description: Merged work item; first adding commit c6e6e795d on origin/main
+  history: []
+- work_item_id: AID-2026-187
+  status: ABANDONED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1336
+  owner_work_item: AID-2026-187
+  claimed_at: '1970-01-01T00:00:00Z'
+  updated_at: '1970-01-01T00:00:00Z'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: null
+  reservation:
+    method: legacy-ledger
+    ref: refs/heads/aid-ledger
+    ref_commit_sha: null
+  evidence:
+  - type: legacy-ledger
+    reference: aid-ledger.yaml
+    description: legacy carrier closed unmerged
+  history: []
+- work_item_id: AID-2026-188
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1337
+  owner_work_item: AID-2026-188
+  claimed_at: '2026-11-26T23:19:46+08:00'
+  updated_at: '2026-11-26T23:19:46+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: f6ef2545913754da7859abfaad5559fdc68074ce
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1337
+    description: Merged work item; first adding commit 1e0c7cad6 on origin/main
+  history: []
+- work_item_id: AID-2026-189
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1339
+  owner_work_item: AID-2026-189
+  claimed_at: '2026-11-26T23:37:25+08:00'
+  updated_at: '2026-11-26T23:37:25+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 4326669caa6c43193d34219a0451b80762b712ff
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1339
+    description: Merged work item; first adding commit 0eb2d6710 on origin/main
+  history: []
+- work_item_id: AID-2026-190
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1343
+  owner_work_item: AID-2026-190
+  claimed_at: '2026-11-27T02:11:07+08:00'
+  updated_at: '2026-11-27T02:11:07+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 2f4f4118bd2c2d8e43a23975f667deeb06553f3c
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1343
+    description: Merged work item; first adding commit a38a2c3e5 on origin/main
+  history: []
+- work_item_id: AID-2026-191
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1345
+  owner_work_item: AID-2026-191
+  claimed_at: '2026-11-27T02:15:27+08:00'
+  updated_at: '2026-11-27T02:15:27+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 5df2ee0020a0eaf2092d38f5866ebe37dab0a0d0
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1345
+    description: Merged work item; first adding commit 95b0f01c3 on origin/main
+  history: []
+- work_item_id: AID-2026-192
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1344
+  owner_work_item: AID-2026-192
+  claimed_at: '2026-11-27T02:21:13+08:00'
+  updated_at: '2026-11-27T02:21:13+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: b68c611d226ce64bd8253b86888dddfbe27d9e79
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1344
+    description: Merged work item; first adding commit 41947e942 on origin/main
+  history: []
+- work_item_id: AID-2026-193
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1346
+  owner_work_item: AID-2026-193
+  claimed_at: '2026-11-27T02:31:26+08:00'
+  updated_at: '2026-11-27T02:31:26+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 6227356311553a7c001a6b0333d135f0e659f0ed
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1346
+    description: Merged work item; first adding commit d238fcf06 on origin/main
+  history: []
+- work_item_id: AID-2026-197
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1348
+  owner_work_item: AID-2026-197
+  claimed_at: '2026-11-27T02:24:09+08:00'
+  updated_at: '2026-11-27T02:24:09+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: cff08dc353eff8c82228a5cc8d73171cd41da378
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1348
+    description: Merged work item; first adding commit fc7920046 on origin/main
+  history: []
+- work_item_id: AID-2026-198
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1342
+  owner_work_item: AID-2026-198
+  claimed_at: '2026-11-27T02:31:30+08:00'
+  updated_at: '2026-11-27T02:31:30+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 9dc98a526703917bd28862f97f75054beacf1388
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1342
+    description: Merged work item; first adding commit 229f44402 on origin/main
+  history: []
+- work_item_id: AID-2026-199
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1353
+  owner_work_item: AID-2026-199
+  claimed_at: '2026-11-27T02:40:34+08:00'
+  updated_at: '2026-11-27T02:40:34+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: a66bc2aa321c86987c88a98c62c4c74e447db50f
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1353
+    description: Merged work item; first adding commit a0a3de0d7 on origin/main
+  history: []
+- work_item_id: AID-2026-200
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1351
+  owner_work_item: AID-2026-200
+  claimed_at: '2026-11-27T02:55:27+08:00'
+  updated_at: '2026-11-27T02:55:27+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: a821a7d9526f1d6447d6ea71d1745c5cdc8b54ef
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1351
+    description: Merged work item; first adding commit 1737a636f on origin/main
+  history: []
+- work_item_id: AID-2026-204
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1354
+  owner_work_item: AID-2026-204
+  claimed_at: '2026-11-27T02:46:04+08:00'
+  updated_at: '2026-11-27T02:46:04+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 980e54d9b17af04eaaf754f160c3068eb0adc6fa
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1354
+    description: Merged work item; first adding commit 189ba0d53 on origin/main
+  history: []
+- work_item_id: AID-2026-210
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1357
+  owner_work_item: AID-2026-210
+  claimed_at: '2026-11-27T03:00:48+08:00'
+  updated_at: '2026-11-27T03:00:48+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 951051313b6cac60b1a3acb069e08de6c5e796c0
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1357
+    description: Merged work item; first adding commit 36653ee58 on origin/main
+  history: []
+- work_item_id: AID-2026-211
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1360
+  owner_work_item: AID-2026-211
+  claimed_at: '2026-11-27T11:06:30+08:00'
+  updated_at: '2026-11-27T11:06:30+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 4fa75e7809a9319db2ab04489cc8f2f9e17fbd79
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1360
+    description: Merged work item; first adding commit 8fb2ee5f8 on origin/main
+  history: []
+- work_item_id: AID-2026-212
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1451
+  owner_work_item: AID-2026-212
+  claimed_at: '2026-11-27T12:27:20+08:00'
+  updated_at: '2026-11-27T12:27:20+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 4e56895cab4d44a59213e1050007626d9249d040
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1451
+    description: Merged work item; first adding commit b17899b97 on origin/main
+  history: []
+- work_item_id: AID-2026-240
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1347
+  owner_work_item: AID-2026-240
+  claimed_at: '2026-11-27T02:59:45+08:00'
+  updated_at: '2026-11-27T02:59:45+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 7e6e8ed96554bfb4f4dd3b1c76074b24be79e4a0
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1347
+    description: Merged work item; first adding commit 7cca5285b on origin/main
+  history: []
+- work_item_id: AID-2026-241
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1325
+  owner_work_item: AID-2026-241
+  claimed_at: '2026-11-27T11:22:27+08:00'
+  updated_at: '2026-11-27T11:22:27+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 3daebd2cad699b5ecccd7ffa7df86029dfbecec6
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1325
+    description: Merged work item; first adding commit 05c9f05eb on origin/main
+  history: []
+- work_item_id: AID-2026-242
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1297
+  owner_work_item: AID-2026-242
+  claimed_at: '2026-11-27T11:29:37+08:00'
+  updated_at: '2026-11-27T11:29:37+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 044dee41cd95a0cbb27bd2556bcb2229d273dcad
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1297
+    description: Merged work item; first adding commit 2a0bbb23d on origin/main
+  history: []
+- work_item_id: AID-2026-250
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1388
+  owner_work_item: AID-2026-250
+  claimed_at: '2026-11-27T12:30:40+08:00'
+  updated_at: '2026-11-27T12:30:40+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 652aeaaea9cc77db959e6241f65184b4bf21c9c8
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1388
+    description: Merged work item; first adding commit 812c7fd10 on origin/main
+  history: []
+- work_item_id: AID-2026-251
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1364
+  owner_work_item: AID-2026-251
+  claimed_at: '2026-11-27T11:32:33+08:00'
+  updated_at: '2026-11-27T11:32:33+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: a7a252eb670b31066a0ffea35dc28cbe6ef5b836
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1364
+    description: Merged work item; first adding commit 5ef1e18ae on origin/main
+  history: []
+- work_item_id: AID-2026-252
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1365
+  owner_work_item: AID-2026-252
+  claimed_at: '2026-11-27T11:30:15+08:00'
+  updated_at: '2026-11-27T11:30:15+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 987d26021affbb5ba6d651e0fb5985d6bd4026a5
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1365
+    description: Merged work item; first adding commit e718dbb61 on origin/main
+  history: []
+- work_item_id: AID-2026-253
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1374
+  owner_work_item: AID-2026-253
+  claimed_at: '2026-11-27T12:05:54+08:00'
+  updated_at: '2026-11-27T12:05:54+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 6f597e2dd8b6e879bf7539aa16b88a39504d9c49
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1374
+    description: Merged work item; first adding commit fa63c35f4 on origin/main
+  history: []
+- work_item_id: AID-2026-254
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1370
+  owner_work_item: AID-2026-254
+  claimed_at: '2026-11-27T11:45:01+08:00'
+  updated_at: '2026-11-27T11:45:01+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 40195e8bf96b9cc6aa254066b9b72968f29ac361
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1370
+    description: Merged work item; first adding commit a4701042c on origin/main
+  history: []
+- work_item_id: AID-2026-255
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1454
+  owner_work_item: AID-2026-255
+  claimed_at: '2026-11-27T14:55:05+08:00'
+  updated_at: '2026-11-27T14:55:05+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 3d9b32bef6775974117ea0ab925179acf43c6ecb
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1454
+    description: Merged work item; first adding commit 25d02b671 on origin/main
+  history: []
+- work_item_id: AID-2026-256
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1380
+  owner_work_item: AID-2026-256
+  claimed_at: '2026-11-27T12:21:21+08:00'
+  updated_at: '2026-11-27T12:21:21+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 46dac1b1e198c8d88daff5a34faf759ecb075869
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1380
+    description: Merged work item; first adding commit d25a794bd on origin/main
+  history: []
+- work_item_id: AID-2026-260
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1368
+  owner_work_item: AID-2026-260
+  claimed_at: '2026-11-27T11:41:45+08:00'
+  updated_at: '2026-11-27T11:41:45+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 10d33b3f6c012e1c0d5649a5279cadb6d27b1a2f
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1368
+    description: Merged work item; first adding commit fdb348e27 on origin/main
+  history: []
+- work_item_id: AID-2026-261
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1383
+  owner_work_item: AID-2026-261
+  claimed_at: '2026-11-27T12:26:24+08:00'
+  updated_at: '2026-11-27T12:26:24+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 242cf101c8b79007ad2fb8d9c89681224577188d
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1383
+    description: Merged work item; first adding commit 8cfd80240 on origin/main
+  history: []
+- work_item_id: AID-2026-262
+  status: CLAIMED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: null
+  owner_work_item: AID-2026-262
+  claimed_at: '1970-01-01T00:00:00Z'
+  updated_at: '1970-01-01T00:00:00Z'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: null
+  reservation:
+    method: legacy-ledger
+    ref: refs/heads/aid-ledger
+    ref_commit_sha: null
+  evidence:
+  - type: legacy-ledger
+    reference: aid-ledger.yaml
+    description: legacy OCCUPIED_BY_OTHER without a resolvable carrier
+  history: []
+- work_item_id: AID-2026-263
+  status: CLAIMED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: null
+  owner_work_item: AID-2026-263
+  claimed_at: '1970-01-01T00:00:00Z'
+  updated_at: '1970-01-01T00:00:00Z'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: null
+  reservation:
+    method: legacy-ledger
+    ref: refs/heads/aid-ledger
+    ref_commit_sha: null
+  evidence:
+  - type: legacy-ledger
+    reference: aid-ledger.yaml
+    description: legacy RESERVED without a resolvable carrier
+  history: []
+- work_item_id: AID-2026-264
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1423
+  owner_work_item: AID-2026-264
+  claimed_at: '2026-11-27T13:14:34+08:00'
+  updated_at: '2026-11-27T13:14:34+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 5670357db7a836d4f26838dbaf99494af41e2b65
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1423
+    description: Merged work item; first adding commit 01138246c on origin/main
+  history: []
+- work_item_id: AID-2026-265
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1418
+  owner_work_item: AID-2026-265
+  claimed_at: '2026-11-27T12:46:55+08:00'
+  updated_at: '2026-11-27T12:46:55+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 460f437eb3496e10737b9ef20f4b816e34d155c4
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1418
+    description: Merged work item; first adding commit 6c511ad21 on origin/main
+  history: []
+- work_item_id: AID-2026-267
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1402
+  owner_work_item: AID-2026-267
+  claimed_at: '2026-11-27T11:42:15+08:00'
+  updated_at: '2026-11-27T11:42:15+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: af2660d55a93278157fa6668aba338daf81e127c
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1402
+    description: Merged work item; first adding commit ab2ab1e0d on origin/main
+  history: []
+- work_item_id: AID-2026-268
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1392
+  owner_work_item: AID-2026-268
+  claimed_at: '2026-11-27T12:01:43+08:00'
+  updated_at: '2026-11-27T12:01:43+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 756e1e25d735f526254fc3241b47880fef527b24
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1392
+    description: Merged work item; first adding commit 664430439 on origin/main
+  history: []
+- work_item_id: AID-2026-269
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1425
+  owner_work_item: AID-2026-269
+  claimed_at: '2026-11-28T08:21:49+08:00'
+  updated_at: '2026-11-28T08:21:49+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 54b8654b3c45c5b620a5ef872bbc3f0eb3f8f697
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1425
+    description: Merged work item; first adding commit 54b8654b3 on origin/main
+  history: []
+- work_item_id: AID-2026-279
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1372
+  owner_work_item: AID-2026-279
+  claimed_at: '2026-11-27T12:03:35+08:00'
+  updated_at: '2026-11-27T12:03:35+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 386d8f57b02d8e3c511ff0e3980b9ce0af8b3028
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1372
+    description: Merged work item; first adding commit 84790d361 on origin/main
+  history: []
+- work_item_id: AID-2026-280
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1404
+  owner_work_item: AID-2026-280
+  claimed_at: '2026-11-27T13:01:57+08:00'
+  updated_at: '2026-11-27T13:01:57+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 31b305d7c8665d0496cea00d2b0acb6626bde072
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1404
+    description: Merged work item; first adding commit 3d71379dc on origin/main
+  history: []
+- work_item_id: AID-2026-281
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1409
+  owner_work_item: AID-2026-281
+  claimed_at: '2026-11-27T13:14:48+08:00'
+  updated_at: '2026-11-27T13:14:48+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 229c0a6b51f4c761ed969337f6ddf7d0bbbb7d0c
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1409
+    description: Merged work item; first adding commit 08d1b86ac on origin/main
+  history: []
+- work_item_id: AID-2026-284
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1440
+  owner_work_item: AID-2026-284
+  claimed_at: '2026-11-27T14:53:25+08:00'
+  updated_at: '2026-11-27T14:53:25+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: f20fff10307f512d3c299b6371f172c85f941e30
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1440
+    description: Merged work item; first adding commit 70bd97b22 on origin/main
+  history: []
+- work_item_id: AID-2026-285
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1447
+  owner_work_item: AID-2026-285
+  claimed_at: '2026-11-27T15:08:33+08:00'
+  updated_at: '2026-11-27T15:08:33+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 08167492c786658bbb2f0ebdfd24236157ebd169
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1447
+    description: Merged work item; first adding commit 95c193302 on origin/main
+  history: []
+- work_item_id: AID-2026-286
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1448
+  owner_work_item: AID-2026-286
+  claimed_at: '2026-11-27T16:04:50+08:00'
+  updated_at: '2026-11-27T16:04:50+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 159095f3cc5dca9d40ad3856aaa493b164c0ca2e
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1448
+    description: Merged work item; first adding commit c6b8651b2 on origin/main
+  history: []
+- work_item_id: AID-2026-287
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1473
+  owner_work_item: AID-2026-287
+  claimed_at: '2026-11-28T08:42:50+08:00'
+  updated_at: '2026-11-28T08:42:50+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 4a6cdd0e7c5dc0db53be37a2f945e02c59d5abf9
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1473
+    description: Merged work item; first adding commit 4a6cdd0e7 on origin/main
+  history: []
+- work_item_id: AID-2026-290
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1408
+  owner_work_item: AID-2026-290
+  claimed_at: '2026-11-27T14:14:15+08:00'
+  updated_at: '2026-11-27T14:14:15+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 7ecf2a8e7d1e40a13f6af6d4335a6766a222194f
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1408
+    description: Merged work item; first adding commit 7ecf2a8e7 on origin/main
+  history: []
+- work_item_id: AID-2026-291
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1427
+  owner_work_item: AID-2026-291
+  claimed_at: '2026-11-27T16:05:51+08:00'
+  updated_at: '2026-11-27T16:05:51+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 93532c4899cc130ae4cc6a6c26b39f1499c26f6d
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1427
+    description: Merged work item; first adding commit 426c0162e on origin/main
+  history: []
+- work_item_id: AID-2026-292
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1483
+  owner_work_item: AID-2026-292
+  claimed_at: '2026-11-28T10:12:59+08:00'
+  updated_at: '2026-11-28T10:12:59+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: cc3e9ed9dbe0eb860a583bc51d6b086248624766
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1483
+    description: Merged work item; first adding commit cc3e9ed9d on origin/main
+  history: []
+- work_item_id: AID-2026-293
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1478
+  owner_work_item: AID-2026-293
+  claimed_at: '2026-11-28T10:31:54+08:00'
+  updated_at: '2026-11-28T10:31:54+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 5ce2491275841d93f59e295a1741599b28ab16fb
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1478
+    description: Merged work item; first adding commit 3fd2d759b on origin/main
+  history: []
+- work_item_id: AID-2026-294
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1491
+  owner_work_item: AID-2026-294
+  claimed_at: '2026-11-28T10:55:18+08:00'
+  updated_at: '2026-11-28T10:55:18+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 3894677073191bf6b7ac113e9baf5874c864fffb
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1491
+    description: Merged work item; first adding commit 389467707 on origin/main
+  history: []
+- work_item_id: AID-2026-295
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1503
+  owner_work_item: AID-2026-295
+  claimed_at: '2026-11-28T11:29:47+08:00'
+  updated_at: '2026-11-28T11:29:47+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 5f6fc4c44b6055a0cfd3ab0da9850fc80c127746
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1503
+    description: Merged work item; first adding commit 5f6fc4c44 on origin/main
+  history: []
+- work_item_id: AID-2026-296
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1490
+  owner_work_item: AID-2026-296
+  claimed_at: '2026-11-28T11:26:31+08:00'
+  updated_at: '2026-11-28T11:26:31+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: cbfc2127fb8e9694134a3837c0cd945258ec1671
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1490
+    description: Merged work item; first adding commit cbfc2127f on origin/main
+  history: []
+- work_item_id: AID-2026-302
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1430
+  owner_work_item: AID-2026-302
+  claimed_at: '2026-11-27T17:45:22+08:00'
+  updated_at: '2026-11-27T17:45:22+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 56c3fe1b2e3859fdd713a6dece3a959943b8a20a
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1430
+    description: Merged work item; first adding commit 56c3fe1b2 on origin/main
+  history: []
+- work_item_id: AID-2026-303
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1496
+  owner_work_item: AID-2026-303
+  claimed_at: '2026-11-27T15:00:09+08:00'
+  updated_at: '2026-11-27T15:00:09+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 48ea7bf125fbf614f8bcd746d8ba3d9fb5768c01
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1496
+    description: Merged work item; first adding commit fec29ef69 on origin/main
+  history: []
+- work_item_id: AID-2026-311
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1432
+  owner_work_item: AID-2026-311
+  claimed_at: '2026-11-27T17:38:43+08:00'
+  updated_at: '2026-11-27T17:38:43+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: efbdebfaa9fede98c9f2501e2fb941f344d0ca03
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1432
+    description: Merged work item; first adding commit cff54dd65 on origin/main
+  history: []
+- work_item_id: AID-2026-312
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1411
+  owner_work_item: AID-2026-312
+  claimed_at: '2026-11-28T11:29:51+08:00'
+  updated_at: '2026-11-28T11:29:51+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 3da2e32cf0475a5d7645862a4a288988f69f09cc
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1411
+    description: Merged work item; first adding commit 3da2e32cf on origin/main
+  history: []
+- work_item_id: AID-2026-313
+  status: CLAIMED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: null
+  owner_work_item: AID-2026-313
+  claimed_at: '1970-01-01T00:00:00Z'
+  updated_at: '1970-01-01T00:00:00Z'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: null
+  reservation:
+    method: legacy-ledger
+    ref: refs/heads/aid-ledger
+    ref_commit_sha: null
+  evidence:
+  - type: legacy-ledger
+    reference: aid-ledger.yaml
+    description: legacy RESERVED without a resolvable carrier
+  history: []
+- work_item_id: AID-2026-321
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1442
+  owner_work_item: AID-2026-321
+  claimed_at: '2026-11-27T15:09:34+08:00'
+  updated_at: '2026-11-27T15:09:34+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 5be0d93f305ca0c1790abe41b4eb23cd7c71a6a0
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1442
+    description: Merged work item; first adding commit 5be0d93f3 on origin/main
+  history: []
+- work_item_id: AID-2026-323
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1446
+  owner_work_item: AID-2026-323
+  claimed_at: '2026-11-27T15:20:44+08:00'
+  updated_at: '2026-11-27T15:20:44+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: f64a3f8bd004135e9873aeafc40e50ef10e10a9c
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1446
+    description: Merged work item; first adding commit f64a3f8bd on origin/main
+  history: []
+- work_item_id: AID-2026-324
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1465
+  owner_work_item: AID-2026-324
+  claimed_at: '2026-11-27T16:59:48+08:00'
+  updated_at: '2026-11-27T16:59:48+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 981397d99b76123678382bcbdd298333a72176c9
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1465
+    description: Merged work item; first adding commit 981397d99 on origin/main
+  history: []
+- work_item_id: AID-2026-325
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1456
+  owner_work_item: AID-2026-325
+  claimed_at: '2026-11-27T16:16:03+08:00'
+  updated_at: '2026-11-27T16:16:03+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: cd1722e753a429247d91f990caa2defac565e308
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1456
+    description: Merged work item; first adding commit cd1722e75 on origin/main
+  history: []
+- work_item_id: AID-2026-326
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1476
+  owner_work_item: AID-2026-326
+  claimed_at: '2026-11-28T08:26:10+08:00'
+  updated_at: '2026-11-28T08:26:10+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: cc5d22b9126e00e3f93ffe71282554309908bc89
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1476
+    description: Merged work item; first adding commit cc5d22b91 on origin/main
+  history: []
+- work_item_id: AID-2026-327
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1495
+  owner_work_item: AID-2026-327
+  claimed_at: '2026-11-28T11:11:53+08:00'
+  updated_at: '2026-11-28T11:11:53+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 79b38c944480926195edd64e3d751a1ce5010fb7
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1495
+    description: Merged work item; first adding commit 79b38c944 on origin/main
+  history: []
+- work_item_id: AID-2026-328
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1489
+  owner_work_item: AID-2026-328
+  claimed_at: '2026-11-28T12:27:21+08:00'
+  updated_at: '2026-11-28T12:27:21+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 4bed709ca5ec8b032931febdd1a22aa30bf93a8c
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1489
+    description: Merged work item; first adding commit 4bed709ca on origin/main
+  history: []
+- work_item_id: AID-2026-329
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1460
+  owner_work_item: AID-2026-329
+  claimed_at: '2026-11-28T08:42:40+08:00'
+  updated_at: '2026-11-28T08:42:40+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: bc641b5e2704d226473dfff57f6ad12724a43839
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1460
+    description: Merged work item; first adding commit c335ebcaf on origin/main
+  history: []
+- work_item_id: AID-2026-330
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1501
+  owner_work_item: AID-2026-330
+  claimed_at: '2026-11-28T09:01:24+08:00'
+  updated_at: '2026-11-28T09:01:24+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 6820fed4036776445d51937bea13b8e6a9822b5e
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1501
+    description: Merged work item; first adding commit d8ec2ae0d on origin/main
+  history: []
+- work_item_id: AID-2026-331
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1514
+  owner_work_item: AID-2026-331
+  claimed_at: '2026-11-28T10:39:50+08:00'
+  updated_at: '2026-11-28T10:39:50+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: f80eef71c9afd29c7132c73ecbebf9bdc4a05343
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1514
+    description: Merged work item; first adding commit d8d2a4288 on origin/main
+  history: []
+- work_item_id: AID-2026-332
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1504
+  owner_work_item: AID-2026-332
+  claimed_at: '2026-11-28T10:22:45+08:00'
+  updated_at: '2026-11-28T10:22:45+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: b51da8c0d4a58727c5a0d407ee76675f71648797
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1504
+    description: Merged work item; first adding commit b51da8c0d on origin/main
+  history: []
+- work_item_id: AID-2026-333
+  status: ABANDONED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1515
+  owner_work_item: AID-2026-333
+  claimed_at: '1970-01-01T00:00:00Z'
+  updated_at: '1970-01-01T00:00:00Z'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: null
+  reservation:
+    method: legacy-ledger
+    ref: refs/heads/aid-ledger
+    ref_commit_sha: null
+  evidence:
+  - type: legacy-ledger
+    reference: aid-ledger.yaml
+    description: legacy carrier closed unmerged
+  history: []
+- work_item_id: AID-2026-340
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1492
+  owner_work_item: AID-2026-340
+  claimed_at: '2026-11-28T08:50:52+08:00'
+  updated_at: '2026-11-28T08:50:52+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 1ccb3b5f16d8d160e35b8c701afb592041d86ca9
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1492
+    description: Merged work item; first adding commit fc56e55af on origin/main
+  history: []
+- work_item_id: AID-2026-341
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1506
+  owner_work_item: AID-2026-341
+  claimed_at: '2026-11-28T11:54:54+08:00'
+  updated_at: '2026-11-28T11:54:54+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: c895d2ee722f963ae3e2e9ed994462b0ed172257
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1506
+    description: Merged work item; first adding commit c895d2ee7 on origin/main
+  history: []
+- work_item_id: AID-2026-343
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1468
+  owner_work_item: AID-2026-343
+  claimed_at: '2026-11-28T12:01:41+08:00'
+  updated_at: '2026-11-28T12:01:41+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 79545846ad844b5c588406581561fd5a859f4153
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1468
+    description: Merged work item; first adding commit a1da587ea on origin/main
+  history: []
+- work_item_id: AID-2026-344
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1526
+  owner_work_item: AID-2026-344
+  claimed_at: '2026-11-28T12:19:03+08:00'
+  updated_at: '2026-11-28T12:19:03+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: e40268e1231920bb4520fda02134cb395a2c039a
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1526
+    description: Merged work item; first adding commit e40268e12 on origin/main
+  history: []
