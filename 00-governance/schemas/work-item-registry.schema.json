@@ -1,0 +1,722 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/oahcom/AiMemoryBrainArchitecture/blob/main/00-governance/schemas/work-item-registry.schema.json",
+  "title": "Canonical Work Item Registry Record",
+  "description": "One canonical record per work item. Field values are evidence-backed; views such as INDEX.md are derived or manually maintained projections.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "work_item_id",
+    "title",
+    "owner",
+    "class",
+    "risk",
+    "status",
+    "prompt",
+    "provenance",
+    "supersedes",
+    "superseded_by",
+    "source_refs"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "work_item_id": {
+      "type": "string",
+      "pattern": "^AID-[0-9]{4}-[0-9]{3}$"
+    },
+    "title": {
+      "$ref": "#/$defs/stringField"
+    },
+    "owner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "accountable_owner",
+        "attribution",
+        "authority",
+        "resolution"
+      ],
+      "properties": {
+        "accountable_owner": {
+          "$ref": "#/$defs/stringField"
+        },
+        "attribution": {
+          "$ref": "#/$defs/stringField"
+        },
+        "authority": {
+          "$ref": "#/$defs/stringField"
+        },
+        "resolution": {
+          "type": "string",
+          "enum": [
+            "SINGLE_SOURCE",
+            "MULTIPLE_DISTINCT_ROLES",
+            "COMPOSITE_DISPLAY_ONLY",
+            "CONFLICT",
+            "UNCONFIRMED"
+          ]
+        }
+      }
+    },
+    "class": {
+      "$ref": "#/$defs/classField"
+    },
+    "risk": {
+      "$ref": "#/$defs/riskField"
+    },
+    "status": {
+      "$ref": "#/$defs/statusField"
+    },
+    "prompt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prompt_status",
+        "prompt_id",
+        "prompt_sha256",
+        "prompt_path",
+        "prompt_version",
+        "prompt_commit_sha",
+        "provenance_note"
+      ],
+      "properties": {
+        "prompt_status": {
+          "type": "string",
+          "enum": [
+            "PINNED",
+            "IDENTIFIED_UNPINNED",
+            "LEGACY_PROVENANCE_ONLY",
+            "NOT_PRESENT",
+            "NOT_APPLICABLE",
+            "UNCONFIRMED"
+          ]
+        },
+        "prompt_id": {
+          "$ref": "#/$defs/stringField"
+        },
+        "prompt_sha256": {
+          "$ref": "#/$defs/sha256Field"
+        },
+        "prompt_path": {
+          "$ref": "#/$defs/stringField"
+        },
+        "prompt_version": {
+          "$ref": "#/$defs/stringField"
+        },
+        "prompt_commit_sha": {
+          "$ref": "#/$defs/gitShaField"
+        },
+        "provenance_note": {
+          "$ref": "#/$defs/stringField"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "prompt_status": {
+                "const": "PINNED"
+              }
+            },
+            "required": [
+              "prompt_status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "prompt_id": {
+                "properties": {
+                  "state": {
+                    "const": "KNOWN"
+                  }
+                }
+              },
+              "prompt_sha256": {
+                "properties": {
+                  "state": {
+                    "const": "KNOWN"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "prompt_status": {
+                "const": "LEGACY_PROVENANCE_ONLY"
+              }
+            },
+            "required": [
+              "prompt_status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "provenance_note": {
+                "properties": {
+                  "state": {
+                    "const": "KNOWN"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "grade",
+        "evidence"
+      ],
+      "properties": {
+        "grade": {
+          "type": "string",
+          "enum": [
+            "PRIMARY",
+            "CORROBORATED",
+            "DERIVED",
+            "CONFLICTED",
+            "UNCONFIRMED"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        }
+      }
+    },
+    "supersedes": {
+      "$ref": "#/$defs/idListField"
+    },
+    "superseded_by": {
+      "$ref": "#/$defs/idListField"
+    },
+    "source_refs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/sourceRef"
+      }
+    }
+  },
+  "$defs": {
+    "fieldState": {
+      "type": "string",
+      "enum": [
+        "KNOWN",
+        "UNKNOWN",
+        "NOT_APPLICABLE",
+        "UNDECIDED",
+        "KNOWN_EMPTY",
+        "UNCONFIRMED"
+      ]
+    },
+    "stringField": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "value"
+          ],
+          "properties": {
+            "state": {
+              "const": "KNOWN"
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "value"
+          ],
+          "properties": {
+            "state": {
+              "const": "KNOWN_EMPTY"
+            },
+            "value": {
+              "const": ""
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "UNKNOWN",
+                "NOT_APPLICABLE",
+                "UNDECIDED",
+                "UNCONFIRMED"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "sha256Field": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "value"
+          ],
+          "properties": {
+            "state": {
+              "const": "KNOWN"
+            },
+            "value": {
+              "type": "string",
+              "pattern": "^[a-fA-F0-9]{64}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "value"
+          ],
+          "properties": {
+            "state": {
+              "const": "KNOWN_EMPTY"
+            },
+            "value": {
+              "const": ""
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "UNKNOWN",
+                "NOT_APPLICABLE",
+                "UNDECIDED",
+                "UNCONFIRMED"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "gitShaField": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "value"
+          ],
+          "properties": {
+            "state": {
+              "const": "KNOWN"
+            },
+            "value": {
+              "type": "string",
+              "pattern": "^[a-fA-F0-9]{40}$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "value"
+          ],
+          "properties": {
+            "state": {
+              "const": "KNOWN_EMPTY"
+            },
+            "value": {
+              "const": ""
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "UNKNOWN",
+                "NOT_APPLICABLE",
+                "UNDECIDED",
+                "UNCONFIRMED"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "classField": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "value"
+          ],
+          "properties": {
+            "state": {
+              "const": "KNOWN"
+            },
+            "value": {
+              "type": "string",
+              "enum": [
+                "BUG",
+                "FEATURE",
+                "GOVERNANCE",
+                "SECURITY",
+                "DOCUMENTATION",
+                "INFRASTRUCTURE",
+                "RESEARCH",
+                "MAINTENANCE",
+                "OTHER"
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "value"
+          ],
+          "properties": {
+            "state": {
+              "const": "KNOWN_EMPTY"
+            },
+            "value": {
+              "const": ""
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "UNKNOWN",
+                "NOT_APPLICABLE",
+                "UNDECIDED",
+                "UNCONFIRMED"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "riskField": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "value"
+          ],
+          "properties": {
+            "state": {
+              "const": "KNOWN"
+            },
+            "value": {
+              "type": "string",
+              "enum": [
+                "LOW",
+                "MODERATE",
+                "HIGH",
+                "CRITICAL"
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "value"
+          ],
+          "properties": {
+            "state": {
+              "const": "KNOWN_EMPTY"
+            },
+            "value": {
+              "const": ""
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "UNKNOWN",
+                "NOT_APPLICABLE",
+                "UNDECIDED",
+                "UNCONFIRMED"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "statusField": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "value"
+          ],
+          "properties": {
+            "state": {
+              "const": "KNOWN"
+            },
+            "value": {
+              "type": "string",
+              "enum": [
+                "PROPOSED",
+                "DISPATCHED",
+                "IN_PROGRESS",
+                "BLOCKED",
+                "IN_REVIEW",
+                "MERGED",
+                "VERIFIED",
+                "ACCEPTED",
+                "REJECTED",
+                "CANCELLED",
+                "SUPERSEDED"
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "value"
+          ],
+          "properties": {
+            "state": {
+              "const": "KNOWN_EMPTY"
+            },
+            "value": {
+              "const": ""
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "UNKNOWN",
+                "NOT_APPLICABLE",
+                "UNDECIDED",
+                "UNCONFIRMED"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "idListField": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "value"
+          ],
+          "properties": {
+            "state": {
+              "const": "KNOWN"
+            },
+            "value": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^AID-[0-9]{4}-[0-9]{3}$"
+              },
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "value"
+          ],
+          "properties": {
+            "state": {
+              "const": "KNOWN_EMPTY"
+            },
+            "value": {
+              "type": "array",
+              "maxItems": 0
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "UNKNOWN",
+                "NOT_APPLICABLE",
+                "UNDECIDED",
+                "UNCONFIRMED"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "sourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "locator",
+        "role"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "GIT_FILE",
+            "GIT_COMMIT",
+            "GITHUB_ISSUE",
+            "GITHUB_PR",
+            "GITHUB_COMMENT",
+            "GITHUB_REVIEW",
+            "CI_RUN",
+            "EXTERNAL_DOCUMENT"
+          ]
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "PRIMARY",
+            "CORROBORATING",
+            "HISTORICAL",
+            "CONTRADICTING"
+          ]
+        },
+        "commit_sha": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{40}$"
+        },
+        "content_sha256": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$"
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "field",
+        "source_ref",
+        "observation"
+      ],
+      "properties": {
+        "field": {
+          "type": "string",
+          "enum": [
+            "work_item_id",
+            "title",
+            "owner.accountable_owner",
+            "owner.attribution",
+            "owner.authority",
+            "class",
+            "risk",
+            "status",
+            "prompt.prompt_id",
+            "prompt.prompt_sha256",
+            "prompt.prompt_path",
+            "prompt.prompt_version",
+            "prompt.prompt_commit_sha",
+            "supersedes",
+            "superseded_by"
+          ]
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "observation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "observed_value": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
