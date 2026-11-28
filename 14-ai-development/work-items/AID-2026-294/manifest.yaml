@@ -128,3 +128,26 @@ implementation:
     - "Positive: the gate exits 0 on the repaired tree with all sixteen contexts."
     - "scripts/test_check_document_management.py: 376/376 passed."
     - "scripts/test_check_repository_hygiene.py: 107 tests OK (skipped=1)."
+
+# Initial registration only:
+# permits this newly introduced Work Item to enter main before its
+# implementation commit is reachable from the target branch.
+prompt_file: "14-ai-development/work-items/AID-2026-294/prompt-v1.md"
+
+# SHA-256 of the exact prompt-v1.md bytes.
+# The checker independently recalculates this from both the head file
+# and the immutable Git blob.
+prompt_sha256: "056b9208fb9425913d3fa57cc8f30414423119b2a98908d706a58f0ed138de55"
+
+# Git blob object ID of the exact same prompt-v1.md bytes.
+# This is a blob OID, not a commit SHA.
+prompt_file_blob_sha: "a9437b105f26f2cb55dab015325363f6e334699e"
+
+# Explicitly declares this as the narrowly scoped first-registration state.
+prompt_commit_trace_initial_registration: true
+
+# IMPORTANT:
+# Do not add prompt_file_commit_sha here.
+# Do not add implementation.implementation_commit_sha here.
+# Do not add implementation.merge_commit_sha here.
+# The initial-registration exception rejects those pins.
