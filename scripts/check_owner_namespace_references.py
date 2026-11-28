@@ -12,6 +12,8 @@ import re
 import sys
 from pathlib import Path
 
+from gov_doc_fail_closed import validate_group
+
 FILES = (
     "01-system-architecture/component-map.md",
     "01-system-architecture/responsibility-matrix.md",
@@ -110,7 +112,11 @@ def mirror_signature(text: str) -> tuple[int, int, frozenset[str]]:
     sys_ids = frozenset(re.findall(r"\bSYS-(?:MEMORY-BRAIN|MEMORY-COMPILER|MEMORY-RUNTIME|CROSS-CUTTING)\b", text))
     return table_rows, owner_refs, sys_ids
 
-def check(root: Path) -> tuple[int, list[str]]:
+def check(
+    root: Path,
+    *,
+    require_group_closure: bool = False,
+) -> tuple[int, list[str]]:
     errors: list[str] = []
     contents: dict[str, str] = {}
     for relative in FILES:
@@ -143,14 +149,26 @@ def check(root: Path) -> tuple[int, list[str]]:
                 errors.append(f"bilingual structural drift for {stem}: table/Owner signature differs")
             if stem == "component-map.md" and len({sig[2] for sig in signatures}) != 1:
                 errors.append("bilingual SYS-* subsystem inventory drift in component-map.md")
+    # AC3 is mandatory for CI, but optional for legacy content-only fixtures.
+    # The CI entry point enables it explicitly with --require-group-closure.
+    if require_group_closure:
+        errors.extend(validate_group(root, FILES))
     return (2 if any(x.startswith("INCOMPLETE") for x in errors) else 1 if errors else 0, errors)
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="scan without modifying files")
     parser.add_argument("--root", type=Path, default=Path("."), help=argparse.SUPPRESS)
+    parser.add_argument(
+        "--require-group-closure",
+        action="store_true",
+        help="fail closed unless all registered documents are classified and DM-12 closed",
+    )
     args = parser.parse_args(argv)
-    code, errors = check(args.root.resolve())
+    code, errors = check(
+        args.root.resolve(),
+        require_group_closure=args.require_group_closure,
+    )
     if errors:
         for item in errors:
             print(f"ERROR {item}", file=sys.stderr)

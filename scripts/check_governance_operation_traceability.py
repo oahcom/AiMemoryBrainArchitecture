@@ -11,6 +11,8 @@ import re
 import sys
 from pathlib import Path
 
+from gov_doc_fail_closed import validate_group
+
 FILES = (
     "01-system-architecture/system-boundaries.md",
     "docs/en/01-system-architecture/system-boundaries.md",
@@ -80,7 +82,11 @@ def table_rows(text: str, expected_header: tuple[str, ...]) -> list[list[str]] |
         return rows
     return None
 
-def check(root: Path) -> tuple[int, list[str]]:
+def check(
+    root: Path,
+    *,
+    require_group_closure: bool = False,
+) -> tuple[int, list[str]]:
     errors: list[str] = []
     row_counts: list[int] = []
     for relative in FILES:
@@ -129,6 +135,10 @@ def check(root: Path) -> tuple[int, list[str]]:
                 errors.append(f"{relative}: false/unilateral completion assertion: {match.group(0)}")
     if len(row_counts) == len(FILES) and len(set(row_counts)) != 1:
         errors.append(f"bilingual mirror row-count mismatch: {row_counts}")
+    # AC3 is mandatory for CI, but optional for legacy content-only fixtures.
+    # The CI entry point enables it explicitly with --require-group-closure.
+    if require_group_closure:
+        errors.extend(validate_group(root, FILES))
     if errors:
         return (2 if any(x.startswith("INCOMPLETE") for x in errors) else 1, errors)
     return 0, []
@@ -137,8 +147,16 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="scan without modifying files")
     parser.add_argument("--root", type=Path, default=Path("."), help=argparse.SUPPRESS)
+    parser.add_argument(
+        "--require-group-closure",
+        action="store_true",
+        help="fail closed unless all registered documents are classified and DM-12 closed",
+    )
     args = parser.parse_args(argv)
-    code, errors = check(args.root.resolve())
+    code, errors = check(
+        args.root.resolve(),
+        require_group_closure=args.require_group_closure,
+    )
     if errors:
         for item in errors:
             print(f"ERROR {item}", file=sys.stderr)
