@@ -64,6 +64,25 @@ jobs:
           (cd scripts/ci && python3 -m unittest test_check_manifest_parse)
           python3 scripts/ci/check_manifest_parse.py
 
+      # Differential identity checks use the PR base tree, not a mutable snapshot.
+      - name: Self-check session identity diff mode
+        run: python3 -m unittest scripts/ci/test_check_session_identity.py -v
+
+      - name: Check session identity findings introduced by this PR
+        if: github.event_name == 'pull_request'
+        env:
+          SESSION_IDENTITY_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$SESSION_IDENTITY_BASE_SHA" || {
+            echo "INCOMPLETE: pull request event has no base SHA"
+            exit 2
+          }
+          git fetch --no-tags origin "$SESSION_IDENTITY_BASE_SHA"
+          python3 scripts/ci/check_session_identity.py \\
+            --diff-base "$SESSION_IDENTITY_BASE_SHA"
+
       - name: Measure manifest blob-pin baseline and negative sample
         env:
           GITHUB_EVENT_BEFORE: ${{ github.event.before || '' }}
