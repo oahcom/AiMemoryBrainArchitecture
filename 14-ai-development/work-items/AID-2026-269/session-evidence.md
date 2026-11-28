@@ -62,7 +62,7 @@ The common executed instruction for L2-A, L2-B and L2-C is the L1 ruling's `## R
 
 **L2-A.** `14-ai-development/work-items/AID-2026-269/exact-head-review-protocol-v1.md` — 27398 bytes, SHA-256 `779d51036a87b474865073f7d3d61f81c08532e5221f78c98cc83dec1cb756bc`, re-read after the renumber. That digest is a timestamped observation, not a final-head verification; R2-19 requires the digest to be re-read at the final head.
 
-**L2-B.** `14-ai-development/work-items/AID-2026-269/review-case-1278.md` — 60545 bytes, SHA-256 `dede5243e82549ac64b57855164d88bfb463512c8d830210e962ed40739198c7`; `14-ai-development/work-items/AID-2026-269/evidence.md` — 32345 bytes, SHA-256 `eed924b22abfc5c88c682e57bd27ee58c3a3f2cd99da506fa5fe6964b9ee65d9`; both re-read after the renumber, with the same caveat. The verdict inside them belongs to the reviewed declaration and is not restated here.
+**L2-B.** `14-ai-development/work-items/AID-2026-269/review-case-1278.md` — 61851 bytes, SHA-256 `3e0a910bded388ef21632c852332f005834ab608a8096f1eb93d47e2abd5ece0`; `14-ai-development/work-items/AID-2026-269/evidence.md` — 32345 bytes, SHA-256 `eed924b22abfc5c88c682e57bd27ee58c3a3f2cd99da506fa5fe6964b9ee65d9`; both re-read after the renumber, with the same caveat. The verdict inside them belongs to the reviewed declaration and is not restated here.
 
 **L2-C.** `14-ai-development/work-items/AID-2026-269/prompt-v1.md` — 16877 bytes, SHA-256 `b2ddd33dee27df4d4c88e01c796f4d70d7a4e663d4504441615f1099e7162170`; `14-ai-development/work-items/AID-2026-269/manifest.yaml`; `14-ai-development/work-items/INDEX.md` one appended row for AID-2026-269. This file is the fourth output and carries no digest of itself, because a document cannot contain its own SHA-256.
 
