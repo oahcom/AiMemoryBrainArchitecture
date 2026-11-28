@@ -1,5 +1,6 @@
 ---
 document_metadata:
+  steward: "Architecture Governance"
   domain: architecture
   role: design-specification
   lifecycle:
@@ -28,14 +29,13 @@ document_metadata:
     source: "01-system-architecture/system-boundaries.md"
     en: "docs/en/01-system-architecture/system-boundaries.md"
     zh-CN: null
-  steward: "user-authorized operator (delegated by account owner)"
 ---
 # 系统边界
 
 - 文档 ID：SYS-BOUNDARIES-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../01-system-architecture/system-boundaries.md)
-- 源版本：bf20b204688bf51a1df76968db7e52ee0dd597c1
+- 源版本：8934b92bdaa89cf9697c7c4b14d15ca6dfca7328
 - 对应英文：[System Boundaries](../../en/01-system-architecture/system-boundaries.md)
 - 状态：明确标记的部分为 DECIDED；CANDIDATE/OPEN 项仍不具规范约束力
 
@@ -256,3 +256,34 @@ Brain 不是：
 ## 14. Forget Fence 权威边界——2026-11-26
 
 D 的规范契约 [01-system-architecture/forget-fence-and-completion-contract.md](forget-fence-and-completion-contract.md) 是 ForgetOperation 及 ForgetFence Target/Lineage 决策的唯一逻辑权威。Storage/Consistency 可以持久化并从物理层保护该权威，但 Storage 本地 Memory/Version Fence 只能是派生、可重建的投影；MUST NOT 签发独立 Generation/Cursor，也不得成为竞争性的决策源。无法建立当前 D 权威状态时，受影响读取和发布必须 Fail-closed。本地抑制不等于 Global Forget Completion。本段记录方向决策；精确版本 Owner 验收和实现证据仍待完成。
+
+## 15. 规范提交游标权威
+
+**决策状态：** 已决定——Owner 已于 2026-11-27 在 [Issue #1210](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1210#issuecomment-7174534633) 记录该决议。本节仅记录该决议；不表示下游 D/F/G 规范或运行时实现已经同步或获批。
+
+### 15.1 权威与分区边界
+
+- 每个部署对应一个逻辑 Brain authority。Tenant 与 shard 是该 authority 内部的分区边界，不是独立 authority。
+- `CanonicalCommitCursor` 按 tenant/shard 分区。不同 tenant 或 shard 之间不存在全序。拒绝跨 tenant 的全局有序游标：它需要全局串行化点或本架构尚未定义的分布式共识。
+- 游标条目只在各自的 tenant/shard 分区内排序。
+- Authority identity 与 epoch/incarnation 必须显式成为游标身份的一部分。Rollover 表示 epoch 变更。不同 authority 或 epoch 的游标不可比较；跨越它们的比较必须显式报错，不能转换成数值顺序。
+
+### 15.2 跨 shard 事务
+
+- 一个跨 shard 事务对每个参与 shard 各产生一个 `CanonicalCommitCursor` 条目，并且只在各自 shard 内排序。
+- 事务具有原子性：所有参与 shard 的条目要么全部提交，要么全部不提交。
+- 全部提交或全部回滚不意味着跨 shard 存在全序；任何 API 都不得暗示这种全序。
+
+### 15.3 Authority fence 范围
+
+- `ForgetFence`、`ProducerRegistrationHighWater` 及类似 fence 均按 authority 归属。
+- 它们必须携带 authority identity 及适用的 target/partition scope，避免将一个 shard 的 fence 误认为覆盖另一个 shard。
+
+### 15.4 必须拒绝的情况
+
+- `cursor_comparison_across_authority_rejected`：跨 authority identity 或 epoch/incarnation 的比较必须显式拒绝，不得强制转换为数值排序。
+- `cross_shard_commit_exposes_no_total_order`：跨 shard 提交只能暴露各 shard 的游标条目及原子提交结果，不得暴露跨 shard 全序关系。
+
+### 15.5 尚待明确的实现边界
+
+本决议没有定义跨 shard 事务游标条目集合的序列化表示，也没有定义 F/G 消费者使用的一致快照/一致切面协议。这些细节仍须由相应 D/F/G 契约明确；不得从单一标量游标中自行推导。本记录不授权代码或运行时实现。
