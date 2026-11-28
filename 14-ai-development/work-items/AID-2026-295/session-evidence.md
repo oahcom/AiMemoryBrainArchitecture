@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-293/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-295/manifest.yaml"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -30,10 +30,10 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "Implementation-session identity, actual input/output provenance, and validation record for AID-2026-293."
+    canonical_scope: "Implementation-session identity, actual input/output provenance, and validation record for AID-2026-295."
     canonical_scope_id: "ai-development/aid-2026-293-session-evidence"
     canonical_scope_keywords:
-      - "AID-2026-293"
+      - "AID-2026-295"
       - "work-item registry validator"
       - "registry schema"
     canonical_conflict_status: None
@@ -46,7 +46,7 @@ document_metadata:
   steward: "user-authorized operator (delegated by account owner)"
 ---
 
-# Session Evidence — AID-2026-293
+# Session Evidence — AID-2026-295
 
 ## Session role / use case
 
@@ -60,7 +60,7 @@ no claim is made that any check ran before it did.
 ## Actual AI input
 
 The implementation sub-session received the work package prompt snapshotted at
-`14-ai-development/work-items/AID-2026-293/prompt-v1.md`, whose exact byte count
+`14-ai-development/work-items/AID-2026-295/prompt-v1.md`, whose exact byte count
 and SHA-256 are pinned in the manifest. Its binding parts:
 
 - The only authority for the validator behaviour is `reply-6b07c97e-080615.md`
@@ -98,5 +98,14 @@ The session produced, in the candidate tree:
 
 The session also recorded a conflict it could not resolve by preference: the
 work package forbids touching `INDEX.md`, while `scripts/check_traceability.py`
-T-04 fails on a manifest that exists on disk but is not indexed. One row was
-added, and the conflict is reported rather than hidden.
+T-04 and the repository-hygiene index-membership rule both fail on a manifest
+that exists on disk but is not indexed. The row was not written; the conflict is
+recorded as `BLOCKED_BY_SCOPE_CONFLICT: manifest-required-by-session-evidence /
+INDEX-write-prohibited`.
+
+The work item was renumbered from `AID-2026-293` to `AID-2026-295` after the
+scan required before opening the pull request: the `main` tree holds no
+`AID-2026-292`–`AID-2026-297` directory, but open pull requests already claim
+292 (#1483), 293 (#1487 and #1478) and 294 (#1491), so 295 is the first free
+identifier in the scanned set. The executed prompt snapshot keeps its original
+text verbatim; only the front-matter path it points at changed.
