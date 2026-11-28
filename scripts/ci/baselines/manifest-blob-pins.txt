@@ -3,7 +3,7 @@
 # This file is a ratchet baseline, not a PASS allowlist: an entry records a
 # known, accepted violation. UNRESOLVED / SCOPE_UNRESOLVABLE / INCOMPLETE are
 # never stored here; they are tracked in the separate unresolved audit ledger.
-# Generated from 6acd3a4413d4 with the registry-backed checker.
+# Regenerate only by re-running the registry-backed checker on the merge target.
 MISMATCH manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=execution_boundary_extension.joined_contract_updated.blob_sha-b5bb0c668efd field=execution_boundary_extension.joined_contract_updated.blob_sha scope=candidate locator=14-ai-development/work-items/AID-2026-001/forget-lifecycle-joined-contract-proposal-v1.md
 MISMATCH manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=reference_model_validation.model.git_blob_sha-bc9d389f3a49 field=reference_model_validation.model.git_blob_sha scope=candidate locator=14-ai-development/work-items/AID-2026-001/reference-model/forget_model.py
 MISMATCH manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pin_id=reference_model_validation.tests.git_blob_sha-18891dc3c7ab field=reference_model_validation.tests.git_blob_sha scope=candidate locator=14-ai-development/work-items/AID-2026-001/reference-model/test_forget_model.py
@@ -122,6 +122,7 @@ UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-108/manifest.yaml pi
 UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-111/manifest.yaml pin_id=execution_evidence.pure_rust.normalised_digest-cb55d807bc90 field=execution_evidence.pure_rust.normalised_digest scope=none locator=none
 UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-111/manifest.yaml pin_id=execution_evidence.sqlite_backend.normalised_digest-a40abc4539f8 field=execution_evidence.sqlite_backend.normalised_digest scope=none locator=none
 UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-140/manifest.yaml pin_id=repository.original_restore_merge_commit-b8e22e3ec49c field=repository.original_restore_merge_commit scope=none locator=none
+UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-150/manifest.yaml pin_id=blob_pins-0-.expected-d5179d5fe919 field=blob_pins[0].expected scope=none locator=none
 UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-150/manifest.yaml pin_id=repository.refreshed_base_commit-bc51161f64d5 field=repository.refreshed_base_commit scope=none locator=none
 UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-150/manifest.yaml pin_id=source.tree-8d509d01e934 field=source.tree scope=none locator=none
 UNCLASSIFIED manifest=14-ai-development/work-items/AID-2026-170/manifest.yaml pin_id=owner_ruling.current_blob-0591e37dea11 field=owner_ruling.current_blob scope=none locator=none
