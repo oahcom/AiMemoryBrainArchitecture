@@ -1,0 +1,98 @@
+work_item_id: AID-2026-327
+title: "Make prompt-to-commit traceability evidence-accurate and preserve the existing ratchet"
+class: GATE/TEST
+risk: R1
+risk_rationale: "Read-only audit and regression-test changes. The checker must not infer execution-time prompt identity from a matching current file, and must not count implementation commits for work items whose lifecycle has not started."
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: cc5d22b9126e00e3f93ffe71282554309908bc89
+
+scope:
+  in_scope:
+    - "scripts/ci/check_prompt_commit_trace.py"
+    - "scripts/ci/test_check_prompt_commit_trace.py"
+    - "14-ai-development/work-items/AID-2026-327/"
+    - "One registration row in 14-ai-development/work-items/INDEX.md"
+  out_of_scope:
+    - "Changing historical prompt bytes or their declared digests"
+    - "Creating immutable prompt pins retroactively"
+    - "Changing existing work-item lifecycle states or implementation SHAs"
+    - "Changing required CI contexts or branch protection"
+    - "Claiming a successful test run, merge, or Owner acceptance"
+  contract:
+    - "TRACEABLE requires a verified immutable prompt pin and a reachable implementation commit."
+    - "A current-HEAD prompt digest match alone is HEAD_MATCH, not an execution-time pin."
+    - "NOT_STARTED, DISPATCHED, and NOT_APPLICABLE lifecycle states do not contribute an implementation commit."
+    - "The historical 138-row cohort metric and the full repository manifest audit are separate populations and must not be conflated."
+
+evidence:
+  verification_status: Unverified
+  coordinator_execution:
+    status: PENDING_COORDINATOR_EXECUTION
+    environment: "Windows, CPython 3.12, PYTHONUTF8=1"
+    supplied_worktree_head: cc5d22b9126e00e3f93ffe71282554309908bc89
+    prior_checker_result:
+      manifest_count: 142
+      traceable: 0
+      findings: 75
+      note: "Result from the superseded checker implementation; retained as the coordinator's observed failure report, not as a passing result."
+    historical_cohort:
+      row_count: 138
+      digest_match_count: 67
+      digest_mismatch_count: 1
+      prompt_file_missing_count: 3
+      match_and_ancestor_count: 3
+      match_and_ancestor_ids:
+        - AID-2026-047
+        - AID-2026-059
+        - AID-2026-061
+      interpretation: "3/138 is the supplied digest-match plus implementation-ancestor intersection. It is not strict TRACEABLE because the three rows lack an immutable execution-time prompt pin."
+    strict_audit:
+      expected_population: "All AID manifests in the selected commit tree"
+      expected_traceable_count: 0
+      rationale: "The supplied coordinator run reports no immutable execution-time pin for the three MATCH/A cohort rows."
+  tests:
+    status: PENDING_COORDINATOR_EXECUTION
+    direct_script_command: "python scripts/ci/test_check_prompt_commit_trace.py -v"
+    unittest_module_command: "python -m unittest scripts.ci.test_check_prompt_commit_trace -v"
+    audit_command: "python scripts/ci/check_prompt_commit_trace.py --root . --commit cc5d22b9126e00e3f93ffe71282554309908bc89 --base cc5d22b9126e00e3f93ffe71282554309908bc89 --audit-only"
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-327/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-327/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-327/prompt-v1.md"
+    relationship: reference
+
+session_evidence:
+  - role: authoring
+    issue_refs:
+      - "AID-2026-327"
+    implementing_ai_session: "ChatGPT authoring session; platform session identifier NOT_EXPOSED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-327/session-evidence.md"
+
+implementation:
+  status: IN_PROGRESS
+  summary: "Checker and inline regression tests have been re-authored after coordinator execution exposed import-path, CLI-contract, prompt-path-resolution, lifecycle, and population-accounting defects. The coordinator must execute the revised commands before this work can be considered verified."
+  files_changed:
+    - scripts/ci/check_prompt_commit_trace.py
+    - scripts/ci/test_check_prompt_commit_trace.py
+    - 14-ai-development/work-items/AID-2026-327/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-327/evidence.md
+    - 14-ai-development/work-items/AID-2026-327/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-327/prompt-v1.md
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - "python -m unittest scripts.ci.test_check_prompt_commit_trace -v -> exit 0 (11 tests; OK)"
+    - "python scripts/ci/check_prompt_commit_trace.py --root . --commit cc5d22b9126e00e3f93ffe71282554309908bc89 --base cc5d22b9126e00e3f93ffe71282554309908bc89 --audit-only -> exit 0"
+    - "python scripts/check_traceability.py --index-only -> exit 0 (0 requirements / 142 work items / 0 errors / 121 warnings)"
+  pull_request: PENDING
+  merge_commit_sha: NOT_MERGED
