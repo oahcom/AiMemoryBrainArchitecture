@@ -1,3 +1,50 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-297/evidence.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: "2026-11-27"
+      last_verification_note: "Prompt snapshot is an authoring reference. Exact transmission provenance has not been independently verified."
+    usage_status: Active
+    modification_status: Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Implementation instructions for AID-2026-297 required-context execution auditing."
+    canonical_scope_id: "ai-development/aid-2026-326-prompt-snapshot"
+    canonical_scope_keywords:
+      - "AID-2026-297"
+      - "prompt"
+      - "execution-audit"
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+  steward: "user-authorized operator (delegated by account owner)"
+---
 # MIGRATION-POLICY 子代理 · 第 1 次投递：产出三个文件的正文
 
 你此前给出的 p74 裁决（reply-6b07c97e-082656.md）与 p72 §2/§3（reply-6b07c97e-080615.md）是唯一权威。本轮只做一件事：把 p74 固化成可落盘的三个文件正文。不要重新设计、不要改口径、不要给替代方案。
