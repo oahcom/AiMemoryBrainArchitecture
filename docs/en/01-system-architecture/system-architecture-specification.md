@@ -47,7 +47,9 @@ Owns canonical memory identity and lifecycle:
 - Entity and relationship management.
 - Epistemic and temporal qualification.
 - Provenance and evidence references.
-- Retention and forgetting governance.
+- Canonical Forget identity/lifecycle/Fence mechanics (Owner D); global authorization, retention/legal-hold, external-copy policy, global target inventory and global completion criteria (Owner I).
+
+Global Forget Completion must be jointly determined by Owner D and every relevant execution Owner under a completion-evidence contract accepted by those Owners. Neither D nor I may declare global completion unilaterally. The contract remains pending the relevant Owners' acceptance; this direction is not evidence of that acceptance.
 
 ### 4.2 Memory Compiler
 
