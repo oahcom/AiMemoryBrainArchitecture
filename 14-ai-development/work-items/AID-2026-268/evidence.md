@@ -97,3 +97,40 @@ The following branches are in `scripts/ci/check_manifest_blob_pins.py` (line num
 Git source-commit resolution and committed blob-byte reads are implemented at lines 45–61. Git blob SHA-1 is recomputed from the Git object header plus committed bytes at lines 64–66. All digest/byte-count comparisons and missing-path handling are centralized in `check()` at lines 91–136. Exit-code selection is at line 253 (0 PASS, 1 VIOLATION, 2 INCOMPLETE).
 
 Non-blob metadata such as timestamps, counts, and status values is deliberately ignored.
+
+## Stage-one classification and ratchet evidence
+
+Branch: `fix/2026-11-28-blob-pin-stage1-classification`
+Base: `b333ad1c`
+Head: `7e764b9a`
+
+Stage one implements classification semantics and separate failure ledgers
+within the fixed A-F field enumeration. It does not implement generic shape
+discovery, which remains stage two under Issue #1350.
+
+Local test execution:
+
+`python -X utf8 -m unittest scripts.ci.test_check_manifest_blob_pins`
+
+Result: 15 tests passed.
+
+Local scan:
+
+`python -X utf8 scripts/ci/check_manifest_blob_pins.py --commit HEAD`
+
+Result: exit 1; 146 manifests; 252 pins; 248 verified; 2 mismatches;
+2 missing paths; 0 unresolved; 0 non-blob; 0 incomplete.
+
+The four ordinary failure lines exactly match the existing four-line
+mismatch/path-missing baseline. The unresolved baseline contains no entries.
+
+Both ratchet categories were exercised locally using equivalent output
+filters and each reported an exact baseline match. This is not evidence that
+the actual GitHub Actions workflow has run successfully.
+
+NON_BLOB is covered by two unit tests for existing commit/tree objects.
+The observed repository scan returned `non_blob=0`; no live repository
+declaration exercised that classification.
+
+No claim is made here that `silent=0` has been established.
+Independent review has not yet occurred.

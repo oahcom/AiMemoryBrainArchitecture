@@ -58,3 +58,41 @@ The actual user input included the following instructions (verbatim excerpts): â
 ## AI-visible output
 
 GitHub API confirmed main at 40195e8bf96b9cc6aa254066b9b72968f29ac361 (2026-11-27T03:57:43Z), the 16 protected required contexts, the existing full-history checkout, and the insertion point immediately after manifest parsing. A branch named fix/aid-268-manifest-blob-pins was created. Implementation artifacts are being prepared; no CI execution or merge is claimed yet.
+
+## Stage-one classification session
+
+Session ID: NOT_RECORDED
+Session role: implementation
+Date: 2026-11-28
+
+### Actual input and provenance
+
+Prompt ID: prompt-stage1
+Prompt version: v1
+Prompt snapshot: `14-ai-development/work-items/AID-2026-268/prompt-stage1.md`
+Prompt SHA-256: `70f131f95e3c63df99dd583a3e282b5bd86742dbf4b8ca4496dcfcc3598054ea`
+Prompt bytes: 24494
+Provenance: NOT_VERIFIED - the snapshot is the prompt as recorded by the
+operator, not a byte-for-byte platform export.
+
+The task was to complete the stage-one classification and dual-ledger
+changes for the existing AID-2026-268 / Issue #1350 checker, retaining
+the fixed A-F field scope and deferring generic shape discovery to stage two.
+
+### AI-visible implementation output
+
+The delivered branch is
+`fix/2026-11-28-blob-pin-stage1-classification`, head `7e764b9a`,
+based on `origin/main` `b333ad1c`.
+
+The implementation changes classification semantics, NON_BLOB handling,
+unresolved versus scan/execution failure handling, separate ordinary and
+unresolved ratchets, and associated tests.
+
+### Execution evidence
+
+The local test and scan results are recorded in `evidence.md`.
+The local ratchet checks used equivalent output filters; actual GitHub
+Actions execution is not claimed.
+
+Independent review: NOT_YET_PERFORMED.

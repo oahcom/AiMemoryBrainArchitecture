@@ -38,10 +38,12 @@ scope:
     - scripts/ci/check_manifest_blob_pins.py
     - scripts/ci/test_check_manifest_blob_pins.py
     - scripts/ci/baselines/manifest-blob-pins.txt
+    - scripts/ci/baselines/manifest-blob-pins-unresolved.txt
     - 14-ai-development/work-items/AID-2026-268/manifest.yaml
     - 14-ai-development/work-items/AID-2026-268/evidence.md
     - 14-ai-development/work-items/AID-2026-268/session-evidence.md
     - 14-ai-development/work-items/AID-2026-268/prompt-snapshot.md
+    - 14-ai-development/work-items/AID-2026-268/prompt-stage1.md
   files_to_modify:
     - .github/workflows/repository-hygiene.yml
     - 14-ai-development/work-items/INDEX.md
@@ -59,11 +61,32 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-268/session-evidence.md
+  - role: implementation
+    issue_refs:
+      - "#1350"
+    implementing_ai_session: STAGE-1-CLASSIFICATION
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-268/prompt-stage1.md
+    executed_prompt_sha256: 70f131f95e3c63df99dd583a3e282b5bd86742dbf4b8ca4496dcfcc3598054ea
+    executed_prompt_bytes: 24494
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-268/session-evidence.md
 acceptance:
   required:
     - Every enumerated Git blob pin is recomputed from committed bytes.
     - Missing paths and mismatched digests fail with declared and actual values where available.
-    - Explicit cross-commit pins resolve only at their declared source commit; unavailable commits exit 2.
+    - Explicit cross-commit pins resolve only at their declared source commit.
+    - An unavailable, invalid, or unresolvable source commit is classified as
+      INCOMPLETE UNRESOLVED(SOURCE_MISSING) and exits 1; exit 2 is reserved for
+      scan or execution failures.
+    - Existing commit/tree/tag objects referenced where a blob pin is expected
+      are classified as NON_BLOB, without incrementing the blob-pin count.
+    - A nonexistent 40-hex object ID does not independently produce
+      GIT_OBJECT_MISSING; locator verification continues and classifies the
+      declared path/digest as MISMATCH or PATH_MISSING where applicable.
+    - MISMATCH/PATH_MISSING and UNRESOLVED are checked by separate exact ratchets.
+    - Stage one retains the fixed A-F field enumeration; generic shape discovery
+      is deferred to stage two under Issue #1350.
     - Prompt SHA-256 and byte-count pins are both verified.
     - The existing Repository hygiene required context remains the carrier.
     - Positive, mismatch, missing-path, cross-commit and prompt tests pass.
