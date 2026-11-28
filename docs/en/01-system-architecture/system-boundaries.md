@@ -35,7 +35,7 @@ document_metadata:
 - Document ID: SYS-BOUNDARIES-001
 - Version: 1.0
 - Source: [Normative source specification](../../../01-system-architecture/system-boundaries.md)
-- Source revision: fd05a4d559a852fd24370297c7cd290384d9414a
+- Source revision: 8934b92bdaa89cf9697c7c4b14d15ca6dfca7328
 - Chinese counterpart: [系统边界](../../zh-CN/01-system-architecture/system-boundaries.md)
 - Status: DECIDED where explicitly identified; CANDIDATE/OPEN items remain non-normative
 
