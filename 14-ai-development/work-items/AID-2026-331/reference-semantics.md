@@ -182,3 +182,188 @@ This document:
 - does not close or accept Issue #1350.
 
 AID-2026-336 implements the checker changes defined here, including removal of the duplicate candidate-tree prompt-snapshot assertions while retaining Session Evidence check 11.
+
+## AID-2026-336 implementation semantics
+
+### Related-evidence reference mode and policy classification
+
+Every non-empty `related_evidence[]` blob declaration MUST have an explicit
+`reference_mode` in its own declaration record.
+
+The only accepted values are:
+
+- `historical`
+- `current`
+
+The checker MUST NOT infer a missing mode, silently default it to `current`,
+or silently default it to `historical`.
+
+A missing or invalid mode is a deterministic declaration-policy violation.
+The checker MUST emit:
+
+`REFERENCE_MODE_MISSING_OR_INVALID`
+
+The finding MUST use:
+
+- `classification="policy"`
+- `scope=related_evidence`
+- `locator=reference_mode`
+- `reason="reference_mode must be historical or current"`
+
+This condition is a violation, not an incomplete scan. It MUST contribute to
+the violation result and produce exit status `1`, not exit status `2`.
+
+A missing or invalid mode does not authorize the checker to evaluate the
+declaration under either reference mode. The declaration remains unevaluated
+and the finding records why it could not be accepted.
+
+### Historical and current resolution
+
+`authored_indexes[]` declarations are historical authorship references. Each
+non-empty declaration MUST be checked against reachable Git blob history at
+the exact declared path.
+
+A historical `related_evidence[]` declaration MUST be checked using the same
+exact-path reachable-history rule.
+
+A current `related_evidence[]` declaration MUST be checked against the
+candidate commit tree. A current reference is not satisfied merely because
+the declared blob appears somewhere else in repository history.
+
+The checker MUST preserve the distinction between:
+
+- `HISTORICAL_REFERENCE_NOT_FOUND`: the declared blob is not recorded at the
+  exact path in reachable history;
+- `CURRENT_REFERENCE_MISMATCH`: the declared blob does not match the
+  candidate-tree reference;
+- `REFERENCE_MODE_MISSING_OR_INVALID`: the declaration does not provide a
+  valid mode and therefore cannot be assigned historical or current
+  resolution semantics.
+
+The first two findings use their respective `historical` and `current`
+classifications. The missing/invalid mode finding uses
+`classification="policy"`.
+
+### Exit-status contract
+
+The checker uses the following exit-status contract:
+
+| Exit status | Meaning |
+|---:|---|
+| `0` | No in-scope violation or incomplete scan was found |
+| `1` | A deterministic declaration or reference violation was found |
+| `2` | The checker could not establish a trustworthy scan result because of genuinely incomplete input or unavailable/unreadable Git data |
+
+A missing or invalid `related_evidence[].reference_mode` is status `1`.
+Historical reference misses, current reference mismatches, missing required
+paths, and unbound blob SHA-256 declarations are also violations and use
+status `1`.
+
+Malformed or unreadable manifest data, an unavailable source commit, or
+unreadable Git history/object data that prevents a trustworthy evaluation
+remains status `2`.
+
+This distinction allows base and negative-fixture scans of commits predating
+the mode migration to complete and report the deterministic policy violation
+without misclassifying the scan itself as incomplete.
+
+### `blob_sha256` declarations are in scope
+
+A non-empty manifest key matching the `blob_sha256` declaration family,
+including qualified names such as `model_blob_sha256_lf`, is an in-scope
+content-integrity declaration.
+
+These declarations are SHA-256 claims over committed file bytes. They are
+distinct from Git blob object IDs and MUST be verified using SHA-256 over the
+bytes at the bound path in the candidate commit.
+
+The checker MUST discover matching declarations at arbitrary nesting depth.
+Each finding MUST preserve its manifest path, JSON Pointer, field name, and
+declared digest where applicable.
+
+The declaration MUST bind to a path in its own containing mapping. The
+checker may use the corresponding `<base>_path` or `<base>_file` field, or the
+supported generic `path` or `file` field. A bare base field is accepted only
+when its value is path-like under the checker contract.
+
+A non-empty `blob_sha256` declaration counts as an in-scope pin, including
+when it cannot be bound to a path.
+
+A declaration with no bindable path MUST emit `UNBOUND_BLOB_SHA256`, increment
+the `unbound` summary counter, and produce exit status `1`. It MUST NOT be
+silently excluded.
+
+A bound declaration whose path is absent from the candidate commit tree is a
+path violation. A bound declaration whose SHA-256 differs from the committed
+file bytes is a mismatch. Invalid declarations or unreadable Git data that
+prevent evaluation remain incomplete conditions.
+
+The summary MUST expose the `unbound=` count so that an unbound declaration
+cannot disappear from the result merely because it has no path to compare.
+
+### Pin counting and exclusions
+
+The `pins=` summary counts non-empty declarations handled by the in-scope
+checker contract, including non-empty `blob_sha256` declarations.
+
+The documented out-of-scope families `gate_a_reconstruction` and
+`d_source_blobs` are not promoted into the AID-336 historical/current pin
+inventory.
+
+The documented prompt metadata exclusions are not ordinary AID-336
+candidate-tree blob pins. Session Evidence check 11 remains authoritative for
+the prompt snapshot digest and byte-count enforcement assigned to it.
+
+The runtime `excluded=` summary is an implementation counter. It MUST NOT be
+treated as interchangeable with a separately inventoried prompt-metadata
+count or a manually assessed declaration-family count.
+
+### Commit selection and `--commit`
+
+The checker accepts an explicit commit-ish revision through `--commit`.
+The revision is resolved to a full commit ID before the scan is performed.
+
+Examples include:
+
+```bash
+python scripts/ci/check_manifest_blob_pins.py --commit HEAD
+python scripts/ci/check_manifest_blob_pins.py --commit origin/main
+python scripts/ci/check_manifest_blob_pins.py --commit <commit-sha>
+```
+
+`HEAD` selects the commit currently checked out in the invoking worktree.
+`origin/main` selects the commit resolved from that local remote-tracking
+reference. An explicit commit SHA selects that commit.
+
+The checker MUST report the resolved full commit ID in its summary. It MUST
+not silently replace an explicitly requested revision with `HEAD` or another
+candidate revision.
+
+An absent, invalid, ambiguous, or unavailable requested commit is an
+incomplete scan and returns status `2`. The caller is responsible for
+providing a revision that exists in the repository being scanned.
+
+Base, candidate, and fixed negative-fixture scans may therefore use different
+explicit commit arguments. A commit predating the related-evidence mode
+migration can still be scanned: its missing mode is reported as a policy
+violation with status `1`, rather than as an incomplete scan with status `2`.
+
+### Ratchet integration
+
+Any output filter that supplies checker findings to the manifest blob-pin
+ratchet MUST retain all violation diagnostic families, including:
+
+- `MISMATCH`
+- `PATH_MISSING`
+- `INCOMPLETE`
+- `UNBOUND_BLOB_SHA256`
+- `HISTORICAL_REFERENCE_NOT_FOUND`
+- `CURRENT_REFERENCE_MISMATCH`
+- `REFERENCE_MODE_MISSING_OR_INVALID`
+
+A ratchet filter MUST NOT omit a newly introduced semantic diagnostic merely
+because the current baseline is empty or because the diagnostic did not exist
+when the baseline was created.
+
+The baseline remains the ratchet comparison input; the filter is responsible
+for ensuring that all relevant checker findings reach it.

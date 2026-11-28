@@ -1,0 +1,217 @@
+work_item_id: AID-2026-336
+title: "Implement Manifest Blob Pin Reference Verification"
+class: ENG
+risk: R2
+risk_rationale: >-
+  This work changes the manifest blob-pin checker, its tests, the negative
+  fixture assertion, and the repository-hygiene ratchet input. It changes
+  which manifest declarations are treated as in-scope pins and adds
+  blob_sha256 verification. The work was exercised against a rebased
+  repository state and fixed negative fixture. Merge and Owner acceptance
+  remain pending.
+status: IMPLEMENTED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: >-
+  AI-assisted implementation prepared from Owner rulings, AID-2026-331
+  reference semantics, and repository evidence supplied for AID-2026-336.
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "daa935f7a"
+tracking_issue: "#1350"
+
+scope:
+  summary: >-
+    Implement the AID-2026-331 reference semantics in the manifest blob-pin
+    checker while preserving the existing blob_sha256 verification contract
+    from the rebased origin/main baseline. Count only the defined AID-336
+    in-scope pin families as ordinary pins; keep documented prompt metadata
+    and explicitly out-of-scope families outside that pin count. Verify
+    authored-index declarations against reachable history at the exact
+    declared path, require an explicit historical/current mode for every
+    related-evidence entry, verify current references against the candidate
+    tree, and retain blob_sha256 SHA-256 verification, unbound diagnostics,
+    and unbound summary accounting. Update the negative fixture assertion,
+    tests, baseline, workflow ratchet filter, and the AID-2026-100 mode
+    migration without rewriting its digest.
+  in_scope:
+    - "Rebase the checker implementation onto the origin/main baseline without dropping the AID-2026-296 blob_sha256 scan."
+    - "Verify authored_indexes[] Git-blob declarations against reachable history at the exact declared path."
+    - "Require related_evidence[].reference_mode to be explicitly historical or current."
+    - "Classify missing or invalid related-evidence reference_mode as a policy violation with classification=policy and exit status 1."
+    - "Verify historical related-evidence references against reachable history at the exact declared path."
+    - "Verify current related-evidence references against the candidate commit tree."
+    - "Preserve distinct HISTORICAL_REFERENCE_NOT_FOUND, CURRENT_REFERENCE_MISMATCH, and REFERENCE_MODE_MISSING_OR_INVALID diagnostics."
+    - "Preserve structural INCOMPLETE findings and exit status 2 for genuinely incomplete or unreadable inputs."
+    - "Count non-empty AID-336 in-scope declarations as pins and preserve explicit exclusion accounting for documented out-of-scope declarations."
+    - "Retain blob_sha256 and qualified *_blob_sha256 discovery, JSON-pointer locations, path binding, SHA-256 verification, UNBOUND_BLOB_SHA256 findings, and unbound summary accounting."
+    - "Count non-empty blob_sha256 declarations as in-scope pins."
+    - "Update the fixed negative fixture assertion to the implemented pin-count and diagnostic contract."
+    - "Extend checker tests to cover the reference semantics and blob_sha256 behavior."
+    - "Update the repository-hygiene ratchet filter to include all three new semantic diagnostic prefixes."
+    - "Add reference_mode: historical to AID-2026-100 related_evidence[0] without changing its declared digest."
+    - "Record measured local verification results and the remaining merge and acceptance boundaries."
+  files_out_of_scope:
+    - "scripts/governance/session_evidence/validate.py"
+    - ".github/workflows/session-evidence.yml"
+    - "14-ai-development/prompt-and-evidence-template.md"
+    - "Any rewrite of existing authored-index or related-evidence digest values"
+    - "Any rewrite of prompt snapshot digest or byte-count metadata"
+  change_boundary: >-
+    Implementation scope is limited to the manifest blob-pin checker,
+    associated tests and negative-fixture assertion, its ratchet baseline
+    and repository-hygiene workflow filter, the required AID-2026-100
+    reference_mode migration, and the AID-2026-336 work-item record.
+    Existing blob_sha256 checking is retained and integrated with the
+    AID-336 semantic checker. This record does not claim a GitHub CI run,
+    merge, independent review, or Owner acceptance.
+
+evidence:
+  - "Rebased implementation branch: aid-2026-336."
+  - "Implementation commit: d8512eee5; supplied parent commit: daa935f7a."
+  - "The implementation changes seven existing implementation, test, baseline, workflow, and migration files."
+  - "The checker at the implementation commit reports manifests=161, pins=12, ok=12, mismatch=0, path_missing=0, incomplete=0, excluded=163, unbound=0."
+  - "The checker result above includes 10 AID-336 in-scope pins and two bound blob_sha256 declarations."
+  - "python scripts/ci/test_check_manifest_blob_pins.py: 35 tests passed."
+  - "python scripts/ci/test_assert_manifest_blob_pin_negative.py: 7 tests passed."
+  - "python -m unittest scripts/ci/test_resolve_manifest_blob_pin_base.py scripts/ci/test_assert_manifest_blob_pin_negative.py: 15 tests passed."
+  - "The fixed negative fixture assertion passed for commit 9a2063ae1fa5d905b3817cd4eddba065a06daa73."
+  - "The negative fixture summary is manifests=108, pins=14, ok=7, mismatch=1, path_missing=0, incomplete=0, excluded=146, unbound=4."
+  - "The negative fixture emitted four UNBOUND_BLOB_SHA256 findings and one REFERENCE_MODE_MISSING_OR_INVALID finding, with zero MISMATCH, PATH_MISSING, or INCOMPLETE-prefixed findings."
+  - "check_manifest_parse.py passed for 161 manifests."
+  - "check_work_item_manifest_schema.py --tree HEAD --baseline 14-ai-development/reports/work-item-manifest-ac4-baseline.json returned rc 0 with Legacy ratchet new regressions: 0."
+  - "AID-2026-100 migration adds reference_mode: historical to related_evidence[0]; its digest is unchanged."
+  - "The measured AID-2026-100 in-scope count after migration is pins=10, ok=10."
+  - "Local command results are recorded evidence and are not represented as GitHub CI results or Owner acceptance."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-336/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-336/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-336/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-336/pincount.md"
+    relationship: normative
+  - path: "14-ai-development/work-items/AID-2026-331/reference-semantics.md"
+    relationship: normative
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
+
+dependency_refs:
+  - "#1350"
+  - "AID-2026-331"
+  - "AID-2026-296"
+
+prompt_id: AID-2026-336-PROMPT
+prompt_version: "v1"
+prompt_bytes: 18905
+prompt_sha256: "7ac7b8cec870ef2ecb0739f9869bc6c59ae612e0c26e9a286a6ee800fff6c52a"
+
+created_at: "2026-11-27"
+updated_at: "2026-11-27"
+implementation_branch: "aid-2026-336"
+implementation_commits:
+  - "d8512eee5"
+changed_paths:
+  - "scripts/ci/check_manifest_blob_pins.py"
+  - "scripts/ci/test_check_manifest_blob_pins.py"
+  - "scripts/ci/baselines/manifest-blob-pins.txt"
+  - "scripts/ci/assert_manifest_blob_pin_negative.py"
+  - "scripts/ci/test_assert_manifest_blob_pin_negative.py"
+  - ".github/workflows/repository-hygiene.yml"
+  - "14-ai-development/work-items/AID-2026-100/manifest.yaml"
+  - "14-ai-development/work-items/AID-2026-336/manifest.yaml"
+  - "14-ai-development/work-items/AID-2026-336/evidence.md"
+  - "14-ai-development/work-items/AID-2026-336/session-evidence.md"
+  - "14-ai-development/work-items/AID-2026-336/prompt-v1.md"
+  - "14-ai-development/work-items/AID-2026-336/pincount.md"
+  - "14-ai-development/work-items/AID-2026-331/reference-semantics.md"
+  - "14-ai-development/work-items/INDEX.md"
+
+verification:
+  status: RECORDED
+  commit_sha: "d8512eee5"
+  commands:
+    - "python scripts/ci/check_manifest_blob_pins.py --commit HEAD"
+    - "python scripts/ci/test_check_manifest_blob_pins.py"
+    - "python scripts/ci/test_assert_manifest_blob_pin_negative.py"
+    - "python -m unittest scripts/ci/test_resolve_manifest_blob_pin_base.py scripts/ci/test_assert_manifest_blob_pin_negative.py"
+    - "python scripts/ci/assert_manifest_blob_pin_negative.py --commit 9a2063ae1fa5d905b3817cd4eddba065a06daa73"
+    - "python scripts/ci/check_manifest_parse.py"
+    - "python scripts/ci/check_work_item_manifest_schema.py --tree HEAD --baseline 14-ai-development/reports/work-item-manifest-ac4-baseline.json"
+  evidence_refs:
+    - "14-ai-development/work-items/AID-2026-336/evidence.md"
+    - "14-ai-development/work-items/AID-2026-336/session-evidence.md"
+
+evidence_tiering:
+  repository: "oahcom/AiMemoryBrainArchitecture"
+  change_class: ENGINEERING_IMPLEMENTATION
+  review_level: R2
+  evidence_level: "1"
+  assessed_by: NOT_ASSIGNED
+  assessed_at: ""
+  rationale: >-
+    Executable checker and CI-gating behavior changed. Local test and checker
+    results are recorded, including a fixed negative fixture. Independent
+    review and Owner acceptance have not been recorded.
+  base_head: "daa935f7a"
+  classification_basis: "Checker, test, fixture assertion, and workflow changes"
+  classification_confirmed_by: NOT_ASSIGNED
+  classification_record: ""
+  downgrade_justification: ""
+  downgrade_confirmed_by: ""
+  downgrade_confirmation_record: ""
+  escalation_target: ""
+  checker_result: RECORDED_LOCAL_RESULTS
+  declaration_path: "evidence-declaration.yaml"
+
+review:
+  status: NOT_STARTED
+  report_ref: ""
+  findings: []
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    Implemented AID-336 historical and current reference verification,
+    required related-evidence reference modes, policy classification for
+    missing or invalid modes, and the in-scope pin counting rules. Preserved
+    and integrated blob_sha256 SHA-256 scanning, including pointer and field
+    diagnostics, unbound findings, and unbound summary accounting. Updated
+    the negative fixture assertion, tests, baseline, ratchet workflow filter,
+    and AID-2026-100 mode migration. The migration did not rewrite the
+    existing digest. Local results are recorded in evidence.md; merge and
+    Owner acceptance remain pending.
+  files_changed:
+    - "scripts/ci/check_manifest_blob_pins.py"
+    - "scripts/ci/test_check_manifest_blob_pins.py"
+    - "scripts/ci/baselines/manifest-blob-pins.txt"
+    - "scripts/ci/assert_manifest_blob_pin_negative.py"
+    - "scripts/ci/test_assert_manifest_blob_pin_negative.py"
+    - ".github/workflows/repository-hygiene.yml"
+    - "14-ai-development/work-items/AID-2026-100/manifest.yaml"
+  tests:
+    - "python scripts/ci/check_manifest_blob_pins.py --commit HEAD"
+    - "python scripts/ci/test_check_manifest_blob_pins.py"
+    - "python scripts/ci/test_assert_manifest_blob_pin_negative.py"
+    - "python -m unittest scripts/ci/test_resolve_manifest_blob_pin_base.py scripts/ci/test_assert_manifest_blob_pin_negative.py"
+    - "python scripts/ci/assert_manifest_blob_pin_negative.py --commit 9a2063ae1fa5d905b3817cd4eddba065a06daa73"
+    - "python scripts/ci/check_manifest_parse.py"
+    - "python scripts/ci/check_work_item_manifest_schema.py --tree HEAD --baseline 14-ai-development/reports/work-item-manifest-ac4-baseline.json"
+
+acceptance:
+  status: PENDING
+  authority: NOT_ASSIGNED
+  evidence_refs:
+    - "14-ai-development/work-items/AID-2026-336/evidence.md"
+    - "14-ai-development/work-items/AID-2026-336/session-evidence.md"
+  disposition: NOT_RECORDED
+
+merge:
+  status: NOT_MERGED
+  pull_request: NOT_RECORDED
+  merge_commit: ""
