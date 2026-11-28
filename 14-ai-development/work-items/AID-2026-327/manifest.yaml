@@ -111,10 +111,10 @@ session_evidence:
   - role: "IMPLEMENTATION_SESSION"
     issue_refs:
       - "#1341"
-    implementing_ai_session: "ChatGPT-GPT-6 (ruling) executed by an automated implementation subagent"
+    implementing_ai_session: "UNIQ-1432"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-327/prompt-v1.md"
-    executed_prompt_sha256: "faf1d4654d3b5ca4f1cac85783d4546e852fb6064e1eb6dfcd52dac691a05228"
-    executed_prompt_bytes: 3038
+    executed_prompt_sha256: "c3c48e67b43e74e11e98eaf14903e7af5ea889154cf0f26b3b3d072f1bc2db04"
+    executed_prompt_bytes: 3043
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-327/session-evidence.md"
