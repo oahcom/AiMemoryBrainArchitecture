@@ -155,6 +155,11 @@ EMBEDDED_BILINGUAL_SOURCES: dict[str, str] = {
         "Acts as the bilingual governance portal and canonical navigation index; "
         "a single file keeps entry points and normative-document links synchronized."
     ),
+    "14-ai-development/design/protection-fingerprint-ratchet.md": (
+        "Defines a machine-consumed protection-fingerprint ratchet contract; "
+        "one source prevents English and Chinese versions from producing "
+        "different configuration or enforcement decisions."
+    ),
 }
 for _source, _reason in EMBEDDED_BILINGUAL_SOURCES.items():
     if not (ROOT / _source).is_file():

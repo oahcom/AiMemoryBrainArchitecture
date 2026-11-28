@@ -108,6 +108,67 @@ def classify_primary(digest_present, implementation_present, any_pin, pinned_ok,
     return "TRACEABLE"
 
 
+def initial_registration_eligible(
+    manifest_path,
+    doc,
+    prompt_path,
+    prompt_blob_sha,
+    prompt_commit_sha,
+    prompt_blob_bytes,
+    head_prompt_bytes,
+    implementation_commit,
+    merge_commit,
+    primary_status,
+    findings,
+):
+    """Verify the narrowly scoped first-registration exception.
+
+    This does not establish TRACEABLE. It only permits a newly introduced
+    work item to enter the repository with an immutable, content-pinned
+    prompt and no implementation commit yet.
+
+    The Git blob object is the immutable evidence. The prompt file at the
+    audited head must have exactly the same bytes as that object.
+    """
+    if doc.get("prompt_commit_trace_initial_registration") is not True:
+        return False
+
+    expected_prompt = (
+        Path(manifest_path).parent / "prompt-v1.md"
+    ).as_posix()
+
+    if prompt_path != expected_prompt:
+        return False
+
+    if not HEX40.fullmatch(str(prompt_blob_sha or "")):
+        return False
+
+    # The bootstrap path uses the immutable blob pin, not a commit pin.
+    if real(prompt_commit_sha):
+        return False
+
+    if prompt_blob_bytes is None or head_prompt_bytes is None:
+        return False
+
+    if prompt_blob_bytes != head_prompt_bytes:
+        return False
+
+    # An implementation commit or merge target means this is no longer
+    # the narrowly defined initial-registration state.
+    if real(implementation_commit) or real(merge_commit):
+        return False
+
+    if primary_status != "NO_TRACE":
+        return False
+
+    # The digest must already be independently verified by audit().
+    # The only permitted finding is the absent implementation commit.
+    if set(findings) != {"commit_absent"}:
+        return False
+
+    return True
+
+
 def audit(root, ref, base):
     rows = []
     base_sha = resolve_commit(root, base)
@@ -144,6 +205,8 @@ def audit(root, ref, base):
             findings.append("digest_head_mismatch")
 
         pin_results = []
+        blob_bytes = None
+
         if has_blob_pin:
             blob_bytes = read_git_blob(root, pblob)
             pin_results.append(bool(blob_bytes is not None and digest_valid and
@@ -185,16 +248,35 @@ def audit(root, ref, base):
         primary = classify_primary(real(digest), real(impl), has_any_pin,
                                    pinned_ok, cdim == "REACHABLE")
 
+        registration_eligible = initial_registration_eligible(
+            manifest_path=mp,
+            doc=doc,
+            prompt_path=pfile,
+            prompt_blob_sha=pblob,
+            prompt_commit_sha=pcommit,
+            prompt_blob_bytes=blob_bytes,
+            head_prompt_bytes=head_bytes,
+            implementation_commit=impl,
+            merge_commit=merge_target,
+            primary_status=primary,
+            findings=findings,
+        )
+
         if not real(digest):
             pdim = "ABSENT"
         elif has_any_pin:
             pdim = "PINNED_OK" if pinned_ok else "UNPINNED_MISMATCH"
         else:
             pdim = "HEAD_MATCH" if head_match else "UNPINNED_MISMATCH"
-        rows.append({"manifest": mp,
-                     "work_item_id": doc.get("work_item_id", Path(mp).parent.name),
-                     "primary_status": primary, "findings": findings,
-                     "prompt_dimension": pdim, "commit_dimension": cdim})
+        rows.append({
+            "manifest": mp,
+            "work_item_id": doc.get("work_item_id", Path(mp).parent.name),
+            "primary_status": primary,
+            "findings": findings,
+            "prompt_dimension": pdim,
+            "commit_dimension": cdim,
+            "initial_registration_eligible": registration_eligible,
+        })
     return rows
 
 
@@ -212,26 +294,58 @@ def summarize(rows):
 
 
 def ratchet_violations(result, baseline, base_manifest_ids):
-    """Use --base for additions and the committed snapshot only for regressions."""
+    """Use --base for additions and the committed snapshot only for regressions.
+
+    A new manifest must either be TRACEABLE or satisfy the independently
+    verified, immutable-prompt initial-registration contract.
+
+    Existing manifests are compared only against an accepted prior state.
+    A manifest already present at --base is never reclassified as new merely
+    because it is absent from the older committed baseline.
+    """
     old = baseline.get("manifests", {})
     base_manifest_ids = set(base_manifest_ids)
     violations = []
+
     for row in result["manifests"]:
         ident = row["work_item_id"]
         prior = old.get(ident)
+
         if ident not in base_manifest_ids:
-            if row["primary_status"] != "TRACEABLE":
-                violations.append(f"NEW_NON_TRACEABLE {ident} {row['primary_status']}")
+            if row["primary_status"] == "TRACEABLE":
+                continue
+
+            if (
+                row["primary_status"] == "NO_TRACE"
+                and row.get("initial_registration_eligible") is True
+            ):
+                continue
+
+            violations.append(
+                f"NEW_NON_TRACEABLE {ident} {row['primary_status']}"
+            )
             continue
+
         # Existing at --base but missing from the older committed baseline:
         # there is no prior accepted state to compare, but it is not new.
         if prior is None:
             continue
+
         if SEVERITY[row["primary_status"]] > SEVERITY[prior["primary_status"]]:
-            violations.append(f"REGRESSION {ident} {prior['primary_status']} -> {row['primary_status']}")
-        added = sorted(set(row["findings"]) - set(prior.get("findings", [])))
+            violations.append(
+                f"REGRESSION {ident} "
+                f"{prior['primary_status']} -> {row['primary_status']}"
+            )
+
+        added = sorted(
+            set(row["findings"]) - set(prior.get("findings", []))
+        )
+
         if added:
-            violations.append(f"NEW_FINDINGS {ident} {','.join(added)}")
+            violations.append(
+                f"NEW_FINDINGS {ident} {','.join(added)}"
+            )
+
     return violations
 
 
