@@ -19,7 +19,13 @@ attribution: "user-authorized operator (delegated by account owner)"
 date: "2026-11-26"
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: 7ecf2a8e7d1e40a13f6af6d4335a6766a222194f
+base_commit_sha: "31c1e5d83e7dad326dbd4b69d4a8e19534718ff1"
+
+# Prompt-to-commit trace pins, measured from the committed prompt snapshot.
+prompt_sha256: "3be160b2b1197339f9ef8e4a1f260d74f6fcf96ea51c0ae0114be5f33e6e64ae"
+prompt_file: "14-ai-development/work-items/AID-2026-303/prompt-v1.md"
+prompt_file_blob_sha: "e11cb75011b9136257ac220636ebc44f74b63f65"
+prompt_file_commit_sha: "1caa5a2714a4e8c9a44a0e08890a384bbe5e51bc"
 scope:
   objective: >-
     Repair the eight measured STALE pointers and four repairable NON_BLOB
@@ -58,19 +64,45 @@ documentation:
     relationship: reference
   - path: "14-ai-development/work-items/INDEX.md"
     relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-303/prompt-v1.md"
+    relationship: reference
 session_evidence:
   - role: "IMPLEMENTATION_SESSION"
     issue_refs:
       - "#1267"
     implementing_ai_session: "ChatGPT-GPT-6"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-303/session-evidence.md"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-303/prompt-v1.md"
+    executed_prompt_sha256: "3be160b2b1197339f9ef8e4a1f260d74f6fcf96ea51c0ae0114be5f33e6e64ae"
+    executed_prompt_bytes: 6695
+    executed_prompt_provenance: "User-provided takeover instructions captured verbatim as prompt-v1.md; the snapshot is the instruction used for the takeover, cherry-picks, bilingual mirror re-derivation, scanner verification, and evidence update."
+    session_reference_status: "RECORDED"
 implementation:
   status: IN_PROGRESS
+  implementation_commit_sha: "1ddea93e977c7f7cc3eda2cf8dfacbaeafd15111"
   summary: >-
-    Exact implementation package prepared. Twelve pointer repairs, two-item
-    source-revision ratchet, existing workflow wiring, and gate-wiring cleanup
-    are specified. No repository write, CI run, or merge is claimed by this
-    session.
+    Took over the stalled AID-2026-303 implementation lane after the original
+    branch remained at 69500815 for 60 minutes without progress, a PR, or a
+    comment response. The replacement branch was initially created from
+    origin/main at 460f437e and subsequently rebased cleanly onto
+    31c1e5d83e7dad326dbd4b69d4a8e19534718ff1 without conflicts. The
+    implementation cherry-pick is now 1ddea93e9, replacing its pre-rebase
+    identity fce62cad (originally derived from 4211b28a); the work-item
+    schema-alignment cherry-pick is now b076af5cc, replacing 96cf0ba2
+    (originally derived from 69500815). Both English and Chinese mirror section
+    4.1 texts were re-derived to distinguish Owner D's canonical Forget
+    identity/lifecycle/Fence mechanics from Owner I's global policy,
+    inventory, and completion responsibilities. After rebase, the source
+    revision scanner reported POINTERS=52, ACCURATE=28, STALE=0,
+    UNRESOLVED=0, DEREFERENCED=24, BAD_DEREFERENCE=0,
+    NON_BLOB_REFERENCE=2, BAD=2, exit 1. The two remaining BAD findings
+    match the two entries in scripts/ci/baselines/source-revision-pointers.txt
+    byte-for-byte under a Python reproduction of the workflow output filter.
+    These two memory-brain-guide non-blob references remain temporary,
+    unresolved ratchet-baseline exceptions and are not claimed as repaired.
+    The equivalence check does not establish that gate_ratchet.py has passed;
+    its CI execution remains pending. The full-history bilingual gate has
+    also not been verified because the available checkout is shallow.
   files_changed:
     - docs/en/00-governance/design-principles.md
     - docs/en/01-system-architecture/responsibility-matrix.md
@@ -99,3 +131,6 @@ implementation:
     - "python3 scripts/ci/test_check_test_reachability.py"
     - "python3 scripts/ci/check_manifest_parse.py"
     - "python3 scripts/check_traceability.py --index-only"
+
+pull_request: 1479
+pull_request_url: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1479"
