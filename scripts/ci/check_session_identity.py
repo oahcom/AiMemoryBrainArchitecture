@@ -550,6 +550,44 @@ def _print_check_result(
     return 1 if new or stale else 0
 
 
+
+def _diff_base_check(root: Path, base_ref: str, current_violations: list[Violation]) -> int:
+    """Compare current findings with a verified Git base; never access a snapshot baseline."""
+    try:
+        if _git_text(root, "rev-parse", "--is-inside-work-tree") != "true":
+            raise RuntimeError("repository root is not inside a Git work tree")
+        if _git_text(root, "rev-parse", "--is-shallow-repository") == "true":
+            raise RuntimeError("shallow repository; fetch complete history first")
+        resolved_ref = _git_text(root, "rev-parse", "--verify", f"{base_ref}^{{commit}}")
+        _git_text(root, "cat-file", "-e", f"{resolved_ref}^{{tree}}")
+        _git_text(root, "merge-base", "HEAD", resolved_ref)
+        base_root = _extract_work_items_archive(root, resolved_ref)
+        try:
+            base_violations, _ = scan_tree(base_root)
+        finally:
+            import shutil
+            shutil.rmtree(base_root, ignore_errors=True)
+    except (OSError, UnicodeError, ValueError, RuntimeError) as exc:
+        print(f"ERROR: cannot verify diff base {base_ref!r}: {exc}", file=sys.stderr)
+        return 2
+
+    current_yaml = [v for v in current_violations if v.code == "SESSION_YAML_INVALID"]
+    base_yaml = [v for v in base_violations if v.code == "SESSION_YAML_INVALID"]
+    if base_yaml:
+        print(f"BASE SESSION_YAML_INVALID: {len(base_yaml)} base-tree YAML error(s) treated as existing debt")
+    introduced = _identities(current_violations) - _identities(base_violations)
+    for v in sorted(current_violations, key=lambda item: (item.identity, item.detail)):
+        if v.code == "SESSION_YAML_INVALID" or v.identity in introduced:
+            print(f"NEW: {v.render()}")
+    print(
+        "SESSION IDENTITY DIFF: "
+        f"violations={len(current_violations)} "
+        f"base={len(base_violations)} "
+        f"new={len(introduced) + len(current_yaml)}"
+    )
+    return 1 if current_yaml or introduced else 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Check session identity using a shrink-only baseline."
@@ -575,6 +613,11 @@ def main(argv: list[str] | None = None) -> int:
         help="target-branch commit/ref required by --bootstrap-baseline",
     )
     parser.add_argument(
+        "--diff-base",
+        metavar="REF",
+        help="fail only for findings introduced relative to this Git commit/ref",
+    )
+    parser.add_argument(
         "--root",
         type=Path,
         default=DEFAULT_ROOT,
@@ -584,6 +627,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.write_baseline and args.bootstrap_baseline:
         parser.error("--write-baseline and --bootstrap-baseline are mutually exclusive")
+    if args.diff_base and (args.write_baseline or args.bootstrap_baseline):
+        parser.error("--diff-base is mutually exclusive with baseline mutation modes")
     if args.base_ref and not args.bootstrap_baseline:
         parser.error("--base-ref requires --bootstrap-baseline")
 
@@ -606,6 +651,9 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 2
+
+    if args.diff_base:
+        return _diff_base_check(root, args.diff_base, violations)
 
     if args.bootstrap_baseline:
         return _bootstrap_baseline(
