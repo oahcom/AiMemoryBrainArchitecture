@@ -101,7 +101,7 @@ implementation:
     - 14-ai-development/work-items/INDEX.md
   tests:
     - "python -m unittest scripts.ci.test_check_prompt_commit_trace -v -> exit 0 (14 tests; OK; EXECUTED_BY_COORDINATOR_NOT_IN_CI against this branch head)"
-    - "python scripts/ci/check_prompt_commit_trace.py --root . --commit 5a4bb16eb6ccb97d1ef506f6669156139dc1270a --base 5a4bb16eb6ccb97d1ef506f6669156139dc1270a --audit-only -> exit 0 (manifests=160; PRIMARY TRACEABLE=3)"
+    - "python scripts/ci/check_prompt_commit_trace.py --root . --commit 5ef8889302f4a730cbe4d8a13c72991b4754a59a --base 5ef8889302f4a730cbe4d8a13c72991b4754a59a --audit-only -> exit 0 (manifests=160; PRIMARY TRACEABLE=3)"
     - "python scripts/ci/check_work_item_manifest_schema.py --tree HEAD --baseline 14-ai-development/reports/work-item-manifest-ac4-baseline.json -> exit 0"
   pull_request: "PR #1520 OPEN; NOT MERGED (rebuild of closed #1494)"
 # Initial registration only: no implementation or merge pin may appear here,

@@ -183,12 +183,12 @@ Two defects made #1494 red; both are fixed in this rebuild:
 
 One further reconciliation was needed. The `Reproduce the historical #1453 false-new-manifest failure` step replays the ratchet at `bdb4b0d4` against `460f437e` with the committed `AID-2026-291/baseline.json`, and it requires exit 0. The rewrite withdrew every implementation SHA under a blocked lifecycle, so a placeholder such as `PENDING` became `commit_absent` instead of `commit_pending`, and twelve base-present rows read as new findings. Only a real SHA is withdrawn now; a placeholder keeps its `commit_pending` classification. That step and the PR ratchet both exit 0 after the change.
 
-Coordinator-local execution (EXECUTED_BY_COORDINATOR_NOT_IN_CI) at code commit `5a4bb16eb6ccb97d1ef506f6669156139dc1270a`, this branch's last commit that changes the checker or its tests; later commits in this branch only edit these records:
+Coordinator-local execution (EXECUTED_BY_COORDINATOR_NOT_IN_CI) at code commit `5ef8889302f4a730cbe4d8a13c72991b4754a59a`, this branch's last commit that changes the checker or its tests; later commits in this branch only edit these records:
 
 | Command | Result |
 |---|---|
 | `python -m unittest scripts.ci.test_check_prompt_commit_trace -v` | 14 tests, OK, exit 0 |
-| `python scripts/ci/check_prompt_commit_trace.py --root . --commit 5a4bb16eb6ccb97d1ef506f6669156139dc1270a --base 5a4bb16eb6ccb97d1ef506f6669156139dc1270a --audit-only` | `manifests=160`, `PRIMARY TRACEABLE=3`, exit 0 |
+| `python scripts/ci/check_prompt_commit_trace.py --root . --commit 5ef8889302f4a730cbe4d8a13c72991b4754a59a --base 5ef8889302f4a730cbe4d8a13c72991b4754a59a --audit-only` | `manifests=160`, `PRIMARY TRACEABLE=3`, exit 0 |
 | `python scripts/ci/check_work_item_manifest_schema.py --tree HEAD --baseline 14-ai-development/reports/work-item-manifest-ac4-baseline.json` | 0 new regressions, exit 0 |
 
 `AID-2026-344` itself audits as `PINNED_OK x ABSENT`, `NO_TRACE`, `initial_registration_eligible: true`. Its recorded prompt snapshot is pinned (6867 bytes, SHA-256 `30996c1bf0bb0cd7a572e8e2fa31fe98bb65bd91a4cb26730928cecb355015ff`, blob `5ef5835179afff4291a7c73de78e4ef8f765b20d`), and no implementation or merge pin is declared, as the initial-registration exception requires. The pin covers the recorded snapshot only; the original dispatch payload remains `NOT_VERIFIED`.
