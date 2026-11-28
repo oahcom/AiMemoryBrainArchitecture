@@ -79,5 +79,5 @@ implementation:
     - "python3 -m unittest -v test_check_governance_operation_traceability.py (from tests/) — expected exit 0; not run locally."
     - "python3 scripts/check_governance_operation_traceability.py --check — expected exit 0; not run locally."
 
-pull_request: null
-pull_request_url: null
+pull_request: 1504
+pull_request_url: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1504"
