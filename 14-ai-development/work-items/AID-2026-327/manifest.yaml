@@ -39,6 +39,11 @@ session_evidence:
       - "#1210"
     implementing_ai_session: "NOT_RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-327/session-evidence.md"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-327/prompt-v1.md"
+    executed_prompt_sha256: "1f632841337ee0f3b2e652d3f5c7d938dd6e6ce7845c42bcece3c173c97da545"
+    executed_prompt_bytes: 4097
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
 implementation:
   status: IMPLEMENTED
   implementation_commit_sha: "3cdbf702bde3149cb0d9041dc48289637699e7ac"
