@@ -22,23 +22,19 @@ document_metadata:
       - trust-boundary
       - ownership
       - forget
-      - cursor
-      - tenant
-      - shard
     canonical_conflict_status: None
     normative_status: Normative
   bilingual_counterpart:
     source: "01-system-architecture/system-boundaries.md"
     en: "docs/en/01-system-architecture/system-boundaries.md"
     zh-CN: null
-  steward: "Architecture Governance"
 ---
 # 系统边界
 
 - 文档 ID：SYS-BOUNDARIES-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../01-system-architecture/system-boundaries.md)
-- 源版本：42b2411048b53ebe6c7947075427665cdfb2d30c
+- 源版本：fd05a4d559a852fd24370297c7cd290384d9414a
 - 对应英文：[System Boundaries](../../en/01-system-architecture/system-boundaries.md)
 - 状态：明确标记的部分为 DECIDED；CANDIDATE/OPEN 项仍不具规范约束力
 
@@ -290,4 +286,3 @@ D 的规范契约 [01-system-architecture/forget-fence-and-completion-contract.m
 ### 15.5 尚待明确的实现边界
 
 本决议没有定义跨 shard 事务游标条目集合的序列化表示，也没有定义 F/G 消费者使用的一致快照/一致切面协议。这些细节仍须由相应 D/F/G 契约明确；不得从单一标量游标中自行推导。本记录不授权代码或运行时实现。
-
