@@ -1,4 +1,4 @@
-work_item_id: AID-2026-341
+work_item_id: AID-2026-343
 title: "Extend DM-12 for additional mirrors and source-less bilingual groups"
 class: GATE/TEST + DOC/GOVERNANCE
 risk: R1
@@ -48,14 +48,14 @@ scope:
     - No new workflow, job, required context, or branch-protection change.
     - No third-party dependencies.
 
-evidence: 14-ai-development/work-items/AID-2026-341/evidence.md
+evidence: 14-ai-development/work-items/AID-2026-343/evidence.md
 
 documentation:
-  - path: 14-ai-development/work-items/AID-2026-341/evidence.md
+  - path: 14-ai-development/work-items/AID-2026-343/evidence.md
     relationship: evidence
-  - path: 14-ai-development/work-items/AID-2026-341/prompt-v1.md
+  - path: 14-ai-development/work-items/AID-2026-343/prompt-v1.md
     relationship: reference
-  - path: 14-ai-development/work-items/AID-2026-341/session-evidence.md
+  - path: 14-ai-development/work-items/AID-2026-343/session-evidence.md
     relationship: evidence
 
 session_evidence:
@@ -64,9 +64,9 @@ session_evidence:
       - "#1461"
       - "#1267"
     implementing_ai_session: "6b09267a-1e40-83ec-a1ee-8cad6f6c15c8"
-    session_evidence_ref: "14-ai-development/work-items/AID-2026-341/session-evidence.md"
-    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-341/prompt-v1.md"
-    executed_prompt_sha256: "23deac1831e18b81ae4796aa97b70e48bc9505a70915d7bd8011acc1d1dfa7fb"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-343/session-evidence.md"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-343/prompt-v1.md"
+    executed_prompt_sha256: "71becd14f1f57de01c3bfddc0ecaa74610cb72137e95a28a65af600f739130ed"
     executed_prompt_bytes: 3989
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: "RECORDED"
@@ -91,7 +91,7 @@ implementation:
     - "T21g inconsistent source-less metadata negative case"
     - "T21h source-absence reason without sentinel negative case"
 
-prompt_file: "14-ai-development/work-items/AID-2026-341/prompt-v1.md"
-prompt_sha256: "23deac1831e18b81ae4796aa97b70e48bc9505a70915d7bd8011acc1d1dfa7fb"
-prompt_file_blob_sha: "b92421af7f69b3213fa872f0d1f563c489cb2dea"
+prompt_file: "14-ai-development/work-items/AID-2026-343/prompt-v1.md"
+prompt_sha256: "71becd14f1f57de01c3bfddc0ecaa74610cb72137e95a28a65af600f739130ed"
+prompt_file_blob_sha: "217b5b359576be5ef3f08647f0c67988cecdfc0a"
 prompt_commit_trace_initial_registration: true

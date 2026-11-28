@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-341/evidence.md"
+        - "14-ai-development/work-items/AID-2026-343/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -30,10 +30,10 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "Implementation-session role, input, output, and provenance record for AID-2026-341."
-    canonical_scope_id: "ai-development/aid-2026-341-session-provenance"
+    canonical_scope: "Implementation-session role, input, output, and provenance record for AID-2026-343."
+    canonical_scope_id: "ai-development/aid-2026-343-session-provenance"
     canonical_scope_keywords:
-      - "AID-2026-341"
+      - "AID-2026-343"
       - "session evidence"
       - "implementation session"
     canonical_conflict_status: None
@@ -46,11 +46,11 @@ document_metadata:
   steward: "user-authorized operator (delegated by account owner)"
 ---
 
-# AID-2026-341 — Session Evidence
+# AID-2026-343 — Session Evidence
 
 ## Session identity
 
-- Work item: AID-2026-341
+- Work item: AID-2026-343
 - Repository: `oahcom/AiMemoryBrainArchitecture`
 - Manifest base: `b51da8c0d4a58727c5a0d407ee76675f71648797`
 - Session conversation: `6b09267a-1e40-83ec-a1ee-8cad6f6c15c8`
@@ -63,7 +63,7 @@ not by the authoring session itself.
 
 The session originally authored the implementation specification under
 the previously proposed identifier AID-2026-321. The work-item carrier
-was subsequently migrated to AID-2026-341 after the original identifier
+was subsequently migrated to AID-2026-343 after the original identifier
 was determined to conflict with an existing main work item.
 
 The migration changes the work-item identity and internal paths. It does
@@ -123,16 +123,16 @@ the operator applied it, that the tests passed, or that a PR was merged.
 
 The original work-item identifier was AID-2026-321.
 
-The replacement identifier is AID-2026-341.
+The replacement identifier is AID-2026-343.
 
 The migration was authorized after the operator supplied the following
 uniqueness measurements against main:
 
 - Target commit: `b51da8c0d4a58727c5a0d407ee76675f71648797`.
-- No AID-2026-341 directory in the target tree.
+- No AID-2026-343 directory in the target tree.
 - No reachable commit in the inspected branches containing the target path.
-- No AID-2026-341 reference in the target INDEX.
-- No AID-2026-341 reference in the inspected 28 open PR titles and bodies.
+- No AID-2026-343 reference in the target INDEX.
+- No AID-2026-343 reference in the inspected 28 open PR titles and bodies.
 - AID-2026-340 was the highest existing 3xx directory.
 
 The original identifier must not be reused by this work item.

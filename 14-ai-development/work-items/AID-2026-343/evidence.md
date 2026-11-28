@@ -12,7 +12,7 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-341/evidence.md"
+        - "14-ai-development/work-items/AID-2026-343/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
@@ -30,10 +30,10 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "Implementation and verification evidence for AID-2026-341 DM-12 mirror-group closure extension."
-    canonical_scope_id: "ai-development/aid-2026-341-execution-evidence"
+    canonical_scope: "Implementation and verification evidence for AID-2026-343 DM-12 mirror-group closure extension."
+    canonical_scope_id: "ai-development/aid-2026-343-execution-evidence"
     canonical_scope_keywords:
-      - "AID-2026-341"
+      - "AID-2026-343"
       - "DM-12"
       - "gate verification"
     canonical_conflict_status: None
@@ -46,7 +46,7 @@ document_metadata:
   steward: "user-authorized operator (delegated by account owner)"
 ---
 
-# AID-2026-341 — Evidence
+# AID-2026-343 — Evidence
 
 ## 1. Required scope
 
@@ -57,7 +57,7 @@ records.
 The four AID-2026-320 documents are explicitly outside this carrier.
 
 The work-item identifier was migrated from the previously proposed
-AID-2026-321 to AID-2026-341 because the former identifier belongs to
+AID-2026-321 to AID-2026-343 because the former identifier belongs to
 another work item on main.
 
 The migration target was checked against the exact target commit:
@@ -66,11 +66,11 @@ The migration target was checked against the exact target commit:
 
 The following uniqueness checks were reported as passing:
 
-- The AID-2026-341 directory does not exist in the target tree.
+- The AID-2026-343 directory does not exist in the target tree.
 - No commit reachable through the inspected branches contains that path.
-- The target INDEX has zero references to AID-2026-341.
+- The target INDEX has zero references to AID-2026-343.
 - AID-2026-340 is the highest existing 3xx work-item directory.
-- None of the 28 inspected open PR titles or bodies references AID-2026-341.
+- None of the 28 inspected open PR titles or bodies references AID-2026-343.
 
 These checks establish identifier availability at the inspected snapshot.
 They do not establish implementation completion or Owner acceptance.
