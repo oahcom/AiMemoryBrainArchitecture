@@ -7,7 +7,6 @@ as a subprocess against committed repository history.
 from __future__ import annotations
 
 import hashlib
-import os
 import subprocess
 import sys
 import tempfile
@@ -97,13 +96,37 @@ class LedgerRepository:
         self._write_manifest(declared_pin or self.new_pin)
         return self._commit("repin manifest blob")
 
-    def add_ledger(self, rows: list[tuple[str, str, str, str, str, str]]) -> str:
-        lines = [
-            "|manifest|field|path|previous_pin|new_pin|repin_commit|",
-            "|---|---|---|---|---|---|",
-        ]
-        for row in rows:
-            lines.append("|" + "|".join(row) + "|")
+    def add_ledger(self, rows: list[tuple[str, ...]]) -> str:
+        """Write six-column legacy rows and seven-column mode-aware rows.
+
+        Each row is either:
+          (manifest, field, path, previous_pin, new_pin, repin_commit)
+        or:
+          (manifest, field, path, reference_mode, previous_pin, new_pin, repin_commit)
+        """
+        legacy_rows = [row for row in rows if len(row) == 6]
+        mode_rows = [row for row in rows if len(row) == 7]
+        if len(legacy_rows) + len(mode_rows) != len(rows):
+            raise ValueError("ledger rows must contain exactly six or seven fields")
+
+        lines = []
+        if not rows or legacy_rows:
+            lines.extend([
+                "|manifest|field|path|previous_pin|new_pin|repin_commit|",
+                "|---|---|---|---|---|---|",
+            ])
+            lines.extend("|" + "|".join(row) + "|" for row in legacy_rows)
+
+        if legacy_rows and mode_rows:
+            lines.append("")
+
+        if mode_rows:
+            lines.extend([
+                "|manifest|field|path|reference_mode|previous_pin|new_pin|repin_commit|",
+                "|---|---|---|---|---|---|---|",
+            ])
+            lines.extend("|" + "|".join(row) + "|" for row in mode_rows)
+
         self._write(LEDGER_PATH, ("\n".join(lines) + "\n").encode("ascii"))
         return self._commit("add manifest pin ledger")
 
@@ -135,6 +158,23 @@ class LedgerRepository:
             MANIFEST,
             "index.root",
             PINNED_PATH,
+            previous_pin or self.old_pin,
+            new_pin or self.new_pin,
+            repin_commit,
+        )
+
+    def valid_mode_row(
+        self,
+        repin_commit: str,
+        reference_mode: str = "current",
+        previous_pin: str | None = None,
+        new_pin: str | None = None,
+    ) -> tuple[str, str, str, str, str, str, str]:
+        return (
+            MANIFEST,
+            "index.root",
+            PINNED_PATH,
+            reference_mode,
             previous_pin or self.old_pin,
             new_pin or self.new_pin,
             repin_commit,
@@ -173,14 +213,9 @@ class ManifestPinLedgerTests(unittest.TestCase):
     def test_ledger_chain_discontinuity_is_incomplete(self) -> None:
         repin = self.repo.make_repin_commit()
         incorrect_previous = hashlib.sha1(b"not the previous pin").hexdigest()
-        self.repo.add_ledger(
-            [
-                self.repo.valid_row(
-                    repin,
-                    previous_pin=incorrect_previous,
-                )
-            ]
-        )
+        self.repo.add_ledger([
+            self.repo.valid_row(repin, previous_pin=incorrect_previous)
+        ])
 
         status, output = self.repo.checker()
 
@@ -209,6 +244,68 @@ class ManifestPinLedgerTests(unittest.TestCase):
 
         self.assertEqual(status, 2, output)
         self.assertIn("target pin does not equal latest ledger new_pin", output)
+
+    def test_seven_column_current_record_authorizes_transition(self) -> None:
+        repin = self.repo.make_repin_commit()
+        self.repo.add_ledger([self.repo.valid_mode_row(repin, "current")])
+
+        status, output = self.repo.checker()
+
+        self.assertEqual(status, 0, output)
+        self.assertIn("ledger_records=1", output)
+        self.assertNotIn("INCOMPLETE ", output)
+        self.assertNotIn("VIOLATION ", output)
+
+    def test_six_column_legacy_record_maps_to_current_mode(self) -> None:
+        repin = self.repo.make_repin_commit()
+        self.repo.add_ledger([self.repo.valid_row(repin)])
+
+        status, output = self.repo.checker()
+
+        self.assertEqual(status, 0, output)
+        self.assertIn("ledger_records=1", output)
+
+    def test_seven_column_record_rejects_invalid_reference_mode(self) -> None:
+        repin = self.repo.make_repin_commit()
+        invalid_row = (
+            MANIFEST,
+            "index.root",
+            PINNED_PATH,
+            "sometimes",
+            self.repo.old_pin,
+            self.repo.new_pin,
+            repin,
+        )
+        self.repo.add_ledger([invalid_row])
+
+        status, output = self.repo.checker()
+
+        self.assertEqual(status, 2, output)
+        self.assertIn("INCOMPLETE", output)
+
+    def test_duplicate_transition_across_legacy_and_extended_tables_is_incomplete(self) -> None:
+        repin = self.repo.make_repin_commit()
+        self.repo.add_ledger([
+            self.repo.valid_row(repin),
+            self.repo.valid_mode_row(repin, "current"),
+        ])
+
+        status, output = self.repo.checker()
+
+        self.assertEqual(status, 2, output)
+        self.assertIn("INCOMPLETE", output)
+        self.assertIn("duplicate", output.lower())
+
+    def test_reference_mode_is_part_of_ledger_transition_identity(self) -> None:
+        repin = self.repo.make_repin_commit()
+        self.repo.add_ledger([
+            self.repo.valid_mode_row(repin, "historical"),
+        ])
+
+        status, output = self.repo.checker()
+
+        self.assertEqual(status, 2, output)
+        self.assertIn("INCOMPLETE", output)
 
 
 if __name__ == "__main__":

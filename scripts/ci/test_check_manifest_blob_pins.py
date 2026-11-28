@@ -14,8 +14,14 @@ GATE = HERE / "check_manifest_blob_pins.py"
 
 
 def git(root, *args, data=None):
-    return subprocess.run(["git", *args], cwd=root, input=data, stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE, check=True).stdout.decode().strip()
+    return subprocess.run(
+        ["git", *args],
+        cwd=root,
+        input=data,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+    ).stdout.decode().strip()
 
 
 def commit_tree(root, files):
@@ -24,8 +30,12 @@ def commit_tree(root, files):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(content if isinstance(content, bytes) else content.encode())
     git(root, "add", ".")
-    git(root, "-c", "user.name=Test", "-c", "user.email=test@example.invalid",
-        "commit", "-m", "fixture")
+    git(
+        root,
+        "-c", "user.name=Test",
+        "-c", "user.email=test@example.invalid",
+        "commit", "-m", "fixture",
+    )
     return git(root, "rev-parse", "HEAD")
 
 
@@ -38,18 +48,38 @@ class BlobPinsTest(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
-    def run_gate(self, commit="HEAD"):
-        p = subprocess.run([sys.executable, str(GATE), "--root", str(self.root),
-                            "--commit", commit], text=True, capture_output=True)
+    def run_gate(self, commit="HEAD", *extra_args):
+        p = subprocess.run(
+            [
+                sys.executable,
+                str(GATE),
+                "--root",
+                str(self.root),
+                "--commit",
+                commit,
+                *extra_args,
+            ],
+            text=True,
+            capture_output=True,
+        )
         return p.returncode, p.stdout, p.stderr
 
     def manifest(self, path, digest):
-        return ("work_item_id: AID-2026-900\n"
-                f"root: {path}\nroot_blob: \"{digest}\"\n")
+        return (
+            "work_item_id: AID-2026-900\n"
+            f"root: {path}\nroot_blob: \"{digest}\"\n"
+        )
 
     @staticmethod
     def blob_sha(data):
-        return hashlib.sha1(b"blob " + str(len(data)).encode() + b"\0" + data).hexdigest()
+        return hashlib.sha1(
+            b"blob " + str(len(data)).encode() + b"\0" + data
+        ).hexdigest()
+
+    def write_manifest(self, document):
+        path = self.root / "14-ai-development/work-items/AID-2026-900/manifest.yaml"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
 
     def test_valid_pin_is_silent_about_individual_pin(self):
         data = b"committed bytes\n"
@@ -70,10 +100,12 @@ class BlobPinsTest(unittest.TestCase):
         commit_tree(self.root, {
             "docs/en/05-memory-runtime/README.md": data,
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
-                ("baseline_and_source_evidence:\n"
-                 "  authored_indexes:\n"
-                 "    - en_mirror: docs/en/05-memory-runtime/README.md\n"
-                 f"      en_mirror_blob: \"{wrong}\"\n"),
+                (
+                    "baseline_and_source_evidence:\n"
+                    "  authored_indexes:\n"
+                    "    - en_mirror: docs/en/05-memory-runtime/README.md\n"
+                    f"      en_mirror_blob: \"{wrong}\"\n"
+                ),
         })
         code, out, err = self.run_gate()
         self.assertEqual(code, 1, out + err)
@@ -112,9 +144,11 @@ class BlobPinsTest(unittest.TestCase):
         source_sha = self.blob_sha(source_data)
         candidate = commit_tree(self.root, {
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
-                ("d_source_commit: " + source + "\n"
-                 "d_source_blobs:\n"
-                 f"  - 'source.md: {source_sha}'\n"),
+                (
+                    "d_source_commit: " + source + "\n"
+                    "d_source_blobs:\n"
+                    f"  - 'source.md: {source_sha}'\n"
+                ),
         })
         code, out, err = self.run_gate(candidate)
         self.assertEqual(code, 0, out + err)
@@ -122,8 +156,10 @@ class BlobPinsTest(unittest.TestCase):
     def test_unavailable_cross_commit_is_incomplete_not_pass(self):
         commit_tree(self.root, {
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
-                ("d_source_commit: " + "f" * 40 + "\n"
-                 "d_source_blobs:\n  - 'source.md: " + "1" * 40 + "'\n"),
+                (
+                    "d_source_commit: " + "f" * 40 + "\n"
+                    "d_source_blobs:\n  - 'source.md: " + "1" * 40 + "'\n"
+                ),
         })
         code, out, err = self.run_gate()
         self.assertEqual(code, 2, out + err)
@@ -135,9 +171,11 @@ class BlobPinsTest(unittest.TestCase):
         commit_tree(self.root, {
             "prompt.md": data,
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
-                ("prompt:\n  prompt_file: prompt.md\n"
-                 f"  prompt_sha256: {hashlib.sha256(data).hexdigest()}\n"
-                 f"  prompt_bytes: {len(data)}\n"),
+                (
+                    "prompt:\n  prompt_file: prompt.md\n"
+                    f"  prompt_sha256: {hashlib.sha256(data).hexdigest()}\n"
+                    f"  prompt_bytes: {len(data)}\n"
+                ),
         })
         code, out, err = self.run_gate()
         self.assertEqual(code, 0, out + err)
@@ -153,7 +191,6 @@ class BlobPinsTest(unittest.TestCase):
         data_a = b"pair A committed bytes\n"
         data_b = b"pair B committed bytes\n"
         digest_a = self.blob_sha(data_a)
-        digest_b = self.blob_sha(data_b)
         wrong = "0" * 40
         manifest = (
             "work_item_id: AID-2026-900\n"
@@ -189,7 +226,6 @@ class BlobPinsTest(unittest.TestCase):
         data_root = b"root file bytes\n"
         data_mirror = b"en mirror file bytes\n"
         digest_root = self.blob_sha(data_root)
-        digest_mirror = self.blob_sha(data_mirror)
         manifest = (
             "work_item_id: AID-2026-900\n"
             "baseline_and_source_evidence:\n"
@@ -384,6 +420,377 @@ class BlobPinsTest(unittest.TestCase):
         self.assertNotIn("MISMATCH related_evidence[0].zh_cn_mirror", out)
         self.assertNotIn("MISMATCH related_evidence[0].en_mirror path=related-zh.md", out)
 
+    def test_authored_index_historical_pin_survives_current_rewrite(self):
+        original = b"authored index original bytes\n"
+        original_sha = self.blob_sha(original)
+        commit_tree(self.root, {"authored.md": original})
+        self.write_manifest({
+            "work_item_id": "AID-2026-900",
+            "baseline_and_source_evidence": {
+                "authored_indexes": [
+                    {"root": "authored.md", "root_blob": original_sha}
+                ]
+            },
+        })
+        commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                (self.root / "14-ai-development/work-items/AID-2026-900/manifest.yaml").read_text(
+                    encoding="utf-8"
+                )
+        })
+        commit_tree(self.root, {"authored.md": b"rewritten authored index\n"})
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=1 ok=1 mismatch=0 path_missing=0 incomplete=0", out)
+
+    def test_authored_index_historical_pin_survives_path_deletion(self):
+        original = b"authored index retained in history\n"
+        original_sha = self.blob_sha(original)
+        commit_tree(self.root, {"authored.md": original})
+        manifest_path = self.root / "14-ai-development/work-items/AID-2026-900/manifest.yaml"
+        manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        manifest_path.write_text(
+            yaml.safe_dump({
+                "work_item_id": "AID-2026-900",
+                "baseline_and_source_evidence": {
+                    "authored_indexes": [
+                        {"root": "authored.md", "root_blob": original_sha}
+                    ]
+                },
+            }, sort_keys=False),
+            encoding="utf-8",
+        )
+        commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                manifest_path.read_text(encoding="utf-8")
+        })
+        git(self.root, "rm", "authored.md")
+        git(
+            self.root,
+            "-c", "user.name=Test",
+            "-c", "user.email=test@example.invalid",
+            "commit", "-m", "delete authored index",
+        )
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=1 ok=1 mismatch=0 path_missing=0 incomplete=0", out)
+
+    def test_authored_index_historical_pin_not_found_in_reachable_history_fails(self):
+        data = b"authored index bytes\n"
+        wrong = "0" * 40
+        commit_tree(self.root, {
+            "authored.md": data,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                yaml.safe_dump({
+                    "work_item_id": "AID-2026-900",
+                    "baseline_and_source_evidence": {
+                        "authored_indexes": [
+                            {"root": "authored.md", "root_blob": wrong}
+                        ]
+                    },
+                }, sort_keys=False),
+        })
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 1, out + err)
+        self.assertIn("pins=1 ok=0 mismatch=1 path_missing=0 incomplete=0", out)
+        self.assertIn("actual=not-found-in-reachable-history", out)
+
+    def test_related_evidence_current_mode_checks_candidate_bytes(self):
+        original = b"related evidence current bytes\n"
+        digest = self.blob_sha(original)
+        commit_tree(self.root, {
+            "related.md": original,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                yaml.safe_dump({
+                    "work_item_id": "AID-2026-900",
+                    "related_evidence": [
+                        {
+                            "reference_mode": "current",
+                            "path": "related.md",
+                            "blob": digest,
+                        }
+                    ],
+                }, sort_keys=False),
+        })
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=1 ok=1 mismatch=0 path_missing=0 incomplete=0", out)
+
+    def test_related_evidence_historical_mode_survives_later_rewrite(self):
+        original = b"historical related evidence\n"
+        digest = self.blob_sha(original)
+        commit_tree(self.root, {"related.md": original})
+        manifest = {
+            "work_item_id": "AID-2026-900",
+            "related_evidence": [
+                {
+                    "reference_mode": "historical",
+                    "path": "related.md",
+                    "blob": digest,
+                }
+            ],
+        }
+        commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                yaml.safe_dump(manifest, sort_keys=False),
+        })
+        commit_tree(self.root, {"related.md": b"new related evidence bytes\n"})
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=1 ok=1 mismatch=0 path_missing=0 incomplete=0", out)
+
+    def test_related_evidence_historical_mode_survives_later_deletion(self):
+        original = b"historical related evidence before deletion\n"
+        digest = self.blob_sha(original)
+        commit_tree(self.root, {"related.md": original})
+        manifest = {
+            "work_item_id": "AID-2026-900",
+            "related_evidence": [
+                {
+                    "reference_mode": "historical",
+                    "path": "related.md",
+                    "blob": digest,
+                }
+            ],
+        }
+        commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                yaml.safe_dump(manifest, sort_keys=False),
+        })
+        git(self.root, "rm", "related.md")
+        git(
+            self.root,
+            "-c", "user.name=Test",
+            "-c", "user.email=test@example.invalid",
+            "commit", "-m", "delete related evidence",
+        )
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=1 ok=1 mismatch=0 path_missing=0 incomplete=0", out)
+
+    def test_related_evidence_missing_mode_is_candidate_incomplete(self):
+        data = b"legacy related evidence bytes\n"
+        digest = self.blob_sha(data)
+        commit_tree(self.root, {
+            "related.md": data,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                yaml.safe_dump({
+                    "work_item_id": "AID-2026-900",
+                    "related_evidence": [
+                        {"path": "related.md", "blob": digest}
+                    ],
+                }, sort_keys=False),
+        })
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 2, out + err)
+        self.assertIn("pins=1 ok=1 mismatch=0 path_missing=0 incomplete=1", out)
+        self.assertIn("INCOMPLETE", out)
+
+    def test_related_evidence_invalid_mode_is_incomplete(self):
+        data = b"related evidence bytes\n"
+        digest = self.blob_sha(data)
+        commit_tree(self.root, {
+            "related.md": data,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                yaml.safe_dump({
+                    "work_item_id": "AID-2026-900",
+                    "related_evidence": [
+                        {
+                            "reference_mode": "sometimes",
+                            "path": "related.md",
+                            "blob": digest,
+                        }
+                    ],
+                }, sort_keys=False),
+        })
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 2, out + err)
+        self.assertIn("pins=1 ok=1 mismatch=0 path_missing=0 incomplete=1", out)
+        self.assertIn("INCOMPLETE", out)
+
+    def test_related_evidence_explicit_current_mode_is_required_and_passes(self):
+        data = b"explicit current evidence\n"
+        digest = self.blob_sha(data)
+        commit_tree(self.root, {
+            "related.md": data,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                yaml.safe_dump({
+                    "work_item_id": "AID-2026-900",
+                    "related_evidence": [
+                        {
+                            "reference_mode": "current",
+                            "path": "related.md",
+                            "blob": digest,
+                        }
+                    ],
+                }, sort_keys=False),
+        })
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=1 ok=1 mismatch=0 path_missing=0 incomplete=0", out)
+
+    def test_base_flag_allows_only_absent_mode_as_legacy_current(self):
+        data = b"legacy current evidence\n"
+        digest = self.blob_sha(data)
+        commit_tree(self.root, {
+            "related.md": data,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                yaml.safe_dump({
+                    "work_item_id": "AID-2026-900",
+                    "related_evidence": [
+                        {"path": "related.md", "blob": digest}
+                    ],
+                }, sort_keys=False),
+        })
+
+        code, out, err = self.run_gate(
+            "HEAD", "--allow-missing-reference-mode"
+        )
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=1 ok=1 mismatch=0 path_missing=0 incomplete=0", out)
+
+    def test_base_flag_does_not_hide_legacy_current_mismatch(self):
+        data = b"actual legacy current evidence\n"
+        wrong = "0" * 40
+        commit_tree(self.root, {
+            "related.md": data,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                yaml.safe_dump({
+                    "work_item_id": "AID-2026-900",
+                    "related_evidence": [
+                        {"path": "related.md", "blob": wrong}
+                    ],
+                }, sort_keys=False),
+        })
+
+        code, out, err = self.run_gate(
+            "HEAD", "--allow-missing-reference-mode"
+        )
+        self.assertEqual(code, 1, out + err)
+        self.assertIn("pins=1 ok=0 mismatch=1 path_missing=0 incomplete=0", out)
+        self.assertIn(f"declared={wrong}", out)
+
+    def test_base_flag_does_not_allow_invalid_mode(self):
+        data = b"invalid mode evidence\n"
+        digest = self.blob_sha(data)
+        commit_tree(self.root, {
+            "related.md": data,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                yaml.safe_dump({
+                    "work_item_id": "AID-2026-900",
+                    "related_evidence": [
+                        {
+                            "reference_mode": "unknown",
+                            "path": "related.md",
+                            "blob": digest,
+                        }
+                    ],
+                }, sort_keys=False),
+        })
+
+        code, out, err = self.run_gate(
+            "HEAD", "--allow-missing-reference-mode"
+        )
+        self.assertEqual(code, 2, out + err)
+        self.assertIn("pins=1 ok=1 mismatch=0 path_missing=0 incomplete=1", out)
+        self.assertIn("INCOMPLETE", out)
+
+    def test_missing_mode_without_base_flag_is_incomplete(self):
+        data = b"missing mode evidence\n"
+        digest = self.blob_sha(data)
+        commit_tree(self.root, {
+            "related.md": data,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                yaml.safe_dump({
+                    "work_item_id": "AID-2026-900",
+                    "related_evidence": [
+                        {"path": "related.md", "blob": digest}
+                    ],
+                }, sort_keys=False),
+        })
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 2, out + err)
+        self.assertIn("pins=1 ok=1 mismatch=0 path_missing=0 incomplete=1", out)
+
+    def test_historical_lookup_includes_reachable_merge_side_branch(self):
+        git(
+            self.root,
+            "-c", "user.name=Test",
+            "-c", "user.email=test@example.invalid",
+            "commit", "--allow-empty", "-m", "common ancestor",
+        )
+        main_branch = git(self.root, "branch", "--show-current")
+        git(self.root, "checkout", "-b", "historical-side")
+        historical_data = b"blob introduced on merge side branch\n"
+        historical_sha = self.blob_sha(historical_data)
+        commit_tree(self.root, {"side-history.md": historical_data})
+        git(self.root, "checkout", main_branch)
+
+        manifest = {
+            "work_item_id": "AID-2026-900",
+            "related_evidence": [
+                {
+                    "reference_mode": "historical",
+                    "path": "side-history.md",
+                    "blob": historical_sha,
+                }
+            ],
+        }
+        commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                yaml.safe_dump(manifest, sort_keys=False),
+        })
+
+        git(
+            self.root,
+            "-c", "user.name=Test",
+            "-c", "user.email=test@example.invalid",
+            "merge", "--no-ff", "historical-side",
+            "-m", "merge historical side branch",
+        )
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=1 ok=1 mismatch=0 path_missing=0 incomplete=0", out)
+
+    def test_historical_lookup_cache_reuses_real_git_result(self):
+        data = b"one historical blob used by two declarations\n"
+        digest = self.blob_sha(data)
+        commit_tree(self.root, {"related.md": data})
+        manifest = {
+            "work_item_id": "AID-2026-900",
+            "related_evidence": [
+                {
+                    "reference_mode": "historical",
+                    "path": "related.md",
+                    "blob": digest,
+                },
+                {
+                    "reference_mode": "historical",
+                    "path": "related.md",
+                    "blob": digest,
+                },
+            ],
+        }
+        commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                yaml.safe_dump(manifest, sort_keys=False),
+        })
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=2 ok=2 mismatch=0 path_missing=0 incomplete=0", out)
+
 
 class UnboundBlobSha256Test(unittest.TestCase):
     """PR #1417 comment 7212343821: an unbound blob_sha256 is a violation."""
@@ -397,21 +804,35 @@ class UnboundBlobSha256Test(unittest.TestCase):
         self.tmp.cleanup()
 
     def run_gate(self):
-        p = subprocess.run([sys.executable, str(GATE), "--root", str(self.root),
-                            "--commit", "HEAD"], text=True, capture_output=True)
+        p = subprocess.run(
+            [
+                sys.executable,
+                str(GATE),
+                "--root",
+                str(self.root),
+                "--commit",
+                "HEAD",
+            ],
+            text=True,
+            capture_output=True,
+        )
         return p.returncode, p.stdout, p.stderr
 
     def commit_manifest(self, manifest, extra=None):
-        files = {"14-ai-development/work-items/AID-2026-900/manifest.yaml": manifest}
+        files = {
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml": manifest
+        }
         files.update(extra or {})
         return commit_tree(self.root, files)
 
     def test_bound_blob_sha256_with_matching_digest_passes(self):
         data = b"bound artifact bytes\n"
-        manifest = ("work_item_id: AID-2026-900\n"
-                    "artifact_pins:\n"
-                    "  model_path: model.md\n"
-                    f"  model_blob_sha256: \"{hashlib.sha256(data).hexdigest()}\"\n")
+        manifest = (
+            "work_item_id: AID-2026-900\n"
+            "artifact_pins:\n"
+            "  model_path: model.md\n"
+            f"  model_blob_sha256: \"{hashlib.sha256(data).hexdigest()}\"\n"
+        )
         self.commit_manifest(manifest, {"model.md": data})
 
         code, out, err = self.run_gate()
@@ -422,10 +843,12 @@ class UnboundBlobSha256Test(unittest.TestCase):
     def test_bound_blob_sha256_with_wrong_digest_is_mismatch(self):
         data = b"bound artifact bytes\n"
         wrong = "0" * 64
-        manifest = ("work_item_id: AID-2026-900\n"
-                    "artifact_pins:\n"
-                    "  model_path: model.md\n"
-                    f"  model_blob_sha256: \"{wrong}\"\n")
+        manifest = (
+            "work_item_id: AID-2026-900\n"
+            "artifact_pins:\n"
+            "  model_path: model.md\n"
+            f"  model_blob_sha256: \"{wrong}\"\n"
+        )
         self.commit_manifest(manifest, {"model.md": data})
 
         code, out, err = self.run_gate()
@@ -440,10 +863,12 @@ class UnboundBlobSha256Test(unittest.TestCase):
 
     def test_bound_blob_sha256_with_missing_target_is_path_missing(self):
         digest = "1" * 64
-        manifest = ("work_item_id: AID-2026-900\n"
-                    "artifact_pins:\n"
-                    "  model_path: absent.md\n"
-                    f"  model_blob_sha256: \"{digest}\"\n")
+        manifest = (
+            "work_item_id: AID-2026-900\n"
+            "artifact_pins:\n"
+            "  model_path: absent.md\n"
+            f"  model_blob_sha256: \"{digest}\"\n"
+        )
         self.commit_manifest(manifest)
 
         code, out, err = self.run_gate()
@@ -458,9 +883,11 @@ class UnboundBlobSha256Test(unittest.TestCase):
 
     def test_digest_without_path_is_unbound_and_fails(self):
         digest = "8324ec551749c2d50067967e4a445b26a6683008a4fa52e02da02a9976417a15"
-        manifest = ("work_item_id: AID-2026-900\n"
-                    "measurement_basis:\n"
-                    f"  model_blob_sha256_lf: \"{digest}\"\n")
+        manifest = (
+            "work_item_id: AID-2026-900\n"
+            "measurement_basis:\n"
+            f"  model_blob_sha256_lf: \"{digest}\"\n"
+        )
         self.commit_manifest(manifest)
 
         code, out, err = self.run_gate()
