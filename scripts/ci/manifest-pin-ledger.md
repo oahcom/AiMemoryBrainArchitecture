@@ -19,3 +19,8 @@ Each record must satisfy all of the following validity rules:
 |---|---|---|---|---|---|
 |14-ai-development/work-items/AID-2026-101/manifest.yaml|session_evidence[0].executed_prompt_snapshot_file|14-ai-development/work-items/AID-2026-101/prompt-v1.md|4470|4412|2ab66153dbcdd8a8f2d68d234914751a748a8f74|
 |14-ai-development/work-items/AID-2026-102/manifest.yaml|session_evidence[0].executed_prompt_snapshot_file|14-ai-development/work-items/AID-2026-102/prompt-v1.md|4470|4412|2ab66153dbcdd8a8f2d68d234914751a748a8f74|
+
+New mode-aware records use the seven-column format. The legacy six-column table above is read as `reference_mode=current`; a record with a different mode is a distinct pin identity, so the same manifest/field/path may carry one chain per mode.
+
+| manifest | field | path | reference_mode | previous_pin | new_pin | repin_commit |
+|---|---|---|---|---|---|---|
