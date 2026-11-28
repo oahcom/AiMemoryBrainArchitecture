@@ -111,17 +111,20 @@ The AI-authored output in this revision consists of:
 
 # Execution boundary
 
-The coordinator executed the revised files locally, outside CI. The targeted checker test module ran 11 tests and passed. Repository-wide discovery ran 116 tests and failed (8 failures, 2 errors, exit 1); the same 10 test_work_item_uniqueness failures occurred on origin/main (188 tests, exit 1), due to the existing Windows python3 PATH issue. The strict audit reported 143 manifests and TRACEABLE=0 (exit 0); the traceability index reported 0 requirements / 142 work items / 0 errors / 121 warnings (exit 0); the manifest-schema check reported 0 new violations (exit 0). Document management reported 1179 governed / 809 classified / 370 unclassified (exit 2), an existing state not introduced by this PR.
+The coordinator executed the revised files locally, outside CI (EXECUTED_BY_COORDINATOR_NOT_IN_CI), against the rebase-after PR code commit d43851732. The targeted checker test module ran 14 tests and passed. Repository-wide discovery ran 194 tests and failed (8 failures, 2 errors, exit 1); the same 10 test_work_item_uniqueness failures were reproduced on origin/main, due to the existing Windows python3 PATH issue. The strict audit reported 151 manifests and TRACEABLE=0 (exit 0); the traceability index reported 0 requirements / 150 work items / 0 errors / 125 warnings (exit 0); the manifest-schema check reported 0 new violations (exit 0). Document management reported 1208 governed / 838 classified / 370 unclassified (exit 2), an existing state not introduced by this PR.
 
-The following records distinguish coordinator-local execution from CI and independent acceptance:
+The following records distinguish coordinator-local execution from CI and independent acceptance. The execution counts below refer to the rebase-after PR code commit d43851732.
 
-- Direct test-suite execution and `unittest` module execution: EXECUTED_BY_COORDINATOR_NOT_IN_CI; 11 tests passed, `OK`, exit 0. This is a coordinator-local result, not a CI result.
-- Repository-wide unittest discovery: EXECUTED_BY_COORDINATOR_NOT_IN_CI; 116 tests, 10 failures, exit 1. The same 10 `test_work_item_uniqueness` failures were reproduced on `origin/main`; they are the existing Windows `python3` PATH issue, not a PR-specific regression.
-- Strict audit against the supplied commit: EXECUTED_BY_COORDINATOR_NOT_IN_CI; `manifests=143`, `PRIMARY TRACEABLE=0`, exit 0. `HEAD_MATCH x REACHABLE=3` is a separate historical intersection and does not constitute strict TRACEABLE evidence.
+- Direct test-suite execution and `unittest` module execution: EXECUTED_BY_COORDINATOR_NOT_IN_CI; 14 tests passed, `OK`, exit 0. This is a coordinator-local result, not a CI result.
+- Repository-wide unittest discovery: EXECUTED_BY_COORDINATOR_NOT_IN_CI; 194 tests, 10 failures, exit 1. The same 10 `test_work_item_uniqueness` failures were reproduced on `origin/main`; they are the existing Windows `python3` PATH issue, not a PR-specific regression.
+- Strict audit against the supplied commit: EXECUTED_BY_COORDINATOR_NOT_IN_CI; `manifests=151`, `PRIMARY TRACEABLE=0`, exit 0. `HEAD_MATCH x REACHABLE=3` is a separate historical intersection and does not constitute strict TRACEABLE evidence.
+- Traceability index: EXECUTED_BY_COORDINATOR_NOT_IN_CI; 0 requirements / 150 work items / 0 errors / 125 warnings, exit 0.
+- Manifest schema check: EXECUTED_BY_COORDINATOR_NOT_IN_CI; 0 new violations, exit 0.
+- Document management: EXECUTED_BY_COORDINATOR_NOT_IN_CI; 1208 governed / 838 classified / 370 unclassified, exit 2. The unclassified state is pre-existing and not introduced by this PR.
 - PR creation: COMPLETED; PR #1494 is open. No merge SHA exists because the PR has not been merged.
 - CI green result: PENDING; no confirmed successful CI run is available.
 - Independent review: PENDING; independent review has not been performed.
 - Owner acceptance: PENDING; no Owner acceptance decision has been recorded.
 - Merge: PENDING; the PR remains open and has not been merged.
 
-The coordinator-local targeted test run passed 11 tests; this is not a CI result. Repository-wide test discovery failed as described above. PR #1494 is open. No successful CI run, merge SHA, or acceptance decision is asserted by this session record.
+The coordinator-local targeted test run passed 14 tests; this is not a CI result. Repository-wide test discovery failed as described above. PR #1494 is open. No successful CI run, merge SHA, or acceptance decision is asserted by this session record.

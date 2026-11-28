@@ -81,7 +81,7 @@ session_evidence:
 
 implementation:
   status: IN_PROGRESS
-  summary: "Checker and inline regression tests have been re-authored after coordinator execution exposed import-path, CLI-contract, prompt-path-resolution, lifecycle, and population-accounting defects. The coordinator must execute the revised commands before this work can be considered verified."
+  summary: "Checker and inline regression tests have been re-authored after coordinator execution exposed import-path, CLI-contract, prompt-path-resolution, lifecycle, and population-accounting defects. The revised commands and checks were executed locally by the coordinator (EXECUTED_BY_COORDINATOR_NOT_IN_CI) against code commit d43851732; this records coordinator-local execution, not CI verification. PR #1494 has been created and is open, but has not been merged. Independent review and Owner acceptance remain pending."
   files_changed:
     - scripts/ci/check_prompt_commit_trace.py
     - scripts/ci/test_check_prompt_commit_trace.py
@@ -91,8 +91,8 @@ implementation:
     - 14-ai-development/work-items/AID-2026-327/prompt-v1.md
     - 14-ai-development/work-items/INDEX.md
   tests:
-    - "python -m unittest scripts.ci.test_check_prompt_commit_trace -v -> exit 0 (11 tests; OK)"
+    - "python -m unittest scripts.ci.test_check_prompt_commit_trace -v -> exit 0 (14 tests; OK; EXECUTED_BY_COORDINATOR_NOT_IN_CI against d43851732)"
     - "python scripts/ci/check_prompt_commit_trace.py --root . --commit cc5d22b9126e00e3f93ffe71282554309908bc89 --base cc5d22b9126e00e3f93ffe71282554309908bc89 --audit-only -> exit 0"
-    - "python scripts/check_traceability.py --index-only -> exit 0 (0 requirements / 142 work items / 0 errors / 121 warnings)"
-  pull_request: PENDING
+    - "python scripts/check_traceability.py --index-only -> exit 0 (0 requirements / 150 work items / 0 errors / 125 warnings; EXECUTED_BY_COORDINATOR_NOT_IN_CI against d43851732)"
+  pull_request: "PR #1494 OPEN; NOT MERGED"
   merge_commit_sha: NOT_MERGED
