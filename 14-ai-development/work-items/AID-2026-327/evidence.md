@@ -96,6 +96,10 @@ The canonical System Boundaries section 15 records:
 
 Issue #1210 predates the repository's AI Session Evidence effective date (2026-12-01). Its historical issue-level declaration is therefore mapped as `LEGACY_UNDECLARED` with `N/A` issue-scoped evidence references in the PR table. The PR-level session evidence still records this current documentation session.
 
+## Existing-gate boundary
+
+The current-head `Existing gates` workflow reports a manifest-schema ratchet failure for `14-ai-development/work-items/AID-2026-016/manifest.yaml` (missing legacy `documentation` and `implementation` keys). That exact file/blob is already present at the PR base commit and is unchanged on this branch. The D-10 PR does not modify AID-2026-016; this is a pre-existing mainline gate blocker, not attributed to this Work Item. All other observed checks at the last tested head passed except this Existing-gates aggregate.
+
 ## Provenance and validation limits
 
 - The prompt snapshot is operator-authored and not a verbatim platform prompt; executed prompt provenance is NOT_VERIFIED.
