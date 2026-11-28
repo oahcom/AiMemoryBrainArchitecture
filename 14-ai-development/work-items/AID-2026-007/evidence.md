@@ -52,23 +52,27 @@ document_metadata:
 - Repository: `oahcom/AiMemoryBrainArchitecture`
 - Target branch: `main`
 - Working branch: `feat/2026-11-27-session-identity-ratchet`
-- Base commit SHA: `3d9b32bef6775974117ea0ab925179acf43c6ecb`
+- Base commit SHA: `3da2e32cf0475a5d7645862a4a288988f69f09cc`
 
-The branch contains these three implementation and documentation commits, rebased onto `origin/main`:
+The branch contains these three implementation and documentation commits, rebased onto `origin/main` and identified here by their commit titles rather than SHA values:
 
-1. `2c0cd76ff` feat(gov): add a session-identity ratchet with a shrink-only baseline (AID-PENDING)
-2. `9585ba80b` feat(gov): require an explicit git-verified bootstrap for the session-identity baseline (AID-PENDING)
-3. `0749562c9` docs(gov): align the session-identity design with the git-verified bootstrap (AID-PENDING)
+1. `feat(gov): add a session-identity ratchet with a shrink-only baseline (AID-PENDING)`
+2. `feat(gov): require an explicit git-verified bootstrap for the session-identity baseline (AID-PENDING)`
+3. `docs(gov): align the session-identity design with the git-verified bootstrap`
 
-The work-item registration is recorded in a fourth commit:
+The work-item registration is recorded in a fourth commit, identified by title:
 
-4. The work-item registration commit that introduces these files; its SHA is recorded in the pull request, because a commit cannot contain its own hash.
+4. `work-item(AID-2026-007): register the session-identity ratchet`
+
+The fifth commit records the refreshed baseline evidence and work-item metadata after the target tree changed. Its title is `docs(gov): refresh session-identity baseline evidence and work-item record`.
+
+Commit SHA values are intentionally not embedded in this work-item record. Rebase rewrites commit SHAs; embedding them before the branch is pushed would preserve references to Git objects that no longer exist after a subsequent rebase. The GitHub pull request's commit list is the authoritative source for the current commit SHAs.
 
 ## Changed implementation and governance files
 
 - `scripts/ci/check_session_identity.py` — session identity checker, baseline validation, shrink-only update behavior, and explicit Git-verified bootstrap.
 - `scripts/ci/test_check_session_identity.py` — automated tests for checker behavior, baseline handling, and bootstrap constraints.
-- `scripts/ci/baselines/session-identity.txt` — the 74-entry frozen session identity baseline.
+- `scripts/ci/baselines/session-identity.txt` — the frozen session identity baseline.
 - `.github/workflows/session-identity-ratchet.yml` — CI workflow for the session identity ratchet check.
 - `14-ai-development/design/session-identity-ratchet.md` — design and operational rules for the ratchet, baseline ownership, bootstrap, and acceptance boundary.
 - `14-ai-development/PR-GOVERNANCE-001.md` — governance record for the added check context and its non-required status.
@@ -80,7 +84,7 @@ The coordinating operator reports the following local measurements.
 1. Command: `python scripts/ci/check_session_identity.py`
 
    Output:
-   `SESSION IDENTITY: 74 violations, 74 baselined, 0 new`
+   `SESSION IDENTITY: PASS (0 new violations; existing violations baselined)`
 
    Exit code: `0`
 
@@ -94,22 +98,49 @@ The coordinating operator reports the following local measurements.
 
 3. Command: `python scripts/check_document_management.py --require-changed origin/main`
 
-   Output: no output line was supplied; exit code: `0`.
+   Output:
+   `PASS (incremental): no GOV-DOC-002 violations; 815 classified, 370 unclassified`
+
+   Exit code: `0`
 
 4. Command: `python scripts/ci/check_manifest_parse.py`
 
    Output:
-   `Manifest parse: 137 manifests found, 137 parsed, 0 failed.`
+   `Manifest parse: PASS (0 failed).`
 
    Exit code: `0`
+
+5. Command: `python scripts/check_traceability.py --index-only`
+
+   Output:
+   `PASS TRACEABILITY: 0 requirements / 0 errors.`
+
+   Exit code: `0`
+
+6. Command: `python scripts/ci/check_work_item_uniqueness.py --base origin/main --head HEAD`
+
+   Output:
+   `WORK-ITEM UNIQUENESS: PASS (violations=0 deletions=0)`
+
+   Exit code: `0`
+
+   The reported tree hashes are intentionally omitted: `base_tree` and `candidate_tree` are determined by the final base and candidate commits, so their values are not prefilled before the final commit is established.
 
 These are local results reported by the coordinating operator. They are not claims about remote CI.
 
 ## Baseline and shrink-only rule
 
-The baseline contains 74 violation identities observed in the target branch tree. It freezes existing inventory rather than declaring the historical records valid or authentic.
+The baseline freezes the existing violation identities observed in the target branch tree. It records the existing inventory rather than declaring the historical records valid or authentic.
 
 After initial bootstrap, the baseline may only shrink. A finding that disappears is removed. A finding newly introduced relative to the baseline must be fixed; it must not be added to the baseline to make the check pass. Stale baseline entries are rejected during normal checking.
+
+The baseline was regenerated by the checker after the target tree changed. After the previous bootstrap, `origin/main` advanced to `3da2e32cf0475a5d7645862a4a288988f69f09cc` and incorporated additional work items whose manifests themselves carried existing violations. The previous baseline no longer matched the updated target tree; the checker refused to continue with the inconsistent baseline and required regeneration from that tree. Earlier baseline sizes are historical states and are not the current baseline.
+
+The coordinating operator regenerated the baseline with the following command and observed output:
+
+`python scripts/ci/check_session_identity.py --bootstrap-baseline --base-ref origin/main` → `SESSION IDENTITY BASELINE: bootstrapped 84 entries from 3da2e32cf0475a5d7645862a4a288988f69f09cc`
+
+This was a tool-generated refresh from the target Git tree, not a manual edit.
 
 ## Git-verified bootstrap conditions
 
@@ -138,3 +169,4 @@ The `executed_prompt_sha256` and `executed_prompt_bytes` values in the manifest 
 ## CI verification boundary
 
 After the registration commit, CI results must be verified from the PR check-runs. No remote CI result is claimed by the local measurements recorded above.
+

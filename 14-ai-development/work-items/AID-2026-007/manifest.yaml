@@ -15,7 +15,7 @@ attribution: "user-authorized operator (delegated by account owner)"
 date: "2026-11-28"
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: "3d9b32bef6775974117ea0ab925179acf43c6ecb"
+base_commit_sha: "3da2e32cf0475a5d7645862a4a288988f69f09cc"
 tracking_issue: NONE
 role: work-record
 steward: "user-authorized operator (delegated by account owner)"
@@ -36,7 +36,7 @@ lifecycle:
     verification_status: Verified
     last_verified_date: "2026-11-28"
     last_verification_note: >-
-      The coordinating operator reports that all four local gates were
+      The coordinating operator reports that the recorded local gates were
       executed and produced the recorded results. CI results are not claimed
       here; they must be verified from the PR check-runs.
   usage_status: Active
@@ -78,7 +78,7 @@ scope:
     - "14-ai-development/work-items/AID-2026-007/session-evidence.md"
     - "14-ai-development/work-items/AID-2026-007/prompt-v1.md"
   out_of_scope:
-    - "Changing any of the existing 74 baseline entries."
+    - "Changing any of the existing baseline entries."
     - "Changing other checkers."
     - "Changing governance clauses outside PR-GOVERNANCE-001.md."
     - "Making the Session identity ratchet GitHub check context required."
@@ -90,7 +90,7 @@ evidence:
   - "scripts/ci/baselines/session-identity.txt"
   - ".github/workflows/session-identity-ratchet.yml"
   - "14-ai-development/design/session-identity-ratchet.md"
-  - "base_commit_sha: 3d9b32bef6775974117ea0ab925179acf43c6ecb"
+  - "base_commit_sha: 3da2e32cf0475a5d7645862a4a288988f69f09cc"
 
 documentation:
   - path: "14-ai-development/work-items/AID-2026-007/evidence.md"
@@ -108,8 +108,8 @@ acceptance:
 acceptance_criteria:
   - id: AC1
     description: >-
-      The session identity checker passes locally with 74 violations,
-      74 baselined, and 0 new.
+      The session identity checker passes locally with no new violations,
+      with all existing violations baselined.
   - id: AC2
     description: >-
       The session identity checker unit test suite completes 27 tests
@@ -119,8 +119,7 @@ acceptance_criteria:
       The document management check with --require-changed origin/main exits 0.
   - id: AC4
     description: >-
-      The manifest parse check reports 137 manifests found, 137 parsed,
-      and 0 failed.
+      The manifest parse check reports PASS (0 failed).
   - id: AC5
     description: >-
       The baseline is shrink-only after explicit Git-verified bootstrap.
@@ -134,12 +133,19 @@ acceptance_criteria:
 implementation:
   status: IMPLEMENTED
   summary: >-
-    Implemented the session identity checker and tests, registered a
-    74-entry shrink-only baseline, added the CI workflow, and aligned the
+    Implemented the session identity checker and tests, registered an
+    shrink-only session identity baseline, added the CI workflow, and aligned the
     governance design and PR governance documentation with explicit
     Git-verified bootstrap. The implementation and documentation are
-    recorded in commits 2c0cd76ff, 9585ba80b, and 0749562c9; the work-item
-    registration is recorded in commit d8b81dbc6.
+    recorded by commit titles: "feat(gov): add a session-identity ratchet
+    with a shrink-only baseline (AID-PENDING)",
+    "feat(gov): require an explicit git-verified bootstrap for the
+    session-identity baseline (AID-PENDING)", and
+    "docs(gov): align the session-identity design with the git-verified
+    bootstrap". The work-item registration is recorded by the title
+    "work-item(AID-2026-007): register the session-identity ratchet".
+    The fifth commit records the updated baseline evidence and work-item
+    metadata after the target tree changed.
   pull_request: null
   pull_request_url: null
   merge_commit: ""
@@ -150,7 +156,6 @@ implementation:
     - "scripts/ci/baselines/session-identity.txt"
     - ".github/workflows/session-identity-ratchet.yml"
     - "14-ai-development/design/session-identity-ratchet.md"
-    - "14-ai-development/PR-GOVERNANCE-001.md"
     - "14-ai-development/work-items/AID-2026-007/manifest.yaml"
     - "14-ai-development/work-items/AID-2026-007/evidence.md"
     - "14-ai-development/work-items/AID-2026-007/session-evidence.md"
@@ -164,9 +169,15 @@ implementation:
     - "python scripts/ci/check_work_item_uniqueness.py --base origin/main --head HEAD"
     - "python scripts/check_traceability.py --index-only"
 
+prompt_file: "14-ai-development/work-items/AID-2026-007/prompt-v1.md"
+prompt_sha256: "5e51cca806efc9f71912bd3778f92deff0a8a8e9a5b6beecf557019ea5b988d9"
+prompt_file_blob_sha: "ea11508e6ef8d410aaa39e126772895d40558db3"
+prompt_commit_trace_initial_registration: true
+
 session_evidence:
   - role: IMPLEMENTATION_SESSION
-    issue_refs: []
+    issue_refs:
+      - "#1462"
     implementing_ai_session: "6b09360b-13cc-83ec-abfd-aa0e6362566c"
     session_reference_status: RECORDED
     session_evidence_ref: "14-ai-development/work-items/AID-2026-007/session-evidence.md"
@@ -174,3 +185,4 @@ session_evidence:
     executed_prompt_sha256: "5e51cca806efc9f71912bd3778f92deff0a8a8e9a5b6beecf557019ea5b988d9"
     executed_prompt_bytes: 12396
     executed_prompt_provenance: NOT_VERIFIED
+

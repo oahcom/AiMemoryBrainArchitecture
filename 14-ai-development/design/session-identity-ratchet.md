@@ -42,291 +42,261 @@ document_metadata:
     zh-CN: null
 ---
 
-# Session Identity Ratchet
+# 会话身份棘轮
 
-- Document ID: SESSION-IDENTITY-RATCHET
-- Version: 1.0
-- Status: DRAFT
-- Scope: Governance infrastructure
-- Implementation: `scripts/ci/check_session_identity.py`
-- Required context: `Session identity ratchet`
+- 文档 ID：SESSION-IDENTITY-RATCHET
+- 版本：1.0
+- 状态：DRAFT
+- 范围：治理基础设施
+- 实现：`scripts/ci/check_session_identity.py`
+- 必需检查上下文：`Session identity ratchet`
 
-## 1. Problem statement
+## 1. 问题陈述
 
-The existing Session Evidence validator establishes structural validity.
-It does not establish that a claimed session identifier represents a
-syntactically identifiable session.
+现有的 Session Evidence 验证器能够确立结构有效性。
+但它不能确立所声明的会话标识符是否代表一个在语法上可识别的会话。
 
-The measured repository inventory establishes the need for an incremental
-control:
+仓库实测清单表明，需要引入增量式控制：
 
-- 132 manifests exist.
-- 93 manifests contain session_evidence.
-- There are 104 session evidence entries.
-- Only 5 entries contain parseable UUID session identifiers.
-- 39 entries contain sentinel values.
-- 60 entries contain human-readable labels.
-- 64 entries claim RECORDED, but only 5 contain UUIDs.
-- 11 entries claim RECORDED while containing sentinels.
-- 12 entries claim NOT_RECORDED while containing human-readable labels.
+- 存在 132 个 manifest。
+- 其中 93 个 manifest 包含 session_evidence。
+- 共存在 104 条会话证据记录。
+- 只有 5 条记录包含可解析的 UUID 会话标识符。
+- 39 条记录包含哨兵值。
+- 60 条记录包含人类可读标签。
+- 64 条记录声明为 RECORDED，但只有 5 条包含 UUID。
+- 11 条记录声明为 RECORDED，同时包含哨兵值。
+- 12 条记录声明为 NOT_RECORDED，同时包含人类可读标签。
 
-A hard replacement of the existing validator would turn historical
-inconsistency into a repository-wide blocking failure.
+如果直接替换现有验证器，历史不一致将变成整个仓库范围的阻断性失败。
 
-That is not an acceptable migration strategy.
+这不是可接受的迁移策略。
 
-## 2. Why a ratchet instead of a one-time repair
+## 2. 为什么采用棘轮，而不是一次性修复
 
-The session identity ratchet introduces a new independently enforced
-check without changing the existing Session Evidence validator.
+会话身份棘轮引入一项新的、独立强制执行的检查，而不改变现有的 Session Evidence 验证器。
 
-The existing violations are frozen into a generated baseline.
+现有违规会被冻结到一个生成的基线中。
 
-The baseline is an explicit inventory of historical exceptions, not an
-approval of those exceptions.
+该基线是历史例外的明确清单，并不表示批准这些例外。
 
-The enforcement rule is:
+强制执行规则如下：
 
-1. A violation present in the baseline is reported but does not block.
-2. A violation absent from the baseline blocks.
-3. Fixing a violation removes it from the current violation set.
-4. The corresponding baseline entry must then be removed.
-5. A baseline entry that no longer corresponds to an actual violation
-   is stale and blocks until the baseline is reduced.
-6. Baseline expansion is forbidden.
-7. Invalid YAML is never suppressible.
+1. 基线中存在的违规会被报告，但不会阻断。
+2. 基线中不存在的违规会阻断。
+3. 修复一项违规后，该违规会从当前违规集合中移除。
+4. 随后必须移除对应的基线条目。
+5. 不再对应实际违规的基线条目属于陈旧条目；在缩减基线之前会造成阻断。
+6. 禁止扩充基线。
+7. 无效 YAML 永远不能被抑制。
 
-This allows existing work items to remain usable while ensuring that
-newly introduced identity defects cannot silently accumulate.
+这样既能让现有工作项继续可用，也能确保新引入的身份缺陷不会悄然累积。
 
-The migration therefore moves monotonically toward zero violations.
+因此，迁移过程会单调地朝零违规推进。
 
-## 3. Parseable session identity
+## 3. 可解析的会话身份
 
-The checker accepts three identifier representations: UUID v4, UUID v8,
-and platform conversation identifiers.
+检查器接受三种标识符表示形式：UUID v4、UUID v8，以及平台会话标识符。
 
-### 3.1 UUID v4 and UUID v8
+### 3.1 UUID v4 和 UUID v8
 
-A canonical 36-character UUID is accepted when its version and variant
-bits satisfy one of the following formats:
+当规范的 36 字符 UUID 满足以下任一格式的版本位和变体位要求时，即可接受：
 
-- UUID v4: version nibble is `4`.
-- UUID v8: version nibble is `8`.
+- UUID v4：版本 nibble 为 `4`。
+- UUID v8：版本 nibble 为 `8`。
 
-Both versions must satisfy the RFC 4122 variant requirement:
+两个版本都必须满足 RFC 4122 变体要求：
 
-- The variant nibble must be `8`, `9`, `A` or `B`.
+- 变体 nibble 必须为 `8`、`9`、`A` 或 `B`。
 
-The complete UUID layout is:
+完整 UUID 布局如下：
 
-- 8 hexadecimal characters
-- hyphen
-- 4 hexadecimal characters
-- hyphen
-- version nibble `4` or `8`, followed by 3 hexadecimal characters
-- hyphen
-- RFC variant nibble `8`, `9`, `A` or `B`, followed by 3 hexadecimal characters
-- hyphen
-- 12 hexadecimal characters
+- 8 个十六进制字符
+- 连字符
+- 4 个十六进制字符
+- 连字符
+- 版本 nibble `4` 或 `8`，后接 3 个十六进制字符
+- 连字符
+- RFC 变体 nibble `8`、`9`、`A` 或 `B`，后接 3 个十六进制字符
+- 连字符
+- 12 个十六进制字符
 
-Examples:
+示例：
 
-UUID v4:
+UUID v4：
 
 `550e8400-e29b-41d4-a716-446655440000`
 
-UUID v8:
+UUID v8：
 
 `6b09360b-13cc-83ec-abfd-aa0e6362566c`
 
-Existing repository session identifiers, including:
+仓库中现有的会话标识符，包括：
 
 - `6b092534-81b4-83ec-a4de-49c5c6ecaa8b`
 - `6b090a00-c1b0-83ec-ad26-9668c882a144`
 - `6b0926ee-d24c-83ec-9ce4-69e18656db14`
 - `6b092946-cf54-83ec-81bc-cb7e7993ed28`
 
-are valid UUID v8 identifiers.
+均为有效的 UUID v8 标识符。
 
-UUID versions other than 4 and 8 are rejected.
+拒绝 UUID v4 和 UUID v8 以外的版本。
 
-UUIDs with variant nibbles outside `8`, `9`, `A` and `B` are rejected.
+拒绝变体 nibble 不属于 `8`、`9`、`A` 和 `B` 的 UUID。
 
-The checker validates the complete format, including version and variant
-bits, rather than merely checking the UUID length or hexadecimal layout.
+检查器会验证完整格式，包括版本位和变体位，而不只是检查 UUID 长度或十六进制布局。
 
-### 3.2 Conversation identifier
+### 3.2 会话标识符
 
-A conversation identifier in this form:
+符合以下形式的会话标识符：
 
 `conv_<32-or-more-hexadecimal-characters>`
 
-Example:
+示例：
 
 `conv_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`
 
-The prefix is case-insensitive. The hexadecimal suffix must contain
-at least 32 characters.
+前缀不区分大小写。十六进制后缀必须至少包含 32 个字符。
 
-### 3.3 Explicit exclusions
+### 3.3 明确排除项
 
-The following are not parseable session identifiers:
+以下内容不能作为可解析的会话标识符：
 
 - `S6-B`
 - `ChatGPT-GPT-6`
 - `opencode-go/deepseek-v4.1-flash`
-- UUID v3 identifiers
-- UUIDs with non-RFC variant bits
+- UUID v3 标识符
+- 具有非 RFC 变体位的 UUID
 - `NOT_RECORDED`
 - `NOT_AVAILABLE`
 - `NOT_EXPOSED_BY_PLATFORM`
-- arbitrary labels and arbitrary non-empty strings
+- 任意标签和任意非空字符串
 
-Parseability proves only conformity to an accepted identifier format.
-It does not prove that the session actually existed or that its evidence
-is authentic.
+可解析性只能证明符合一种已接受的标识符格式。
+它不能证明会话确实存在，也不能证明其证据真实可信。
 
-## 4. Status consistency
+## 4. 状态一致性
 
-Two status values are accepted:
+接受以下两种状态值：
 
 - `RECORDED`
 - `NOT_RECORDED`
 
-The following invariants apply.
+适用以下不变量。
 
-| Status | implementing_ai_session | Result |
+| 状态 | implementing_ai_session | 结果 |
 |---|---|---|
-| RECORDED | UUID v4 | Valid |
-| RECORDED | conv_ identifier | Valid |
-| RECORDED | Sentinel | Invalid |
-| RECORDED | Human label | Invalid |
-| NOT_RECORDED | Sentinel | Valid |
-| NOT_RECORDED | Human label | Invalid |
-| NOT_RECORDED | UUID or conv_ identifier | Invalid |
+| RECORDED | UUID v4 | 有效 |
+| RECORDED | conv_ 标识符 | 有效 |
+| RECORDED | 哨兵值 | 无效 |
+| RECORDED | 人类可读标签 | 无效 |
+| NOT_RECORDED | 哨兵值 | 有效 |
+| NOT_RECORDED | 人类可读标签 | 无效 |
+| NOT_RECORDED | UUID 或 conv_ 标识符 | 无效 |
 
-A missing required field is independently invalid.
+缺少必需字段本身即为无效。
 
-Sentinel values are compared case-insensitively after trimming
-surrounding whitespace.
+比较哨兵值之前，会先去除其周围的空白字符，再以不区分大小写的方式进行比较。
 
-## 5. Violation codes
+## 5. 违规代码
 
 ### SESSION_UNPARSEABLE
 
-The status is RECORDED, but the supplied value is neither an accepted
-UUID v4 nor an accepted conversation identifier.
+状态为 RECORDED，但提供的值既不是可接受的 UUID v4，也不是可接受的会话标识符。
 
-Examples:
+示例：
 
 - RECORDED + S6-B
 - RECORDED + ChatGPT-GPT-6
 
 ### SESSION_SENTINEL_MISMATCH
 
-The status is NOT_RECORDED, but the value is not a recognized sentinel.
+状态为 NOT_RECORDED，但该值不是已识别的哨兵值。
 
-This prevents human-readable labels from being represented as an
-unrecorded session.
+这可以防止将人类可读标签表示为未记录的会话。
 
 ### SESSION_RECORDED_SENTINEL
 
-The status is RECORDED, but the value is a recognized sentinel.
+状态为 RECORDED，但该值是已识别的哨兵值。
 
-This is reported separately from SESSION_UNPARSEABLE because it is
-a direct contradiction between the declaration and the value.
+由于这是声明与值之间的直接矛盾，因此会与 SESSION_UNPARSEABLE 分开报告。
 
-### Additional structural violations
+### 其他结构性违规
 
-- SESSION_FIELD_MISSING: a required field is absent, null, empty,
-  or has an invalid entry structure.
-- SESSION_STATUS_INVALID: an unsupported status is declared.
-- SESSION_YAML_INVALID: the manifest cannot be parsed or its
-  top-level structure is invalid.
+- SESSION_FIELD_MISSING：必需字段缺失、为 null、为空，或条目结构无效。
+- SESSION_STATUS_INVALID：声明了不受支持的状态。
+- SESSION_YAML_INVALID：manifest 无法解析，或其顶层结构无效。
 
-YAML errors always count as new violations.
+YAML 错误始终计为新违规。
 
-## 6. Baseline format and ownership
+## 6. 基线格式与所有权
 
-Canonical location:
+规范位置：
 
 `scripts/ci/baselines/session-identity.txt`
 
-Initial creation requires an explicit bootstrap against the target branch:
+首次创建时，必须明确针对目标分支执行 bootstrap：
 
 `python3 scripts/ci/check_session_identity.py --bootstrap-baseline --base-ref origin/main`
 
-Bootstrap baseline contents are derived only from the work-items tree
-referenced by `--base-ref`, not from the current working tree. Bootstrap
-freezes violations already present in that target branch tree and refuses
-when the current tree contains violations absent from the target branch tree.
+Bootstrap 基线内容仅从 `--base-ref` 所引用的工作项树生成，而不是从当前工作树生成。Bootstrap 会冻结目标分支树中已经存在的违规；如果当前树包含目标分支树中不存在的违规，则拒绝执行。
 
-Each baseline entry consists of:
+每条基线记录由以下内容组成：
 
 `CODE manifest-path#entry-index`
 
-Entry indexes are one-based.
+条目索引从 1 开始。
 
-The path and entry index distinguish individual findings. The violation
-code distinguishes the type of finding.
+路径和条目索引用于区分各个具体发现。违规代码用于区分发现的类型。
 
-The baseline is gate input. It is not manually editable.
+基线是门禁输入，不允许手动编辑。
 
-After initial bootstrap, subsequent baseline generations may only remove
-entries. The ordinary `--write-baseline` command requires an existing
-baseline and cannot create or expand one.
+首次 bootstrap 后，后续基线生成只能移除条目。常规 `--write-baseline` 命令要求基线已经存在，不能创建或扩充基线。
 
-If the current tree introduces a finding not already in the baseline,
-baseline generation refuses to proceed.
+如果当前树引入了基线中尚不存在的发现，基线生成将拒绝继续。
 
-If a finding has disappeared, generation removes it.
+如果某项发现已经消失，生成过程会将其移除。
 
-Deleting the baseline file does not reset the ratchet: ordinary checking
-and ordinary `--write-baseline` both exit with code `2` when the baseline
-is missing.
+删除基线文件不会重置棘轮：当基线缺失时，常规检查和常规 `--write-baseline` 都会以代码 `2` 退出。
 
-The checker also rejects stale baseline entries during normal execution.
+检查器在正常执行期间也会拒绝陈旧的基线条目。
 
-This prevents the baseline from becoming a permanent exemption list.
+这可以防止基线演变为永久豁免清单。
 
-## 7. Relationship with Session Evidence
+## 7. 与 Session Evidence 的关系
 
-The existing `Session Evidence` required context remains unchanged.
+现有的 `Session Evidence` 必需检查上下文保持不变。
 
-Its existing implementation is:
+其现有实现为：
 
 `scripts/governance/session_evidence/validate.py`
 
-That validator remains responsible for its existing decisions, including
-structural fields, evidence paths, hashes and byte counts.
+该验证器继续负责其现有判定，包括结构字段、证据路径、哈希值和字节数。
 
-The new checker does not modify or replace those decisions.
+新检查器不会修改或替代这些判定。
 
-The division of responsibility is:
+职责划分如下：
 
-| Control | Responsibility |
+| 控制项 | 职责 |
 |---|---|
-| Session Evidence | Existing evidence structure and integrity |
-| Session identity ratchet | Semantic identity format and status consistency |
+| Session Evidence | 现有证据的结构与完整性 |
+| Session identity ratchet | 语义身份格式与状态一致性 |
 
-The two checks are independent required contexts.
+这两项检查是相互独立的必需检查上下文。
 
-This separation is intentional. Changing the existing validator would
-change historical outcomes across the 132 manifests and violate the
-non-blocking migration requirement.
+这种分离是有意为之。修改现有验证器会改变 132 个 manifest 的历史检查结果，并违反非阻断式迁移要求。
 
-## 8. Workflow enforcement
+## 8. 工作流强制执行
 
-Workflow:
+工作流：
 
 `.github/workflows/session-identity-ratchet.yml`
 
-Required job context:
+必需作业上下文：
 
 `Session identity ratchet`
 
-Triggers:
+触发条件：
 
 - pull_request: opened
 - pull_request: synchronize
@@ -334,73 +304,62 @@ Triggers:
 - pull_request: ready_for_review
 - push to main
 
-The job runs the isolated checker tests before scanning the repository.
+该作业会在扫描仓库之前运行隔离的检查器测试。
 
-The job uses checkout-local files only. It does not access GitHub APIs,
-network services, external session platforms or remote evidence stores.
+该作业只使用 checkout 本地文件。它不会访问 GitHub API、网络服务、外部会话平台或远程证据存储。
 
-The required context must be added to the repository's required
-status-check declarations and protection configuration.
+必须将该必需上下文添加到仓库的必需状态检查声明和保护配置中。
 
-The workflow's existence alone does not establish platform enforcement.
+工作流的存在本身并不能证明平台已强制执行该检查。
 
-## 9. Future tightening
+## 9. 未来收紧
 
-The first implementation deliberately limits enforcement to session
-identity and status consistency.
+第一版实现有意将强制执行范围限制在会话身份和状态一致性。
 
-It does not include independent reviewer completeness.
+它不包括独立审查者完整性。
 
-The measured repository has 47 manifests containing independent_reviewer,
-with NOT_ASSIGNED and NOT_APPOINTED accounting for 77.1%.
+实测仓库中有 47 个 manifest 包含 independent_reviewer，其中 NOT_ASSIGNED 和 NOT_APPOINTED 合计占 77.1%。
 
-The most recent 20 work items contain zero actual independent reviews.
+最近的 20 个工作项中，没有任何一次实际独立审查。
 
-This is a separate governance defect and must not be silently mixed
-into the initial identity baseline.
+这是一个独立的治理缺陷，不得悄然混入初始身份基线。
 
-A future ratchet extension should introduce:
+未来的棘轮扩展应引入：
 
-1. A defined parseable reviewer-session identity.
-2. A distinction between an actual independent reviewer and a placeholder.
-3. A verifiable relationship between reviewer and implementing session.
-4. A separate violation inventory and baseline.
-5. Tests for same-session self-review and delegated role simulation.
-6. A shrink-only migration that preserves historical records.
+1. 明确定义可解析的审查者会话身份。
+2. 区分实际独立审查者与占位值。
+3. 建立可验证的审查者会话与实施会话之间的关系。
+4. 独立的违规清单和基线。
+5. 针对同一会话自我审查和委派角色模拟的测试。
+6. 保留历史记录、只允许缩减的迁移方式。
 
-The eventual target is to prohibit new NOT_ASSIGNED and NOT_APPOINTED
-reviewer declarations while allowing historical entries to be
-remediated incrementally.
+最终目标是禁止新增 NOT_ASSIGNED 和 NOT_APPOINTED 审查者声明，同时允许历史条目逐步得到修复。
 
-The future extension must not weaken or replace the session identity
-invariants established here.
+未来扩展不得削弱或替代此处确立的会话身份不变量。
 
-## 10. Acceptance boundary
+## 10. 验收边界
 
-The checker passing means:
+检查器通过意味着：
 
-- No new session identity violations exist outside the frozen baseline.
-- The baseline contains no stale entries.
-- All manifests containing session_evidence have been examined.
-- Invalid YAML has not been suppressed.
+- 冻结基线之外不存在新的会话身份违规。
+- 基线不包含陈旧条目。
+- 所有包含 session_evidence 的 manifest 均已检查。
+- 无效 YAML 未被抑制。
 
-Bootstrap freezes violations already present in the target branch tree. It
-refuses only when the current tree contains violations absent from that target
-branch tree. The negative case was verified with
-`--bootstrap-baseline --base-ref cb5b3dcd`, which exited `1` because the
-current tree contained two violations absent from that base tree.
+Bootstrap 会冻结目标分支树中已经存在的违规。只有当当前树包含目标分支树中不存在的违规时，它才会拒绝执行。使用
+`--bootstrap-baseline --base-ref cb5b3dcd`
+验证了负向情形：由于当前树包含两个在该基线树中不存在的违规，该命令以 `1` 退出。
 
-The current 74-entry baseline includes the existing violations in
-`AID-2026-265` and `AID-2026-291` because both are present in the target branch
-tree. Their repair belongs to separate work items; this PR does not modify
-either work item's files.
+当前基线由检查器根据目标分支树
+`3da2e32cf0475a5d7645862a4a288988f69f09cc` 重新生成。目标树前进后，原有基线已与更新后的目标树不一致；检查器拒绝在这种不一致状态下继续，因此必须从更新后的目标树重新生成基线。这不是手动编辑，也不是扩大棘轮允许范围。
 
-It does not mean:
+该基线包括 `AID-2026-265` 和 `AID-2026-291` 中已有的违规，因为这两个工作项都存在于目标分支树中。修复它们属于独立工作项；本 PR 不修改这两个工作项的任何文件。
+它不意味着：
 
-- Every historical session has been recovered.
-- A UUID proves an actual platform session.
-- Prompt provenance has been verified.
-- Independent review has occurred.
-- Every historical session-evidence record is authentic.
+- 每个历史会话都已恢复。
+- UUID 能证明真实的平台会话存在。
+- Prompt 来源已得到验证。
+- 已经执行了独立审查。
+- 每条历史会话证据记录都是真实可信的。
 
-Those claims require separate evidence and separate controls.
+这些主张需要独立证据和独立控制。
