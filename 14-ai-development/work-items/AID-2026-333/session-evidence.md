@@ -72,6 +72,21 @@ The user supplied:
 
 The initial merge-queue recommendation was withdrawn after the user supplied the repository eligibility and API rejection evidence.
 
+## AI-visible output
+
+The three-round ruling history was:
+
+1. The merge queue was initially selected as the prevention mechanism.
+2. That recommendation was withdrawn after the ruleset creation request returned HTTP 422 (`Invalid rule 'merge_queue':`) and the repository was measured as public and user-owned, making it ineligible for the required merge-queue configuration.
+3. Strict required-status-check branch protection was selected as the prevention mechanism. The ancestry-based duplicate-claim detector was retained as a supplementary post-merge alarm, not as a prevention mechanism.
+
+### Executed tests
+
+The workflow-wiring regression was run against the original workflow before the patch. It failed with exit code 1 because the required detector wiring and strict-protection limitation note were absent.
+
+After the patch, the complete local uniqueness test suite reported:
+
+
 ## AI-visible ruling
 
 The selected prevention mechanism is strict required-status-check branch protection.
