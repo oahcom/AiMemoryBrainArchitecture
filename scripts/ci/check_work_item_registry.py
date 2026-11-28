@@ -394,9 +394,46 @@ def schema_error_code(error: ValidationError) -> str:
     if error.validator == "enum" or error.validator == "const":
         return "SCHEMA_ENUM_OUT_OF_RANGE"
     if error.validator == "oneOf":
-        message = error.message
-        if "KNOWN" in message and "value" in message:
-            return "SCHEMA_KNOWN_VALUE_MISSING"
+        instance = error.instance
+
+        # Collect nested oneOf branch errors. jsonschema exposes the
+        # failures of individual alternatives through error.context.
+        def iter_context_errors(parent):
+            for child in parent.context:
+                yield child
+                yield from iter_context_errors(child)
+
+        context_errors = list(iter_context_errors(error))
+
+        if isinstance(instance, dict):
+            state = instance.get("state")
+            has_value = "value" in instance
+
+            # UNKNOWN must not carry a value.
+            if state == "UNKNOWN" and has_value:
+                return "SCHEMA_STATE_VALUE_CONTRADICTION"
+
+            # KNOWN requires the value property to be present.
+            if state == "KNOWN":
+                for child in context_errors:
+                    if (
+                        child.validator == "required"
+                        and isinstance(child.validator_value, (list, tuple))
+                        and "value" in child.validator_value
+                    ):
+                        return "SCHEMA_KNOWN_VALUE_MISSING"
+
+            # KNOWN_EMPTY requires a valid empty value.
+            # Identify a failed value constraint from the child error
+            # location, rather than parsing the parent error message.
+            if state == "KNOWN_EMPTY" and has_value:
+                for child in context_errors:
+                    if (
+                        child.validator in ("const", "enum", "minLength", "maxLength")
+                        and "value" in child.absolute_path
+                    ):
+                        return "SCHEMA_KNOWN_EMPTY_INVALID"
+
         return "SCHEMA_STATE_VALUE_CONTRADICTION"
     if error.validator == "anyOf":
         return "SCHEMA_STATE_VALUE_CONTRADICTION"
