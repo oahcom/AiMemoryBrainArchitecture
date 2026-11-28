@@ -85,9 +85,20 @@ jobs:
           fi
 
       - name: Ratchet manifest blob pins
+        env:
+          BASELINE_REF: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+        shell: bash
         run: |
+          set -euo pipefail
+          test -n "$BASELINE_REF" || {
+            echo "INCOMPLETE: event has no authoritative base commit"
+            exit 2
+          }
+          git fetch --no-tags origin "$BASELINE_REF"
           python3 scripts/ci/gate_ratchet.py \
+            --baseline-id manifest-blob-pins \
             --baseline scripts/ci/baselines/manifest-blob-pins.txt \
+            --baseline-ref "$BASELINE_REF" \
             --format schema \
             --command "python3 scripts/ci/check_manifest_blob_pins.py --commit HEAD | sed -n '/^MISMATCH /p; /^PATH_MISSING /p; /^INCOMPLETE /p'"
 

@@ -208,11 +208,20 @@ jobs:
       # asserts the comment and that file agree, so change both together.
       # Red on main, so ratchet rather than gate.
       - name: Ratchet the GOV-DOC-001 full scan
+        env:
+          BASELINE_REF: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
         shell: bash
         run: |
           set -euo pipefail
+          test -n "$BASELINE_REF" || {
+            echo "INCOMPLETE: event has no authoritative base commit"
+            exit 2
+          }
+          git fetch --no-tags origin "$BASELINE_REF"
           python3 scripts/ci/gate_ratchet.py \
+            --baseline-id bilingual-docs \
             --baseline scripts/ci/baselines/bilingual-docs.txt \
+            --baseline-ref "$BASELINE_REF" \
             --format paths \
             --command "python3 scripts/check_bilingual_docs_full.py"
 
