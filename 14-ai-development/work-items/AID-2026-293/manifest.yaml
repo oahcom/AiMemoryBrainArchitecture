@@ -1,0 +1,171 @@
+work_item_id: AID-2026-293
+title: "Add the canonical work-item registry schema and source rules"
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  Adds a normative work-item registry record schema, source rules and
+  executable fixtures. The change does not rewrite existing work-item
+  manifests or alter runtime behavior. Governance metadata, bilingual
+  parity, repository admission and session evidence remain subject to
+  their respective independent gates.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "f77b1e63f0aca6b93f14fee5bd5c04510053ee23"
+tracking_issue: "#1464"
+
+scope:
+  summary: >-
+    Add the canonical work-item registry record schema, its normative source
+    rules, bilingual documentation and executable fixtures. Register this
+    integration unit as AID-2026-293 and preserve exact prompt/session
+    provenance without claiming Owner acceptance or independent review.
+  in_scope:
+    - "Add 00-governance/schemas/work-item-registry.schema.json."
+    - "Add normative source rules for canonical work-item registry fields."
+    - "Add English and Simplified Chinese counterparts for the source rules."
+    - "Add and run the schema fixtures."
+    - "Add repository-hygiene admission for JSON and YAML schema assets under 00-governance/schemas/."
+    - "Register AID-2026-293 in its manifest and the work-item INDEX."
+    - "Record the P1 task snapshot and implementing-session evidence."
+  files_out_of_scope:
+    - "Existing work-item manifests other than this new manifest."
+    - "The legacy work-item manifest population."
+    - "Branch protection and required-context configuration."
+    - "Unrelated pull requests and work items."
+  change_boundary: >-
+    The change is additive except for the required document metadata front
+    matter on the canonical source-rules document, the corresponding
+    bilingual counterpart files, the repository-hygiene admission rule and
+    its tests, and the AID-2026-293 manifest and INDEX registration. Existing
+    source-rules body text remains unchanged.
+
+evidence:
+  - "Issue #1464."
+  - "P1 task snapshot in prompt-v1.md."
+  - "Canonical schema fixtures and their runner."
+  - "Repository-hygiene admission output recorded in the PR discussion."
+  - "Source-rules canonical file and bilingual counterparts."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-293/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-293/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-293/session-evidence.md"
+    relationship: evidence
+  - path: "00-governance/schemas/work-item-registry.schema.json"
+    relationship: schema
+  - path: "00-governance/schemas/work-item-registry.source-rules.md"
+    relationship: normative
+  - path: "docs/en/00-governance/schemas/work-item-registry.source-rules.md"
+    relationship: reference
+  - path: "docs/zh-CN/00-governance/schemas/work-item-registry.source-rules.md"
+    relationship: reference
+  - path: "00-governance/schemas/fixtures/run_fixtures.py"
+    relationship: implementation
+
+acceptance_criteria:
+  - id: AC1
+    description: >-
+      The canonical work-item registry schema and source rules are present
+      and the source-rules document has valid document metadata.
+    measurement: >-
+      Run the schema fixture runner and document-management metadata checker
+      against the exact PR head.
+    expected_result: >-
+      Schema fixtures pass and the canonical source-rules document has no
+      DM-01 or DM-02 errors.
+  - id: AC2
+    description: >-
+      The source-rules document has complete English and Simplified Chinese
+      counterparts.
+    measurement: >-
+      Run GOV-DOC-001 and the bilingual documentation ratchet against the
+      exact PR head.
+    expected_result: >-
+      Both counterpart paths exist, are linked through document metadata,
+      and the bilingual gap count does not regress.
+  - id: AC3
+    description: >-
+      Repository hygiene admits only JSON and YAML schema assets within the
+      governance schema subtree through the new anchored rule.
+    measurement: >-
+      Run scripts/test_check_repository_hygiene.py and the repository
+      new-file admission check against the exact PR base and head.
+    expected_result: >-
+      The new schema assets are admitted, unrelated suffixes remain denied,
+      and all repository-hygiene tests pass.
+  - id: AC4
+    description: >-
+      The work item is traceable through a manifest, prompt snapshot,
+      session-evidence record and INDEX row.
+    measurement: >-
+      Run the session-evidence and work-item index membership checks against
+      the exact PR head; independently recompute the prompt snapshot digest
+      and byte count from the committed Git blob.
+    expected_result: >-
+      The manifest and evidence paths resolve, the prompt digest and byte
+      count match the committed blob, and the INDEX contains exactly one
+      AID-2026-293 row.
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    Independent exact-Head review has not been recorded. The implementing
+    session does not review or approve its own work.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: NOT_ASSIGNED
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    The schema, source rules, fixtures, repository-hygiene admission change,
+    bilingual documentation and work-item traceability artifacts are
+    prepared in PR #1478. The reported admission and fixture results are
+    limited to the exact heads and commands recorded in evidence.md.
+  pull_request: "#1478"
+  merge_commit: ""
+  implementation_commit: ""
+  ci_status: NOT_CLAIMED
+  files_changed:
+    - "00-governance/schemas/work-item-registry.schema.json"
+    - "00-governance/schemas/work-item-registry.source-rules.md"
+    - "docs/en/00-governance/schemas/work-item-registry.source-rules.md"
+    - "docs/zh-CN/00-governance/schemas/work-item-registry.source-rules.md"
+    - "scripts/ci/check_repository_hygiene.py"
+    - "scripts/test_check_repository_hygiene.py"
+    - "14-ai-development/work-items/AID-2026-293/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-293/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-293/evidence.md"
+    - "14-ai-development/work-items/AID-2026-293/session-evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "python 00-governance/schemas/fixtures/run_fixtures.py"
+    - "python scripts/test_check_repository_hygiene.py"
+    - "python scripts/check_document_management.py --require-changed <exact-base-sha>"
+    - "python scripts/check_bilingual_docs.py"
+    - "python scripts/check_traceability.py --index-only"
+    - "Exact-Head Session Evidence validation."
+    - "Exact-Head repository new-file admission check."
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1464"
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-293/prompt-v1.md
+    executed_prompt_sha256: 407999eb554c37c61d18c151aa0477e23aeb09011cdd2a026cc0a8f6192371fb
+    executed_prompt_bytes: 25517
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-293/session-evidence.md

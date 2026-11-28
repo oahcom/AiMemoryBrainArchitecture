@@ -20,7 +20,7 @@ from pathlib import PurePosixPath
 # closed when either side of the relation is absent, where it used to return no
 # violations over an empty set (AID-2026-199, #1212). The two versions are
 # separate numbers on purpose -- one changed the contract, the other the rules.
-CHECK_VERSION = "2026-11-27.2"
+CHECK_VERSION = "2026-11-28.1"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -147,6 +147,13 @@ AID_REFERENCE_MODEL_GITIGNORE_RE = re.compile(
 # whole point of printing it in the log is that a reader can say which rules
 # produced a given PASS, and a shared number makes that unanswerable.
 PROTOCOL_SCHEMA_RE = re.compile(r"08-bmcp-protocol/schemas/[^/]+\.schema\.json")
+
+# Work-item registry schema assets are confined to the governance
+# schema subtree. Admit JSON schemas and YAML fixtures only; do not
+# widen JSON/YAML admission to other repository paths.
+WORK_ITEM_REGISTRY_SCHEMA_ASSET_RE = re.compile(
+    r"00-governance/schemas/(?:[^/]+/)*[^/]+\.(?:json|yaml)"
+)
 
 # A2: conformance vectors are JSON anywhere below the conformance root, with
 # one carve-out. package.json and package-lock.json belong to D17 only at the
@@ -323,6 +330,9 @@ def is_allowed_new_path(path):
         return True
 
     if PROTOCOL_SCHEMA_RE.fullmatch(path):
+        return True
+
+    if WORK_ITEM_REGISTRY_SCHEMA_ASSET_RE.fullmatch(path):
         return True
 
     if CONFORMANCE_VECTOR_RE.fullmatch(path):
