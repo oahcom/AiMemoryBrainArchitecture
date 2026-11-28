@@ -38,7 +38,11 @@ def valid_data():
             for mid in module_ids
         ],
         "statuses": {
-            "ac6_negative_cases": "PENDING_COORDINATOR_EXECUTION",
+            "ac3": "CONFIRMED_BY_COORDINATOR",
+            "ac4": "PENDING_SOURCE_EVIDENCE",
+            "ac6": "EXECUTED_BY_COORDINATOR_NOT_IN_CI",
+            "ac6_negative_cases": "EXECUTED_BY_COORDINATOR_NOT_IN_CI",
+            "ac8": "PENDING_INDEPENDENT_REVIEW",
             "ac8_independent_review": "PENDING_INDEPENDENT_REVIEW",
         },
     }

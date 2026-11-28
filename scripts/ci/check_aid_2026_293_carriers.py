@@ -26,6 +26,15 @@ MODULE_IDS = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "Storage"}
 DIMENSIONS = {"change_surface", "coupling", "irreversibility", "concurrency_state"}
 VALID_EVIDENCE_STATES = {"PATH_LINE", "NO_EVIDENCE_FOUND", "PENDING_SEARCH_EXECUTION"}
 
+STATUS_VALUES = {
+    "ac3": {"CONFIRMED_BY_COORDINATOR"},
+    "ac4": {"PENDING_SOURCE_EVIDENCE"},
+    "ac6": {"EXECUTED_BY_COORDINATOR_NOT_IN_CI"},
+    "ac6_negative_cases": {"EXECUTED_BY_COORDINATOR_NOT_IN_CI"},
+    "ac8": {"PENDING_INDEPENDENT_REVIEW"},
+    "ac8_independent_review": {"PENDING_INDEPENDENT_REVIEW"},
+}
+
 _TYPO = {
     ord(c): r
     for c, r in zip(
@@ -281,12 +290,27 @@ def validate(data: Any, root: Path | None = None) -> list[str]:
         errors.append(issue("R7_AC6_AC8_PENDING", "statuses",
                             "statuses must be a mapping"))
     else:
-        if statuses.get("ac6_negative_cases") != "PENDING_COORDINATOR_EXECUTION":
-            errors.append(issue("R7_AC6_AC8_PENDING", "AC6",
-                                "negative cases must remain pending coordinator execution"))
-        if statuses.get("ac8_independent_review") != "PENDING_INDEPENDENT_REVIEW":
-            errors.append(issue("R7_AC6_AC8_PENDING", "AC8",
-                                "independent review must remain pending"))
+        actual_keys = set(statuses)
+        expected_keys = set(STATUS_VALUES)
+        if actual_keys != expected_keys:
+            errors.append(
+                issue(
+                    "R7_AC6_AC8_PENDING",
+                    "statuses",
+                    f"must contain exactly these fields: {','.join(sorted(expected_keys))}",
+                )
+            )
+
+        for field, allowed_values in STATUS_VALUES.items():
+            value = statuses.get(field)
+            if value not in allowed_values:
+                errors.append(
+                    issue(
+                        "R7_AC6_AC8_PENDING",
+                        field,
+                        f"unsupported status value; expected one of {','.join(sorted(allowed_values))}",
+                    )
+                )
 
     return errors
 
