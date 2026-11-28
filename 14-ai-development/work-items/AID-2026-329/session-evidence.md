@@ -50,6 +50,17 @@ document_metadata:
 
 # Session Evidence — AID-2026-329
 
+## Session role / use case
+
+This ChatGPT session served as the design, specification, and implementation-
+guidance session for the AID-2026-329 document-management count-contract
+work. ChatGPT produced the count-contract decisions and replacement text;
+the local execution agent on Windows, using PowerShell, was responsible for
+writing the changes to the repository, running the positive and negative
+tests, and handling repository operations. The execution boundary explicitly
+prohibited WSL. The main session acted as the coordinator and did not
+substitute for the local agent's measured execution results.
+
 ## 1. Session identification
 
 - Work item: `AID-2026-329`
@@ -77,6 +88,41 @@ exit codes, and submitting the resulting evidence for independent review.
 
 This record distinguishes commands and results supplied as measured facts
 from negative-test procedures whose execution has not yet been evidenced.
+
+## Actual AI input
+
+The actual inputs to ChatGPT were the user's instructions to implement the
+document-management test count contract associated with issue #1268, initially
+specified against an aggregate of `372`, and the subsequent instructions that
+all substantive design and text be produced by ChatGPT while the main session
+served only as coordinator. The user also required the work to continue
+without stopping, prohibited WSL, and later supplied the rebase and
+remeasurement facts requiring the contract to be updated to the current-main
+aggregate of `377` (`376` executed cases plus `1` registered skipped case).
+
+The executed instruction snapshot for this work is recorded as
+`14-ai-development/work-items/AID-2026-329/prompt-v1.md`.
+
+## AI-visible output
+
+ChatGPT produced the count-contract design and implementation guidance for
+`scripts/test_check_document_management.py`, including the `EXPECTED_AGGREGATE`
+value and the replacement finalization logic. After the rebase and
+remeasurement, the guidance was updated to `EXPECTED_AGGREGATE = 377`, with
+the expected total defined after `ALLOWED_SKIPS`. ChatGPT also produced the
+replacement evidence text describing the current-main baseline and the
+rebase-related changes to `main()`.
+
+The session's AI-visible deliverables included the positive- and
+negative-test acceptance criteria, the exact expected failure messages, and
+replacement wording for the work-item evidence and related PR documentation.
+The measured execution results were supplied separately by the user: the
+positive run reported `376/376;1 skipped` and exited `0`; the aggregate
+mismatch negative case exited `1` with
+`FAIL: expected 376 executed and skipped cases, got 377 (376 executed, 1 skipped)`;
+and the empty-ledger negative case exited `1` with
+`FAIL: no cases executed`. These are reported as execution-agent measurements,
+not as commands executed by ChatGPT.
 
 ## 3. Baseline command executed
 
