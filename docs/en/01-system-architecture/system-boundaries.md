@@ -1,5 +1,6 @@
 ---
 document_metadata:
+  steward: "Architecture Governance"
   domain: architecture
   role: design-specification
   lifecycle:
