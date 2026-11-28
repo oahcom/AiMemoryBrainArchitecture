@@ -1,0 +1,4 @@
+{
+  "valid": true,
+  "reason": "NOT_APPLICABLE fields omit value and are used where the field cannot apply"
+}

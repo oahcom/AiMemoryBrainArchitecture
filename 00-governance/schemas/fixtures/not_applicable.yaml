@@ -1,0 +1,52 @@
+schema_version: 1
+work_item_id: AID-2026-292
+title:
+  state: KNOWN
+  value: Canonical work-item registry schema
+owner:
+  accountable_owner:
+    state: KNOWN
+    value: oahcom
+  attribution:
+    state: KNOWN
+    value: oahcom
+  authority:
+    state: KNOWN
+    value: repository owner
+  resolution: SINGLE_SOURCE
+class:
+  state: NOT_APPLICABLE
+risk:
+  state: NOT_APPLICABLE
+status:
+  state: KNOWN
+  value: IN_PROGRESS
+prompt:
+  prompt_status: NOT_APPLICABLE
+  prompt_id:
+    state: NOT_APPLICABLE
+  prompt_sha256:
+    state: NOT_APPLICABLE
+  prompt_path:
+    state: NOT_APPLICABLE
+  prompt_version:
+    state: NOT_APPLICABLE
+  prompt_commit_sha:
+    state: NOT_APPLICABLE
+  provenance_note:
+    state: NOT_APPLICABLE
+provenance:
+  grade: UNCONFIRMED
+  evidence:
+  - field: title
+    source_ref: reply-6b07c97e-182004
+    observation: title stated verbatim in the canonical record spec
+    observed_value: Canonical work-item registry schema
+supersedes:
+  state: NOT_APPLICABLE
+superseded_by:
+  state: NOT_APPLICABLE
+source_refs:
+- kind: GIT_FILE
+  locator: 00-governance/schemas/work-item-registry.schema.json
+  role: PRIMARY

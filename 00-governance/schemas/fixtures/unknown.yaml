@@ -1,0 +1,50 @@
+schema_version: 1
+work_item_id: AID-2026-292
+title:
+  state: UNKNOWN
+owner:
+  accountable_owner:
+    state: KNOWN
+    value: oahcom
+  attribution:
+    state: KNOWN
+    value: oahcom
+  authority:
+    state: KNOWN
+    value: repository owner
+  resolution: SINGLE_SOURCE
+class:
+  state: UNKNOWN
+risk:
+  state: UNKNOWN
+status:
+  state: UNKNOWN
+prompt:
+  prompt_status: NOT_PRESENT
+  prompt_id:
+    state: UNKNOWN
+  prompt_sha256:
+    state: UNKNOWN
+  prompt_path:
+    state: UNKNOWN
+  prompt_version:
+    state: UNKNOWN
+  prompt_commit_sha:
+    state: UNKNOWN
+  provenance_note:
+    state: UNKNOWN
+provenance:
+  grade: UNCONFIRMED
+  evidence:
+  - field: title
+    source_ref: reply-6b07c97e-182004
+    observation: title stated verbatim in the canonical record spec
+    observed_value: Canonical work-item registry schema
+supersedes:
+  state: UNKNOWN
+superseded_by:
+  state: UNKNOWN
+source_refs:
+- kind: GIT_FILE
+  locator: 00-governance/schemas/work-item-registry.schema.json
+  role: PRIMARY
