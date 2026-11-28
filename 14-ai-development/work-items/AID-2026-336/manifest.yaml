@@ -108,8 +108,22 @@ dependency_refs:
 
 prompt_id: AID-2026-336-PROMPT
 prompt_version: "v1"
-prompt_bytes: 18905
-prompt_sha256: "7ac7b8cec870ef2ecb0739f9869bc6c59ae612e0c26e9a286a6ee800fff6c52a"
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1350"
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-336/prompt-v1.md
+    executed_prompt_sha256: 7ac7b8cec870ef2ecb0739f9869bc6c59ae612e0c26e9a286a6ee800fff6c52a
+    executed_prompt_bytes: 18905
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-336/session-evidence.md
+    note: >-
+      Canonical session-evidence entry. The declared digest and byte count are
+      the prompt-v1.md bytes recorded for this work item; no executing session
+      identity is asserted.
 
 created_at: "2026-11-27"
 updated_at: "2026-11-27"
