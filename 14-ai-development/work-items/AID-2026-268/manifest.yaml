@@ -42,8 +42,11 @@ scope:
     - 14-ai-development/work-items/AID-2026-268/evidence.md
     - 14-ai-development/work-items/AID-2026-268/session-evidence.md
     - 14-ai-development/work-items/AID-2026-268/prompt-snapshot.md
+    - 14-ai-development/work-items/AID-2026-268/session-evidence-ledger-hotfix.md
+    - 14-ai-development/work-items/AID-2026-268/prompt-snapshot-ledger-hotfix.md
   files_to_modify:
     - .github/workflows/repository-hygiene.yml
+    - scripts/ci/manifest-pin-ledger.md
     - 14-ai-development/work-items/INDEX.md
   files_out_of_scope:
     - scripts/ci/check_work_item_uniqueness.py
@@ -59,6 +62,16 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-268/session-evidence.md
+  - role: ledger-hotfix
+    issue_refs:
+      - "#1349"
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-268/prompt-snapshot-ledger-hotfix.md
+    executed_prompt_sha256: 214369f43643a3028344f352fb6abff720d6f80e645a61711eaa2ce4bba5b5cd
+    executed_prompt_bytes: 3437
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-268/session-evidence-ledger-hotfix.md
 acceptance:
   required:
     - >-
