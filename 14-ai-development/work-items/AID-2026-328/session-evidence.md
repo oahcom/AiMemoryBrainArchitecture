@@ -19,7 +19,7 @@ document_metadata:
       last_verified_date: null
       last_verification_note: "Implementation and exact-head verification remain pending."
     usage_status: Active
-    modification_status: Active
+    modification_status: Modified
     supersession:
       supersedes: []
       supersession_reason: null
