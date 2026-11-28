@@ -150,15 +150,15 @@ def main(argv=None):
     print(f"ratchet: baseline={len(baseline)} current={len(current)} "
           f"regressions={len(regressions)} fixed={len(fixed)}")
     if proc.returncode not in (0, 1):
-        print(f"ratchet: FAIL - wrapped command exited {proc.returncode}; failure set is not comparable.")
+        print(f"ratchet: FAIL - wrapped command exited {proc.returncode}; only 0 (clean) and 1 (red) are comparable.")
         return 1
     if proc.returncode != 0 and not current:
-        print(f"ratchet: FAIL - wrapped command exited {proc.returncode} without findings.")
+        print(f"ratchet: FAIL - wrapped command exited {proc.returncode} without printing any item.")
         return 1
     for item in regressions:
         print(f"::error::ratchet regression: {item}")
     for item in fixed:
-        print(f"::error::ratchet stale baseline identity: {item}")
+        print(f"::error::ratchet stale baseline identity: {item}; lower the baseline by removing fixed items.")
     if regressions or fixed:
         return 1
     print("ratchet: PASS - failure identity set matches baseline exactly.")

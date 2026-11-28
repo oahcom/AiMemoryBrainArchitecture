@@ -67,6 +67,7 @@ jobs:
       - name: Measure manifest blob-pin baseline and negative sample
         env:
           BASE_SHA: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_sha || github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event_name == 'merge_group' && github.event.merge_group.head_sha || github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
           git fetch --no-tags origin refs/pull/1220/head:refs/remotes/origin/pr/1220
@@ -76,7 +77,7 @@ jobs:
           base_status=$?
           python3 scripts/ci/check_manifest_blob_pins.py --commit 9a2063ae1fa5d905b3817cd4eddba065a06daa73
           negative_status=$?
-          python3 scripts/ci/check_manifest_blob_pins.py --commit HEAD
+          python3 scripts/ci/check_manifest_blob_pins.py --commit "$HEAD_SHA"
           candidate_status=$?
           set -e
           if [ "$base_status" -gt 1 ] || [ "$negative_status" -gt 1 ] || [ "$candidate_status" -gt 1 ]; then
@@ -85,11 +86,13 @@ jobs:
           fi
 
       - name: Ratchet manifest blob pins
+        env:
+          HEAD_SHA: ${{ github.event_name == 'merge_group' && github.event.merge_group.head_sha || github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
         run: |
           python3 scripts/ci/gate_ratchet.py \
             --baseline scripts/ci/baselines/manifest-blob-pins.txt \
             --format schema \
-            --command "python3 scripts/ci/check_manifest_blob_pins.py --commit HEAD | sed -n '/^MISMATCH /p; /^PATH_MISSING /p; /^INCOMPLETE /p'"
+            --command "python3 scripts/ci/check_manifest_blob_pins.py --commit $HEAD_SHA | sed -n '/^MISMATCH /p; /^PATH_MISSING /p; /^INCOMPLETE /p'"
 
       - name: Self-check manifest blob pin verification
         run: python3 scripts/ci/test_check_manifest_blob_pins.py
