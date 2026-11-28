@@ -1,22 +1,11 @@
-# AID-2026-268 manifest blob-pin baseline
-# Measured against main 6f597e2dd8b6e879bf7539aa16b88a39504d9c49.
-# 89 pre-existing mismatches: 40 prompt SHA-256 pins, 40 prompt byte-count pins,
-# 3 AID-2026-100 related-evidence pins, and 6 nested authored-index pins (2 roots + 4 mirrors).
-# These legacy records belong to other work items and are not modified here.
-# Two additional stable PATH_MISSING entries are pre-existing on main in AID-2026-261.
-# gate_ratchet requires every entry to remain failing; a fixed entry is stale/red.
-MISMATCH related_evidence[0].path path=14-ai-development/work-items/AID-2026-100/evidence.md declared=87adf4a8cde8ba5c4c14596932f3488ec988a38c actual=ae46c7a4424778d0c8e4c5b21c6535023a9b460d
-MISMATCH related_evidence[0].en_mirror path=docs/en/14-ai-development/work-items/AID-2026-100/evidence.md declared=da156fe2409f17b364e9af65446bb73ab709e539 actual=425e5eaf6c99286342e20f5ecf525ee297d75e0c
-MISMATCH related_evidence[0].zh_cn_mirror path=docs/zh-CN/14-ai-development/work-items/AID-2026-100/evidence.md declared=d750ef5555916bfb82180f30a6e83b3a0766fdfc actual=fda38f1355f6160db78facde996fee3345905ea1
-MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-101/prompt-v1.md declared=89ac65f2d58e187451b7c0a98648d0dd4352e3dac79f521b8029b0432f7e94c1 actual=de3b9b80c952096d7ba14b5226517eed8c14b61593328f80d3a3cf3f1122fc94
-MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-101/prompt-v1.md declared=4470 actual=4412
-MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-102/prompt-v1.md declared=df3c53282d858ecc7302ba86b4fb419bf6a31c8030d30cee256b64840b4e4e7a actual=468a1d4fd8f43d81c8ffba081afd46497b54a2b427849838946163785716072d
-MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-102/prompt-v1.md declared=4470 actual=4412
-MISMATCH authored_indexes[0].root path=05-memory-runtime/README.md declared=107c225b631eaa5732bab90bc09144799a542502 actual=216760a45c54386b95c2c985f7bf188d7479f776
-MISMATCH authored_indexes[1].root path=09-security-governance/README.md declared=1046665b0990183b689ed6db88edc9ba1089c83e actual=37b4c8a7f6b807bc22e9f278106972cbe84af8c8
-MISMATCH authored_indexes[0].en_mirror path=docs/en/05-memory-runtime/README.md declared=2fac42740167293c941c1450437ca780d0488b5d actual=8808e9b298c78c2c4c64a9675b27e973c0e996bc
-MISMATCH authored_indexes[0].zh_cn_mirror path=docs/zh-CN/05-memory-runtime/README.md declared=9881fd88fcbfe1b3760154503c8d13e781ad89f0 actual=c945394cf4aa667874938d64fc1c2b551d3ad5a9
-MISMATCH authored_indexes[1].en_mirror path=docs/en/09-security-governance/README.md declared=7c8b434c7161c47c5e35e0ffcadc736981996c4a actual=9edb8239b2bc34922a0618f5645ca27c6d8d1eb1
-MISMATCH authored_indexes[1].zh_cn_mirror path=docs/zh-CN/09-security-governance/README.md declared=772025aa9da8afe706af6f607ae47e35c5020522 actual=6b2c25ba19f11cdd58d4ad1558373be8c2026f1d
-PATH_MISSING path=14-ai-development/work-items/AID-2026-261/prompt-v1.md; declared=0
+# Issue #1462: this file is anchored to the PR base commit by gate_ratchet.py.
+# Candidate changes may remove existing entries but may not add entries.
+# A baseline addition is a failure, even when the underlying checker reports it.
+# Manifest blob pin ratchet baseline.
+# Measured against main bf7fd91cbb3ccad4d2dba5662b14b849e446d706.
+# This is the history-scan anchor for the append-only manifest pin ledger.
+# Pin transitions before this commit are historical context, not new ledger entries.
+# The two PATH_MISSING entries below are intentional AID-2026-261 sentinels.
+# Do not remove or alter them without an explicit owner decision.
 PATH_MISSING path=14-ai-development/work-items/AID-2026-261/prompt-v1.md; declared=0000000000000000000000000000000000000000000000000000000000000000
+PATH_MISSING path=14-ai-development/work-items/AID-2026-261/prompt-v1.md; declared=0

@@ -1,9 +1,42 @@
+---
+document_metadata:
+  domain: architecture
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      evidence_reference: []
+    evidence_verification:
+      verification_status: Unverified
+      last_verification_note: "Front matter added when the section 4.1 body was re-derived for AID-2026-303; not a formal approval record."
+    usage_status: Active
+    modification_status: Modified
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "System architecture specification"
+    canonical_scope_id: architecture/system-architecture-specification
+    canonical_scope_keywords:
+      - architecture
+      - specification
+      - forget
+      - completion
+    canonical_conflict_status: None
+    normative_status: Normative
+  bilingual_counterpart:
+    source: "01-system-architecture/system-architecture-specification.md"
+    en: "docs/en/01-system-architecture/system-architecture-specification.md"
+    zh-CN: null
+  steward: "user-authorized operator (delegated by account owner)"
+---
+
 # 系统架构规范
 
 - 文档 ID：SYS-ARCH-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../01-system-architecture/system-overview.md)
-- 源版本：995a1c5a3815d7e7b81b8d7f2ccc546c91d4c256
+- 源版本：c3707831777feb14aedd7aea0eca1c162bf59fc6
 - 对应英文：[System Architecture Specification](../../en/01-system-architecture/system-architecture-specification.md)
 - 状态：DECIDED（已决议基线），其中明确标记的候选项和验证项除外
 
@@ -47,7 +80,9 @@ Brain 不负责：
 - 实体与关系管理。
 - 认知和时间限定。
 - 来源链和证据引用。
-- 保留与遗忘治理。
+- Canonical Forget 身份／生命周期／Fence 机制（Owner D）；全局授权、保留／法律保全、外部副本策略、全局目标清单及全局完成标准（Owner I）。
+
+Global Forget Completion 必须由 Owner D 与每一位相关执行 Owner 根据经这些 Owner 接受的完成证据契约共同确定。Owner D 和 Owner I 均不得单方面宣布全局完成。该契约仍有待相关 Owner 接受；本方向性要求本身不构成相关 Owner 已接受该契约的证据。
 
 ### 4.2 Memory Compiler（记忆编译器）
 

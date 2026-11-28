@@ -1,0 +1,83 @@
+work_item_id: AID-2026-295
+title: "Add the canonical work-item registry schema and its mandatory validator"
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  Adds a read-only validator, its regression suite, one schema file and one
+  workflow job. It migrates no registry data, rewrites no existing manifest and
+  deletes no existing gate; the manifest blob-pin auditor keeps running.
+status: MERGED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner acceptance not recorded"
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "3d9b32bef6775974117ea0ab925179acf43c6ecb"
+scope:
+  objective: >-
+    Make the canonical work-item registry checkable before any record is
+    migrated: registry blobs are scanned from the candidate tree, one ID on two
+    paths is a violation, every record is validated against the committed
+    schema, and prompt pins are verified against committed bytes. INDEX
+    projection is deferred to phase D and reported as NOT_APPLICABLE here.
+  issue: "none (delegated work package VALIDATOR-IMPL)"
+  decisions:
+    - "The record schema is copied verbatim from the specification; it is not re-derived."
+    - "check_manifest_blob_pins.py is retained as a read-only historical manifest auditor, per the adjudication in the specification."
+    - "No registry data file is migrated in this change; migration is phase C."
+evidence: 14-ai-development/work-items/AID-2026-295/session-evidence.md
+documentation:
+  - path: 00-governance/schemas/work-item-registry.schema.json
+    relationship: schema
+  - path: scripts/ci/check_work_item_registry.py
+    relationship: implementation
+  - path: scripts/ci/test_check_work_item_registry.py
+    relationship: reference
+  - path: .github/workflows/gates.yml
+    relationship: implementation
+  - path: scripts/ci/check_repository_hygiene.py
+    relationship: implementation
+  - path: 14-ai-development/work-items/AID-2026-295/session-evidence.md
+    relationship: evidence
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1350"
+    implementing_ai_session: "opencode-9router-hermes"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-295/session-evidence.md
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-295/prompt-v1.md
+    executed_prompt_sha256: "36457aae35d6349cfbbed67b8c3ccb25bd98b61fe7fb7d179eded2e92c24b53e"
+    executed_prompt_bytes: 5416
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+implementation:
+  status: IMPLEMENTED
+  pull_request: 1503
+  merge_commit_sha: 5f6fc4c44b6055a0cfd3ab0da9850fc80c127746
+  merged_at: "2026-11-28T03:29:48Z"
+  summary: >-
+    Adds the registry record schema, a JSONL-emitting validator with the
+    specification's exit-code contract, 64 regression cases over throwaway Git
+    repositories, one workflow job that runs the suite, the self-test and the
+    validator, and one exact-path admission rule so the schema can land. INDEX
+    projection is deferred to phase D; this change writes only the single
+    INDEX.md registration row for the work item itself.
+  files_changed:
+    - 00-governance/schemas/work-item-registry.schema.json
+    - scripts/ci/check_work_item_registry.py
+    - scripts/ci/test_check_work_item_registry.py
+    - scripts/ci/check_repository_hygiene.py
+    - scripts/test_check_repository_hygiene.py
+    - .github/workflows/gates.yml
+    - 14-ai-development/work-items/INDEX.md
+    - 14-ai-development/work-items/AID-2026-295/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-295/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-295/prompt-v1.md
+  tests:
+    - "python -m unittest scripts.ci.test_check_work_item_registry -v"
+    - "python -m unittest scripts.test_check_repository_hygiene"
+    - "python scripts/ci/check_work_item_registry.py --tree HEAD"

@@ -1,0 +1,66 @@
+schema_version: 1
+work_item_id: AID-2026-293
+title:
+  state: KNOWN
+  value: Canonical work-item registry schema
+owner:
+  accountable_owner:
+    state: KNOWN
+    value: oahcom
+  attribution:
+    state: KNOWN
+    value: oahcom
+  authority:
+    state: KNOWN
+    value: repository owner
+  resolution: SINGLE_SOURCE
+  reviewer:
+    state: KNOWN
+    value: someone
+class:
+  state: KNOWN
+  value: GOVERNANCE
+risk:
+  state: KNOWN
+  value: LOW
+status:
+  state: KNOWN
+  value: IN_PROGRESS
+prompt:
+  prompt_status: PINNED
+  prompt_id:
+    state: KNOWN
+    value: prompt-2026-11-28-registry-schema
+  prompt_sha256:
+    state: KNOWN
+    value: 0f1e2d3c4b5a69788796a5b4c3d2e1f00f1e2d3c4b5a69788796a5b4c3d2e1f0
+  prompt_path:
+    state: KNOWN
+    value: 00-governance/schemas/work-item-registry.source-rules.md
+  prompt_version:
+    state: KNOWN
+    value: '1'
+  prompt_commit_sha:
+    state: KNOWN
+    value: 31c1e5d83e7dad326dbd4b69d4a8e19534718ff1
+  provenance_note:
+    state: KNOWN
+    value: supplied by ChatGPT session reply-6b07c97e-182004
+provenance:
+  grade: PRIMARY
+  evidence:
+  - field: title
+    source_ref: reply-6b07c97e-182004
+    observation: title stated verbatim in the canonical record spec
+    observed_value: Canonical work-item registry schema
+supersedes:
+  state: KNOWN_EMPTY
+  value: []
+superseded_by:
+  state: KNOWN_EMPTY
+  value: []
+source_refs:
+- kind: GIT_FILE
+  locator: 00-governance/schemas/work-item-registry.schema.json
+  role: PRIMARY
+registry_index: 00-governance/registry/INDEX.yaml

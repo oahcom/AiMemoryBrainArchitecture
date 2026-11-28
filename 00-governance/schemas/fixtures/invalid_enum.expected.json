@@ -1,0 +1,4 @@
+{
+  "valid": false,
+  "reason": "class, status and prompt_status are closed enums; out-of-enum values are rejected"
+}

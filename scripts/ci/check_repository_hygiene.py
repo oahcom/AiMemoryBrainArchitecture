@@ -20,7 +20,34 @@ from pathlib import PurePosixPath
 # closed when either side of the relation is absent, where it used to return no
 # violations over an empty set (AID-2026-199, #1212). The two versions are
 # separate numbers on purpose -- one changed the contract, the other the rules.
-CHECK_VERSION = "2026-11-27.2"
+# 2026-11-28.1 is a rule change on two fronts. One exact path,
+# `00-governance/schemas/work-item-registry.schema.json`, joins the admission
+# allowlist for the canonical work-item registry (AID-2026-293): the schema is
+# JSON, and JSON was admitted only at named configuration paths, so the new file
+# could not land without this line. The same version admits the two registry
+# migration artifacts by exact path (D21, AID-2026-297). No existing path
+# changes verdict.
+#
+#
+# 2026-11-28.3 is a combined rule change incorporating two independently
+# developed admission changes that both used 2026-11-28.2 on their respective
+# branches. It admits the exact legacy work-item ledger report paths
+# `14-ai-development/reports/work-item-legacy-cohort.json` and
+# `14-ai-development/reports/work-item-legacy-disposition.json` for the
+# repository hygiene legacy ledger workflow. It also preserves exact-path
+# admission for `00-governance/schemas/work-item-registry.schema.json` and
+# adds fixture-only admission for direct children of
+# `00-governance/schemas/fixtures/` ending in `.yaml` or `.expected.json`.
+# These are separately scoped asset classes; the fixture rule does not admit
+# arbitrary JSON or YAML files elsewhere under `00-governance/schemas/` or
+# anywhere else in the repository. The version is advanced to .3 because the
+# merged checker contains both independently versioned rule changes.
+#
+# 2026-11-28.3 also carries the two registry migration artifacts by exact path
+# (D21, AID-2026-297): `00-governance/registry-adjudications/schema.json` and
+# `00-governance/registry-migration/inventory.yaml`. Exact paths, not directory
+# patterns, so a second JSON or YAML in those directories stays refused.
+CHECK_VERSION = "2026-11-28.3"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -78,7 +105,10 @@ ALLOWED_CONFIG_PATHS = frozenset({
 ALLOWED_DATA_PATHS = frozenset({
     "14-ai-development/reports/work-item-manifest-ac4-baseline.json",
     "14-ai-development/reports/steward-adoption-baseline.json",
+    "14-ai-development/reports/work-item-legacy-cohort.json",
+    "14-ai-development/reports/work-item-legacy-disposition.json",
     "14-ai-development/work-items/AID-2026-291/baseline.json",
+    "scripts/ci/baselines/protection-fingerprint.json",
 })
 
 REQUIREMENTS_FILE_RE = re.compile(r"requirements(?:-[A-Za-z0-9_.-]+)?\.txt\Z")
@@ -182,6 +212,32 @@ ARCHITECTURE_METADATA_SCHEMA_RE = re.compile(
     r"00-governance/architecture-document-metadata\.schema\.yaml"
 )
 DOCUMENT_SCOPE_REGISTRY_RE = re.compile(r"00-governance/document-scope-registry\.yaml")
+
+# AID-2026-293: the canonical work-item registry record schema. One exact path,
+# for the same reason as the two governance singletons above: JSON is admitted
+# only at named configuration paths, and a sibling `.schema.json` in the same
+# directory is a different document, not this one.
+WORK_ITEM_REGISTRY_SCHEMA_RE = re.compile(
+    r"00-governance/schemas/work-item-registry\.schema\.json"
+)
+
+# D21: the registry migration program's two non-Markdown artifacts. Each is an
+# exact path, not a directory pattern: a second JSON under
+# registry-adjudications/ or a second YAML under registry-migration/ must stay
+# refused until a reviewer admits it deliberately.
+REGISTRY_ADJUDICATION_SCHEMA_RE = re.compile(
+    r"00-governance/registry-adjudications/schema\.json"
+)
+REGISTRY_MIGRATION_INVENTORY_RE = re.compile(
+    r"00-governance/registry-migration/inventory\.yaml"
+)
+
+# AID-2026-293: fixture assets for the canonical work-item registry.
+# Admit only direct fixture files with the explicitly supported suffixes.
+# Do not admit arbitrary YAML or JSON elsewhere in the schema subtree.
+WORK_ITEM_REGISTRY_SCHEMA_ASSET_RE = re.compile(
+    r"00-governance/schemas/fixtures/[^/]+\.(?:yaml|expected\.json)"
+)
 REMOTE_WORKER_INVENTORY_RE = re.compile(r"14-ai-development/remote-worker-inventory\.yaml")
 
 
@@ -347,6 +403,18 @@ def is_allowed_new_path(path):
         return True
 
     if DOCUMENT_SCOPE_REGISTRY_RE.fullmatch(path):
+        return True
+
+    if WORK_ITEM_REGISTRY_SCHEMA_RE.fullmatch(path):
+        return True
+
+    if REGISTRY_ADJUDICATION_SCHEMA_RE.fullmatch(path):
+        return True
+
+    if REGISTRY_MIGRATION_INVENTORY_RE.fullmatch(path):
+        return True
+
+    if WORK_ITEM_REGISTRY_SCHEMA_ASSET_RE.fullmatch(path):
         return True
 
     if REMOTE_WORKER_INVENTORY_RE.fullmatch(path):

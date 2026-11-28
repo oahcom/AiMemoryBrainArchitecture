@@ -78,6 +78,9 @@ ALLOWED_SKIPS = {
         "symlink creation unavailable on this platform",
 }
 
+# Aggregate contract: 386 executed and skipped test cases.
+EXPECTED_AGGREGATE = 386
+
 
 def doc(body: str) -> str:
     return f"---\ndocument_metadata:\n{body}\n---\n\n# Title\n"
@@ -2028,6 +2031,173 @@ def run_bilingual_closure() -> None:
                  "file, not a mirror"),
         )
 
+    # T21a-T21h: DM-12 models additional mirrors beyond the en / zh-CN slots,
+    # and explicit source-less groups that declare the absence of a canonical
+    # root instead of leaving a mirror outside every group. Each case varies
+    # exactly one property so a failure names the rule that broke.
+    source_with_mirrors = (
+        '  bilingual_counterpart:\n'
+        '    source: null\n'
+        '    en: "docs/en/00-governance/a.md"\n'
+        '    zh-CN: "docs/zh-CN/00-governance/a.md"\n'
+        '    mirrors:\n'
+        '      - "docs/en/00-governance/extra.md"\n'
+    )
+    source_without_mirrors = (
+        '  bilingual_counterpart:\n'
+        '    source: null\n'
+        '    en: "docs/en/00-governance/a.md"\n'
+        '    zh-CN: "docs/zh-CN/00-governance/a.md"\n'
+    )
+    en_mirror = (
+        '  bilingual_counterpart:\n'
+        '    source: "00-governance/src.md"\n'
+        '    en: null\n'
+        '    zh-CN: "docs/zh-CN/00-governance/a.md"\n'
+    )
+    zh_mirror = (
+        '  bilingual_counterpart:\n'
+        '    source: "00-governance/src.md"\n'
+        '    en: "docs/en/00-governance/a.md"\n'
+        '    zh-CN: null\n'
+    )
+    extra_mirror = (
+        '  bilingual_counterpart:\n'
+        '    source: "00-governance/src.md"\n'
+        '    en: null\n'
+        '    zh-CN: null\n'
+    )
+
+    def mirror_repo(tmp: str, source: str, extra_meta: str | None = None) -> Path:
+        root = _repo(tmp)
+        (root / "docs" / "en" / "00-governance").mkdir(parents=True)
+        (root / "docs" / "zh-CN" / "00-governance").mkdir(parents=True)
+        (root / "00-governance" / "src.md").write_text(
+            doc(BASE + source), encoding="utf-8"
+        )
+        (root / "docs" / "en" / "00-governance" / "a.md").write_text(
+            doc(BASE + en_mirror), encoding="utf-8"
+        )
+        (root / "docs" / "zh-CN" / "00-governance" / "a.md").write_text(
+            doc(BASE + zh_mirror), encoding="utf-8"
+        )
+        if extra_meta is not None:
+            (root / "docs" / "en" / "00-governance" / "extra.md").write_text(
+                extra_meta, encoding="utf-8"
+            )
+        return root
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = mirror_repo(tmp, source_with_mirrors, doc(BASE + extra_mirror))
+        expect_gate(
+            "T21a source declares and closes an additional mirror", root, 0
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = mirror_repo(tmp, source_without_mirrors, doc(BASE + extra_mirror))
+        expect_gate(
+            "T21b an undeclared third mirror is rejected", root, 1
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = mirror_repo(tmp, source_with_mirrors, "# no metadata\n")
+        expect_gate(
+            "T21c an additional mirror without metadata is rejected", root, 1
+        )
+
+    absence = (
+        '  bilingual_counterpart:\n'
+        '    source: NO_AUTHORITATIVE_SOURCE\n'
+        '    source_absence_reason: "No authoritative source has been established."\n'
+        '    en: null\n'
+        '    zh-CN: "docs/zh-CN/00-governance/a.md"\n'
+    )
+    absence_zh = (
+        '  bilingual_counterpart:\n'
+        '    source: NO_AUTHORITATIVE_SOURCE\n'
+        '    source_absence_reason: "No authoritative source has been established."\n'
+        '    en: "docs/en/00-governance/a.md"\n'
+        '    zh-CN: null\n'
+    )
+
+    def sourceless_repo(tmp: str, en_meta: str, zh_meta: str) -> Path:
+        root = _repo(tmp)
+        (root / "docs" / "en" / "00-governance").mkdir(parents=True)
+        (root / "docs" / "zh-CN" / "00-governance").mkdir(parents=True)
+        (root / "docs" / "en" / "00-governance" / "a.md").write_text(
+            doc(en_meta), encoding="utf-8"
+        )
+        (root / "docs" / "zh-CN" / "00-governance" / "a.md").write_text(
+            doc(zh_meta), encoding="utf-8"
+        )
+        return root
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = sourceless_repo(tmp, BASE + absence, BASE + absence_zh)
+        expect_gate(
+            "T21d reciprocal source-less bilingual pair is accepted", root, 0
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = sourceless_repo(
+            tmp,
+            BASE + absence.replace(
+                '    source_absence_reason: "No authoritative source has been established."\n',
+                "",
+            ),
+            BASE + absence_zh.replace(
+                '    source_absence_reason: "No authoritative source has been established."\n',
+                "",
+            ),
+        )
+        expect_gate(
+            "T21e source-less sentinel without a reason is rejected", root, 1
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "docs" / "en" / "00-governance").mkdir(parents=True)
+        (root / "docs" / "en" / "00-governance" / "a.md").write_text(
+            doc(BASE + absence.replace(
+                '    zh-CN: "docs/zh-CN/00-governance/a.md"\n',
+                "    zh-CN: null\n",
+            )),
+            encoding="utf-8",
+        )
+        expect_gate(
+            "T21f isolated source-less mirror is rejected", root, 1
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = sourceless_repo(
+            tmp,
+            BASE + absence,
+            BASE.replace("role: design-specification", "role: reference")
+            + absence_zh,
+        )
+        expect_gate(
+            "T21g source-less members with inconsistent metadata are rejected",
+            root, 1,
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _repo(tmp)
+        (root / "docs" / "en" / "00-governance").mkdir(parents=True)
+        (root / "docs" / "en" / "00-governance" / "a.md").write_text(
+            doc(BASE + (
+                '  bilingual_counterpart:\n'
+                '    source: null\n'
+                '    source_absence_reason: "reason without the sentinel"\n'
+                '    en: null\n'
+                '    zh-CN: null\n'
+            )),
+            encoding="utf-8",
+        )
+        expect_gate(
+            "T21h source-absence reason without sentinel is rejected", root, 1
+        )
+
+
 def run_schema_agreement() -> None:
     """T19: the published schema and the gate must accept the same shape.
 
@@ -2893,14 +3063,14 @@ def run_schema_fail_closed() -> None:
             return proc.returncode, (proc.stdout + proc.stderr)
 
     # Empty fields: must stop, not silently check nothing.
-    code, out = with_schema('schema_version: "2"\nfields: {}\n')
+    code, out = with_schema('schema_version: "3"\nfields: {}\n')
     record("T33 empty fields stops the gate",
            code != 0 and "no fields mapping" in out or "no longer declares" in out,
            f"  exit {code}: {out.strip()[:160]}")
 
     # Fields without the four dimensions: also must stop.
     code, out = with_schema(
-        'schema_version: "2"\nfields:\n  domain:\n    kind: string\n'
+        'schema_version: "3"\nfields:\n  domain:\n    kind: string\n'
     )
     record("T34 schema missing the four dimensions stops the gate",
            code != 0 and ("no longer declares" in out or "fewer than" in out),
@@ -3276,7 +3446,7 @@ def run_declared_but_unread() -> None:
         root = Path(tmp)
         (root / "00-governance").mkdir()
         (root / gate.SCHEMA_FILE).write_text(
-            src.replace('schema_version: "2"', 'schema_version: "3"'), encoding="utf-8"
+            src.replace('schema_version: "3"', 'schema_version: "0"'), encoding="utf-8"
         )
         try:
             gate.schema(root)
@@ -4345,7 +4515,7 @@ def run_restored_guards() -> None:
     # A schema that keeps all four dimensions and the required leaves, so the
     # run reaches check_schema_keys instead of stopping at "no longer declares".
     mutated = (
-        'schema_version: "2"\n'
+        'schema_version: "3"\n'
         "fields:\n"
         "  domain:\n    kind: NOT_A_KIND\n    required: true\n"
         "  role:\n    kind: string\n    required: true\n"
@@ -4920,7 +5090,7 @@ def run_unbound_emissions() -> None:
         _bind(
             "T105 DM-12 a counterpart that does not exist is named",
             _gate_lines(root),
-            r"DM\-12 .+: bilingual_counterpart\.en does not exist: .+",
+            r"DM\-12 .+: counterpart .+ is not a regular repository file",
         )
 
     with tempfile.TemporaryDirectory() as tmp:
@@ -5329,6 +5499,92 @@ def run_security_readme_canonical_status() -> None:
     )
 
 
+def run_symlink_unavailable_self_check() -> None:
+    """T129: unavailable symlink creation skips only dependent cases.
+
+    The sixteen cases that need a symlink are expected to land in SKIPPED and
+    in no other record. The cases that share those functions but do not need a
+    symlink must still execute: a skip that aborts its function erases them,
+    and that erasure is what an exit code cannot show.
+    """
+    from unittest.mock import patch
+
+    print("symlink-unavailable self-check")
+
+    expected_skips = [
+        "T36 directory symlink is rejected as a governed root",
+        "T37 governed_files does not descend into a symlinked root",
+        "T41 symlinked governed file is rejected",
+        "T42 governed file reached through a symlinked parent is rejected",
+        "T49 symlinked backlog root is named in the diagnostic",
+        "T50 symlinked directory inside a backlog root is reported",
+        "T51 symlinked markdown file inside a backlog root is reported",
+        "T51b symlinked bilingual mirror directory is refused by name",
+        "T58 symlinked subdirectory in a normative root is reported",
+        "T59 top-level symlink is reported and does not satisfy the registry",
+        "T60 declared directory that is only a symlink is reported",
+        "T128 DM-14 a symlinked mirror directory is named",
+    ]
+    independent = [
+        "T43 hidden top-level directory must be accounted for",
+        "T44 .git is structurally exempt from the registry",
+        "T45 backlog count disagreeing with the disk is an error",
+        "T46 backlog count that is not an integer is an error",
+        "T47 backlog documents are actually scanned",
+        "T52 backlog count equals the number of files the scan returns",
+        "T61 a same-named key elsewhere is not reported as the forbidden path",
+    ]
+
+    result_start = len(RESULTS)
+    skipped_start = len(SKIPPED)
+    unexpected_start = len(UNEXPECTED_SKIPS)
+    names_before = dict(RESULTS_BY_NAME)
+
+    ok = False
+    try:
+        with redirect_stdout(io.StringIO()):
+            with patch.object(
+                Path, "symlink_to",
+                side_effect=OSError(1314, "symlink creation unavailable"),
+            ):
+                run_symlink_boundary()
+                run_scan_boundary()
+                run_unified_scan()
+                run_unbound_emissions()
+
+        new_results = RESULTS[result_start:]
+        new_skips = SKIPPED[skipped_start:]
+        new_unexpected = UNEXPECTED_SKIPS[unexpected_start:]
+        result_names = set(RESULTS_BY_NAME) - set(names_before)
+        ok = (
+            new_skips == expected_skips
+            and len(new_results) > 0
+            and not new_unexpected
+            and not (set(expected_skips) & result_names)
+            and all(RESULTS_BY_NAME.get(name) is True for name in independent)
+        )
+        detail = (
+            f"  skips={new_skips}; unexpected={new_unexpected}; "
+            f"dependent_results={sorted(set(expected_skips) & result_names)}; "
+            f"missing_dependent={sorted(set(expected_skips) - set(new_skips))}; "
+            f"independent={[RESULTS_BY_NAME.get(name) for name in independent]}"
+        )
+    except Exception as exc:  # noqa: BLE001 - a raised check is a failed check
+        detail = f"  self-check raised {type(exc).__name__}: {exc}"
+    finally:
+        del RESULTS[result_start:]
+        del SKIPPED[skipped_start:]
+        del UNEXPECTED_SKIPS[unexpected_start:]
+        RESULTS_BY_NAME.clear()
+        RESULTS_BY_NAME.update(names_before)
+
+    record(
+        "T129 symlink-unavailable cases skip without erasing independent cases",
+        ok,
+        detail,
+    )
+
+
 def main() -> int:
     print("check_document_management self-check")
     runners = (
@@ -5372,6 +5628,7 @@ def main() -> int:
         run_single_entry_callers,
         run_fault_injection,
         run_unbound_emissions,
+        run_symlink_unavailable_self_check,
         run_schema_agreement,
     )
     for runner in runners:
@@ -5386,26 +5643,25 @@ def main() -> int:
             RESULTS.append(False)
             RESULTS_BY_NAME[failure_name] = False
 
-    passed, total = sum(RESULTS), len(RESULTS)
-    print(f"{passed}/{total} passed")
-    if SKIPPED:
-        # Printed separately, and deliberately not folded into the total: a
-        # skipped case is coverage the run did not have, and `n/n passed` would
-        # read as if it did.
-        print(f"{len(SKIPPED)} skipped, {len(SKIPPED) - len(UNEXPECTED_SKIPS)} "
+    passed, executed = sum(RESULTS), len(RESULTS)
+    skipped = len(SKIPPED)
+    total = executed + skipped
+    print(f"{passed}/{executed};{skipped} skipped")
+    if skipped:
+        print(f"{skipped} skipped, {skipped - len(UNEXPECTED_SKIPS)} "
               f"registered of {len(ALLOWED_SKIPS)} allowed: " + "; ".join(SKIPPED))
-    # Three ways to be green while proving less than claimed, all refused:
-    # a failure, an unregistered skip, and a run in which nothing executed.
-    # The last one is the reason `total` is checked: `0/0 passed` is arithmetically
-    # a pass and evidentially nothing.
-    if total == 0:
+    if executed == 0:
         print("FAIL: no cases executed")
         return 1
     if UNEXPECTED_SKIPS:
         print(f"FAIL: {len(UNEXPECTED_SKIPS)} unregistered skip(s): "
               + "; ".join(UNEXPECTED_SKIPS))
         return 1
-    return 0 if passed == total else 1
+    if total != EXPECTED_AGGREGATE:
+        print(f"FAIL: expected {EXPECTED_AGGREGATE} executed and skipped "
+              f"cases, got {total} ({executed} executed, {skipped} skipped)")
+        return 1
+    return 0 if passed == executed else 1
 
 
 if __name__ == "__main__":

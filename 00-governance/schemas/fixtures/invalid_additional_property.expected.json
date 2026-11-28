@@ -1,0 +1,4 @@
+{
+  "valid": false,
+  "reason": "additionalProperties is false; an undeclared field is rejected at the record and field level"
+}
