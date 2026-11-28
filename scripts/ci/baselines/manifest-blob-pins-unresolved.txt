@@ -1,0 +1,6 @@
+# Issue #1350 phase-one unresolved ratchet baseline.
+# This file is anchored to the PR base commit by gate_ratchet.py.
+# Candidate changes may remove existing entries but may never add entries.
+# Phase one checks only its fixed manifest pin field families.
+# The initial unresolved failure set is empty.
+# This empty baseline does not exempt PATH_MISSING, MISMATCH, or NON_BLOB.

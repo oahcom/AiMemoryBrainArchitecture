@@ -19,6 +19,9 @@ from pathlib import Path
 
 BASELINES = {
     "manifest-blob-pins": "scripts/ci/baselines/manifest-blob-pins.txt",
+    "manifest-blob-pins-unresolved": (
+        "scripts/ci/baselines/manifest-blob-pins-unresolved.txt"
+    ),
     "bilingual-docs": "scripts/ci/baselines/bilingual-docs.txt",
 }
 
