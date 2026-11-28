@@ -1,0 +1,81 @@
+work_item_id: AID-2026-329
+title: "Enforce the document-management test count contract at 377 cases"
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  Without an explicit aggregate guard, accidental test removal or unregistered
+  skips can go undetected while the self-check still exits successfully.
+  The current main-branch baseline is 376 executed cases plus 1 registered
+  skipped case, for an aggregate of 377. The guard must count skips in the
+  aggregate without treating them as passes. The separate #1438 regression
+  case is not included; when added, the expected aggregate must be raised to
+  378.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner acceptance not recorded"
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "4a6cdd0e7c5dc0db53be37a2f945e02c59d5abf9"
+
+# Prompt-to-commit trace pins, measured from the committed prompt snapshot.
+prompt_sha256: "770f6bc6a647a4996c9d784d465ad2152bd25f13cfd2fb19beead7bbab00bf63"
+prompt_file: "14-ai-development/work-items/AID-2026-329/prompt-v1.md"
+prompt_file_blob_sha: "09a9af2a359fb4a698ecd70df93e89a8e0e51f2b"
+prompt_file_commit_sha: "c335ebcaf0025887f34a29f5d47d4b1d6ca164e1"
+scope:
+  objective: >-
+    Enforce the document-management test aggregate of 377, counting executed
+    cases and registered skips while requiring every executed case to pass.
+    Preserve the existing runner-based self-check structure and skip admission
+    behavior. Do not implement or modify symlink-unavailability handling or
+    its forced-OSError(1314, ...) regression path, which remain assigned to
+    Issue #1438.
+  files_changed:
+    - scripts/test_check_document_management.py
+
+evidence: 14-ai-development/work-items/AID-2026-329/evidence.md
+
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-329/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-329/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-329/session-evidence.md
+    relationship: evidence
+
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1268"
+    implementing_ai_session: "6b08ffa5-bccc-83ec-ae24-ea58c1d913b9"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-329/session-evidence.md
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-329/prompt-v1.md
+    # 回填项：prompt-v1.md 落盘后计算真实 SHA-256 与字节数。
+    executed_prompt_sha256: "770f6bc6a647a4996c9d784d465ad2152bd25f13cfd2fb19beead7bbab00bf63"
+    executed_prompt_bytes: 6388
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: "RECORDED"
+
+implementation:
+  status: IMPLEMENTED
+  implementation_commit_sha: "cc4b4ca6126ad49a9080e49f9692684a0c67aca2"
+  summary: >-
+    Enforces the document-management self-check aggregate at 377 cases using
+    the current runner-based main() structure: 376 executed cases plus 1
+    registered skipped case. Executed cases and skipped cases are counted
+    separately; skips contribute to the aggregate but not to the passed count.
+    The finalization rejects zero executed cases, unregistered skips, aggregate
+    mismatch, and any executed case that did not pass. The #1438
+    symlink-unavailability regression case is outside this baseline and will
+    require raising the aggregate to 378 when that case is added.
+  files_changed:
+    - scripts/test_check_document_management.py
+  tests:
+    - "Current main-branch baseline: 376 executed, 1 registered skipped, aggregate 377; expected exit 0 and 376/376 passed."
+    - "Aggregate mismatch: in a temporary copy, set EXPECTED_AGGREGATE to 376; expected exit 1 and diagnostic: FAIL: expected 376 executed and skipped cases, got 377 (376 executed, 1 skipped)."
+    - "Zero-execution guard: in a temporary copy, clear the execution and skip ledgers before finalization; expected exit 1 and diagnostic: FAIL: no cases executed."
+    - "Verify record(), skip(), ALLOWED_SKIPS, and the runner exception handling remain unchanged by the count-contract change."

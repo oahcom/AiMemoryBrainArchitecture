@@ -20,9 +20,15 @@ from pathlib import PurePosixPath
 # closed when either side of the relation is absent, where it used to return no
 # violations over an empty set (AID-2026-199, #1212). The two versions are
 # separate numbers on purpose -- one changed the contract, the other the rules.
-# 2026-11-27.3 is a rule change: admit only the exact AID-2026-293
+#
+# 2026-11-28.1 is a rule change: one exact path,
+# `00-governance/schemas/work-item-registry.schema.json`, joins the admission
+# allowlist for the canonical work-item registry (AID-2026-293). The schema is
+# JSON, and JSON was admitted only at named configuration paths, so the new file
+# could not land without this line.
+# 2026-11-28.2 is a rule change on top of .1: admit only the exact AID-2026-293
 # carrier-data.yaml path; other YAML files remain denied.
-CHECK_VERSION = "2026-11-27.3"
+CHECK_VERSION = "2026-11-28.2"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -191,6 +197,13 @@ ARCHITECTURE_METADATA_SCHEMA_RE = re.compile(
     r"00-governance/architecture-document-metadata\.schema\.yaml"
 )
 DOCUMENT_SCOPE_REGISTRY_RE = re.compile(r"00-governance/document-scope-registry\.yaml")
+# AID-2026-293: the canonical work-item registry record schema. One exact path,
+# for the same reason as the two governance singletons above: JSON is admitted
+# only at named configuration paths, and a sibling `.schema.json` in the same
+# directory is a different document, not this one.
+WORK_ITEM_REGISTRY_SCHEMA_RE = re.compile(
+    r"00-governance/schemas/work-item-registry\.schema\.json"
+)
 REMOTE_WORKER_INVENTORY_RE = re.compile(r"14-ai-development/remote-worker-inventory\.yaml")
 
 
@@ -359,6 +372,9 @@ def is_allowed_new_path(path):
         return True
 
     if path == AID_293_CARRIER_DATA_PATH:
+        return True
+
+    if WORK_ITEM_REGISTRY_SCHEMA_RE.fullmatch(path):
         return True
 
     if REMOTE_WORKER_INVENTORY_RE.fullmatch(path):
