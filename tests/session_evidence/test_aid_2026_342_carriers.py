@@ -35,7 +35,13 @@ def valid_data():
                     "irreversibility": 3,
                     "concurrency_state": 3,
                 },
-                "evidence_gap": "EVIDENCE_GAP: fixture intentionally lacks source proof.",
+                "evidence_gap": (
+                    "EVIDENCE_GAP: "
+                    "change_surface: fixture intentionally lacks source proof; "
+                    "coupling: fixture intentionally lacks source proof; "
+                    "irreversibility: fixture intentionally lacks source proof; "
+                    "concurrency_state: fixture intentionally lacks source proof."
+                ),
             }
             for mid in module_ids
         ],
@@ -120,6 +126,44 @@ class CarrierRulesTest(unittest.TestCase):
         }
         self.assert_rule(data, "R3_RISK_EVIDENCE_STATE")
 
+    def test_negative_r11_no_evidence_search_command_must_be_git_grep(self):
+        data = valid_data()
+        data["risks"][0] = {
+            "id": "R-01",
+            "evidence_state": "NO_EVIDENCE_FOUND",
+            "search_command": "echo nothing",
+            "search_scope": "an unrelated scope that does not constrain the command",
+            "search_executed": True,
+        }
+
+        self.assert_rule(
+            data,
+            "R11_B_VARIANT_REQUIRES_ZERO_HITS",
+            root=REPO_ROOT,
+        )
+
+    def test_positive_r11_git_grep_returns_zero_hits(self):
+        data = valid_data()
+        data["risks"][0] = {
+            "id": "R-01",
+            "evidence_state": "NO_EVIDENCE_FOUND",
+            "search_command": (
+                'git grep -n "pattern-that-cannot-exist-293" '
+                "-- 00-governance"
+            ),
+            "search_scope": "Repository path 00-governance",
+            "search_executed": True,
+        }
+
+        errors = validate(data, root=REPO_ROOT)
+        self.assertFalse(
+            any(
+                item.startswith("R11_B_VARIANT_REQUIRES_ZERO_HITS ")
+                for item in errors
+            ),
+            errors,
+        )
+
     def test_negative_r4_missing_module(self):
         data = valid_data()
         data["modules"].pop()
@@ -134,6 +178,59 @@ class CarrierRulesTest(unittest.TestCase):
         data = valid_data()
         data["modules"][0].pop("evidence_gap")
         self.assert_rule(data, "R6_MODULE_EVIDENCE")
+
+    def test_negative_r12_module_dimension_not_named(self):
+        data = valid_data()
+        module = data["modules"][0]
+
+        module["evidence"] = [
+            {
+                "supports": (
+                    "change_surface: fixture evidence for change surface. "
+                    "coupling: fixture evidence for coupling. "
+                    "concurrency_state: fixture evidence for concurrency state."
+                )
+            }
+        ]
+
+        # R6 accepts this non-empty EVIDENCE_GAP, but it does not identify
+        # irreversibility as the dimension for which evidence is missing.
+        module["evidence_gap"] = (
+            "EVIDENCE_GAP: fixture gap without an explicit dimension label."
+        )
+
+        self.assert_rule(
+            data,
+            "R12_MODULE_DIMENSION_COVERAGE",
+        )
+
+    def test_positive_r12_each_dimension_is_evidenced_or_gapped(self):
+        data = valid_data()
+        module = data["modules"][0]
+
+        module["evidence"] = [
+            {
+                "supports": (
+                    "change_surface: fixture evidence for change surface. "
+                    "coupling: fixture evidence for coupling."
+                )
+            }
+        ]
+
+        module["evidence_gap"] = (
+            "EVIDENCE_GAP: "
+            "irreversibility: fixture intentionally lacks source proof; "
+            "concurrency_state: fixture intentionally lacks source proof."
+        )
+
+        errors = validate(data)
+        self.assertFalse(
+            any(
+                item.startswith("R12_MODULE_DIMENSION_COVERAGE ")
+                for item in errors
+            ),
+            errors,
+        )
 
     def test_negative_r7_false_pending_state(self):
         data = valid_data()

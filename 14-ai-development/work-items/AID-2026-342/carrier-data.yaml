@@ -51,13 +51,20 @@ risks:
     quote: "| Authorization and revocation | Owner I | Owner I for authorization / PermissionEpoch state | Each affected subsystem at its access boundary | Versioned authorization or revocation record plus enforcement evidence from each affected boundary; a policy record alone is not proof of enforcement |"
 
   - id: R-09
-    evidence_state: NO_EVIDENCE_FOUND
+    evidence_state: PATH_LINE
+    path_line: "01-system-architecture/system-quality-attributes.md:239"
+    quote: "| QA-03 | OPEN | High | Define RTO/RPO and audit availability requirements for intended deployment modes. |"
+    additional_evidence:
+      - path_line: "01-system-architecture/system-quality-attributes.md:153"
+        quote: "Availability SLOs and recovery objectives (RTO/RPO) require workload and deployment assumptions; do not invent values at architecture stage."
+      - path_line: "01-system-architecture/system-quality-attributes.md:253"
+        quote: "- **OPEN:** Workload corpus, SLO/RTO/RPO, evaluation labels, and backup erasure semantics."
     search_command: 'git grep -n -i -E "RPO|RTO|disaster recovery|restore drill" 31c1e5d83e7dad326dbd4b69d4a8e19534718ff1 -- 01-system-architecture 03-memory-brain 04-memory-compiler 05-memory-runtime 06-memory-context 09-security-governance reviews docs'
     search_scope: "Baseline commit 31c1e5d83e7dad326dbd4b69d4a8e19534718ff1; paths: 01-system-architecture, 03-memory-brain, 04-memory-compiler, 05-memory-runtime, 06-memory-context, 09-security-governance, reviews, docs"
     search_executed: true
     hits: 392
-    result: NO_SUPPORTING_LINE
-    search_interpretation: "The search returned 392 keyword matches; none was identified as a supporting source line for this risk."
+    result: SUPPORTING_LINES_FOUND
+    search_interpretation: "Correction: the earlier interpretation that none of the 392 keyword matches supported this risk was incorrect. Three directly relevant source lines were present in the search results and have now been verified against the current HEAD. The QA-03 OPEN/High entry at line 239 directly records the missing RTO/RPO and availability requirements; lines 153 and 253 provide additional context for the recovery objectives and their unresolved assumptions. The search record is retained; the previous negative conclusion is superseded by this correction."
 
   - id: R-10
     evidence_state: PATH_LINE
@@ -65,85 +72,166 @@ risks:
     quote: "1. Does IR reduce transformation complexity? **Not proven.** It may reduce repeated interpretation but adds stages and version-governance cost."
 
 modules:
-  - id: A
-    scores:
-      change_surface: 4
-      coupling: 5
-      irreversibility: 3
-      concurrency_state: 4
-    evidence_gap: "EVIDENCE_GAP: No A-specific source line has been revalidated to substantiate the change-surface score for module A."
-
-  - id: B
-    scores:
-      change_surface: 5
-      coupling: 5
-      irreversibility: 4
-      concurrency_state: 4
-    evidence_gap: "EVIDENCE_GAP: The available consolidation interaction entry in 01-system-architecture/component-interactions.md:138 does not establish a module-B-specific basis for all four scores."
-
-  - id: C
-    scores:
-      change_surface: 4
-      coupling: 5
-      irreversibility: 4
-      concurrency_state: 5
-    evidence_gap: "EVIDENCE_GAP: The forget-fence linearization evidence in 03-memory-brain/forget-fence-operation-and-publication-gate.md:120 is not a revalidated module-C-specific score justification."
-
-  - id: D
-    scores:
-      change_surface: 5
-      coupling: 5
-      irreversibility: 5
-      concurrency_state: 5
-    evidence_gap: "EVIDENCE_GAP: The adapter acknowledgement entry in 01-system-architecture/data-flows.md:230 does not provide a D-specific source line connecting the four scores to module D."
-
-  - id: E
-    scores:
-      change_surface: 5
-      coupling: 5
-      irreversibility: 4
-      concurrency_state: 5
-    evidence_gap: "EVIDENCE_GAP: The completion-contract entry in 01-system-architecture/forget-fence-and-completion-contract.md:53 records source-revision provenance, not an E-specific four-dimensional scoring rationale."
-
-  - id: F
-    scores:
-      change_surface: 4
-      coupling: 5
-      irreversibility: 4
-      concurrency_state: 5
-    evidence_gap: "EVIDENCE_GAP: The external-boundary checks in 01-system-architecture/component-interactions.md:52 do not identify an F-specific change surface or substantiate F's four scores."
-
-  - id: G
-    scores:
-      change_surface: 4
-      coupling: 5
-      irreversibility: 4
-      concurrency_state: 5
-    evidence_gap: "EVIDENCE_GAP: The asynchronous-work rule in 01-system-architecture/data-flows.md:54 is a general requirement and has not been tied to a G-specific four-dimensional assessment."
-
-  - id: H
-    scores:
-      change_surface: 4
-      coupling: 5
-      irreversibility: 5
-      concurrency_state: 5
-    evidence_gap: "EVIDENCE_GAP: The BMCP/Adapter interaction entry in 01-system-architecture/component-interactions.md:288 identifies interface concerns but does not establish an H-specific rationale for each score."
-
-  - id: I
-    scores:
-      change_surface: 5
-      coupling: 5
-      irreversibility: 5
-      concurrency_state: 5
-    evidence_gap: "EVIDENCE_GAP: The authorization and revocation entry in 01-system-architecture/system-boundaries.md:239 describes a boundary responsibility but does not provide an I-specific four-dimensional scoring trace."
-
-  - id: Storage
-    scores:
-      change_surface: 5
-      coupling: 5
-      irreversibility: 5
-      concurrency_state: 5
-    evidence_gap: "EVIDENCE_GAP: The verified risk excerpts do not include a Storage-specific physical persistence, recovery, or state-transition source line supporting these four scores."
+- id: A
+  scores:
+    change_surface: 4
+    coupling: 5
+    irreversibility: 3
+    concurrency_state: 4
+  path_line: 01-system-architecture/responsibility-matrix.md:50
+  quote: '| Forgetting/retention governance | S | S | S | S | S | S | S | S | S | — | S | S | P | S |'
+  evidence:
+  - path_line: 01-system-architecture/responsibility-matrix.md:50
+    quote: '| Forgetting/retention governance | S | S | S | S | S | S | S | S | S | — | S | S | P | S |'
+    supports: 'change_surface: Forgetting/retention governance 在多个职责列中被标记为 Supporting，显示该治理关注点横跨多个模块，而不是局部改动。coupling: 多个模块共同承担该治理关注点，体现跨职责依赖。'
+  - path_line: 01-system-architecture/component-interactions.md:240
+    quote: '- Forget creates a durable governance job/fence before asynchronous derivative cleanup.'
+    supports: 'concurrency_state: 持久化 governance job/fence 与异步 derivative cleanup 之间存在明确先后关系，说明治理状态必须跨异步清理过程维持。'
+  evidence_gap: 'EVIDENCE_GAP: irreversibility: 候选清单内无直接说明治理变更不可逆性或回滚代价的行。建议执行但尚未执行：rg -n -i ''rollback|irreversible|retract|supersed|restore|compensat'' 00-governance 01-system-architecture，检索治理决策、架构治理与系统边界中的回滚、撤销和补偿语义。'
+- id: B
+  scores:
+    change_surface: 5
+    coupling: 5
+    irreversibility: 4
+    concurrency_state: 4
+  path_line: 02-domain-model/phase-2-domain-extension.md:36
+  quote: '| ClaimRevision and exact ClaimRevisionRef | `domain-model-overview.md` §2.4; `06-memory-context/context-versioning.md` §§13.2–13.3 requires exact immutable ClaimRevision references | `Claim` currently combines proposition and assertion state; no separate revision type | IN SCOPE |'
+  evidence:
+  - path_line: 02-domain-model/phase-2-domain-extension.md:36
+    quote: '| ClaimRevision and exact ClaimRevisionRef | `domain-model-overview.md` §2.4; `06-memory-context/context-versioning.md` §§13.2–13.3 requires exact immutable ClaimRevision references | `Claim` currently combines proposition and assertion state; no separate revision type | IN SCOPE |'
+    supports: 'change_surface: Claim 与 ClaimRevision 的分离涉及 Domain Model 和 Memory Context 的跨模块引用契约，且当前 Claim 同时承载 proposition 与 assertion state。coupling: Context Versioning 要求精确 immutable ClaimRevision 引用，Domain Model 与 Context 的版本语义相互依赖。'
+  - path_line: 02-domain-model/core-entities.md:125
+    quote: FactRevision is immutable and references exact ClaimRevisionRef, Evidence, Provenance, Scope, Attestor, Method/Version and I AuthorizationDecisionRef values.
+    supports: 'coupling: FactRevision 显式引用 ClaimRevisionRef、Evidence、Provenance、Scope、Attestor、Method/Version 和 AuthorizationDecisionRef，形成多个领域对象之间的强引用关系。irreversibility: FactRevision 被明确规定为 immutable，表明其断言版本不能作为普通可变状态原地改写。'
+  evidence_gap: 'EVIDENCE_GAP: concurrency_state: 候选清单内无直接描述并发提交、竞争更新、序列化或状态转换冲突的行。建议执行但尚未执行：rg -n -i ''concurrent|race|serialization|revision conflict|CAS|commit cursor'' 02-domain-model 06-memory-context，检索领域修订与 Context 精确版本引用中的并发和提交一致性约束。'
+- id: C
+  scores:
+    change_surface: 4
+    coupling: 5
+    irreversibility: 4
+    concurrency_state: 5
+  path_line: 07-agent-integration/applied-evidence-contract.md:62
+  quote: '- G Applied: allowed only after G verifies a valid C/H AppliedAttestation for the exact DeliveryAttempt and ContextVersion at the final inference boundary.'
+  evidence:
+  - path_line: 07-agent-integration/applied-evidence-contract.md:62
+    quote: '- G Applied: allowed only after G verifies a valid C/H AppliedAttestation for the exact DeliveryAttempt and ContextVersion at the final inference boundary.'
+    supports: 'change_surface: Agent Integration 的 Applied 语义跨越 G Context、H Adapter 和最终 inference boundary。coupling: G 必须验证由 C/H 提供的 AppliedAttestation，并绑定精确 DeliveryAttempt 与 ContextVersion。concurrency_state: 证明绑定到精确 attempt 和 version，不能将其他交付尝试或版本的确认混用。'
+  - path_line: 01-system-architecture/component-interactions.md:239
+    quote: '- Adapter Applied reports are monotonic for a given Context Session; stale acknowledgements cannot roll back applied version.'
+    supports: 'irreversibility: Applied 报告对给定 Context Session 单调推进，旧 acknowledgement 不得回滚已应用版本。concurrency_state: 明确规定 stale acknowledgement 与当前已应用版本之间的竞争处理规则。'
+  evidence_gap: null
+- id: D
+  scores:
+    change_surface: 5
+    coupling: 5
+    irreversibility: 5
+    concurrency_state: 5
+  path_line: 03-memory-brain/forget-fence-operation-and-publication-gate.md:120
+  quote: '- **Linearization point:** one durable canonical transaction/serializable commit that makes the fence effective and captures producer-registration high-water under the same admission/fence serialization order. The installation CanonicalCommitCursor is audit order, not fence generation.'
+  evidence:
+  - path_line: 03-memory-brain/forget-fence-operation-and-publication-gate.md:120
+    quote: '- **Linearization point:** one durable canonical transaction/serializable commit that makes the fence effective and captures producer-registration high-water under the same admission/fence serialization order. The installation CanonicalCommitCursor is audit order, not fence generation.'
+    supports: 'change_surface: Forget Fence 生效、producer-registration high-water 捕获和 canonical transaction 必须作为一个整体协调。coupling: Admission 与 Fence 共享 serialization order，并依赖 canonical transaction。irreversibility: durable commit 使 fence 生效，表明该状态变更具有明确的持久化线性化点。concurrency_state: serializable commit 和 admission/fence serialization order 明确约束并发操作顺序。'
+  - path_line: 03-memory-brain/memory-lifecycle-manager.md:133
+    quote: '- D records CanonicalSuppressionComplete only when the producer barrier is closed and every required canonical-domain target has suppression confirmation or an explicit I-approved residual exception. This is not global Forget completion, cleanup completion or physical-erasure proof.'
+    supports: 'change_surface: 完成判定覆盖 producer barrier、所有 required canonical-domain targets 和 I-approved residual exception。coupling: D 的完成记录依赖 producer barrier 以及各 canonical-domain target 的确认。concurrency_state: 必须先关闭 producer barrier，再确认每个目标的 suppression 状态，才能记录完成。'
+  evidence_gap: null
+- id: E
+  scores:
+    change_surface: 5
+    coupling: 5
+    irreversibility: 4
+    concurrency_state: 5
+  path_line: 04-memory-compiler/accepted-receipt-and-idempotency-contract.md:61
+  quote: '| AcceptedReceipt | E | Immutable source Event, payload ref/digest, idempotency record and compile intent are durably recoverable | D admission, compiler completion, canonical commit, dependency registration, publication or indexing |'
+  evidence:
+  - path_line: 04-memory-compiler/accepted-receipt-and-idempotency-contract.md:61
+    quote: '| AcceptedReceipt | E | Immutable source Event, payload ref/digest, idempotency record and compile intent are durably recoverable | D admission, compiler completion, canonical commit, dependency registration, publication or indexing |'
+    supports: 'change_surface: AcceptedReceipt 的证据链跨越 D admission、compiler completion、canonical commit、dependency registration、publication 和 indexing。coupling: E 的接收记录与 D 及多个下游阶段存在明确依赖。irreversibility: source Event 被标记为 immutable，相关 payload、idempotency record 和 compile intent 要求 durable recovery。'
+  - path_line: 04-memory-compiler/compiler-state-and-producer-admission.md:286
+    quote: '| Lease acquire/renew | LeaseId + monotonic lease epoch/expiry | Conditional current-owner lease; revalidate identity, PermissionEpoch and ForgetFence. A lease is not new admission authority. |'
+    supports: 'coupling: Lease acquire/renew 必须重新验证 identity、PermissionEpoch 和 ForgetFence。concurrency_state: current-owner 条件、monotonic lease epoch/expiry 和条件式续租明确处理 worker 并发竞争及过期状态。'
+  evidence_gap: null
+- id: F
+  scores:
+    change_surface: 4
+    coupling: 5
+    irreversibility: 4
+    concurrency_state: 5
+  path_line: 05-memory-runtime/working-set-and-cache.md:74
+  quote: '- Query Cache: query fingerprint + principal/scope/environment + policy/Forget epoch + retrieval config + index watermarks + consistency fence.'
+  evidence:
+  - path_line: 05-memory-runtime/working-set-and-cache.md:74
+    quote: '- Query Cache: query fingerprint + principal/scope/environment + policy/Forget epoch + retrieval config + index watermarks + consistency fence.'
+    supports: 'change_surface: Query Cache 的有效性涉及 query、principal/scope/environment、policy/Forget epoch、retrieval config、index watermarks 和 consistency fence 多个维度。coupling: 缓存结果同时依赖授权状态、Forget 状态、检索配置和索引水位。'
+  - path_line: 05-memory-runtime/working-set-and-cache.md:152
+    quote: '- **Forget:** immediately deny target and descendant/lineage reads; evict or quarantine hot-memory/entity/query/index-derived entries; remove or render inaccessible matching Working Set refs/snippets; cancel in-flight retrieval/fills; recheck at fill publication and final return.'
+    supports: 'irreversibility: Forget 要求立即拒绝目标及 lineage 读取，并清除或隔离派生缓存与 Working Set 内容，体现对既有派生状态的强制抑制。concurrency_state: 必须取消 in-flight retrieval/fills，并在 fill publication 和 final return 再次检查，明确处理并发检索与 Forget 的竞争。'
+  evidence_gap: null
+- id: G
+  scores:
+    change_surface: 4
+    coupling: 5
+    irreversibility: 4
+    concurrency_state: 5
+  path_line: 06-memory-context/context-reconciliation.md:227
+  quote: '| G-CF-13 | Delivery Prepared; Context head advances before send | Concurrent Context ChangeSet commits | Old delivery→Superseded; new target prepared | No stale send; new target gets new delivery | Send old snapshot based only on prior prepare | CAS, head versions, delivery state |'
+  evidence:
+  - path_line: 06-memory-context/context-reconciliation.md:227
+    quote: '| G-CF-13 | Delivery Prepared; Context head advances before send | Concurrent Context ChangeSet commits | Old delivery→Superseded; new target prepared | No stale send; new target gets new delivery | Send old snapshot based only on prior prepare | CAS, head versions, delivery state |'
+    supports: 'change_surface: Context ChangeSet、Context head、delivery 和 snapshot 需要协同处理。coupling: Delivery Prepared 状态依赖 Context head version 和 delivery state。concurrency_state: 明确描述并发 ChangeSet commit 时旧 delivery 必须 Superseded，并通过 CAS 与 head versions 防止 stale send。'
+  - path_line: 01-system-architecture/forget-fence-and-completion-contract.md:165
+    quote: '| G Context snapshot/delta/ChangeSet | Context refs and pending changes are discoverable targets | G tombstones affected refs, invalidates snapshots/deltas and commits a new safe ContextVersion | Old immutable snapshot is audit-only; never served as current |'
+    supports: 'irreversibility: 受影响 refs 被 tombstone，旧 immutable snapshot 仅供审计且不得继续作为当前状态提供。change_surface: 处理范围包括 Context refs、pending changes、snapshots、deltas 和新的 safe ContextVersion。'
+  evidence_gap: null
+- id: H
+  scores:
+    change_surface: 4
+    coupling: 5
+    irreversibility: 5
+    concurrency_state: 5
+  path_line: 01-system-architecture/forget-fence-and-completion-contract.md:70
+  quote: '- **H owns:** BMCP wire, Adapter local state, offline reconnect and trustworthy application/clear acknowledgement.'
+  evidence:
+  - path_line: 01-system-architecture/forget-fence-and-completion-contract.md:70
+    quote: '- **H owns:** BMCP wire, Adapter local state, offline reconnect and trustworthy application/clear acknowledgement.'
+    supports: 'change_surface: H 的职责同时覆盖 BMCP wire、Adapter local state、offline reconnect 和 application/clear acknowledgement。coupling: 协议传输、Adapter 状态与应用/清除确认必须协同。irreversibility: clear acknowledgement 是清除操作的确认边界，不能仅凭传输成功推定清除完成。'
+  - path_line: 01-system-architecture/forget-fence-and-completion-contract.md:168
+    quote: '| H Adapter offline reconnect | Offline Adapter remains outstanding target; offline is not implicit success | H authenticates/reconciles latest fence, discards stale snapshots/deltas, applies safe state and attests before reuse | No cached Context reuse; unknown/blocked until H criterion met |'
+    supports: 'coupling: Adapter 恢复必须与 latest fence 和 Context snapshot/delta 状态协调。concurrency_state: offline Adapter 仍是 outstanding target；reconnect 时需重新认证、协调最新 fence、丢弃 stale 数据并在 attestation 前阻止复用。irreversibility: stale snapshots/deltas 必须丢弃，不能作为恢复后的有效状态重新使用。'
+  evidence_gap: null
+- id: I
+  scores:
+    change_surface: 5
+    coupling: 5
+    irreversibility: 5
+    concurrency_state: 5
+  path_line: 01-system-architecture/forget-fence-and-completion-contract.md:66
+  quote: '- **I owns:** principal/authorization and revocation policy, permission epochs, retention, backup/external-copy rules, residual-exception approval, global completion policy and physical-erasure requirements. D cannot authorize itself or declare global/physical completion.'
+  evidence:
+  - path_line: 01-system-architecture/forget-fence-and-completion-contract.md:66
+    quote: '- **I owns:** principal/authorization and revocation policy, permission epochs, retention, backup/external-copy rules, residual-exception approval, global completion policy and physical-erasure requirements. D cannot authorize itself or declare global/physical completion.'
+    supports: 'change_surface: I 的职责跨越身份授权、撤销、permission epochs、retention、backup/external-copy、residual exception、global completion 和 physical erasure。coupling: D 不得自行授权或宣告 global/physical completion，明确存在跨 Owner 的权限与完成判定边界。irreversibility: physical-erasure requirements 和 backup/external-copy rules 涉及外部副本与物理删除的后果。'
+  - path_line: 09-security-governance/security-and-identity-overview.md:90
+    quote: '| PermissionEpoch | Monotonic authorization generation used to invalidate stale decisions/leases | I |'
+    supports: 'coupling: PermissionEpoch 是 I 所有的授权状态，并用于使其他组件中的 decision/lease 失效。concurrency_state: monotonic authorization generation 用于识别并使 stale decisions/leases 失效，约束并发授权状态与旧租约。'
+  evidence_gap: null
+- id: Storage
+  scores:
+    change_surface: 5
+    coupling: 5
+    irreversibility: 5
+    concurrency_state: 5
+  path_line: 01-system-architecture/component-interactions.md:241
+  quote: '- Cross-component multi-record workflows use durable state machines/outbox or equivalent recoverable protocol; no assumption of a distributed ACID transaction across all components.'
+  evidence:
+  - path_line: 01-system-architecture/component-interactions.md:241
+    quote: '- Cross-component multi-record workflows use durable state machines/outbox or equivalent recoverable protocol; no assumption of a distributed ACID transaction across all components.'
+    supports: 'change_surface: Storage 需要承载跨组件、多记录 workflow，而非单一存储操作。coupling: 多组件状态必须通过 durable state machines/outbox 或等效协议协调。concurrency_state: recoverable protocol 和 durable state machine 约束跨组件操作及故障恢复状态。'
+  - path_line: 02-domain-model/lifecycle-model.md:197
+    quote: '- `SuppressionCommitted` is the canonical linearization event: the tombstone, ForgetFence generation and operation/outbox record must be durably committed together. After that point, cancellation/rollback cannot remove the fence or restore ordinary access.'
+    supports: 'irreversibility: SuppressionCommitted 后 cancellation/rollback 不能移除 fence 或恢复普通访问，明确规定不可逆的状态边界。concurrency_state: tombstone、ForgetFence generation 和 operation/outbox record 必须共同持久化提交，并以 canonical linearization event 确定状态顺序。coupling: 多类记录必须原子协调提交。'
+  evidence_gap: null
 
 statuses:
   ac3: CONFIRMED_BY_COORDINATOR

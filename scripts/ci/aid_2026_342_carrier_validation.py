@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import argparse
 import re
+import shlex
+import subprocess
 import sys
 import unicodedata
 from pathlib import Path
@@ -25,6 +27,7 @@ RISK_IDS = {f"R-{i:02d}" for i in range(1, 11)}
 MODULE_IDS = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "Storage"}
 DIMENSIONS = {"change_surface", "coupling", "irreversibility", "concurrency_state"}
 VALID_EVIDENCE_STATES = {"PATH_LINE", "NO_EVIDENCE_FOUND", "PENDING_SEARCH_EXECUTION"}
+R11_TIMEOUT_SECONDS = 30
 
 STATUS_VALUES = {
     "ac3": {"CONFIRMED_BY_COORDINATOR"},
@@ -186,6 +189,279 @@ def validate_source_evidence(
     return errors
 
 
+def validate_no_evidence_search(
+    risk: dict[str, Any],
+    object_id: str,
+    root: Path | None,
+) -> list[str]:
+    """R11: NO_EVIDENCE_FOUND must be backed by a fresh zero-hit git grep.
+
+    R8/R9/R10 validate source evidence only when a path_line is present, so a
+    declaration of NO_EVIDENCE_FOUND skipped every evidence check. This rule
+    closes that fail-open path: the recorded search is re-executed, and the
+    declaration is accepted only when the constrained command reports no hits.
+    """
+    if risk.get("evidence_state") != "NO_EVIDENCE_FOUND":
+        return []
+
+    command = risk.get("search_command")
+    if not isinstance(command, str) or not command.strip():
+        return [
+            issue(
+                "R11_B_VARIANT_REQUIRES_ZERO_HITS",
+                object_id,
+                "search_command must be a non-empty git grep command",
+            )
+        ]
+
+    if root is None or not root.is_dir():
+        return [
+            issue(
+                "R11_B_VARIANT_REQUIRES_ZERO_HITS",
+                object_id,
+                "repository root is required to rerun search_command",
+            )
+        ]
+
+    try:
+        argv = shlex.split(command, posix=True)
+    except ValueError as exc:
+        return [
+            issue(
+                "R11_B_VARIANT_REQUIRES_ZERO_HITS",
+                object_id,
+                f"search_command cannot be parsed: {exc}",
+            )
+        ]
+
+    if len(argv) < 6 or argv[:2] != ["git", "grep"]:
+        return [
+            issue(
+                "R11_B_VARIANT_REQUIRES_ZERO_HITS",
+                object_id,
+                "only a constrained git grep command is permitted",
+            )
+        ]
+
+    # Split the command into options/pattern/revision and pathspecs.
+    if argv.count("--") != 1:
+        return [
+            issue(
+                "R11_B_VARIANT_REQUIRES_ZERO_HITS",
+                object_id,
+                "git grep command must contain exactly one -- path separator",
+            )
+        ]
+
+    separator = argv.index("--")
+    before_paths = argv[2:separator]
+    paths = argv[separator + 1:]
+
+    if not paths:
+        return [
+            issue(
+                "R11_B_VARIANT_REQUIRES_ZERO_HITS",
+                object_id,
+                "git grep command must specify at least one repository-relative path",
+            )
+        ]
+
+    allowed_options = {"-n", "-i", "-E"}
+    options: list[str] = []
+    cursor = 0
+
+    while cursor < len(before_paths) and before_paths[cursor] in allowed_options:
+        options.append(before_paths[cursor])
+        cursor += 1
+
+    if "-n" not in options:
+        return [
+            issue(
+                "R11_B_VARIANT_REQUIRES_ZERO_HITS",
+                object_id,
+                "git grep must use -n so matching output can be counted by line",
+            )
+        ]
+
+    if cursor >= len(before_paths):
+        return [
+            issue(
+                "R11_B_VARIANT_REQUIRES_ZERO_HITS",
+                object_id,
+                "git grep command is missing its search pattern",
+            )
+        ]
+
+    pattern = before_paths[cursor]
+    if not pattern or pattern.startswith("-"):
+        return [
+            issue(
+                "R11_B_VARIANT_REQUIRES_ZERO_HITS",
+                object_id,
+                "git grep search pattern is invalid",
+            )
+        ]
+    cursor += 1
+
+    # Permit at most one explicit revision. Do not permit arbitrary git options
+    # or revision expressions from the data file.
+    remaining = before_paths[cursor:]
+    if len(remaining) > 1:
+        return [
+            issue(
+                "R11_B_VARIANT_REQUIRES_ZERO_HITS",
+                object_id,
+                "only one optional full commit SHA or HEAD revision is permitted",
+            )
+        ]
+
+    if remaining and re.fullmatch(r"(?:[0-9a-fA-F]{40}|HEAD)", remaining[0]) is None:
+        return [
+            issue(
+                "R11_B_VARIANT_REQUIRES_ZERO_HITS",
+                object_id,
+                "revision must be a full 40-character commit SHA or HEAD",
+            )
+        ]
+
+    # Reject absolute paths, parent traversal, and option-like pathspecs.
+    for path in paths:
+        candidate = Path(path)
+        if (
+            not path
+            or path.startswith("-")
+            or candidate.is_absolute()
+            or ".." in candidate.parts
+        ):
+            return [
+                issue(
+                    "R11_B_VARIANT_REQUIRES_ZERO_HITS",
+                    object_id,
+                    f"unsafe repository path in git grep command: {path!r}",
+                )
+            ]
+
+    try:
+        result = subprocess.run(
+            argv,
+            cwd=root,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=R11_TIMEOUT_SECONDS,
+            shell=False,
+            check=False,
+        )
+    except subprocess.TimeoutExpired:
+        return [
+            issue(
+                "R11_B_VARIANT_REQUIRES_ZERO_HITS",
+                object_id,
+                f"git grep exceeded {R11_TIMEOUT_SECONDS}-second timeout",
+            )
+        ]
+    except OSError as exc:
+        return [
+            issue(
+                "R11_B_VARIANT_REQUIRES_ZERO_HITS",
+                object_id,
+                f"git grep could not be executed: {exc}",
+            )
+        ]
+
+    output_lines = result.stdout.splitlines()
+    hit_count = len(output_lines)
+
+    if result.stderr.strip():
+        return [
+            issue(
+                "R11_B_VARIANT_REQUIRES_ZERO_HITS",
+                object_id,
+                f"git grep wrote to stderr: {result.stderr.strip()}",
+            )
+        ]
+
+    # git grep returns 1 with empty stdout for the ordinary no-match case.
+    if result.returncode == 1 and hit_count == 0:
+        return []
+
+    # A successful git grep invocation must have produced at least one
+    # numbered matching line. A zero exit code with empty output is treated
+    # as an inconsistent command result, not silently accepted as no hits.
+    if result.returncode == 0 and hit_count == 0:
+        return [
+            issue(
+                "R11_B_VARIANT_REQUIRES_ZERO_HITS",
+                object_id,
+                "git grep exited 0 but produced no numbered matching lines",
+            )
+        ]
+
+    if result.returncode == 0 and hit_count > 0:
+        return [
+            issue(
+                "R11_B_VARIANT_REQUIRES_ZERO_HITS",
+                object_id,
+                f"search returned {hit_count} matching lines; expected zero",
+            )
+        ]
+
+    return [
+        issue(
+            "R11_B_VARIANT_REQUIRES_ZERO_HITS",
+            object_id,
+            f"git grep failed with exit code {result.returncode}",
+        )
+    ]
+
+
+def validate_module_dimension_coverage(
+    module: dict[str, Any],
+    module_id: str,
+) -> list[str]:
+    """R12: every module dimension must be named in evidence or evidence_gap.
+
+    R6 accepts a module whose path_line parses or whose gap starts with
+    EVIDENCE_GAP:, so "two dimensions evidenced, one left blank" and "no
+    evidence at all" were indistinguishable. Each dimension must therefore be
+    named either by an evidence[*].supports entry or by the evidence_gap.
+    """
+    errors: list[str] = []
+
+    evidence = module.get("evidence")
+    if not isinstance(evidence, list):
+        evidence = []
+
+    supports_texts = [
+        item.get("supports")
+        for item in evidence
+        if isinstance(item, dict) and isinstance(item.get("supports"), str)
+    ]
+
+    gap = module.get("evidence_gap")
+    gap_text = gap if isinstance(gap, str) else ""
+
+    for dim in sorted(DIMENSIONS):
+        marker = re.compile(
+            rf"(?<![A-Za-z0-9_]){re.escape(dim)}\s*:"
+        )
+
+        supported = any(marker.search(text) for text in supports_texts)
+        explicitly_gapped = bool(marker.search(gap_text))
+
+        if not supported and not explicitly_gapped:
+            errors.append(
+                issue(
+                    "R12_MODULE_DIMENSION_COVERAGE",
+                    module_id,
+                    f"{dim} is neither named in evidence[*].supports nor evidence_gap",
+                )
+            )
+
+    return errors
+
+
 def validate(data: Any, root: Path | None = None) -> list[str]:
     errors: list[str] = []
 
@@ -252,6 +528,8 @@ def validate(data: Any, root: Path | None = None) -> list[str]:
                     evidence_id = f"{rid}.additional_evidence[{index}]"
                     errors.extend(validate_source_evidence(evidence, evidence_id, root))
 
+        errors.extend(validate_no_evidence_search(risk, rid, root))
+
     modules = data.get("modules")
     if not isinstance(modules, list):
         errors.append(issue("R4_MODULE_COVERAGE", "modules", "modules must be a list"))
@@ -265,6 +543,11 @@ def validate(data: Any, root: Path | None = None) -> list[str]:
         if not isinstance(module, dict):
             continue
         mid = str(module.get("id", "UNKNOWN"))
+
+        # R12 requires every scored dimension to be explicitly evidenced
+        # or explicitly identified as an evidence gap.
+        errors.extend(validate_module_dimension_coverage(module, mid))
+
         scores = module.get("scores")
         if not isinstance(scores, dict) or set(scores) != DIMENSIONS:
             errors.append(issue("R5_FOUR_DIMENSION_SCORES", mid,
@@ -339,7 +622,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     print("AID-2026-342 CARRIER CHECK PASS")
-    print("R1-R10: 10/10 structural and source-evidence rules satisfied")
+    print("R1-R12: 12/12 structural and source-evidence rules satisfied")
     return 0
 
 
