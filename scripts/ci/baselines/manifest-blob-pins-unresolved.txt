@@ -1,0 +1,5 @@
+# Stage-one unresolved manifest blob-pin baseline.
+# Each entry is an exact INCOMPLETE UNRESOLVED(<REASON_CODE>): ... output line.
+# Include only reproducible, classified unresolved declarations.
+# Do not include pure INCOMPLETE scan or execution failures.
+# Stage-one object-type probing does not emit GIT_OBJECT_MISSING.

@@ -126,9 +126,10 @@ class BlobPinsTest(unittest.TestCase):
                  "d_source_blobs:\n  - 'source.md: " + "1" * 40 + "'\n"),
         })
         code, out, err = self.run_gate()
-        self.assertEqual(code, 2, out + err)
-        self.assertIn("INCOMPLETE", out)
-        print(out.strip())
+        self.assertEqual(code, 1, out + err)
+        self.assertIn("INCOMPLETE UNRESOLVED(SOURCE_MISSING)", out)
+        self.assertIn("unresolved=1", out)
+        self.assertIn("incomplete=0", out)
 
     def test_prompt_sha256_and_byte_count_are_both_checked(self):
         data = b"prompt\n"
@@ -382,6 +383,41 @@ class BlobPinsTest(unittest.TestCase):
         self.assertNotIn("MISMATCH related_evidence[0].zh_cn_mirror", out)
         self.assertNotIn("MISMATCH related_evidence[0].en_mirror path=related-zh.md", out)
 
+    def test_existing_commit_oid_is_non_blob_and_not_a_pin(self):
+        data = b"committed source bytes\n"
+        source = commit_tree(self.root, {"payload.md": data})
+
+        candidate = commit_tree(self.root, {
+            "payload.md": data,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                self.manifest("payload.md", source),
+        })
+
+        code, out, err = self.run_gate(candidate)
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=0 ok=0 mismatch=0 path_missing=0 incomplete=0", out)
+        self.assertIn("verified=0 mismatch=0 path_missing=0 unresolved=0 non_blob=1 incomplete=0", out)
+        self.assertNotIn("MISMATCH", out)
+        self.assertNotIn("INCOMPLETE", out)
+
+    def test_existing_tree_oid_is_non_blob_and_not_a_pin(self):
+        data = b"committed source bytes\n"
+        source = commit_tree(self.root, {"payload.md": data})
+        tree_oid = git(self.root, "rev-parse", f"{source}^{{tree}}")
+
+        candidate = commit_tree(self.root, {
+            "payload.md": data,
+            "14-ai-development/work-items/AID-2026-900/manifest.yaml":
+                self.manifest("payload.md", tree_oid),
+        })
+
+        code, out, err = self.run_gate(candidate)
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=0 ok=0 mismatch=0 path_missing=0 incomplete=0", out)
+        self.assertIn("verified=0 mismatch=0 path_missing=0 unresolved=0 non_blob=1 incomplete=0", out)
+        self.assertNotIn("MISMATCH", out)
+        self.assertNotIn("INCOMPLETE", out)
+
 
 class UnboundBlobSha256Test(unittest.TestCase):
     """PR #1417 comment 7212343821: an unbound blob_sha256 is a violation."""
@@ -464,12 +500,18 @@ class UnboundBlobSha256Test(unittest.TestCase):
         code, out, err = self.run_gate()
         self.assertEqual(code, 1, out + err)
         self.assertIn(
-            "UNBOUND_BLOB_SHA256 manifest=14-ai-development/work-items/AID-2026-900/"
-            "manifest.yaml pointer=/measurement_basis/model_blob_sha256_lf "
+            "INCOMPLETE UNRESOLVED(UNBOUND): manifest=14-ai-development/"
+            "work-items/AID-2026-900/manifest.yaml "
+            "pointer=/measurement_basis/model_blob_sha256_lf "
             f"field=model_blob_sha256_lf declared={digest}",
             out,
         )
-        self.assertIn("unbound=1", out)
+        # An explicit declaration is a pin even when unbound, and it lands in
+        # the unresolved ledger only; it is not a PATH_MISSING.
+        self.assertIn(
+            "pins=1 ok=0 mismatch=0 path_missing=0 incomplete=0 unbound=1", out
+        )
+        self.assertIn("unresolved=1", out)
         self.assertNotIn("PATH_MISSING", out)
 
 

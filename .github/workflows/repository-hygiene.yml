@@ -96,12 +96,23 @@ jobs:
             exit 1
           fi
 
-      - name: Ratchet manifest blob pins
+      - name: Ratchet manifest blob-pin mismatches and missing paths
+        shell: bash
         run: |
+          set -euo pipefail
           python3 scripts/ci/gate_ratchet.py \
             --baseline scripts/ci/baselines/manifest-blob-pins.txt \
             --format schema \
-            --command "python3 scripts/ci/check_manifest_blob_pins.py --commit HEAD | sed -n '/^MISMATCH /p; /^PATH_MISSING /p; /^INCOMPLETE /p; /^UNBOUND_BLOB_SHA256 /p'"
+            --command "bash -c 'out=\$(python3 scripts/ci/check_manifest_blob_pins.py --commit HEAD 2>&1); rc=\$?; if [ \"\$rc\" -gt 1 ]; then printf \"%s\\n\" \"\$out\"; exit \"\$rc\"; fi; printf \"%s\\n\" \"\$out\" | sed -n \"/^MISMATCH /p; /^PATH_MISSING /p\"; exit 0'"
+
+      - name: Ratchet manifest blob-pin unresolved occurrences
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/ci/gate_ratchet.py \
+            --baseline scripts/ci/baselines/manifest-blob-pins-unresolved.txt \
+            --format schema \
+            --command "bash -c 'out=\$(python3 scripts/ci/check_manifest_blob_pins.py --commit HEAD 2>&1); rc=\$?; if [ \"\$rc\" -gt 1 ]; then printf \"%s\\n\" \"\$out\"; exit \"\$rc\"; fi; printf \"%s\\n\" \"\$out\" | sed -n \"/^INCOMPLETE UNRESOLVED(/p\"; exit 0'"
 
       - name: Self-check manifest blob pin verification
         run: python3 scripts/ci/test_check_manifest_blob_pins.py
@@ -112,6 +123,16 @@ jobs:
           python3 -m unittest \
             scripts/ci/test_resolve_manifest_blob_pin_base.py \
             scripts/ci/test_assert_manifest_blob_pin_negative.py
+
+      - name: Self-check source revision pointer verification
+        run: python3 scripts/test_check_source_revision_pointers.py
+
+      - name: Ratchet source revision pointers
+        run: |
+          python3 scripts/ci/gate_ratchet.py \
+            --baseline scripts/ci/baselines/source-revision-pointers.txt \
+            --format schema \
+            --command "bash -o pipefail -c 'python3 scripts/check_source_revision_pointers.py | sed -n -e \"/^STALE /p\" -e \"/^UNRESOLVED /p\" -e \"/^NON_BLOB_REFERENCE /p\" -e \"/^BAD_DEREFERENCE /p\"'"
 
       - name: Self-check the line-ending gate
         run: python3 scripts/test_check_line_endings.py
@@ -131,16 +152,6 @@ jobs:
 
       - name: Check that every test file is reachable from a workflow
         run: python3 scripts/ci/check_test_reachability.py
-
-      - name: Self-check source revision pointer verification
-        run: python3 scripts/test_check_source_revision_pointers.py
-
-      - name: Ratchet source revision pointers
-        run: |
-          python3 scripts/ci/gate_ratchet.py \
-            --baseline scripts/ci/baselines/source-revision-pointers.txt \
-            --format schema \
-            --command "bash -o pipefail -c 'python3 scripts/check_source_revision_pointers.py | sed -n -e \"/^STALE /p\" -e \"/^UNRESOLVED /p\" -e \"/^NON_BLOB_REFERENCE /p\" -e \"/^BAD_DEREFERENCE /p\"'"
 
       # Each listed file is unreachable by unittest discover; discovery here would silently run
       # nothing. The explicit list is the defect tracked by #834.
