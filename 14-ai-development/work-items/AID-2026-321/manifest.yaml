@@ -90,3 +90,26 @@ implementation:
     - "T21f isolated source-less mirror negative case"
     - "T21g inconsistent source-less metadata negative case"
     - "T21h source-absence reason without sentinel negative case"
+
+# Initial registration only:
+# permits this newly introduced Work Item to enter main before its
+# implementation commit is reachable from the target branch.
+prompt_file: "14-ai-development/work-items/AID-2026-321/prompt-v1.md"
+
+# SHA-256 of the exact prompt-v1.md bytes.
+# The checker independently recalculates this from both the head file
+# and the immutable Git blob.
+prompt_sha256: "a18b592d6b64abc4ccc034cb4c0d73524aaf43a37c02b8a2decfe4aab1e69ed1"
+
+# Git blob object ID of the exact same prompt-v1.md bytes.
+# This is a blob OID, not a commit SHA.
+prompt_file_blob_sha: "15b8bed751adda02e427b3584fb933ea9d541a59"
+
+# Explicitly declares this as the narrowly scoped first-registration state.
+prompt_commit_trace_initial_registration: true
+
+# IMPORTANT:
+# Do not add prompt_file_commit_sha here.
+# Do not add implementation.implementation_commit_sha here.
+# Do not add implementation.merge_commit_sha here.
+# The initial-registration exception rejects those pins.
