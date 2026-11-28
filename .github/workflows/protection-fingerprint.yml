@@ -1,0 +1,46 @@
+name: Protection fingerprint
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  protection-fingerprint:
+    name: Protection fingerprint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Run offline tests
+        working-directory: scripts/ci
+        run: python3 -m unittest -v test_check_protection_fingerprint
+
+      - name: Check live protection fingerprint
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          output_file="$(mktemp)"
+          trap 'rm -f "$output_file"' EXIT
+          set +e
+          python3 scripts/ci/check_protection_fingerprint.py \
+            --repo "${GITHUB_REPOSITORY}" \
+            --branch main 2>&1 | tee "$output_file"
+          checker_status=${PIPESTATUS[0]}
+          set -e
+          grep '^PROTECTION FINGERPRINT:' "$output_file" >> "$GITHUB_STEP_SUMMARY" || true
+          exit "$checker_status"
