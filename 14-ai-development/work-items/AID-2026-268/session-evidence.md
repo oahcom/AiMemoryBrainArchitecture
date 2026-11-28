@@ -67,13 +67,16 @@ Date: 2026-11-28
 
 ### Actual input and provenance
 
-Prompt ID: prompt-stage1
-Prompt version: v1
-Prompt snapshot: `14-ai-development/work-items/AID-2026-268/prompt-stage1.md`
-Prompt SHA-256: `70f131f95e3c63df99dd583a3e282b5bd86742dbf4b8ca4496dcfcc3598054ea`
-Prompt bytes: 24494
-Provenance: NOT_VERIFIED - the snapshot is the prompt as recorded by the
-operator, not a byte-for-byte platform export.
+Prompt ID: NOT_RECORDED
+Prompt version: NOT_RECORDED
+Prompt snapshot: NOT_RECORDED
+Prompt SHA-256: NOT_RECORDED
+Prompt bytes: NOT_RECORDED
+Provenance: NOT_RECORDED - the stage-one implementation prompt was not frozen
+as a committed snapshot. `scripts/ci/check_work_item_uniqueness.py` forbids an
+existing work item from gaining new tracked paths, so this session's prompt
+could not be added under AID-2026-268/ without violating that gate. The
+recorded values above are therefore state words, not digests.
 
 The task was to complete the stage-one classification and dual-ledger
 changes for the existing AID-2026-268 / Issue #1350 checker, retaining
