@@ -33,7 +33,9 @@ document_metadata:
     canonical_status: Non-Canonical
     canonical_scope: "Records the session provenance limits for AID-2026-327."
     canonical_scope_id: "ai-development/aid-2026-327-session-evidence"
-    canonical_scope_keywords: ["AID-2026-327", "session-evidence"]
+    canonical_scope_keywords:
+      - "AID-2026-327"
+      - "session-evidence"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
