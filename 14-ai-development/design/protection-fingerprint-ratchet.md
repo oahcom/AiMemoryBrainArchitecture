@@ -14,13 +14,14 @@ document_metadata:
       approval_applicability: Applicable-To-Current-Version
       evidence_reference:
         - "Live GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection payload, HTTP 200, 7813 bytes, 2026-11-27"
-        - "Schema v3 implementation and offline test suite"
+        - "Live GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main summary payload, observed 2026-11-27"
+        - "Schema v4 implementation and offline test suite"
         - "Initial baseline experiment: PR #1038, head b5cf4f2578de0e9aa2ba3e7e86a110ce1d8f69d9, run 138943464904"
       revocation: null
     evidence_verification:
       verification_status: Verified
       last_verified_date: "2026-11-27"
-      last_verification_note: "Schema v3 is based on the complete branch protection endpoint payload. The recorded fingerprint includes all 12 required fingerprint fields. The observed required_pull_request_reviews key is absent and is represented explicitly as null. The live required-status-check context set contains 16 entries."
+      last_verification_note: "Schema v4 records the complete 12-field /protection fingerprint and the three-field branch-summary fingerprint separately. The full endpoint's required_pull_request_reviews key is absent and is represented explicitly as null. Both endpoint context sets contain the same 16 entries."
     usage_status: Active
     modification_status: Modified
   authority:
@@ -37,47 +38,68 @@ document_metadata:
 
 ## 1. Purpose
 
-This document specifies a fail-closed fingerprint check for the repository's GitHub branch-protection configuration.
+This document specifies a two-endpoint fingerprint check for the repository's GitHub branch-protection configuration.
 
-The check reads the complete branch-protection endpoint, extracts a defined set of protection properties, and compares them with a repository-controlled baseline. It detects weakening, reports tightening, and rejects incomplete evidence rather than treating missing data as unchanged.
+The checker prefers the complete branch-protection endpoint. If the caller cannot read that endpoint because of an authorization or visibility response, `--endpoint auto` visibly degrades to the branch summary endpoint. The summary endpoint has a smaller evidence surface; the checker compares only its three independently baselined fields and explicitly reports the eleven full-endpoint fields it could not verify.
 
-The fingerprint is deliberately limited to the fields defined in schema version 3. A passing result establishes equality or tightening only for those fingerprinted fields; it is not a general certification of every GitHub security setting.
+The two endpoint fingerprints are separate evidence contracts. A summary value must never be substituted for, inferred as, or written into a full-endpoint field.
 
-## 2. API boundary and payload shape
+The check detects weakening, reports tightening, and rejects incomplete evidence rather than treating missing data as unchanged.
 
-The source of truth is:
+## 2. API boundary and endpoint selection
+
+### 2.1 Full endpoint
+
+The complete source is:
 
 `GET /repos/{owner}/{repo}/branches/{branch}/protection`
 
-The endpoint response is the protection object itself. It is not wrapped in a `protection` property, and it does not contain the summary endpoint's `protection.enabled` property.
+The response is the protection object itself. It is not wrapped in a `protection` property, and it does not contain the summary endpoint's `protection.enabled` property.
 
-The implementation reads fields directly from the response root. It must not require or synthesize either of these structures:
+The implementation reads fields directly from the response root. It must not require or synthesize:
 
 - `payload.protection`
 - `payload.protection.enabled`
 
-The live response calibrated on 2026-11-27 returned HTTP 200 and contained:
+### 2.2 Summary endpoint
 
-- `required_status_checks`
-- `required_signatures`
-- `enforce_admins`
-- `required_linear_history`
-- `allow_force_pushes`
-- `allow_deletions`
-- `block_creations`
-- `required_conversation_resolution`
-- `lock_branch`
-- `allow_fork_syncing`
+The summary source is:
 
-The `required_pull_request_reviews` key was absent from that response.
+`GET /repos/{owner}/{repo}/branches/{branch}`
 
-A request without `GITHUB_TOKEN` is incomplete. HTTP 403 and HTTP 404—including insufficient permission and non-administrator-token cases—are also incomplete outcomes. The checker reports the HTTP status and returns exit code `2`. It must never turn an authorization or not-found response into a passing result.
+The summary response exposes the branch's protection summary under `protection`. The checker reads only:
 
-## 3. Schema version 3 fingerprint
+- `protection.enabled`
+- `protection.required_status_checks.contexts`
+- `protection.required_status_checks.enforcement_level`
 
-The schema version is `3`. The fingerprint has exactly 12 top-level fields:
+The summary endpoint's contexts are normalized as a sorted set. It does not provide the other eleven fields in the full fingerprint.
 
-| Field | Source in endpoint payload | Type |
+### 2.3 Endpoint modes
+
+The CLI accepts:
+
+| Mode | Behavior |
+|---|---|
+| `--endpoint auto` | Default. Try `/protection` first; on HTTP 401, 403, or 404, use the branch summary endpoint. |
+| `--endpoint full` | Require the complete `/protection` endpoint. Any HTTP 401, 403, or 404 is incomplete evidence and returns exit code `2`. |
+| `--endpoint summary` | Force the branch summary endpoint; do not request `/protection`. |
+
+In `auto` mode, HTTP 401, 403, and 404 are the only statuses that trigger summary fallback. Other HTTP statuses, transport failures, invalid JSON, and incomplete payloads return exit code `2`.
+
+A missing `GITHUB_TOKEN` is not rejected before making the full request in `auto` mode. The request is made without an Authorization header. GitHub may return HTTP 401; that status triggers the same visible summary fallback as 403 or 404. In `full` mode, a missing token returns exit code `2`.
+
+Fallback does not mean the full check passed. It means the run obtained a smaller but useful evidence set and explicitly reports that reduced coverage.
+
+## 3. Schema version 4
+
+The baseline uses schema version `4` and contains two separate fingerprint objects.
+
+### 3.1 Full fingerprint
+
+`fingerprint` contains exactly the twelve schema-v3 fields. Their meanings and direction rules are unchanged.
+
+| Field | Source in `/protection` response | Type |
 |---|---|---|
 | `strict` | `required_status_checks.strict` | Boolean |
 | `contexts` | `required_status_checks.contexts` | List of unique non-empty strings |
@@ -92,41 +114,59 @@ The schema version is `3`. The fingerprint has exactly 12 top-level fields:
 | `allow_fork_syncing` | `allow_fork_syncing.enabled` | Boolean |
 | `required_pull_request_reviews` | Root property, when present | Object or explicit `null` for absence |
 
-The `contexts` value is normalized as a sorted set for comparison. API response ordering does not affect the fingerprint. Duplicate or empty context names make the payload incomplete.
+The `contexts` value is normalized as a sorted set. Duplicate or empty context names make the payload incomplete.
 
-For the boolean values, the relevant source object and its `enabled` property must exist and have the expected type. `strict` must exist as a boolean under `required_status_checks`.
+For boolean values, the source object and its `enabled` property must exist and have the expected type. `strict` must exist as a boolean under `required_status_checks`.
 
-### 3.1 Required pull-request reviews: presence is data
+### 3.2 Summary fingerprint
 
-`required_pull_request_reviews` has a three-part contract:
+`summary_fingerprint` contains exactly three fields:
 
-1. If the key is absent from the endpoint response, the fingerprint value is `null`.
-2. If the key is present, its value must be an object and the object is recorded.
-3. If the key is present with `null` or a non-object value, the live payload is incomplete.
+| Field | Source in branch summary response | Type |
+|---|---|---|
+| `enabled` | `protection.enabled` | Boolean |
+| `contexts` | `protection.required_status_checks.contexts` | List of unique non-empty strings |
+| `enforcement_level` | `protection.required_status_checks.enforcement_level` | One of `off`, `non_admins`, `everyone` |
 
-Absence is not treated as a missing required field. It is an explicit state of the endpoint and is stored in the baseline as JSON `null`.
+The calibrated summary baseline is:
 
-When present, the object is retained as a JSON-compatible object and serialized with stable key ordering. This records `required_approving_review_count` and other returned review-policy properties rather than reducing the object to a single boolean.
+- `enabled`: `true`
+- `contexts`: the same normalized 16-entry context set recorded in `fingerprint.contexts`
+- `enforcement_level`: `everyone`
 
-### 3.2 Fail-closed completeness
+The two `contexts` values are stored separately because they come from different endpoint responses. They must not be merged or treated as a single shared field.
 
-If a field represented in the baseline is missing from the live payload, has an invalid type, or cannot be normalized, the result is `INCOMPLETE` with exit code `2`.
+`enforcement_level` uses this explicit ordering:
 
-A baseline that does not contain all 12 fields, contains invalid field types, or has invalid experiment metadata is also incomplete.
+| Value | Rank |
+|---|---:|
+| `off` | 0 |
+| `non_admins` | 1 |
+| `everyone` | 2 |
+
+An unknown or missing enforcement level is incomplete evidence and returns exit code `2`. The checker must not guess a rank for an unrecognized value.
+
+### 3.3 Baseline completeness
+
+Both `fingerprint` and `summary_fingerprint` must exist in every schema-v4 baseline and must contain exactly their defined fields.
+
+A missing section, missing field, extra field, invalid type, duplicate context, invalid enforcement level, or incomplete experiment metadata makes the baseline incomplete and returns exit code `2`.
+
+This requirement applies even when a particular run selects only one endpoint. A full-only run does not excuse a missing summary baseline, and a summary-only run does not excuse a missing full baseline.
 
 The checker must not:
 
-- infer a missing value from the baseline;
+- infer a missing value from the other endpoint;
 - substitute a default boolean;
 - treat a missing object as `false`;
 - treat a present `null` review object as equivalent to an absent key;
-- interpret a failed API request as an unchanged configuration.
+- interpret a failed API request as an unchanged configuration;
+- use `strict` as a substitute for `enforcement_level`;
+- use `protection.enabled` as a substitute for any full fingerprint field.
 
 ## 4. Direction rules
 
-Each field has an explicit direction rule. No field may fall through to an implicit default classification.
-
-### 4.1 Boolean fields
+### 4.1 Full fingerprint boolean fields
 
 The protective polarity is fixed as follows:
 
@@ -145,9 +185,7 @@ The protective polarity is fixed as follows:
 
 A value change toward the protective value is `TIGHTENED`; a value change away from it is `LOOSENED`. Equal values are `UNCHANGED`.
 
-This polarity is applied symmetrically. For example, changing `allow_deletions` from `true` to `false` is tightening, while changing it from `false` to `true` is loosening. Likewise, changing `required_signatures` from `true` to `false` is loosening.
-
-### 4.2 Required contexts
+### 4.2 Full fingerprint contexts
 
 Let \(B\) be the baseline set and \(C\) the current set.
 
@@ -162,30 +200,92 @@ Adding contexts without removing existing contexts is tightening. Removing any b
 
 ### 4.3 Required pull-request reviews
 
-| Baseline | Current | Direction |
-|---|---|---|
-| Absent (`null`) | Absent (`null`) | `UNCHANGED` |
-| Absent (`null`) | Present object | `TIGHTENED` |
-| Present object | Absent (`null`) | `LOOSENED` |
-| Same present object | Same present object | `UNCHANGED` |
-| Present object with lower approving-review count | Higher count | `TIGHTENED` |
-| Present object with higher approving-review count | Lower count | `LOOSENED` |
+`required_pull_request_reviews` has a three-part contract:
 
-For changes to a present review object other than a comparable integer `required_approving_review_count` change, the checker conservatively reports `LOOSENED`. This prevents an unrecognized or ambiguous object mutation from being silently accepted as safe. The complete object is still printed and retained in the fingerprint, so the change remains visible for review.
+1. If the key is absent from the full endpoint response, the fingerprint value is `null`.
+2. If the key is present, its value must be an object and the object is recorded.
+3. If the key is present with `null` or a non-object value, the live payload is incomplete.
 
-### 4.4 Overall result
+Absence is an explicit state and is stored in the baseline as JSON `null`.
 
-The overall classification follows these rules:
+When present, the object is retained as a JSON-compatible object and serialized with stable key ordering. The checker recognizes the monotonic direction of an integer `required_approving_review_count` change. An increase is tightening and a decrease is loosening. Other mutations to a present review object are conservatively classified as loosening.
 
-- If any field is `LOOSENED`, the overall result is loosening and exit code is `1`.
-- If no field is loosened and at least one field is `TIGHTENED`, the overall result is tightening and exit code is `0`.
-- If every field is `UNCHANGED`, the overall result is unchanged and exit code is `0`.
+### 4.4 Summary `enabled`
+
+For `summary_fingerprint.enabled`:
+
+- `true` to `false` is `LOOSENED`.
+- `false` to `true` is `TIGHTENED`.
+- Equal values are `UNCHANGED`.
+
+### 4.5 Summary contexts
+
+Summary contexts use the same set-direction rule as full contexts:
+
+- no change is `UNCHANGED`;
+- pure additions are `TIGHTENED`;
+- any removal, including a mixed addition/removal, is `LOOSENED`.
+
+### 4.6 Summary enforcement level
+
+The summary enforcement direction follows the rank table in section 3.2:
+
+- a rank increase is `TIGHTENED`;
+- a rank decrease is `LOOSENED`;
+- equal ranks are `UNCHANGED`;
+- an unknown value is incomplete and returns exit code `2`.
+
+### 4.7 Overall result
+
+For either endpoint comparison:
+
+- If any comparable field is `LOOSENED`, the run returns exit code `1`.
+- If no field is loosened and at least one field is `TIGHTENED`, the run returns exit code `0`.
+- If every comparable field is `UNCHANGED`, the run returns exit code `0`.
 
 Tightening never cancels loosening in another field.
 
-Every tightening must produce a visible notice that the fingerprint baseline should be reviewed and synchronized. The checker does not silently rewrite the baseline during an ordinary comparison.
+Every tightening must produce a visible notice that the corresponding baseline should be reviewed and synchronized. The checker does not silently rewrite the baseline during an ordinary comparison.
 
-## 5. CLI and exit-code contract
+## 5. Visible degraded-mode contract
+
+When `auto` receives HTTP 401, 403, or 404 from `/protection`, it must:
+
+1. Print an explicit degraded-mode diagnostic identifying the full-endpoint HTTP status.
+2. Request the branch summary endpoint.
+3. Validate and compare all three summary fields against `summary_fingerprint`.
+4. Print one `FIELD` direction line for each of `enabled`, `contexts`, and `enforcement_level`.
+5. Print exactly eleven `UNVERIFIABLE` lines in this fixed order:
+
+   1. `strict`
+   2. `required_signatures`
+   3. `enforce_admins`
+   4. `required_linear_history`
+   5. `allow_force_pushes`
+   6. `allow_deletions`
+   7. `block_creations`
+   8. `required_conversation_resolution`
+   9. `lock_branch`
+   10. `allow_fork_syncing`
+   11. `required_pull_request_reviews`
+
+Each line has this form:
+
+`UNVERIFIABLE <field> (requires Administration read on /protection)`
+
+The run also prints a note naming the full-baseline fields not re-verified in this run:
+
+`NOTE: baseline fields not re-verified this run: ...`
+
+The final line is exactly:
+
+`PROTECTION FINGERPRINT: DEGRADED MODE — 3 field(s) verifiable, 11 unverifiable`
+
+A degraded run is not automatically a failure. If the three summary fields are unchanged or tightened, exit code is `0`. If any summary field is loosened, exit code is `1`. If the summary request or summary payload is incomplete, exit code is `2`.
+
+The degraded result must never be described as a successful verification of the twelve full-endpoint fields.
+
+## 6. CLI and exit-code contract
 
 Implementation:
 
@@ -196,7 +296,8 @@ Supported arguments:
 - `--repo`: repository in `owner/name` form; defaults to `oahcom/AiMemoryBrainArchitecture`.
 - `--branch`: branch name; defaults to `main`.
 - `--fingerprint`: baseline path; defaults to `scripts/ci/baselines/protection-fingerprint.json`.
-- `--write`: explicitly write a new baseline from the live payload.
+- `--endpoint`: one of `auto`, `full`, or `summary`; defaults to `auto`.
+- `--write`: explicitly update the selected endpoint's baseline section.
 - `--experiment-pr`
 - `--experiment-head`
 - `--experiment-run`
@@ -208,29 +309,43 @@ Exit codes:
 
 | Exit code | Meaning |
 |---|---|
-| `0` | All fields unchanged or at least one field tightened, with no loosening |
-| `1` | One or more fields loosened |
-| `2` | Missing token, HTTP/API error, incomplete live payload, invalid baseline, missing write metadata, or unexpected checker error |
+| `0` | Comparable fields are unchanged or tightened, with no loosening |
+| `1` | One or more comparable fields are loosened |
+| `2` | Missing required evidence, non-fallback API error, invalid baseline, incomplete payload, missing write metadata, or unexpected checker error |
 
-The checker prints one line for each fingerprint field:
+`--endpoint full` never falls back. HTTP 401, 403, or 404 returns exit code `2`.
 
-`FIELD <name>: recorded=<x> live=<y> DIRECTION=<UNCHANGED|LOOSENED|TIGHTENED>`
+`--endpoint summary` requests only the summary endpoint.
 
-The final comparison summary is:
+`--endpoint auto` first requests the full endpoint and falls back only for HTTP 401, 403, or 404. A transport error or another HTTP status is not a fallback condition.
 
-`PROTECTION FINGERPRINT: <n> field(s) changed, <m> loosened, <k> tightened`
-
-Each `TIGHTENED` field also produces a baseline synchronization notice.
-
-HTTP 403 and HTTP 404 must remain distinguishable in the error message and must both return exit code `2`. Neither status may be interpreted as an empty configuration or a pass.
-
-## 6. Baseline and experiment provenance
+## 7. Baseline writes and provenance
 
 The baseline is stored at:
 
 `scripts/ci/baselines/protection-fingerprint.json`
 
-It uses schema version `3` and records all 12 fields.
+Schema version `4` records:
+
+- `fingerprint`: the complete twelve-field `/protection` baseline;
+- `summary_fingerprint`: the independent three-field branch-summary baseline;
+- `experiment`: provenance metadata.
+
+Both sections are mandatory.
+
+`--write` updates only the section corresponding to the endpoint used:
+
+| Effective endpoint | Section updated | Section preserved |
+|---|---|---|
+| Full success | `fingerprint` | `summary_fingerprint` |
+| Forced summary | `summary_fingerprint` | `fingerprint` |
+| Auto fallback | `summary_fingerprint` | `fingerprint` |
+
+The unselected section's JSON value must remain unchanged. In particular, a degraded write must not clear, replace, synthesize, or otherwise modify any of the twelve full-fingerprint values.
+
+A write requires the complete existing schema-v4 baseline. It must not bootstrap a missing section from the live endpoint or from the other section.
+
+The writer uses deterministic JSON serialization, sorted object keys, normalized context ordering, a trailing newline, and atomic replacement. Repeating a write with the same selected live payload and experiment metadata must produce byte-identical output.
 
 The initial experiment provenance is retained from the earlier baseline experiment:
 
@@ -243,13 +358,9 @@ The initial experiment provenance is retained from the earlier baseline experime
 | Experiment observation | HTTP 405 for required status check `rust-workspace-test` |
 | PR disposition | Closed, unmerged |
 
-The schema-v3 fingerprint values are calibrated from the complete endpoint payload observed on 2026-11-27. The absent `required_pull_request_reviews` key is stored explicitly as `null`.
+Baseline changes must remain explicit, reviewable, deterministic, and tied to recorded experiment provenance.
 
-Baseline writes are explicit operations. The writer uses deterministic JSON serialization, sorted object keys, normalized context ordering, a trailing newline, and an atomic replacement. Repeating a write with the same live payload and the same experiment metadata must produce byte-identical output.
-
-A baseline update must be reviewable as a repository change. Normal comparison must never update the baseline.
-
-## 7. CI execution and tests
+## 8. CI execution and tests
 
 The offline test suite is:
 
@@ -262,35 +373,58 @@ cd scripts/ci
 python -m unittest -v test_check_protection_fingerprint
 ```
 
-Tests inject a `payload_fetcher` and cover field-level direction rules, absent/present review-object semantics, incomplete data, HTTP failures, CLI write requirements, and deterministic baseline writing.
+Tests inject both endpoint fetchers. They cover the full-field direction rules, summary-field direction rules, endpoint selection, fallback HTTP statuses, unknown enforcement values, baseline completeness, preservation of the unselected baseline section, write requirements, and deterministic output.
 
 The scheduled workflow is:
 
 `.github/workflows/protection-fingerprint.yml`
 
-It runs on pushes to `main`, on its daily schedule, and through manual dispatch. It does not run on `pull_request` events.
+It runs on pushes to `main`, on its daily schedule, and through manual dispatch. It does not run on `pull_request` events and is not a required status check.
 
-The workflow uses `secrets.GITHUB_TOKEN` as its API credential. That token may not have the Administration read permission required by the complete branch-protection endpoint. In that case, the API can return HTTP 403 and the checker correctly exits `2`.
+The workflow uses `secrets.GITHUB_TOKEN`. Its normal permission set does not grant Administration read access to `/protection`, so the expected run may be degraded. The checker output's final `PROTECTION FINGERPRINT:` line is copied into `$GITHUB_STEP_SUMMARY`. The workflow preserves the checker exit status: a detected loosening remains a failing run, while an unchanged degraded comparison can pass with its coverage gap explicitly visible.
 
-### 7.1 Why this gate is not enforced on pull requests
+## 9. Why degrade instead of fail
 
-The owner has decided that this gate is not a pull-request enforcement check. This is an explicit operating boundary, not an indication that the checker is optional or that its fail-closed behavior should be weakened.
+The default workflow credential is `GITHUB_TOKEN`. Under the current permission model, it cannot obtain Administration read access to the complete `/protection` endpoint. The following eleven fields are therefore permanently unverifiable through that credential:
 
-Three deployment choices have different costs:
+- `strict`
+- `required_signatures`
+- `enforce_admins`
+- `required_linear_history`
+- `allow_force_pushes`
+- `allow_deletions`
+- `block_creations`
+- `required_conversation_resolution`
+- `lock_branch`
+- `allow_fork_syncing`
+- `required_pull_request_reviews`
 
-1. **Run on pull requests and make the check required using a manually provisioned PAT.** The PAT would need the necessary Administration read permission and secure provisioning, rotation, and ownership. This creates an additional long-lived credential dependency in the PR merge path.
-2. **Run on pull requests using the default `GITHUB_TOKEN` and fall back to the summary branch endpoint.** The summary endpoint does not expose the complete set of fields fingerprinted by schema v3. Such a fallback would silently reduce the coverage and assurance of the check.
-3. **Run the complete-endpoint check only on the daily schedule, main pushes, and manual dispatch.** This accepts a low-frequency detection interval for a low-frequency configuration surface and avoids making PR mergeability depend on an additional privileged credential.
+The summary endpoint still exposes three useful fields: `protection.enabled`, `required_status_checks.contexts`, and `required_status_checks.enforcement_level`. Failing every scheduled run solely because the workflow credential cannot read the full endpoint would discard this available evidence. Silently treating the summary as the full fingerprint would overstate what was verified.
 
-The selected policy is the third choice. Branch protection is expected to change infrequently, and daily observation is considered sufficient for this control. The complete endpoint and schema-v3 fingerprint remain intact; there is no summary-endpoint fallback.
+The selected behavior is visible degradation:
 
-The workflow deliberately has no `pull_request` trigger and its job is not a required status check. It therefore does not block any pull request.
+1. Try the full endpoint first.
+2. On HTTP 401, 403, or 404, query the summary endpoint.
+3. Compare its three fields with the independent `summary_fingerprint` baseline.
+4. Print the eleven `UNVERIFIABLE` lines and the note naming the unverified full-baseline fields.
+5. End with the explicit degraded-mode summary showing three verifiable and eleven unverifiable fields.
 
-An HTTP 403 from `/protection` when using `secrets.GITHUB_TOKEN` is an expected possible credential-provisioning state: the token lacks Administration read access. It indicates that the scheduled workflow could not obtain the required evidence. It does not, by itself, establish that branch protection has drifted or been weakened. In particular, **a red workflow caused by HTTP 403 is not proof of configuration drift**.
+This makes the coverage gap part of the run's ordinary output and GitHub Actions summary. A green degraded run means only that the three summary fields were not loosened. It does not mean that the eleven full-endpoint fields were checked or unchanged.
 
-The workflow writes this distinction to `$GITHUB_STEP_SUMMARY` on each run. The checker itself remains fail-closed: it returns `INCOMPLETE` with exit code `2` for HTTP 403, rather than converting an authorization failure into a pass. The operational decision not to make this workflow a required PR check does not change the checker's evidence contract.
+If an Administration-read PAT is provisioned for this workflow, the operator must deliberately switch the invocation to:
 
-## 8. Declared check context versus platform-required contexts
+```bash
+python3 scripts/ci/check_protection_fingerprint.py \
+  --repo "${GITHUB_REPOSITORY}" \
+  --branch main \
+  --endpoint full
+```
+
+The switch must be recorded as evidence in the same reviewed change that provisions or references the credential. That evidence must identify the credential's intended permission scope without disclosing its value, the workflow/configuration change selecting `--endpoint full`, the approving change or PR, and a successful full-endpoint run showing all twelve field comparisons. This is necessary because changing the endpoint mode changes the evidence contract and removes the explicit degraded-mode warning; an unrecorded switch could make a workflow appear to have complete coverage without demonstrating that the credential can actually read the endpoint.
+
+The workflow remains non-required and has no `pull_request` trigger. Degraded operation is an observability policy, not a PR merge gate.
+
+## 10. Declared check context versus platform-required contexts
 
 The repository's declared check-context inventory is maintained in:
 
@@ -300,7 +434,7 @@ Its `declared-check-contexts` list contains 17 entries, including:
 
 `Protection fingerprint`
 
-The live platform `required_status_checks.contexts` set currently contains 16 entries. `Protection fingerprint` is not configured as a required platform status check and is intentionally not being made required under the owner decision in section 7.1.
+The live platform `required_status_checks.contexts` set currently contains 16 entries. `Protection fingerprint` is not configured as a required platform status check and is intentionally not being made required.
 
 These counts describe different contracts:
 
@@ -311,84 +445,84 @@ These counts describe different contracts:
 
 Therefore, the declaration may contain 17 entries while platform branch protection currently requires 16. The presence of `Protection fingerprint` in the declaration does not mean GitHub enforces it as a required status check. Its declaration records the workflow's check context and producer contract; it does not opt the check into PR merge enforcement.
 
-## 9. Boundary with Repository hygiene
+## 11. Boundary with Repository hygiene
 
 The protection fingerprint and Repository hygiene checks have separate responsibilities.
 
-The fingerprint check compares selected live branch-protection settings with a repository-controlled baseline.
+The fingerprint check compares selected live branch-protection settings with repository-controlled full and summary baselines.
 
 Repository hygiene checks repository content and governance requirements, including document metadata and manifest consistency.
 
 Neither check substitutes for the other:
 
-- A passing fingerprint check does not establish repository document or manifest compliance.
+- A passing full fingerprint check does not establish repository document or manifest compliance.
+- A passing degraded summary check establishes only the three summary fields and does not establish that the eleven full-endpoint fields are unchanged.
 - A passing Repository hygiene check does not establish that live branch protection has not been weakened.
 - A declared workflow context does not establish that GitHub requires that context.
 
 The fingerprint check must not weaken or bypass Repository hygiene requirements.
 
-## 10. Known blind spots and residual risks
+## 12. Known blind spots and residual risks
 
-### 10.1 Endpoint scope
+### 12.1 Endpoint scope
 
-The fingerprint covers the 12 schema-v3 fields defined in section 3. It does not claim to cover every setting that GitHub may expose through other endpoints or administrative interfaces.
+The full fingerprint covers the twelve schema-v4 full-endpoint fields. The summary fingerprint covers only the three summary fields. Neither claims to cover every setting that GitHub may expose through other endpoints or administrative interfaces.
 
-A passing result is evidence only about the recorded fields in the complete branch-protection endpoint response.
+A full-mode passing result is evidence about the twelve recorded full fields. A degraded-mode passing result is evidence only about the three recorded summary fields.
 
-### 10.2 Review-object direction
+### 12.2 Review-object direction
 
-The complete `required_pull_request_reviews` object is retained and compared. The implementation recognizes the monotonic direction of `required_approving_review_count`. Other object mutations are conservatively classified as loosening because their direction cannot safely be inferred from an unreviewed generic JSON difference.
+The complete `required_pull_request_reviews` object is retained and compared in full mode. The implementation recognizes the monotonic direction of `required_approving_review_count`. Other object mutations are conservatively classified as loosening because their direction cannot safely be inferred from an unreviewed generic JSON difference.
 
-This may produce a conservative loosening classification for a review-object change that is in fact more restrictive. Such a result requires human review; it must not be silently downgraded to unchanged.
+### 12.3 Required-context producer identity
 
-### 10.3 Required-context producer identity
-
-The fingerprint compares required context names as a set. The endpoint's `checks` entries also include app IDs, but schema version 3 does not include those app IDs in its 12-field fingerprint.
+Both fingerprints compare required context names as sets. The full endpoint's `checks` entries also include app IDs, but schema version 4 does not include those app IDs in either fingerprint.
 
 A context name that remains unchanged while its producing GitHub App identity changes is outside the current fingerprint's detection scope.
 
-### 10.4 Self-enforcement gap
+### 12.4 Self-enforcement gap
 
 The protection fingerprint workflow is intentionally not a required PR check. Its declaration in the 17-entry context inventory does not make it platform-required.
 
 The scheduled workflow provides recurring observation while it remains enabled and executable. It does not eliminate the risk that the workflow, schedule, permissions, or platform access is disabled or removed.
 
-The daily schedule also creates a detection interval: a protection change may not be observed until the next successful scheduled run. This interval is an accepted consequence of the owner decision not to introduce a privileged PAT into the PR merge path.
+The daily schedule also creates a detection interval: a protection change may not be observed until the next successful scheduled run. Degraded runs further leave the eleven full-endpoint fields unverified.
 
-### 10.5 API and credential availability
+### 12.5 API and credential availability
 
-API outages, rate limits, permission changes, token scope changes, HTTP 403, HTTP 404, transport errors, and response-shape changes can prevent a complete comparison.
+API outages, rate limits, permission changes, token scope changes, transport errors, and response-shape changes can prevent a comparison.
 
-All such conditions must fail closed with exit code `2`. In particular, an authorization failure must never be interpreted as proof that the configuration is unchanged.
+Only HTTP 401, 403, and 404 from the full endpoint trigger automatic summary fallback. Other HTTP statuses and transport errors return exit code `2`. A failure of the summary request or an incomplete summary payload also returns exit code `2`.
 
-A 403 caused by the default workflow token lacking Administration read access is an expected credential limitation under the current deployment. It is not evidence of configuration drift, and the workflow is not a required check.
+The degraded-mode output must not be suppressed or summarized as a full success. The eleven `UNVERIFIABLE` lines and final degraded-mode line are mandatory evidence of reduced coverage.
 
-### 10.6 Baseline governance
+### 12.6 Baseline governance
 
 A baseline is only as trustworthy as the process that admits changes to it. An unauthorized or inadequately reviewed baseline replacement can make a weakened configuration appear unchanged.
 
-Baseline changes must remain explicit, reviewable, deterministic, and tied to recorded experiment provenance.
+The two baseline sections must remain endpoint-specific. Updating one section must preserve the other section's values. A partial write must never convert unverified data into a new baseline.
 
-## 11. Acceptance criteria
+## 13. Acceptance criteria
 
 The implementation is acceptable when:
 
-1. It reads the complete `/branches/{branch}/protection` endpoint and treats the response root as the protection object.
-2. It fingerprints all 12 schema-v3 fields.
-3. It records an absent `required_pull_request_reviews` property as explicit JSON `null`.
-4. It rejects a present review property with a non-object value.
-5. It rejects any missing or mistyped baseline-recorded live field with exit code `2`.
-6. It rejects an incomplete baseline with exit code `2`.
-7. It returns exit code `2` for missing credentials and HTTP 403/404, preserving the HTTP status in the diagnostic.
-8. It applies explicit protective polarity to every boolean field.
-9. It classifies context removal and mixed context changes as loosening, and pure additions as tightening.
-10. It classifies review-object absence/presence and approving-review-count changes as specified.
-11. It prints a field-level direction line for each of the 12 fields and a final summary.
-12. It emits a baseline synchronization notice for every tightened field.
-13. It requires all four experiment arguments for `--write`.
-14. It writes deterministic, byte-identical baseline output for repeated writes of the same payload and metadata.
-15. Its offline tests use an injected payload fetcher and perform no network requests.
-16. Its tests detect mutations that remove loosening detection, remove the tightening notice, or allow HTTP 403 to pass.
+1. It supports `--endpoint auto`, `--endpoint full`, and `--endpoint summary`, with `auto` as the default.
+2. `auto` tries `/branches/{branch}/protection` first and falls back only for HTTP 401, 403, or 404.
+3. `full` never falls back and returns exit code `2` for HTTP 401, 403, or 404.
+4. `summary` calls only `/branches/{branch}`.
+5. The schema-v4 baseline requires both endpoint-specific sections and all fields in each section.
+6. The full fingerprint retains the twelve schema-v3 fields and their existing direction rules.
+7. The summary fingerprint contains `enabled`, `contexts`, and `enforcement_level`.
+8. Summary enforcement uses the ordered values `off`, `non_admins`, and `everyone`; unknown values return exit code `2`.
+9. Degraded mode compares all three summary fields and returns exit code `1` for any loosening.
+10. Degraded mode prints the eleven `UNVERIFIABLE` lines in the specified order and the baseline non-verification note.
+11. Degraded mode ends with `PROTECTION FINGERPRINT: DEGRADED MODE — 3 field(s) verifiable, 11 unverifiable`.
+12. A missing token in auto mode can trigger HTTP 401 fallback; a missing token in full mode returns exit code `2`.
+13. Full writes update only `fingerprint`; summary and degraded writes update only `summary_fingerprint`.
+14. A write preserves the unselected fingerprint section's JSON value.
+15. The baseline writer is deterministic and atomic.
+16. The offline tests inject fetchers and perform no network requests.
 17. The workflow has no `pull_request` trigger and is not a required status check.
-18. The workflow records the expected meaning of HTTP 403 in the job summary.
-19. Documentation distinguishes the 17 declared contexts from the 16 currently platform-required contexts and does not claim that `Protection fingerprint` is required by branch protection.
+18. The workflow copies the checker's final `PROTECTION FINGERPRINT:` line into `$GITHUB_STEP_SUMMARY` and preserves the checker exit status.
+19. The documentation distinguishes the 17 declared contexts from the 16 currently platform-required contexts.
+20. A future switch to an Administration-read PAT and `--endpoint full` is recorded in a reviewed change and supported by a successful full-endpoint run.

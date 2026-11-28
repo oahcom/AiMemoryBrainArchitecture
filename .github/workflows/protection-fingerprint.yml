@@ -28,15 +28,19 @@ jobs:
         working-directory: scripts/ci
         run: python3 -m unittest -v test_check_protection_fingerprint
 
-      - name: Explain credential provisioning status
-        shell: bash
-        run: |
-          echo "HTTP 403 on /protection means GITHUB_TOKEN lacks Administration read; it is a credential provisioning state, not configuration drift. This workflow is not a required check and blocks no pull request." >> "$GITHUB_STEP_SUMMARY"
-
       - name: Check live protection fingerprint
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
         run: |
+          set -euo pipefail
+          output_file="$(mktemp)"
+          trap 'rm -f "$output_file"' EXIT
+          set +e
           python3 scripts/ci/check_protection_fingerprint.py \
             --repo "${GITHUB_REPOSITORY}" \
-            --branch main
+            --branch main 2>&1 | tee "$output_file"
+          checker_status=${PIPESTATUS[0]}
+          set -e
+          grep '^PROTECTION FINGERPRINT:' "$output_file" >> "$GITHUB_STEP_SUMMARY" || true
+          exit "$checker_status"

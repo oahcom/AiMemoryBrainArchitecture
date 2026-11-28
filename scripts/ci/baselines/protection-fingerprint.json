@@ -36,5 +36,27 @@
     "required_signatures": false,
     "strict": true
   },
-  "schema_version": 3
+  "schema_version": 4,
+  "summary_fingerprint": {
+    "contexts": [
+      "BMCP conformance suite (hard gate)",
+      "BMCP protocol index (hard gate)",
+      "Bilingual docs coverage (ratchet)",
+      "Branch freshness vs base",
+      "GOV-DOC-001 structural checks",
+      "GOV-DOC-002 metadata checks",
+      "Repository hygiene (hard gate)",
+      "Rust clippy (hard gate)",
+      "Rust doctests (hard gate)",
+      "Rust format (hard gate)",
+      "Schema non-empty audit (hard gate)",
+      "Session Evidence",
+      "Session Evidence self-test (base)",
+      "Session Evidence self-test (head)",
+      "audit",
+      "rust-workspace-test"
+    ],
+    "enabled": true,
+    "enforcement_level": "everyone"
+  }
 }
