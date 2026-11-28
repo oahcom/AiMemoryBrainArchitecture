@@ -1,3 +1,35 @@
+---
+document_metadata:
+  steward: "Architecture Governance"
+  domain: ai-development
+  role: normative-standard
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      approved_version: null
+      approval_date: null
+      approval_scope: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      verification_reference: null
+    usage_status: Active
+    modification_status: Unchanged
+    supersession: null
+    archival: null
+  authority:
+    canonical_status: Candidate
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Normative
+  bilingual_counterpart: "policy.zh-CN.md"
+---
+```
+
 # Work-item Registry Migration Policy
 
 **Version:** 1.1  
@@ -384,4 +416,3 @@ The migration script in Stage C does not generate or modify INDEX. INDEX project
 ```text
 scripts/ci/generate_work_item_index.py
 scripts/ci/check_work_item_index.py
-```
