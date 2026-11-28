@@ -365,6 +365,10 @@ jobs:
         run: python3 scripts/test_check_work_item_manifest_schema.py
       - name: Test legacy ledger builder
         run: python -m pytest -q scripts/test_build_legacy_ledger.py
+      - name: Test the stage-1 manifest autofiller
+        run: python -m pytest -q scripts/test_autofill_work_item_manifests.py
+      - name: Test the stage-2 proposal applier
+        run: python -m pytest -q scripts/test_apply_manifest_proposals.py
       - name: Enforce manifest schema and legacy ratchet
         run: python scripts/ci/check_work_item_manifest_schema.py --tree HEAD --baseline "14-ai-development/reports/work-item-manifest-ac4-baseline.json"
       - name: Report all four historical cohort migration batches
