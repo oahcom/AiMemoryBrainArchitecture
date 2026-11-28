@@ -66,7 +66,8 @@ documentation:
     description: Work-item registry index entry.
 
 session_evidence:
-  - implementing_ai_session: "6b0a1bf9-0474-83ec-bb98-ceeb26101261"
+  - role: implementing_ai_session
+    implementing_ai_session: "6b0a1bf9-0474-83ec-bb98-ceeb26101261"
     session_reference_status: RECORDED
     session_evidence_ref: "14-ai-development/work-items/AID-2026-345/session-evidence.md"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-345/prompt-v1.md"

@@ -10,11 +10,11 @@ Each record must satisfy all of the following validity rules:
 4. `repin_commit` is a valid full commit SHA and is an ancestor of the commit being verified.
 5. Records for the same `(manifest, field, path)` form a continuous history, and the target commit's pin equals the latest recorded `new_pin`.
 
+## Rebase correction
+
+The original `repin_commit` value identified the pre-squash branch commit `6045af65fcc2e89d1895e09ed666af4d737203bf`, which is not an ancestor of the current `main` history. PR #1512 was integrated by squash, producing the single-parent commit `2ab66153dbcdd8a8f2d68d234914751a748a8f74` on `main`. That commit's first-parent state contains the two `4470` declarations, and the squash commit contains the corresponding `4412` declarations. The ledger anchors are corrected to identify the commit that actually carries those transitions in `main`; the two records retain their original manifest, field, path, `previous_pin`, and `new_pin` meanings.
+
 | manifest | field | path | previous_pin | new_pin | repin_commit |
 |---|---|---|---|---|---|
 |14-ai-development/work-items/AID-2026-101/manifest.yaml|session_evidence[0].executed_prompt_snapshot_file|14-ai-development/work-items/AID-2026-101/prompt-v1.md|4470|4412|2ab66153dbcdd8a8f2d68d234914751a748a8f74|
 |14-ai-development/work-items/AID-2026-102/manifest.yaml|session_evidence[0].executed_prompt_snapshot_file|14-ai-development/work-items/AID-2026-102/prompt-v1.md|4470|4412|2ab66153dbcdd8a8f2d68d234914751a748a8f74|
-
-## Rebase correction
-
-The original `repin_commit` value identified the pre-squash branch commit `6045af65fcc2e89d1895e09ed666af4d737203bf`, which is not an ancestor of the current `main` history. PR #1512 was integrated by squash, producing the single-parent commit `2ab66153dbcdd8a8f2d68d234914751a748a8f74` on `main`. That commit's first-parent state contains the two `4470` declarations, and the squash commit contains the corresponding `4412` declarations. The ledger anchors are corrected to identify the commit that actually carries those transitions in `main`; the two records retain their original manifest, field, path, `previous_pin`, and `new_pin` meanings.
