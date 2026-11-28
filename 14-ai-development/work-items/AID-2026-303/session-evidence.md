@@ -52,7 +52,7 @@ document_metadata:
 
 Implementation specification and repository governance session for Issue #1267.
 
-## Actual user input
+## Actual AI input
 
 The user supplied:
 

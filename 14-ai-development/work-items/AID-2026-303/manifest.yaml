@@ -75,7 +75,7 @@ session_evidence:
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-303/prompt-v1.md"
     executed_prompt_sha256: "3be160b2b1197339f9ef8e4a1f260d74f6fcf96ea51c0ae0114be5f33e6e64ae"
     executed_prompt_bytes: 6695
-    executed_prompt_provenance: "User-provided takeover instructions captured verbatim as prompt-v1.md; the snapshot is the instruction used for the takeover, cherry-picks, bilingual mirror re-derivation, scanner verification, and evidence update."
+    executed_prompt_provenance: "VERIFIED"
     session_reference_status: "RECORDED"
 implementation:
   status: IN_PROGRESS
