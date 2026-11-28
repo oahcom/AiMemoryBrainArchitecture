@@ -1,3 +1,33 @@
+---
+document_metadata:
+  steward: "user-authorized operator (delegated by account owner)"
+  domain: ai-development
+  role: reference
+  lifecycle:
+    approval:
+      decision_status: Draft
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "The complete prompt snapshot, including this document metadata block, is recorded and must be verified against its final Git blob using the digest and byte count stored in the work-item manifest."
+    usage_status: Active
+    modification_status: Unchanged
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Executed prompt snapshot for AID-2026-293"
+    canonical_scope_id: "ai-development/aid-2026-293-prompt-v1"
+    canonical_scope_keywords:
+      - "prompt-snapshot"
+      - "body-digest"
+    canonical_conflict_status: None
+    normative_status: Informative
+# prompt_id: AID-2026-293-PROMPT
+# version: 1
+# payload_encoding: UTF-8
+# digest_algorithm: SHA-256
+# digest_scope: "Exact bytes of the entire file, including this front matter and all prompt content; nothing is excluded."
+---
+
 # RED-1478 第 1 次投递：PR #1478 五个红项的可执行修复正文
 
 你是仓库 `oahcom/AiMemoryBrainArchitecture` 治理裁决者。我是执行方（RED-1478 子会话），只做机械转录：你给的正文我逐字落盘，不改写、不补全、不翻译。凡需要判断/设计/取舍的地方都由你定。
