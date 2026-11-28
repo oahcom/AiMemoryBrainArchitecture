@@ -165,7 +165,8 @@ implementation:
 
 session_evidence:
   - role: IMPLEMENTER
-    issue_refs: ["#1469"]
+    issue_refs:
+      - "#1469"
     implementing_ai_session: GPT6_SESSION_20261127_AID2026326
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-326/prompt-v1.md
     executed_prompt_sha256: afc8e732df2de2eb29e22b21b05558c395c1b2ee1ee2c4ddeca5e3744ba39e91
