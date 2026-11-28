@@ -126,8 +126,45 @@ ratchet: FAIL - 4 new failure(s) above baseline.
 The baseline file is byte-unchanged. The red light is a newly discovered real
 violation, not a baseline drift and not a test regression.
 
+## Integration after main advanced to b333ad1c
+
+While this branch was open, main advanced from `a0500d519` to
+`b333ad1cf0e86992621d41cc1dac87eb3141353c`, which repaired most historical
+mismatches and added `scripts/ci/assert_manifest_blob_pin_negative.py`, an
+exact-equality assertion over the immutable negative sample `9a2063ae`.
+
+That sample also carries the same four unbound declarations, so the new class
+changes its evidence. The assertion was updated rather than loosened:
+
+```
+main=9a2063ae1fa5d905b3817cd4eddba065a06daa73 manifests=108 pins=172 ok=82 mismatch=86 path_missing=0 incomplete=0 unbound=4
+NEGATIVE_ASSERTION_PASS: immutable sample rejected; manifests=108 pins=172 ok=82 mismatch=86 path_missing=0 incomplete=0 unbound=4
+```
+
+The pinned summary moves from `pins=168 … incomplete=0` to `pins=172 … unbound=4`,
+and `EXPECTED_UNBOUND = 4` makes the count of unbound lines exact as well. Its
+seven tests still pass.
+
+On the merged head the ratchet reads:
+
+```
+ratchet: baseline=4 current=8 regressions=4 fixed=0
+ratchet: FAIL - 4 new failure(s) above baseline.
+```
+
+`main` at `b333ad1c` scans as:
+
+```
+main=b333ad1cf0e86992621d41cc1dac87eb3141353c manifests=146 pins=256 ok=248 mismatch=2 path_missing=2 incomplete=0 unbound=4
+```
+
+Four unbound findings, one manifest, unchanged by the merge.
+
 ## Boundary
 
 No baseline entry was added or edited. No other workflow, branch protection,
 ruleset or required context was changed. No merge is claimed. PR #1426 and its
-branch were not touched.
+branch were not touched. The base was merged into this branch (a merge commit,
+not a rebase, not a force push) only because a conflicted PR produces no
+`refs/pull/<n>/merge` ref and therefore triggers no `pull_request` workflow at
+all; the first head `8918d2ea` produced zero check runs for that reason.

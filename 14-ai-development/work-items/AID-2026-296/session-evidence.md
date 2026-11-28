@@ -109,6 +109,13 @@ ratchet: baseline=15 current=19 regressions=4 fixed=0
 ratchet: FAIL - 4 new failure(s) above baseline.
 ```
 
+Main later advanced to `b333ad1c`, which added
+`scripts/ci/assert_manifest_blob_pin_negative.py` — an exact-equality assertion
+over the immutable negative sample `9a2063ae`. That sample carries the same four
+unbound declarations, so its pinned summary was moved to `pins=172 … unbound=4`
+with `EXPECTED_UNBOUND = 4`, tightening the count instead of relaxing it. On the
+merged head the ratchet reads `baseline=4 current=8 regressions=4`.
+
 ## Boundary
 
 No force push, no rebase, no merge, no edit to the primary worktree, no edit to

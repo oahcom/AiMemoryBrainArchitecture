@@ -14,8 +14,8 @@ COMMIT = "9a2063ae1fa5d905b3817cd4eddba065a06daa73"
 
 SUMMARY = (
     "main=9a2063ae1fa5d905b3817cd4eddba065a06daa73 "
-    "manifests=108 pins=168 ok=82 mismatch=86 "
-    "path_missing=0 incomplete=0"
+    "manifests=108 pins=172 ok=82 mismatch=86 "
+    "path_missing=0 incomplete=0 unbound=4"
 )
 
 
@@ -58,6 +58,10 @@ class NegativeAssertionTests(unittest.TestCase):
         lines.extend(
             f"print('MISMATCH fixture-{i} path=file-{i} declared=old actual=new')"
             for i in range(86)
+        )
+        lines.extend(
+            f"print('UNBOUND_BLOB_SHA256 manifest=m{i} pointer=/p/f field=f declared=d')"
+            for i in range(4)
         )
         lines.append("sys.exit(1)")
         return "\n".join(lines) + "\n"

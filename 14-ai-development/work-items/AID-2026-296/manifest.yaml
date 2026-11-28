@@ -55,6 +55,17 @@ scope:
         Keep every existing test and add the four required cases: bound and
         matching, bound and mismatched (MISMATCH), bound with an absent target
         (PATH_MISSING), and a digest with no path (UNBOUND_BLOB_SHA256, exit 1).
+    - path: "scripts/ci/assert_manifest_blob_pin_negative.py"
+      detail: >-
+        The immutable negative sample now also yields four unbound findings, so
+        its pinned summary moves to pins=172 and gains unbound=4, and the
+        assertion additionally requires exactly four UNBOUND_BLOB_SHA256 lines.
+        The check stays exact-equality; nothing is loosened.
+    - path: "scripts/ci/test_assert_manifest_blob_pin_negative.py"
+      detail: >-
+        Fixture summary follows the new shape and the valid fixture emits four
+        UNBOUND_BLOB_SHA256 lines, so the seven negative-assertion tests keep
+        exercising the exact-equality path.
     - path: ".github/workflows/repository-hygiene.yml"
       detail: >-
         Add /^UNBOUND_BLOB_SHA256 /p to the sed filter of the existing ratchet
@@ -105,10 +116,15 @@ implementation:
     field. On main a0500d519 this adds four findings, all in
     AID-2026-001.measurement_basis, and the ratchet reports 15 baseline items
     against 19 current, so the existing hard gate turns red on a real,
-    previously excluded violation. The baseline was not touched.
+    previously excluded violation. The baseline was not touched. After merging
+    main b333ad1c the immutable negative sample 9a2063ae also yields four
+    unbound findings, so its exact-equality expectation moved to pins=172 with
+    unbound=4 and now requires exactly four UNBOUND_BLOB_SHA256 lines.
   files_changed:
     - "scripts/ci/check_manifest_blob_pins.py"
     - "scripts/ci/test_check_manifest_blob_pins.py"
+    - "scripts/ci/assert_manifest_blob_pin_negative.py"
+    - "scripts/ci/test_assert_manifest_blob_pin_negative.py"
     - ".github/workflows/repository-hygiene.yml"
     - "14-ai-development/work-items/AID-2026-296/manifest.yaml"
     - "14-ai-development/work-items/AID-2026-296/evidence.md"
@@ -121,3 +137,4 @@ implementation:
     - "Bound blob_sha256 whose target is absent: PATH_MISSING, exit 1."
     - "Digest with no path: UNBOUND_BLOB_SHA256, exit 1."
     - "All 13 pre-existing blob-pin tests still pass (17 total)."
+    - "Immutable negative sample 9a2063ae: NEGATIVE_ASSERTION_PASS with exactly 4 UNBOUND_BLOB_SHA256 lines; its 7 tests pass."
