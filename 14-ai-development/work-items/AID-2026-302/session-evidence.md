@@ -92,3 +92,15 @@ blob-pin gate change, for Issue #1350, on a delegated task.
 - No check that the 93 declarations are *semantically* the right ones beyond
   the scope rules in `evidence.md` §1; where the scope could not be fixed, the
   declaration is `BLOCKED` rather than guessed.
+
+## Actual AI input
+
+NOT_AVAILABLE
+
+The platform did not expose a verifiable verbatim prompt transcript for this session. The file `14-ai-development/work-items/AID-2026-302/prompt-v1.md` is explicitly a structured transcription of the three dispatch turns, not a verified byte-for-byte capture of the original input; its provenance therefore remains NOT_VERIFIED.
+
+## AI-visible output
+
+NOT_RECORDED
+
+A verbatim AI-visible response/output transcript was not retained in the session record. The numbered actions above are a retrospective work record, not a claim to reproduce the original model output. The measured checker results and declaration-by-declaration evidence are recorded separately in `14-ai-development/work-items/AID-2026-302/evidence.md`.
