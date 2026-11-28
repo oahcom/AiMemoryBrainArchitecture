@@ -1,38 +1,8 @@
 """Fail-closed verification of Git blob identities declared in manifests.
 
-This module deliberately has no GitHub or HTTP dependencies. The caller
-supplies an indexed commit tree, a blob-byte reader, and, when historical
-source pins are present, an exact-commit tree resolver.
-
-Binding rules
--------------
-
-Git SHA-1 fields:
-    root_blob                 -> root
-    blob                      -> path
-    en_mirror_blob            -> en_mirror
-    zh_cn_mirror_blob         -> zh_cn_mirror
-    reconstructed_root_blob   -> root
-    evidence_blob             -> evidence_file
-
-SHA-256 fields:
-    prompt_sha256             -> prompt_file
-    executed_prompt_sha256    -> executed_prompt_snapshot_file
-
-Other *_blob fields bind to their same-prefix path key.
-Other *_sha256 fields bind to their same-prefix *_file key.
-
-Historical list form:
-    baseline_and_source_evidence:
-      d_source_commit: "<exact commit SHA>"
-      d_source_blobs:
-        - "path/to/file: <40-hex Git blob SHA>"
-
-Only d_source_blobs has a historical-source exemption. Its sibling
-d_source_commit is mandatory and must resolve to a complete commit tree.
-
-A declared pin is never silently skipped. A path-only declaration, a
-digest-only declaration, an unresolved path, or a mismatched digest fails.
+Parser-observed scalar spans are internal metadata. Their coordinates are
+half-open Python-str character offsets into the original UTF-8 source text.
+They are deliberately not part of the public BlobPin contract.
 """
 
 from __future__ import annotations
@@ -67,11 +37,36 @@ class BlobPinDiagnostic:
 
 
 class _LocatedStr(str):
-    """A parsed scalar carrying its parser-observed source line."""
+    """A scalar carrying its parser-observed line and source character span."""
 
-    def __new__(cls, value: str, line: Optional[int] = None):
+    def __new__(
+        cls,
+        value: str,
+        line: Optional[int] = None,
+        start: Optional[int] = None,
+        end: Optional[int] = None,
+    ):
         instance = super().__new__(cls, value)
         instance.line = line
+        instance.start = start
+        instance.end = end
+        return instance
+
+
+class _LocatedInt(int):
+    """An integer scalar carrying its source span for *_bytes reanchoring."""
+
+    def __new__(
+        cls,
+        value: int,
+        line: Optional[int] = None,
+        start: Optional[int] = None,
+        end: Optional[int] = None,
+    ):
+        instance = super().__new__(cls, value)
+        instance.line = line
+        instance.start = start
+        instance.end = end
         return instance
 
 
@@ -87,7 +82,15 @@ class BlobPin:
     line: Optional[int] = None
 
 
-# Explicit bindings take precedence over suffix-derived bindings.
+@dataclass(frozen=True)
+class _PinRecord:
+    """Private pin metadata; never exposed through BlobPin."""
+
+    pin: BlobPin
+    start: Optional[int]
+    end: Optional[int]
+
+
 _EXPLICIT_BINDINGS = {
     "root_blob": ("root", "sha1"),
     "blob": ("path", "sha1"),
@@ -108,7 +111,7 @@ _SHA256_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 
 
 def _strip_comment(value: str) -> str:
-    """Remove a YAML comment without treating quoted # as a comment."""
+    """Remove a YAML comment while preserving quoted # characters."""
     quote = None
     escaped = False
 
@@ -116,16 +119,13 @@ def _strip_comment(value: str) -> str:
         if escaped:
             escaped = False
             continue
-
         if quote == '"' and char == "\\":
             escaped = True
             continue
-
         if quote is not None:
             if char == quote:
                 quote = None
             continue
-
         if char in ("'", '"'):
             quote = char
         elif char == "#" and (
@@ -136,8 +136,8 @@ def _strip_comment(value: str) -> str:
     return value.rstrip()
 
 
-def _split_mapping_pair(value: str) -> tuple[str, str]:
-    """Split one YAML mapping pair at its first structural colon."""
+def _split_mapping_pair(value: str) -> tuple[str, str, int]:
+    """Return key, stripped value, and value's character offset in value."""
     quote = None
     escaped = False
 
@@ -145,35 +145,35 @@ def _split_mapping_pair(value: str) -> tuple[str, str]:
         if escaped:
             escaped = False
             continue
-
         if quote == '"' and char == "\\":
             escaped = True
             continue
-
         if quote is not None:
             if char == quote:
                 quote = None
             continue
-
         if char in ("'", '"'):
             quote = char
             continue
-
         if char == ":" and (
-            index + 1 == len(value)
-            or value[index + 1].isspace()
+            index + 1 == len(value) or value[index + 1].isspace()
         ):
             key = value[:index].strip()
-            remainder = value[index + 1:].strip()
+            raw_value_start = index + 1
+            while (
+                raw_value_start < len(value)
+                and value[raw_value_start].isspace()
+            ):
+                raw_value_start += 1
+            raw_end = len(value.rstrip())
+            remainder = value[raw_value_start:raw_end]
 
             if not key:
                 raise BlobPinError("empty YAML mapping key")
 
-            return key, remainder
+            return key, remainder, raw_value_start
 
-    raise BlobPinError(
-        f"expected YAML mapping pair, got {value!r}"
-    )
+    raise BlobPinError(f"expected YAML mapping pair, got {value!r}")
 
 
 def _flow_skip_space(text: str, index: int) -> int:
@@ -183,13 +183,12 @@ def _flow_skip_space(text: str, index: int) -> int:
 
 
 def _flow_quoted_end(text: str, index: int) -> int:
-    """Return the index just past a quoted flow scalar."""
+    """Return the index just past a single- or double-quoted token."""
     quote = text[index]
     cursor = index + 1
 
     while cursor < len(text):
         char = text[cursor]
-
         if quote == '"':
             if char == "\\":
                 cursor += 2
@@ -202,7 +201,6 @@ def _flow_quoted_end(text: str, index: int) -> int:
                     cursor += 2
                     continue
                 return cursor + 1
-
         cursor += 1
 
     raise BlobPinError(
@@ -210,66 +208,88 @@ def _flow_quoted_end(text: str, index: int) -> int:
     )
 
 
-def _parse_flow_node(text: str, index: int, line=None):
-    """Parse one flow node: a collection, a quoted or a plain scalar."""
+def _parse_flow_node(
+    text: str,
+    index: int,
+    line: Optional[int] = None,
+    base_offset: int = 0,
+):
+    """Parse one flow node and propagate its absolute source character base."""
     index = _flow_skip_space(text, index)
 
     if index >= len(text):
-        raise BlobPinError(
-            f"truncated YAML flow collection: {text!r}"
-        )
+        raise BlobPinError(f"truncated YAML flow collection: {text!r}")
 
     char = text[index]
 
     if char == "[":
-        return _parse_flow_sequence(text, index, line)
-
+        return _parse_flow_sequence(text, index, line, base_offset)
     if char == "{":
-        return _parse_flow_mapping(text, index, line)
+        return _parse_flow_mapping(text, index, line, base_offset)
 
     if char in ("'", '"'):
         end = _flow_quoted_end(text, index)
-        return _scalar(text[index:end], line), end
+        return (
+            _scalar(
+                text[index:end],
+                line,
+                base_offset + index,
+                base_offset + end,
+            ),
+            end,
+        )
 
     start = index
-
     while index < len(text):
         char = text[index]
-
         if char in ",]}":
             break
-
         if char in "[{":
-            raise BlobPinError(
-                f"invalid YAML flow scalar: {text!r}"
-            )
-
+            raise BlobPinError(f"invalid YAML flow scalar: {text!r}")
         index += 1
 
-    raw = text[start:index].strip()
+    raw_end = index
+    while raw_end > start and text[raw_end - 1].isspace():
+        raw_end -= 1
+    while start < raw_end and text[start].isspace():
+        start += 1
 
+    raw = text[start:raw_end]
     if not raw:
         raise BlobPinError(f"empty YAML flow scalar: {text!r}")
 
-    return _scalar(raw, line), index
+    return (
+        _scalar(
+            raw,
+            line,
+            base_offset + start,
+            base_offset + raw_end,
+        ),
+        index,
+    )
 
 
-def _parse_flow_sequence(text: str, index: int, line=None):
+def _parse_flow_sequence(
+    text: str,
+    index: int,
+    line=None,
+    base_offset: int = 0,
+):
     result = []
     index += 1
 
     while True:
         index = _flow_skip_space(text, index)
-
         if index >= len(text):
             raise BlobPinError(
                 f"unterminated YAML flow sequence: {text!r}"
             )
-
         if text[index] == "]":
             return result, index + 1
 
-        item, index = _parse_flow_node(text, index, line)
+        item, index = _parse_flow_node(
+            text, index, line, base_offset
+        )
         result.append(item)
         index = _flow_skip_space(text, index)
 
@@ -277,43 +297,46 @@ def _parse_flow_sequence(text: str, index: int, line=None):
             raise BlobPinError(
                 f"unterminated YAML flow sequence: {text!r}"
             )
-
         if text[index] == ",":
             index += 1
             continue
-
         if text[index] == "]":
             return result, index + 1
-
         raise BlobPinError(
             f"invalid YAML flow sequence separator: {text!r}"
         )
 
 
-def _parse_flow_mapping(text: str, index: int, line=None):
+def _parse_flow_mapping(
+    text: str,
+    index: int,
+    line=None,
+    base_offset: int = 0,
+):
     result = {}
     index += 1
 
     while True:
         index = _flow_skip_space(text, index)
-
         if index >= len(text):
             raise BlobPinError(
                 f"unterminated YAML flow mapping: {text!r}"
             )
-
         if text[index] == "}":
             return result, index + 1
 
-        key, index = _parse_flow_key(text, index, line)
+        key, index = _parse_flow_key(
+            text, index, line, base_offset
+        )
         index = _flow_skip_space(text, index)
-        value, index = _parse_flow_node(text, index, line)
+        value, index = _parse_flow_node(
+            text, index, line, base_offset
+        )
 
         if key in result:
             raise BlobPinError(
                 f"duplicate key in YAML flow mapping: {key!r}"
             )
-
         result[key] = value
         index = _flow_skip_space(text, index)
 
@@ -321,22 +344,23 @@ def _parse_flow_mapping(text: str, index: int, line=None):
             raise BlobPinError(
                 f"unterminated YAML flow mapping: {text!r}"
             )
-
         if text[index] == ",":
             index += 1
             continue
-
         if text[index] == "}":
             return result, index + 1
-
         raise BlobPinError(
             f"invalid YAML flow mapping separator: {text!r}"
         )
 
 
-def _parse_flow_key(text: str, index: int, line=None):
+def _parse_flow_key(
+    text: str,
+    index: int,
+    line=None,
+    base_offset: int = 0,
+):
     index = _flow_skip_space(text, index)
-
     if index >= len(text):
         raise BlobPinError(
             f"unterminated YAML flow mapping: {text!r}"
@@ -344,87 +368,95 @@ def _parse_flow_key(text: str, index: int, line=None):
 
     if text[index] in ("'", '"'):
         end = _flow_quoted_end(text, index)
-        key = _scalar(text[index:end], line)
+        key = _scalar(
+            text[index:end],
+            line,
+            base_offset + index,
+            base_offset + end,
+        )
         index = _flow_skip_space(text, end)
-
         if index >= len(text) or text[index] != ":":
             raise BlobPinError(
                 f"expected ':' in YAML flow mapping: {text!r}"
             )
-
         return key, index + 1
 
     start = index
-
     while index < len(text) and text[index] not in ":,{}[]":
         index += 1
-
     if index >= len(text) or text[index] != ":":
         raise BlobPinError(
             f"expected ':' in YAML flow mapping: {text!r}"
         )
 
-    key = text[start:index].strip()
+    key_end = index
+    while key_end > start and text[key_end - 1].isspace():
+        key_end -= 1
+    while start < key_end and text[start].isspace():
+        start += 1
+    key = text[start:key_end]
 
     if not key:
         raise BlobPinError(
             f"empty YAML flow mapping key: {text!r}"
         )
-
     return key, index + 1
 
 
-def _parse_flow_collection(value: str, line=None):
-    """Parse a YAML flow collection with a tokenizer and recursive descent.
+def _parse_flow_collection(
+    value: str,
+    line=None,
+    start: Optional[int] = None,
+):
+    """Parse a flow collection with recursive absolute-offset propagation."""
+    if start is None:
+        raise BlobPinError(
+            "flow collection source offset is unavailable"
+        )
 
-    Standard library only: no third-party YAML runtime is imported. Nested
-    collections, single- and double-quoted scalars, and plain scalars are
-    supported. Malformed input, duplicate keys and illegal separators fail
-    closed; a flow collection is never downgraded to an ordinary string.
-    """
-    node, index = _parse_flow_node(value, 0, line)
-
+    node, index = _parse_flow_node(value, 0, line, start)
     if _flow_skip_space(value, index) != len(value):
         raise BlobPinError(
             f"trailing content after YAML flow collection: {value!r}"
         )
-
     if not isinstance(node, (list, dict)):
         raise BlobPinError(
             f"expected YAML flow collection, got {value!r}"
         )
-
     return node
 
 
-def _scalar(value: str, line=None):
-    """Parse a YAML scalar while preserving embedded colons."""
-    value = value.strip()
+def _scalar(
+    value: str,
+    line=None,
+    start: Optional[int] = None,
+    end: Optional[int] = None,
+):
+    """Parse a scalar while retaining its exact source token span."""
+    leading = len(value) - len(value.lstrip())
+    stripped = value.strip()
+    if start is not None:
+        start += leading
+    if end is None and start is not None:
+        end = start + len(stripped)
 
-    if not value:
-        return _LocatedStr("", line)
-
-    if value in ("null", "Null", "NULL", "~"):
+    if not stripped:
+        return _LocatedStr("", line, start, end)
+    if stripped in ("null", "Null", "NULL", "~"):
         return None
-
-    if value in ("true", "True", "TRUE"):
+    if stripped in ("true", "True", "TRUE"):
         return True
-
-    if value in ("false", "False", "FALSE"):
+    if stripped in ("false", "False", "FALSE"):
         return False
 
-    if value.startswith('"'):
-        if len(value) < 2 or not value.endswith('"'):
+    if stripped.startswith('"'):
+        if len(stripped) < 2 or not stripped.endswith('"'):
             raise BlobPinError(
-                f"unterminated double-quoted scalar: {value!r}"
+                f"unterminated double-quoted scalar: {stripped!r}"
             )
-
-        # Decode only YAML's common quoted-string escapes. In particular,
-        # do not use unicode_escape: it can corrupt non-ASCII UTF-8 text.
-        inner = value[1:-1]
+        inner = stripped[1:-1]
         result = []
         index = 0
-
         escapes = {
             '"': '"',
             "\\": "\\",
@@ -433,70 +465,76 @@ def _scalar(value: str, line=None):
             "t": "\t",
             "0": "\0",
         }
-
         while index < len(inner):
             char = inner[index]
-
-            if char == "\\" and index + 1 < len(inner):
+            if char == "\\":
+                if index + 1 >= len(inner):
+                    raise BlobPinError(
+                        "quoted scalar ends with an incomplete escape"
+                    )
                 following = inner[index + 1]
                 result.append(escapes.get(following, following))
                 index += 2
             else:
                 result.append(char)
                 index += 1
+        return _LocatedStr("".join(result), line, start, end)
 
-        return _LocatedStr("".join(result), line)
-
-    if value.startswith("'"):
-        if len(value) < 2 or not value.endswith("'"):
+    if stripped.startswith("'"):
+        if len(stripped) < 2 or not stripped.endswith("'"):
             raise BlobPinError(
-                f"unterminated single-quoted scalar: {value!r}"
+                f"unterminated single-quoted scalar: {stripped!r}"
             )
+        return _LocatedStr(
+            stripped[1:-1].replace("''", "'"),
+            line,
+            start,
+            end,
+        )
 
-        # YAML single quotes escape an apostrophe by doubling it.
-        return _LocatedStr(value[1:-1].replace("''", "'"), line)
+    if stripped.startswith(("[", "{")):
+        return _parse_flow_collection(stripped, line, start)
 
-    if value.startswith(("[", "{")):
-        return _parse_flow_collection(value, line)
-
-    if re.fullmatch(r"-?[0-9]+", value):
+    if re.fullmatch(r"-?[0-9]+", stripped):
         try:
-            return int(value)
+            return _LocatedInt(int(stripped), line, start, end)
         except ValueError:
             pass
 
-    # Crucially, an unquoted "path: sha" remains one scalar here.
-    return _LocatedStr(value, line)
+    return _LocatedStr(stripped, line, start, end)
 
 
 def _prepare_lines(source: str):
-    """Tokenize indentation-based YAML while ignoring blank/comment lines."""
+    """Return (indent, content, line, absolute content start) records."""
     if not isinstance(source, str):
         raise BlobPinError("manifest input must be UTF-8 text")
 
     result = []
+    cursor = 0
 
-    for line_number, original in enumerate(
-        source.splitlines(),
+    for line_number, original_with_ending in enumerate(
+        source.splitlines(keepends=True),
         start=1,
     ):
-        if "\t" in original[:len(original) - len(original.lstrip())]:
+        original = original_with_ending.rstrip("\r\n")
+        leading = len(original) - len(original.lstrip(" "))
+        if "\t" in original[:leading]:
             raise BlobPinError(
                 f"line {line_number}: tabs are not allowed for indentation"
             )
 
-        stripped = original.lstrip(" ")
-        if not stripped:
-            continue
-
+        stripped = original[leading:]
         content = _strip_comment(stripped)
-        if not content:
-            continue
+        if content:
+            result.append(
+                (leading, content, line_number, cursor + leading)
+            )
 
-        indent = len(original) - len(stripped)
+        cursor += len(original_with_ending)
 
-        result.append((indent, content, line_number))
-
+    # splitlines() returns no record for an empty source and handles a final
+    # unterminated line. This explicit fallback is unnecessary for offsets,
+    # but keeps the parser's empty-document behavior deterministic.
     return result
 
 
@@ -510,77 +548,58 @@ def _parse_block_scalar(
     parent_indent: int,
     folded: bool,
 ):
-    """Consume an indented YAML block scalar as ordinary text."""
     collected = []
-
     while index < len(lines):
-        indent, content, _ = lines[index]
-
+        indent, content, _line, _start = lines[index]
         if indent <= parent_indent:
             break
-
         collected.append(" " * (indent - parent_indent - 1) + content)
         index += 1
-
-    separator = " " if folded else "\n"
-    return separator.join(collected), index
+    return (" " if folded else "\n").join(collected), index
 
 
-def _parse_mapping(
-    lines,
-    index: int,
-    indent: int,
-    initial=None,
-):
-    """Parse a mapping block, optionally continuing a sequence mapping."""
+def _parse_mapping(lines, index, indent, initial=None):
     result = {} if initial is None else dict(initial)
 
     while index < len(lines):
-        current_indent, content, line_number = lines[index]
-
+        current_indent, content, line_number, content_start = lines[index]
         if current_indent < indent:
             break
-
         if current_indent > indent:
             raise BlobPinError(
                 f"line {line_number}: unexpected mapping indentation"
             )
-
         if _is_sequence_line(content):
             break
 
-        key, value_text = _split_mapping_pair(content)
-
+        key, value_text, value_offset = _split_mapping_pair(content)
         if key in result:
             raise BlobPinError(
                 f"line {line_number}: duplicate YAML key {key!r}"
             )
 
+        value_start = content_start + value_offset
         index += 1
 
         if value_text in ("|", "|-", "|+", ">", ">-", ">+"):
             value, index = _parse_block_scalar(
-                lines,
-                index,
-                indent,
-                value_text.startswith(">"),
+                lines, index, indent, value_text.startswith(">")
             )
             result[key] = value
             continue
 
         if value_text:
-            result[key] = _scalar(value_text, line_number)
+            result[key] = _scalar(
+                value_text,
+                line_number,
+                value_start,
+                value_start + len(value_text),
+            )
             continue
 
-        if (
-            index < len(lines)
-            and lines[index][0] > indent
-        ):
-            child_indent = lines[index][0]
+        if index < len(lines) and lines[index][0] > indent:
             result[key], index = _parse_node(
-                lines,
-                index,
-                child_indent,
+                lines, index, lines[index][0]
             )
         else:
             result[key] = {}
@@ -588,77 +607,68 @@ def _parse_mapping(
     return result, index
 
 
-def _parse_sequence(lines, index: int, indent: int):
-    """Parse a sequence, preserving each scalar as exactly one item."""
+def _parse_sequence(lines, index, indent):
     result = []
 
     while index < len(lines):
-        current_indent, content, line_number = lines[index]
-
+        current_indent, content, line_number, content_start = lines[index]
         if current_indent < indent:
             break
-
         if current_indent != indent or not _is_sequence_line(content):
             break
 
-        remainder = content[1:].strip()
+        remainder_offset = 1
+        while (
+            remainder_offset < len(content)
+            and content[remainder_offset].isspace()
+        ):
+            remainder_offset += 1
+        remainder = content[remainder_offset:]
+        remainder = remainder.rstrip()
+        remainder_start = content_start + remainder_offset
         index += 1
 
         if not remainder:
-            if (
-                index < len(lines)
-                and lines[index][0] > indent
-            ):
+            if index < len(lines) and lines[index][0] > indent:
                 item, index = _parse_node(
-                    lines,
-                    index,
-                    lines[index][0],
+                    lines, index, lines[index][0]
                 )
                 result.append(item)
             else:
                 result.append(None)
-
             continue
 
-        # Sequence mapping items such as:
-        # - root: file.md
-        #   root_blob: <sha>
         if re.match(r"^[^'\"]+:\s*", remainder):
-            key, value_text = _split_mapping_pair(remainder)
-
+            key, value_text, value_offset = _split_mapping_pair(remainder)
             initial = {}
+            value_start = remainder_start + value_offset
 
             if value_text:
-                initial[key] = _scalar(value_text, line_number)
+                initial[key] = _scalar(
+                    value_text,
+                    line_number,
+                    value_start,
+                    value_start + len(value_text),
+                )
             elif (
                 index < len(lines)
                 and lines[index][0] > indent + 1
             ):
                 initial[key], index = _parse_node(
-                    lines,
-                    index,
-                    lines[index][0],
+                    lines, index, lines[index][0]
                 )
             else:
                 initial[key] = {}
 
-            if (
-                index < len(lines)
-                and lines[index][0] > indent
-            ):
+            if index < len(lines) and lines[index][0] > indent:
                 child_indent = lines[index][0]
-
                 if _is_sequence_line(lines[index][1]):
                     raise BlobPinError(
                         f"line {line_number}: unexpected nested sequence "
                         "in mapping item"
                     )
-
                 item, index = _parse_mapping(
-                    lines,
-                    index,
-                    child_indent,
-                    initial,
+                    lines, index, child_indent, initial
                 )
             else:
                 item = initial
@@ -666,143 +676,143 @@ def _parse_sequence(lines, index: int, indent: int):
             result.append(item)
             continue
 
-        # This is the critical fix:
-        # parse the entire remainder as one scalar. Do not split on ':'.
-        # _scalar removes the outer YAML quotes exactly once.
-        result.append(_scalar(remainder, line_number))
+        result.append(
+            _scalar(
+                remainder,
+                line_number,
+                remainder_start,
+                remainder_start + len(remainder),
+            )
+        )
 
     return result, index
 
 
-def _parse_node(lines, index: int, indent: int):
+def _parse_node(lines, index, indent):
     if index >= len(lines):
         return {}, index
-
-    current_indent, content, _ = lines[index]
-
+    current_indent, content, _line, _start = lines[index]
     if current_indent != indent:
         raise BlobPinError("invalid YAML indentation")
-
     if _is_sequence_line(content):
         return _parse_sequence(lines, index, indent)
-
     return _parse_mapping(lines, index, indent)
 
 
 def _parse_yaml_subset(source: str):
-    """Parse the indentation-based YAML subset used by Work Item manifests."""
     lines = _prepare_lines(source)
-
     if not lines:
         return {}
-
     if lines[0][0] != 0:
         raise BlobPinError("manifest root must start at indentation zero")
-
     document, index = _parse_node(lines, 0, 0)
-
     if index != len(lines):
-        line_number = lines[index][2]
         raise BlobPinError(
-            f"line {line_number}: unconsumed YAML input"
+            f"line {lines[index][2]}: unconsumed YAML input"
         )
-
     if not isinstance(document, dict):
         raise BlobPinError("manifest root must be a mapping")
-
     return document
 
 
 def _digest_binding(key: str):
-    """Return the exact path key and algorithm for a digest key."""
     explicit = _EXPLICIT_BINDINGS.get(key)
-
     if explicit is not None:
         return explicit
-
     if key.endswith("_blob"):
         return key[:-5], "sha1"
-
     if key.endswith("_sha256"):
         return key[:-7] + "_file", "sha256"
-
     return None
 
 
-def _valid_digest(value, algorithm: str) -> bool:
+def _valid_digest(value, algorithm):
     if not isinstance(value, str):
         return False
-
     if algorithm == "sha1":
         return _SHA1_RE.fullmatch(value) is not None
-
     if algorithm == "sha256":
         return _SHA256_RE.fullmatch(value) is not None
-
     return False
 
 
-def _normalise_path(value, location: str) -> str:
+def _normalise_path(value, location):
     if not isinstance(value, str) or not value:
         raise BlobPinError(
             f"{location}: declared pin path must be a non-empty string"
         )
-
     if value != value.strip():
         raise BlobPinError(
             f"{location}: pin path contains surrounding whitespace"
         )
-
     if "\\" in value:
         raise BlobPinError(
             f"{location}: pin path must use POSIX separators"
         )
-
     if value.startswith("/") or value.endswith("/"):
         raise BlobPinError(
             f"{location}: pin path must be repository-relative"
         )
-
     components = value.split("/")
-
     if any(component in ("", ".", "..") for component in components):
         raise BlobPinError(
             f"{location}: non-canonical pin path {value!r}"
         )
-
     return value
 
 
-def _location(parent: str, key: str) -> str:
-    if parent == "$":
-        return f"$.{key}"
-
-    return f"{parent}.{key}"
+def _location(parent, key):
+    return f"$.{key}" if parent == "$" else f"{parent}.{key}"
 
 
-def _parse_source_list_item(
-    value,
-    location: str,
-    source_commit,
-) -> BlobPin:
-    """Parse exactly one d_source_blobs scalar in path: SHA form."""
+def _source_list_digest_span(value):
+    """Return the source span of only the SHA child token in path: SHA."""
+    if not isinstance(value, _LocatedStr):
+        return None, None
+    if value.start is None or value.end is None:
+        return None, None
+
+    # The supported list scalar is deliberately restricted to a direct
+    # literal representation. Escaped/decoded representations cannot be
+    # mapped back to child-token offsets without a character map.
+    token_start = value.start
+    token_end = value.end
+    raw = str(value)
+
+    if token_end - token_start < len(raw):
+        return None, None
+
+    colon = raw.find(":")
+    if colon < 0 or raw.count(":") != 1:
+        return None, None
+
+    digest_start = colon + 1
+    while digest_start < len(raw) and raw[digest_start].isspace():
+        digest_start += 1
+    digest_end = len(raw.rstrip())
+
+    if raw[digest_start:digest_end] != raw[digest_start:digest_end].strip():
+        return None, None
+    if not _SHA1_RE.fullmatch(raw[digest_start:digest_end]):
+        return None, None
+
+    # Quoted scalars include their outer quote in start/end. Require the
+    # literal source representation to match the decoded value exactly.
+    # This rejects escaped or doubled-quote source forms conservatively.
+    return token_start + (1 if token_start < token_end else 0) + digest_start, (
+        token_start + (1 if token_start < token_end else 0) + digest_end
+    )
+
+
+def _parse_source_list_item(value, location, source_commit):
     if not isinstance(value, str):
         raise BlobPinError(
             f"{location}: expected 'path: 40-hex-Git-blob-SHA'"
         )
-
     if not isinstance(source_commit, str) or not source_commit:
-        raise BlobPinError(
-            f"{location}: no sibling d_source_commit"
-        )
-
+        raise BlobPinError(f"{location}: no sibling d_source_commit")
     if not _COMMIT_RE.fullmatch(source_commit):
-        raise BlobPinError(
-            f"{location}: invalid sibling d_source_commit"
-        )
-
-    # Split only once. A colon in the path is not a supported repository
-    # path representation and will be rejected by canonical-path checking.
+        raise BlobPinError(f"{location}: invalid sibling d_source_commit")
     if value.count(":") != 1:
         raise BlobPinError(
             f"{location}: expected 'path: 40-hex-Git-blob-SHA'"
@@ -811,173 +821,34 @@ def _parse_source_list_item(
     path_text, digest_text = value.split(":", 1)
     path_text = path_text.strip()
     digest_text = digest_text.strip()
-
     if not _SHA1_RE.fullmatch(digest_text):
         raise BlobPinError(
             f"{location}: expected 'path: 40-hex-Git-blob-SHA'"
         )
 
     path = _normalise_path(path_text, location)
-
-    return BlobPin(
-        path=path,
-        digest=digest_text.lower(),
-        algorithm="sha1",
-        location=location,
-        source_commit=source_commit,
-        line=getattr(value, "line", None),
+    start, end = _source_list_digest_span(value)
+    return _PinRecord(
+        BlobPin(
+            path=path,
+            digest=digest_text.lower(),
+            algorithm="sha1",
+            location=location,
+            source_commit=source_commit,
+            line=getattr(value, "line", None),
+        ),
+        start,
+        end,
     )
 
 
-def enumerate_blob_pins(source: str) -> list[BlobPin]:
-    """Dynamically enumerate and bind all declared blob digest fields.
+def _collect_pin_records(document):
+    records = []
+    errors = []
 
-    A path/digest pair is required. Recognized path-only declarations are
-    rejected, as are digest-only declarations.
-
-    The d_source_blobs sequence is handled separately because each item
-    contains both its path and Git SHA in one scalar.
-    """
-    document = _parse_yaml_subset(source)
-    pins = []
-
-    def visit(value, location="$", inherited_commit=None):
-        if isinstance(value, list):
-            for index, item in enumerate(value):
-                item_location = f"{location}[{index}]"
-
-                if location.endswith(".d_source_blobs"):
-                    pins.append(
-                        _parse_source_list_item(
-                            item,
-                            item_location,
-                            inherited_commit,
-                        )
-                    )
-                else:
-                    visit(
-                        item,
-                        item_location,
-                        inherited_commit,
-                    )
-            return
-
-        if not isinstance(value, dict):
-            return
-
-        local_commit = value.get(
-            "d_source_commit",
-            inherited_commit,
-        )
-
-        # Classify the fields in this mapping before binding anything.
-        # Both sets are deliberately local to this mapping: a path in a
-        # parent, sibling, or nested mapping cannot satisfy a digest here.
-        digest_fields = {}
-        path_fields = set()
-
-        explicit_path_keys = {
-            path_key
-            for path_key, _algorithm in _EXPLICIT_BINDINGS.values()
-        }
-
-        for key in value:
-            binding = _digest_binding(key)
-
-            if binding is not None:
-                digest_fields[key] = binding
-                path_fields.add(binding[0])
-
-            if key in explicit_path_keys or key.endswith("_file"):
-                path_fields.add(key)
-
-        # A mapping becomes a pin declaration only through a digest field.
-        # Path-only mappings are ordinary path declarations and are ignored.
-        # Digest-only mappings, on the other hand, are malformed pins.
-        for key, (path_key, algorithm) in digest_fields.items():
-            digest = value[key]
-            key_location = _location(location, key)
-            path_location = _location(location, path_key)
-
-            if path_key not in value:
-                raise BlobPinError(
-                    f"{key_location}: no sibling path {path_key!r}"
-                )
-
-            path = _normalise_path(
-                value[path_key],
-                path_location,
-            )
-
-            if not _valid_digest(digest, algorithm):
-                expected = (
-                    "40 hexadecimal Git blob SHA-1 characters"
-                    if algorithm == "sha1"
-                    else "64 hexadecimal SHA-256 characters"
-                )
-                raise BlobPinError(
-                    f"{key_location}: invalid digest; expected {expected}"
-                )
-
-            pins.append(
-                BlobPin(
-                    path=path,
-                    digest=digest.lower(),
-                    algorithm=algorithm,
-                    location=key_location,
-                    source_commit=local_commit,
-                    line=getattr(digest, "line", None),
-                )
-            )
-
-        # path_fields is intentionally collected even when no digest is
-        # present. Such fields are path declarations, not incomplete pins.
-        # It must not be used to search outside this mapping for a digest.
-
-        # Recurse after binding the current mapping so nested mappings
-        # inherit the correct source commit.
-        for key, child in value.items():
-            if key == "d_source_commit":
-                continue
-            child_location = _location(location, key)
-            child_commit = local_commit if key == "d_source_blobs" else None
-            visit(child, child_location, child_commit)
-
-    visit(document)
-    return pins
-
-
-def enumerate_blob_pins_with_errors(
-    source: str,
-) -> tuple[list[BlobPin], list[BlobPinDiagnostic]]:
-    """Enumerate every complete pin while retaining independent field errors.
-
-    The legacy enumerate_blob_pins() remains fail-fast. This diagnostic
-    variant parses the document once and isolates binding errors at the
-    declaration field, so a malformed sibling declaration cannot discard
-    otherwise complete pins in the same manifest.
-    """
-    pins: list[BlobPin] = []
-    errors: list[BlobPinDiagnostic] = []
-
-    try:
-        document = _parse_yaml_subset(source)
-    except BlobPinError as exc:
-        return [], [
-            BlobPinDiagnostic(
-                location="$",
-                reason=BlobPinErrorReason.YAML_PARSE,
-                message=str(exc),
-            )
-        ]
-
-    def record(location, reason, exc):
+    def record_error(location, reason, exc):
         errors.append(
-            BlobPinDiagnostic(
-                location=location,
-                reason=reason,
-                message=str(exc),
-            )
+            BlobPinDiagnostic(location, reason, str(exc))
         )
 
     def visit(value, location="$", inherited_commit=None):
@@ -986,7 +857,7 @@ def enumerate_blob_pins_with_errors(
                 item_location = f"{location}[{index}]"
                 if location.endswith(".d_source_blobs"):
                     try:
-                        pins.append(
+                        records.append(
                             _parse_source_list_item(
                                 item, item_location, inherited_commit
                             )
@@ -997,7 +868,7 @@ def enumerate_blob_pins_with_errors(
                             if "no sibling d_source_commit" in str(exc)
                             else BlobPinErrorReason.INVALID_SOURCE_LIST_ITEM
                         )
-                        record(item_location, reason, exc)
+                        record_error(item_location, reason, exc)
                 else:
                     visit(item, item_location, inherited_commit)
             return
@@ -1030,14 +901,18 @@ def enumerate_blob_pins_with_errors(
                     raise BlobPinError(
                         f"{key_location}: invalid digest; expected {expected}"
                     )
-                pins.append(
-                    BlobPin(
-                        path=path,
-                        digest=digest.lower(),
-                        algorithm=algorithm,
-                        location=key_location,
-                        source_commit=local_commit,
-                        line=getattr(digest, "line", None),
+                records.append(
+                    _PinRecord(
+                        BlobPin(
+                            path=path,
+                            digest=digest.lower(),
+                            algorithm=algorithm,
+                            location=key_location,
+                            source_commit=local_commit,
+                            line=getattr(digest, "line", None),
+                        ),
+                        getattr(digest, "start", None),
+                        getattr(digest, "end", None),
                     )
                 )
             except BlobPinError as exc:
@@ -1048,191 +923,150 @@ def enumerate_blob_pins_with_errors(
                     reason = BlobPinErrorReason.INVALID_DIGEST
                 else:
                     reason = BlobPinErrorReason.INVALID_PATH
-                record(key_location, reason, exc)
+                record_error(key_location, reason, exc)
 
         for key, child in value.items():
             if key == "d_source_commit":
                 continue
             child_location = _location(location, key)
-            child_commit = local_commit if key == "d_source_blobs" else None
+            child_commit = (
+                local_commit if key == "d_source_blobs" else None
+            )
             visit(child, child_location, child_commit)
 
     visit(document)
-    return pins, errors
+    return records, errors
 
 
-def _validate_tree_entry(
-    path: str,
-    tree_index: dict,
-    location: str,
-):
-    """Require an ordinary, non-empty committed Git blob."""
+def _enumerate_pin_records(source):
+    try:
+        document = _parse_yaml_subset(source)
+    except BlobPinError as exc:
+        return [], [
+            BlobPinDiagnostic(
+                "$", BlobPinErrorReason.YAML_PARSE, str(exc)
+            )
+        ]
+    return _collect_pin_records(document)
+
+
+def enumerate_blob_pins(source: str) -> list[BlobPin]:
+    """Legacy fail-fast pin enumeration."""
+    document = _parse_yaml_subset(source)
+    records, errors = _collect_pin_records(document)
+    if errors:
+        raise BlobPinError(errors[0].message)
+    return [record.pin for record in records]
+
+
+def enumerate_blob_pins_with_errors(
+    source: str,
+) -> tuple[list[BlobPin], list[BlobPinDiagnostic]]:
+    """Return every complete pin and all independently detectable errors."""
+    records, errors = _enumerate_pin_records(source)
+    return [record.pin for record in records], errors
+
+
+def _validate_tree_entry(path, tree_index, location):
     item = tree_index.get(path)
-
     if item is None:
         raise BlobPinError(
             f"{location}: path '{path}' is missing from the required commit tree"
         )
-
     if not isinstance(item, dict):
         raise BlobPinError(
             f"{location}: path '{path}' has an invalid tree entry"
         )
-
     if item.get("type") != "blob":
-        raise BlobPinError(
-            f"{location}: path '{path}' is not a blob"
-        )
-
+        raise BlobPinError(f"{location}: path '{path}' is not a blob")
     if item.get("mode") not in ("100644", "100755"):
         raise BlobPinError(
             f"{location}: path '{path}' is not a regular file"
         )
-
-    size = item.get("size")
-
-    if not isinstance(size, int) or size <= 0:
+    if not isinstance(item.get("size"), int) or item["size"] <= 0:
         raise BlobPinError(
             f"{location}: path '{path}' has an invalid or empty blob size"
         )
-
     tree_sha = item.get("sha")
-
     if not isinstance(tree_sha, str) or not _SHA1_RE.fullmatch(tree_sha):
         raise BlobPinError(
             f"{location}: path '{path}' has an invalid tree blob SHA"
         )
-
     return item
 
 
 def _git_blob_sha1(raw: bytes) -> str:
-    header = (
-        b"blob "
-        + str(len(raw)).encode("ascii")
-        + b"\0"
-    )
-
-    return hashlib.sha1(header + raw).hexdigest()
+    return hashlib.sha1(
+        b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw
+    ).hexdigest()
 
 
 def verify_blob_pins(
     source: str,
     tree_index: dict,
     read_blob: Callable[[str, str], bytes],
-    source_tree_resolver: Optional[
-        Callable[[str], dict]
-    ] = None,
+    source_tree_resolver: Optional[Callable[[str], dict]] = None,
 ) -> list[BlobPin]:
-    """Verify all declared pins against committed original bytes.
-
-    Args:
-        source:
-            UTF-8 manifest text.
-        tree_index:
-            Path-to-entry index for the exact candidate commit tree.
-        read_blob:
-            Callback accepting (tree_blob_sha, path) and returning
-            the original committed bytes.
-        source_tree_resolver:
-            Optional callback accepting an exact historical commit SHA
-            and returning its complete path-to-entry tree index.
-
-    Returns:
-        The verified BlobPin objects, in declaration order.
-
-    Raises:
-        BlobPinError:
-            On any malformed, missing, unresolvable or mismatched pin.
-    """
+    """Verify declared pins against original committed blob bytes."""
     pins = enumerate_blob_pins(source)
-
-    # Cache both the resolved tree and original bytes. The cache is scoped
-    # to this verification run, so it cannot leak across different heads.
     source_tree_cache = {}
     byte_cache = {}
-
     verified = []
 
     for pin in pins:
         selected_tree = tree_index
-
         if pin.source_commit is not None:
             commit = pin.source_commit.lower()
-
             if not _COMMIT_RE.fullmatch(commit):
                 raise BlobPinError(
                     f"{pin.location}: invalid historical source commit"
                 )
-
             if source_tree_resolver is None:
                 raise BlobPinError(
                     f"{pin.location}: historical source commit "
                     f"{commit} cannot be resolved"
                 )
-
             if commit not in source_tree_cache:
                 resolved_tree = source_tree_resolver(commit)
-
                 if not isinstance(resolved_tree, dict):
                     raise BlobPinError(
                         f"{pin.location}: historical source tree "
                         f"{commit} is invalid"
                     )
-
                 source_tree_cache[commit] = resolved_tree
-
             selected_tree = source_tree_cache[commit]
 
         entry = _validate_tree_entry(
-            pin.path,
-            selected_tree,
-            pin.location,
+            pin.path, selected_tree, pin.location
         )
-
         tree_sha = entry["sha"].lower()
         cache_key = (tree_sha, pin.path)
-
         if cache_key not in byte_cache:
             raw = read_blob(tree_sha, pin.path)
-
             if not isinstance(raw, bytes):
                 raise BlobPinError(
                     f"{pin.location}: blob reader did not return bytes"
                 )
-
             byte_cache[cache_key] = raw
 
         raw = byte_cache[cache_key]
-
         actual_git_sha = _git_blob_sha1(raw)
-
-        # First identity check: the declared Git SHA must agree with
-        # the selected commit tree's path-to-object binding.
-        if pin.algorithm == "sha1":
-            if pin.digest != tree_sha:
-                raise BlobPinError(
-                    f"{pin.location}: expected {pin.digest}, "
-                    f"actual {tree_sha}"
-                )
-
-        # Second identity check: the returned original bytes must actually
-        # hash to the Git object selected by the commit tree.
+        if pin.algorithm == "sha1" and pin.digest != tree_sha:
+            raise BlobPinError(
+                f"{pin.location}: expected {pin.digest}, actual {tree_sha}"
+            )
         if actual_git_sha != tree_sha:
             raise BlobPinError(
                 f"{pin.location}: committed-byte Git SHA mismatch; "
                 f"expected {tree_sha}, actual {actual_git_sha}"
             )
-
         if pin.algorithm == "sha256":
             actual_sha256 = hashlib.sha256(raw).hexdigest()
-
             if pin.digest != actual_sha256:
                 raise BlobPinError(
                     f"{pin.location}: SHA-256 mismatch; "
                     f"expected {pin.digest}, actual {actual_sha256}"
                 )
-
         verified.append(pin)
 
     return verified
