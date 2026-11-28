@@ -5,7 +5,7 @@
 # One AID maps to exactly one work_item_id.
 
 schema: 1
-updated_at_utc: "2026-11-28T05:11:49Z"
+updated_at_utc: "2026-11-28T06:20:00Z"
 entries:
   - id: AID-2026-082
     state: MERGED
@@ -313,3 +313,7 @@ entries:
       capacity rather than claiming an unnecessarily large range.
       AID-2026-341 is occupied by PR #1506 on main; this Work Item
       therefore uses AID-2026-345. Re-scan before any later allocation.
+  - id: AID-2026-334
+    state: RESERVED
+    carrier: "branch feat/gate-contract-harness (PR pending)"
+    note: "2026-11-28 scan (origin/main f0843a8f; 10073 origin refs; 173 distinct AID work-item directories added anywhere in history): occupied above 329 are 330/331/332/333/336/340/341/342/344/345/347; this ledger holds 333 and 345; open-PR title/body search for AID-2026-334 returns no claim (one unrelated body mention in PR #1329). 334 is free on the main work-items tree, on every origin ref and in this ledger. Scope: Gate Contract Harness package 1 -- registry scripts/ci/gate-contracts.yaml, executor scripts/ci/run_gate_contract.py, static validator scripts/ci/check_gate_contracts.py, fixture builder, their tests, and three migrations (protocol-index CLI backstop, manifest blob-pin exact status assertion, session-evidence self-test silent skip), wired into the existing Repository hygiene (hard gate) context; no required context renamed or added."
