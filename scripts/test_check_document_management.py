@@ -79,8 +79,8 @@ ALLOWED_SKIPS = {
 }
 
 # Current document-management count contract: executed cases plus registered skips.
-# The additional symlink-unavailable regression case belongs to #1438.
-EXPECTED_AGGREGATE = 377
+# The additional symlink-unavailable regression case belongs to #1438; main added one further case.
+EXPECTED_AGGREGATE = 378
 
 
 def doc(body: str) -> str:
