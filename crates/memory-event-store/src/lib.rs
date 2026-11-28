@@ -1,7 +1,8 @@
 //! Backend-neutral durable Event Store contract.
-//! 事件接收是持久化边界，不等于编译或 Canonical Memory Commit。
+//! Acceptance is a persistence boundary, not a Canonical Memory Commit.
 
 use memory_domain::{OpaqueId, ScopeRef, TimeValue};
+use memory_storage::ValidatedAuthorization;
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum EventClassification {
@@ -65,19 +66,19 @@ pub trait EventStore {
     fn accept(
         &mut self,
         envelope: EventEnvelope,
-        scope: &[ScopeRef],
+        cap: &ValidatedAuthorization,
     ) -> Result<AcceptedReceipt, EventStoreError>;
 
     fn status(
-        &self,
+        &mut self,
         event_id: &OpaqueId,
-        scope: &[ScopeRef],
+        cap: &ValidatedAuthorization,
     ) -> Result<Option<AcceptedReceipt>, EventStoreError>;
 
     fn replay(
         &mut self,
         event_id: &OpaqueId,
-        scope: &[ScopeRef],
+        cap: &ValidatedAuthorization,
     ) -> Result<AcceptedReceipt, EventStoreError>;
 }
 
@@ -89,6 +90,7 @@ mod tests {
     fn id(v: &str) -> OpaqueId {
         OpaqueId::new(v).unwrap()
     }
+
     fn scope() -> ScopeRef {
         ScopeRef {
             scope_id: id("s1"),

@@ -6,6 +6,7 @@ license = "UNLICENSED"
 publish = false
 
 [dependencies]
+memory-storage = { path = "../memory-storage" }
 memory-domain = { path = "../memory-domain" }
 
 serde = { version = "1", features = ["derive"] }

@@ -6,6 +6,7 @@ license = "UNLICENSED"
 publish = false
 
 [dependencies]
+memory-storage = { path = "../memory-storage" }
 memory-domain = { path = "../memory-domain" }
 memory-event-store = { path = "../memory-event-store" }
 rusqlite = { version = "0.43.0", features = ["bundled"] }

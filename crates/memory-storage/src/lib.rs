@@ -1,10 +1,14 @@
 //! Backend-neutral storage contract for the Phase 1 canonical memory model.
 //! 仅定义 Storage Port；不包含 SQLite、网络或具体持久化实现。
 
-use memory_domain::{Memory, MemoryVersion, OpaqueId, ScopeRef};
+use memory_domain::{
+    AuthorizationDecisionRef, AuthorizationOperation, AuthorizationSubjectV1,
+    AuthorizationTarget, Claim, Memory, MemoryVersion, OpaqueId, ScopeRef,
+};
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum StorageError {
+    InvalidAuthorizationReceipt,
     NotFoundOrNotVisible,
     StaleVersion,
     IdempotencyConflict,
@@ -84,86 +88,197 @@ pub struct ChangePage {
     pub next_cursor: Option<CommitSequence>,
 }
 
+/// Candidate evidence returned by the authorization authority.
+/// This is not itself a validated capability.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct AuthorizationReceipt {
+    pub decision: AuthorizationDecisionRef,
+    pub subject: AuthorizationSubjectV1,
+}
+
+/// Marker for a transaction context accepted by the authorization port.
+/// Backend implementations must only accept contexts belonging to their
+/// own transactional connection.
+pub trait AuthorizationTransaction: std::any::Any {
+    fn as_any(&self) -> &dyn std::any::Any;
+}
+
+/// Validated, process-local authorization capability.
+///
+/// Its fields are private and it deliberately does not implement Serialize
+/// or Deserialize. The only constructor is authorize().
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ValidatedAuthorization {
+    receipt: AuthorizationReceipt,
+}
+
+impl ValidatedAuthorization {
+    pub fn subject(&self) -> &AuthorizationSubjectV1 {
+        &self.receipt.subject
+    }
+
+    pub fn decision(&self) -> &AuthorizationDecisionRef {
+        &self.receipt.decision
+    }
+
+    /// The validated receipt, for backends that must revalidate the durable
+    /// decision inside their own transaction.
+    pub fn receipt(&self) -> &AuthorizationReceipt {
+        &self.receipt
+    }
+}
+
+/// The one authority used by memory and event storage operations.
+pub trait AuthorizationAuthority {
+    fn issue(
+        &self,
+        subject: &AuthorizationSubjectV1,
+        decision_id: &OpaqueId,
+    ) -> Result<AuthorizationReceipt, StorageError>;
+
+    fn validate(
+        &self,
+        receipt: &AuthorizationReceipt,
+        expected: &AuthorizationSubjectV1,
+    ) -> Result<(), StorageError>;
+
+    fn validate_in_transaction(
+        &self,
+        transaction: &dyn AuthorizationTransaction,
+        receipt: &AuthorizationReceipt,
+        expected: &AuthorizationSubjectV1,
+    ) -> Result<(), StorageError>;
+}
+
+/// The only capability construction entry point.
+pub fn authorize(
+    authority: &dyn AuthorizationAuthority,
+    receipt: AuthorizationReceipt,
+    expected: &AuthorizationSubjectV1,
+) -> Result<ValidatedAuthorization, StorageError> {
+    if &receipt.subject != expected {
+        return Err(StorageError::InvalidAuthorizationReceipt);
+    }
+
+    authority.validate(&receipt, expected)?;
+
+    Ok(ValidatedAuthorization { receipt })
+}
+
+/// A non-canonical metadata projection. It intentionally contains only
+/// explicitly selected metadata and never exposes the canonical Memory.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ScopedMemoryProjection {
+    pub memory_id: OpaqueId,
+    pub memory_kind: String,
+    pub lifecycle_state: memory_domain::MemoryLifecycle,
+    pub retention_class: String,
+    pub sensitivity: String,
+    pub created_at: String,
+    pub updated_at: String,
+    /// Only scopes in both the stored memory and the caller's authorized
+    /// projection scope may appear here.
+    pub visible_scope_refs: Vec<ScopeRef>,
+    pub authorized_scopes: Vec<ScopeRef>,
+    pub policy_epoch: u64,
+    pub projection_digest: String,
+}
+
+/// A non-canonical version projection. Aggregate reference collections
+/// are deliberately absent until ClaimRevision membership is implemented.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ScopedMemoryVersionProjection {
+    pub memory_id: OpaqueId,
+    pub memory_version_id: OpaqueId,
+    pub canonical_content_digest: String,
+    pub visible_claims: Vec<Claim>,
+    pub authorized_scopes: Vec<ScopeRef>,
+    pub policy_epoch: u64,
+    pub projection_digest: String,
+}
+
 pub trait MemoryStorage {
-    fn create_memory(&mut self, memory: Memory, scope: &[ScopeRef]) -> Result<(), StorageError>;
+    fn create_memory(
+        &mut self,
+        memory: Memory,
+        cap: &ValidatedAuthorization,
+    ) -> Result<(), StorageError>;
+
     fn read_current(
-        &self,
+        &mut self,
         memory_id: &OpaqueId,
-        scope: &[ScopeRef],
-    ) -> Result<Option<MemoryVersion>, StorageError>;
-    /// Returns the `Memory` aggregate (lifecycle, retention, sensitivity) rather than a
-    /// `MemoryVersion`. Visibility semantics are identical to `read_current`: absent or
-    /// forgotten yields `Ok(None)`, non-intersecting scope yields `ScopeMismatch`.
+        cap: &ValidatedAuthorization,
+        projection_scope: &[ScopeRef],
+    ) -> Result<Option<ScopedMemoryVersionProjection>, StorageError>;
+
     fn read_memory(
-        &self,
+        &mut self,
         memory_id: &OpaqueId,
-        scope: &[ScopeRef],
-    ) -> Result<Option<Memory>, StorageError>;
+        cap: &ValidatedAuthorization,
+        projection_scope: &[ScopeRef],
+    ) -> Result<Option<ScopedMemoryProjection>, StorageError>;
+
     fn read_version(
-        &self,
+        &mut self,
         memory_id: &OpaqueId,
         version_id: &OpaqueId,
-        scope: &[ScopeRef],
-    ) -> Result<Option<MemoryVersion>, StorageError>;
+        cap: &ValidatedAuthorization,
+        projection_scope: &[ScopeRef],
+    ) -> Result<Option<ScopedMemoryVersionProjection>, StorageError>;
+
     fn commit_version(
         &mut self,
         request: CommitRequest,
-        scope: &[ScopeRef],
+        cap: &ValidatedAuthorization,
     ) -> Result<CommitReceipt, StorageError>;
-    /// Stage a version as hidden: it must not become current and must not be
-    /// readable through `read_version` until `publish_prepared` authorizes it.
+
     fn prepare_version(
         &mut self,
         request: PrepareRequest,
-        scope: &[ScopeRef],
+        cap: &ValidatedAuthorization,
     ) -> Result<PreparedCommitReceipt, StorageError>;
-    /// Authorize a prepared version: allocate the canonical sequence, advance the
-    /// current pointer and append the change record, all in one transaction.
+
     fn publish_prepared(
         &mut self,
         publication_id: &str,
         expected_current_version: Option<OpaqueId>,
-        scope: &[ScopeRef],
+        cap: &ValidatedAuthorization,
     ) -> Result<CommitReceipt, StorageError>;
-    /// The persisted publication state of one version, as recorded by
-    /// `prepare_version` / `publish_prepared`. Returns `None` when no preparation
-    /// row exists for that publication. Visibility semantics follow `read_current`:
-    /// absent or forgotten yields `Ok(None)`, non-intersecting scope yields
-    /// `ScopeMismatch`.
+
     fn publication_state(
-        &self,
+        &mut self,
         publication_id: &str,
-        scope: &[ScopeRef],
+        cap: &ValidatedAuthorization,
     ) -> Result<Option<PublicationState>, StorageError>;
-    /// Permanently hide a memory and all of its versions.
-    /// Repeated calls return the original fence sequence.
+
     fn forget_memory(
         &mut self,
         memory_id: &OpaqueId,
         reason_digest: &str,
-        scope: &[ScopeRef],
+        cap: &ValidatedAuthorization,
     ) -> Result<i64, StorageError>;
 
-    /// Permanently hide one version. Other versions of the memory remain visible.
     fn forget_version(
         &mut self,
         memory_id: &OpaqueId,
         version_id: &OpaqueId,
         reason_digest: &str,
-        scope: &[ScopeRef],
+        cap: &ValidatedAuthorization,
     ) -> Result<i64, StorageError>;
 
     fn list_changes(
-        &self,
+        &mut self,
         after: Option<CommitSequence>,
-        scope: &[ScopeRef],
+        cap: &ValidatedAuthorization,
+        projection_scope: &[ScopeRef],
         limit: usize,
     ) -> Result<ChangePage, StorageError>;
+
     fn resolve_idempotency(
-        &self,
+        &mut self,
         idempotency_key: &str,
         request_digest: &str,
-        scope: &[ScopeRef],
+        cap: &ValidatedAuthorization,
     ) -> Result<Option<CommitReceipt>, StorageError>;
 }
 

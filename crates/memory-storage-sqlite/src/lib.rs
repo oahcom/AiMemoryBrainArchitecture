@@ -1,13 +1,19 @@
 //! SQLite implementation of the Phase 1 MemoryStorage port.
 //! 这是第一个具体持久化适配器；事务边界仍严格受 Storage Trait 约束。
 
+mod authorization;
+mod projection;
+
 use memory_domain::{
-    scope_set_contains_all, scopes_intersect, Memory, MemoryLifecycle, MemoryVersion, OpaqueId,
-    ScopeRef,
+    scope_set_contains_all, scopes_intersect, AuthorizationOperation,
+    AuthorizationSubjectV1, AuthorizationTarget, Memory, MemoryLifecycle,
+    MemoryVersion, OpaqueId, PrincipalRef, ScopeRef,
 };
 use memory_storage::{
-    ChangePage, ChangeRecord, CommitReceipt, CommitRequest, CommitSequence, MemoryStorage,
-    PrepareRequest, PreparedCommitReceipt, PublicationState, StorageError,
+    AuthorizationAuthority, ChangePage, ChangeRecord, CommitReceipt, CommitRequest, CommitSequence,
+    MemoryStorage, PrepareRequest, PreparedCommitReceipt, PublicationState,
+    ScopedMemoryProjection, ScopedMemoryVersionProjection, StorageError,
+    ValidatedAuthorization,
 };
 use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
 use std::time::Duration;
@@ -134,7 +140,9 @@ impl SqliteMemoryStorage {
                    PRIMARY KEY (target_kind, target_id)
                  );",
             )
-            .map_err(|_| StorageError::TransactionUnavailable)
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+
+        authorization::initialize(&self.connection)
     }
 
     fn encode<T: serde::Serialize>(value: &T) -> Result<String, StorageError> {
@@ -152,17 +160,6 @@ impl SqliteMemoryStorage {
         scope
             .iter()
             .try_for_each(|item| item.validate().map_err(|_| StorageError::InvalidSchema))
-    }
-
-    fn scope_allowed(stored_json: &str, requested: &[ScopeRef]) -> Result<(), StorageError> {
-        Self::validate_scope_set(requested)?;
-        let stored: Vec<ScopeRef> = Self::decode(stored_json)?;
-        Self::validate_scope_set(&stored)?;
-        if scopes_intersect(&stored, requested) {
-            Ok(())
-        } else {
-            Err(StorageError::ScopeMismatch)
-        }
     }
 
     fn is_fenced(
@@ -232,1088 +229,1313 @@ impl SqliteMemoryStorage {
         format!("{}.{:09}Z", now.as_secs(), now.subsec_nanos())
     }
 
-    fn read_version_row(
-        &self,
-        memory_id: &OpaqueId,
-        version_id: &OpaqueId,
-        scope: &[ScopeRef],
-    ) -> Result<Option<MemoryVersion>, StorageError> {
-        let row = self
-            .connection
-            .query_row(
-                "SELECT v.scope_json, v.version_json
-                 FROM versions v
-                 LEFT JOIN publication_preparations p ON p.version_id = v.version_id
-                 WHERE v.memory_id = ?1 AND v.version_id = ?2
-                   AND (p.version_id IS NULL OR p.state = 'Published')
-                   AND NOT EXISTS (
-                       SELECT 1 FROM canonical_forget_fences f
-                       WHERE (f.target_kind = 'Memory' AND f.target_id = v.memory_id)
-                          OR (f.target_kind = 'Version' AND f.target_id = v.version_id)
-                   )",
-                params![memory_id.as_str(), version_id.as_str()],
-                |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?)),
-            )
-            .optional()
-            .map_err(|_| StorageError::TransactionUnavailable)?;
 
-        match row {
-            Some((scope_json, version_json)) => {
-                Self::scope_allowed(&scope_json, scope)?;
-                let stored_scopes: Vec<ScopeRef> = Self::decode(&scope_json)?;
-                let mut version: MemoryVersion = Self::decode(&version_json)?;
+fn expected_subject(
+    cap: &ValidatedAuthorization,
+    operation: AuthorizationOperation,
+    target_kind: &str,
+    target_id: String,
+) -> Result<AuthorizationSubjectV1, StorageError> {
+    let subject = cap.subject();
+    let target = AuthorizationTarget::new(target_kind, target_id)
+        .map_err(|_| StorageError::InvalidSchema)?;
 
-                version
-                    .validate()
-                    .map_err(|_| StorageError::InvalidSchema)?;
+    AuthorizationSubjectV1::new(
+        subject.principal_ref.clone(),
+        operation,
+        subject.scopes.clone(),
+        target,
+        subject.epoch,
+    )
+    .map_err(|_| StorageError::InvalidSchema)
+}
 
-                if version
-                    .claims
-                    .iter()
-                    .any(|claim| !scope_set_contains_all(&stored_scopes, &claim.scope_refs))
-                {
-                    return Err(StorageError::InvalidSchema);
-                }
+fn validate_cap_in_tx(
+    tx: &Connection,
+    cap: &ValidatedAuthorization,
+    expected: &AuthorizationSubjectV1,
+) -> Result<(), StorageError> {
+    let token = authorization::SqliteTransactionToken::for_connection(tx);
+    let authority = authorization::TxAuthority { connection: tx };
+    authority.validate_in_transaction(&token, cap.receipt(), expected)
+}
 
-                // A Claim is an indivisible disclosure unit: if any of its ScopeRefs
-                // is outside the caller-visible set, hide the entire Claim rather
-                // than returning a partial or existence-revealing projection.
-                version
-                    .claims
-                    .retain(|claim| scope_set_contains_all(scope, &claim.scope_refs));
+fn composite_version_target(
+    memory_id: &OpaqueId,
+    version_id: &OpaqueId,
+) -> String {
+    // 十进制 UTF-8 字节长度前缀；两个字段边界无歧义。
+    let memory = memory_id.as_str();
+    let version = version_id.as_str();
+    format!("{}:{}{}:{}", memory.len(), memory, version.len(), version)
+}
 
-                Ok(Some(version))
-            }
-            None => Ok(None),
-        }
+fn effective_projection_scopes(
+    stored: &[ScopeRef],
+    authorized: &[ScopeRef],
+    requested: &[ScopeRef],
+) -> Result<Vec<ScopeRef>, StorageError> {
+    Self::validate_scope_set(authorized)?;
+    Self::validate_scope_set(requested)?;
+
+    // 请求的每一个 scope 都必须由授权凭证覆盖；不能通过交集静默缩窄
+    // 一个越权请求，否则调用方无法区分“无数据”和“请求越权”。
+    if !scope_set_contains_all(authorized, requested) {
+        return Err(StorageError::ScopeMismatch);
     }
+
+    projection::projectable_scopes(stored, authorized, requested)
+}
+
+fn read_version_row_tx(
+    tx: &Connection,
+    memory_id: &OpaqueId,
+    version_id: &OpaqueId,
+    authorized: &[ScopeRef],
+    projection_scope: &[ScopeRef],
+) -> Result<Option<(MemoryVersion, Vec<ScopeRef>)>, StorageError> {
+    let row = tx
+        .query_row(
+            "SELECT v.scope_json, v.version_json
+             FROM versions v
+             LEFT JOIN publication_preparations p ON p.version_id = v.version_id
+             WHERE v.memory_id = ?1 AND v.version_id = ?2
+               AND (p.version_id IS NULL OR p.state = 'Published')
+               AND NOT EXISTS (
+                   SELECT 1 FROM canonical_forget_fences f
+                   WHERE (f.target_kind = 'Memory' AND f.target_id = v.memory_id)
+                      OR (f.target_kind = 'Version' AND f.target_id = v.version_id)
+               )",
+            params![memory_id.as_str(), version_id.as_str()],
+            |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?)),
+        )
+        .optional()
+        .map_err(|_| StorageError::TransactionUnavailable)?;
+
+    let Some((scope_json, version_json)) = row else {
+        return Ok(None);
+    };
+
+    let stored_scopes: Vec<ScopeRef> = Self::decode(&scope_json)?;
+    Self::validate_scope_set(&stored_scopes)?;
+    let visible_scopes = Self::effective_projection_scopes(
+        &stored_scopes,
+        authorized,
+        projection_scope,
+    )?;
+
+    let version: MemoryVersion = Self::decode(&version_json)?;
+    version.validate().map_err(|_| StorageError::InvalidSchema)?;
+
+    if version.memory_id != *memory_id
+        || version.memory_version_id != *version_id
+        || version.claims.iter().any(|claim| {
+            !scope_set_contains_all(&stored_scopes, &claim.scope_refs)
+        })
+    {
+        return Err(StorageError::InvalidSchema);
+    }
+
+    Ok(Some((version, visible_scopes)))
+}
+
+fn version_projection(
+    version: &MemoryVersion,
+    visible_scopes: &[ScopeRef],
+    authorized_scopes: &[ScopeRef],
+    policy_epoch: u64,
+) -> ScopedMemoryVersionProjection {
+    let visible_claims =
+        projection::visible_claims(version, authorized_scopes, visible_scopes);
+    let projection_digest = projection::version_projection_digest(
+        version,
+        &visible_claims,
+        authorized_scopes,
+        policy_epoch,
+    );
+
+    ScopedMemoryVersionProjection {
+        memory_id: version.memory_id.clone(),
+        memory_version_id: version.memory_version_id.clone(),
+        canonical_content_digest: version.content_digest.clone(),
+        visible_claims,
+        authorized_scopes: authorized_scopes.to_vec(),
+        policy_epoch,
+        projection_digest,
+    }
+}
 }
 
 impl MemoryStorage for SqliteMemoryStorage {
-    fn create_memory(&mut self, memory: Memory, scope: &[ScopeRef]) -> Result<(), StorageError> {
-        Self::validate_scope_set(scope)?;
-        memory.validate().map_err(|_| StorageError::InvalidSchema)?;
-        if memory.current_version_id.is_some() {
-            // Creation cannot point at a version that this operation does not persist.
-            return Err(StorageError::InvalidReference);
-        }
-        Self::scope_allowed(&Self::encode(&memory.scope_refs)?, scope)?;
-        if Self::is_fenced(&self.connection, "Memory", memory.memory_id.as_str())? {
-            return Err(StorageError::Forgotten);
-        }
-        let scope_json = Self::encode(&memory.scope_refs)?;
-        let memory_json = Self::encode(&memory)?;
-        self.connection
-            .execute(
-                "INSERT INTO memories(memory_id, scope_json, current_version_id, memory_json)
-                 VALUES (?1, ?2, ?3, ?4)",
-                params![
-                    memory.memory_id.as_str(),
-                    scope_json,
-                    memory.current_version_id.as_ref().map(OpaqueId::as_str),
-                    memory_json
-                ],
-            )
-            .map_err(|_| StorageError::InvalidReference)?;
-        Ok(())
+fn create_memory(
+    &mut self,
+    memory: Memory,
+    cap: &ValidatedAuthorization,
+) -> Result<(), StorageError> {
+    let tx = self.connection
+        .transaction_with_behavior(TransactionBehavior::Immediate)
+        .map_err(|_| StorageError::TransactionUnavailable)?;
+
+    let expected = Self::expected_subject(
+        cap,
+        AuthorizationOperation::CreateMemory,
+        "Memory",
+        memory.memory_id.as_str().to_owned(),
+    )?;
+    Self::validate_cap_in_tx(&tx, cap, &expected)?;
+
+    Self::validate_scope_set(&cap.subject().scopes)?;
+    memory.validate().map_err(|_| StorageError::InvalidSchema)?;
+    if memory.current_version_id.is_some() {
+        return Err(StorageError::InvalidReference);
     }
 
-    fn read_memory(
-        &self,
-        memory_id: &OpaqueId,
-        scope: &[ScopeRef],
-    ) -> Result<Option<Memory>, StorageError> {
-        Self::validate_scope_set(scope)?;
-        let row = self
-            .connection
-            .query_row(
-                "SELECT scope_json, memory_json FROM memories WHERE memory_id = ?1",
-                params![memory_id.as_str()],
-                |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?)),
-            )
-            .optional()
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-        let Some((scope_json, memory_json)) = row else {
-            return Ok(None);
-        };
-        Self::scope_allowed(&scope_json, scope)?;
-        // A forgotten memory is invisible on every read path, not only on version reads.
-        if Self::is_fenced(&self.connection, "Memory", memory_id.as_str())? {
-            return Ok(None);
-        }
-        let memory: Memory = Self::decode(&memory_json)?;
-        memory.validate().map_err(|_| StorageError::InvalidSchema)?;
-        if &memory.memory_id != memory_id {
-            return Err(StorageError::InvalidSchema);
-        }
-        Ok(Some(memory))
+    let scope_json = Self::encode(&memory.scope_refs)?;
+    let memory_json = Self::encode(&memory)?;
+    let stored_scopes: Vec<ScopeRef> = Self::decode(&scope_json)?;
+    Self::effective_projection_scopes(
+        &stored_scopes,
+        &cap.subject().scopes,
+        &cap.subject().scopes,
+    )?;
+
+    if Self::is_fenced(&tx, "Memory", memory.memory_id.as_str())? {
+        return Err(StorageError::Forgotten);
     }
 
-    fn read_current(
-        &self,
-        memory_id: &OpaqueId,
-        scope: &[ScopeRef],
-    ) -> Result<Option<MemoryVersion>, StorageError> {
-        Self::validate_scope_set(scope)?;
-        let row = self
-            .connection
-            .query_row(
-                "SELECT scope_json, current_version_id FROM memories WHERE memory_id = ?1",
-                params![memory_id.as_str()],
-                |row| Ok((row.get::<_, String>(0)?, row.get::<_, Option<String>>(1)?)),
-            )
-            .optional()
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-        let Some((scope_json, current)) = row else {
-            return Ok(None);
-        };
-        Self::scope_allowed(&scope_json, scope)?;
-        let Some(current) = current else {
-            return Ok(None);
-        };
-        let version_id = OpaqueId::new(current).map_err(|_| StorageError::InvalidSchema)?;
-        self.read_version_row(memory_id, &version_id, scope)
-    }
+    tx.execute(
+        "INSERT INTO memories(memory_id, scope_json, current_version_id, memory_json)
+         VALUES (?1, ?2, ?3, ?4)",
+        params![
+            memory.memory_id.as_str(),
+            scope_json,
+            Option::<&str>::None,
+            memory_json
+        ],
+    )
+    .map_err(|_| StorageError::InvalidReference)?;
 
-    fn read_version(
-        &self,
-        memory_id: &OpaqueId,
-        version_id: &OpaqueId,
-        scope: &[ScopeRef],
-    ) -> Result<Option<MemoryVersion>, StorageError> {
-        Self::validate_scope_set(scope)?;
-        self.read_version_row(memory_id, version_id, scope)
-    }
+    tx.commit().map_err(|_| StorageError::TransactionUnavailable)
+}
 
-    fn publication_state(
-        &self,
-        publication_id: &str,
-        scope: &[ScopeRef],
-    ) -> Result<Option<PublicationState>, StorageError> {
-        Self::validate_scope_set(scope)?;
-        let row = self
-            .connection
-            .query_row(
-                "SELECT v.scope_json, v.memory_id, v.version_id, p.state
-                 FROM publication_preparations p
-                 JOIN versions v ON v.version_id = p.version_id
-                 WHERE p.publication_id = ?1",
-                params![publication_id],
-                |row| {
-                    Ok((
-                        row.get::<_, String>(0)?,
-                        row.get::<_, String>(1)?,
-                        row.get::<_, String>(2)?,
-                        row.get::<_, String>(3)?,
-                    ))
-                },
-            )
-            .optional()
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-        let Some((scope_json, memory_id, version_id, state)) = row else {
-            return Ok(None);
-        };
-        Self::scope_allowed(&scope_json, scope)?;
-        // Forgotten targets are invisible on every read path, exactly as
-        // `read_version_row` excludes fenced versions.
-        if Self::is_fenced(&self.connection, "Memory", &memory_id)?
-            || Self::is_fenced(&self.connection, "Version", &version_id)?
-        {
-            return Ok(None);
-        }
-        let state = match state.as_str() {
-            "PreparedHidden" => PublicationState::PreparedHidden,
-            "Published" => PublicationState::Published,
-            "Suppressed" => PublicationState::Suppressed,
-            _ => return Err(StorageError::InvalidSchema),
-        };
-        Ok(Some(state))
-    }
+fn read_memory(
+    &mut self,
+    memory_id: &OpaqueId,
+    cap: &ValidatedAuthorization,
+    projection_scope: &[ScopeRef],
+) -> Result<Option<ScopedMemoryProjection>, StorageError> {
+    let tx = self.connection
+        .transaction_with_behavior(TransactionBehavior::Immediate)
+        .map_err(|_| StorageError::TransactionUnavailable)?;
 
-    fn commit_version(
-        &mut self,
-        request: CommitRequest,
-        scope: &[ScopeRef],
-    ) -> Result<CommitReceipt, StorageError> {
-        Self::validate_scope_set(scope)?;
-        if request.memory_id != request.new_version.memory_id {
-            return Err(StorageError::InvalidReference);
-        }
-        request
-            .new_version
-            .validate()
-            .map_err(|_| StorageError::InvalidSchema)?;
-        if request.idempotency_key.is_empty() || request.request_digest.is_empty() {
-            return Err(StorageError::InvalidSchema);
-        }
+    let expected = Self::expected_subject(
+        cap,
+        AuthorizationOperation::ReadMemory,
+        "Memory",
+        memory_id.as_str().to_owned(),
+    )?;
+    Self::validate_cap_in_tx(&tx, cap, &expected)?;
 
-        let tx = self
-            .connection
-            .transaction_with_behavior(TransactionBehavior::Immediate)
-            .map_err(|_| StorageError::TransactionUnavailable)?;
+    Self::validate_scope_set(&cap.subject().scopes)?;
+    Self::validate_scope_set(projection_scope)?;
 
-        let memory_row = tx
-            .query_row(
-                "SELECT scope_json, current_version_id FROM memories WHERE memory_id = ?1",
-                params![request.memory_id.as_str()],
-                |row| Ok((row.get::<_, String>(0)?, row.get::<_, Option<String>>(1)?)),
-            )
-            .optional()
-            .map_err(|_| StorageError::TransactionUnavailable)?
-            .ok_or(StorageError::NotFoundOrNotVisible)?;
+    let row = tx.query_row(
+        "SELECT scope_json, memory_json FROM memories WHERE memory_id = ?1",
+        params![memory_id.as_str()],
+        |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?)),
+    ).optional().map_err(|_| StorageError::TransactionUnavailable)?;
 
-        Self::scope_allowed(&memory_row.0, scope)?;
-        Self::ensure_not_forgotten(
-            &tx,
-            &request.memory_id,
-            Some(&request.new_version.memory_version_id),
-            request.new_version.parent_version_id.as_ref(),
-        )?;
-        let memory_scopes: Vec<ScopeRef> = Self::decode(&memory_row.0)?;
-        if request.new_version.claims.iter().any(|claim| {
-            !scope_set_contains_all(&memory_scopes, &claim.scope_refs)
-                || !scope_set_contains_all(scope, &claim.scope_refs)
-        }) {
-            return Err(StorageError::ScopeMismatch);
-        }
+    let result = match row {
+        None => None,
+        Some((scope_json, memory_json)) => {
+            let stored_scopes: Vec<ScopeRef> = Self::decode(&scope_json)?;
+            Self::validate_scope_set(&stored_scopes)?;
 
-        if let Some((stored_memory_id, stored_digest, receipt_json)) = tx
-            .query_row(
-                "SELECT memory_id, request_digest, receipt_json FROM idempotency WHERE idempotency_key = ?1",
-                params![request.idempotency_key.as_str()],
-                |row| Ok((
-                    row.get::<_, String>(0)?,
-                    row.get::<_, String>(1)?,
-                    row.get::<_, String>(2)?,
-                )),
-            )
-            .optional()
-            .map_err(|_| StorageError::TransactionUnavailable)?
-        {
-            // Idempotency keys are globally unique in this adapter. A retry may
-            // replay only the receipt for the same memory and identical payload.
-            if stored_memory_id == request.memory_id.as_str()
-                && stored_digest == request.request_digest
-            {
-                return Self::decode(&receipt_json);
+            // 越权 projection_scope 即使目标不存在，也已在事务内先完成授权复核；
+            // 对存在目标，严格检查 stored ∩ authorized ∩ requested。
+            let visible_scope_refs = Self::effective_projection_scopes(
+                &stored_scopes,
+                &cap.subject().scopes,
+                projection_scope,
+            )?;
+
+            if Self::is_fenced(&tx, "Memory", memory_id.as_str())? {
+                None
+            } else {
+                let memory: Memory = Self::decode(&memory_json)?;
+                memory.validate().map_err(|_| StorageError::InvalidSchema)?;
+                if memory.memory_id != *memory_id || memory.scope_refs != stored_scopes {
+                    return Err(StorageError::InvalidSchema);
+                }
+
+                let policy_epoch = authorization::current_epoch(&tx)?;
+                let authorized_scopes = cap.subject().scopes.clone();
+                let projection_digest = projection::memory_projection_digest(
+                    &memory,
+                    &visible_scope_refs,
+                    &authorized_scopes,
+                    policy_epoch,
+                );
+
+                Some(ScopedMemoryProjection {
+                    memory_id: memory.memory_id,
+                    memory_kind: memory.memory_kind,
+                    lifecycle_state: memory.lifecycle_state,
+                    retention_class: memory.retention_class,
+                    sensitivity: memory.sensitivity,
+                    created_at: memory.created_at,
+                    updated_at: memory.updated_at,
+                    visible_scope_refs,
+                    authorized_scopes,
+                    policy_epoch,
+                    projection_digest,
+                })
             }
+        }
+    };
+
+    tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+    Ok(result)
+}
+
+fn read_current(
+    &mut self,
+    memory_id: &OpaqueId,
+    cap: &ValidatedAuthorization,
+    projection_scope: &[ScopeRef],
+) -> Result<Option<ScopedMemoryVersionProjection>, StorageError> {
+    let tx = self.connection
+        .transaction_with_behavior(TransactionBehavior::Immediate)
+        .map_err(|_| StorageError::TransactionUnavailable)?;
+
+    let expected = Self::expected_subject(
+        cap,
+        AuthorizationOperation::ReadMemory,
+        "Memory",
+        memory_id.as_str().to_owned(),
+    )?;
+    Self::validate_cap_in_tx(&tx, cap, &expected)?;
+
+    Self::validate_scope_set(&cap.subject().scopes)?;
+    Self::validate_scope_set(projection_scope)?;
+
+    let row = tx.query_row(
+        "SELECT scope_json, current_version_id FROM memories WHERE memory_id = ?1",
+        params![memory_id.as_str()],
+        |row| Ok((row.get::<_, String>(0)?, row.get::<_, Option<String>>(1)?)),
+    ).optional().map_err(|_| StorageError::TransactionUnavailable)?;
+
+    let result = match row {
+        None => None,
+        Some((scope_json, current)) => {
+            let stored_scopes: Vec<ScopeRef> = Self::decode(&scope_json)?;
+            Self::effective_projection_scopes(
+                &stored_scopes,
+                &cap.subject().scopes,
+                projection_scope,
+            )?;
+
+            if Self::is_fenced(&tx, "Memory", memory_id.as_str())? {
+                None
+            } else if let Some(current) = current {
+                let version_id = OpaqueId::new(current)
+                    .map_err(|_| StorageError::InvalidSchema)?;
+                match Self::read_version_row_tx(
+                    &tx,
+                    memory_id,
+                    &version_id,
+                    &cap.subject().scopes,
+                    projection_scope,
+                )? {
+                    None => None,
+                    Some((version, visible_scopes)) => {
+                        let epoch = authorization::current_epoch(&tx)?;
+                        Some(Self::version_projection(
+                            &version,
+                            &visible_scopes,
+                            &cap.subject().scopes,
+                            epoch,
+                        ))
+                    }
+                }
+            } else {
+                None
+            }
+        }
+    };
+
+    tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+    Ok(result)
+}
+
+fn read_version(
+    &mut self,
+    memory_id: &OpaqueId,
+    version_id: &OpaqueId,
+    cap: &ValidatedAuthorization,
+    projection_scope: &[ScopeRef],
+) -> Result<Option<ScopedMemoryVersionProjection>, StorageError> {
+    let tx = self.connection
+        .transaction_with_behavior(TransactionBehavior::Immediate)
+        .map_err(|_| StorageError::TransactionUnavailable)?;
+
+    let expected = Self::expected_subject(
+        cap,
+        AuthorizationOperation::ReadVersion,
+        "Version",
+        Self::composite_version_target(memory_id, version_id),
+    )?;
+    Self::validate_cap_in_tx(&tx, cap, &expected)?;
+
+    Self::validate_scope_set(&cap.subject().scopes)?;
+    Self::validate_scope_set(projection_scope)?;
+
+    let result = match Self::read_version_row_tx(
+        &tx,
+        memory_id,
+        version_id,
+        &cap.subject().scopes,
+        projection_scope,
+    )? {
+        None => None,
+        Some((version, visible_scopes)) => {
+            let epoch = authorization::current_epoch(&tx)?;
+            Some(Self::version_projection(
+                &version,
+                &visible_scopes,
+                &cap.subject().scopes,
+                epoch,
+            ))
+        }
+    };
+
+    tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+    Ok(result)
+}
+
+fn publication_state(
+    &mut self,
+    publication_id: &str,
+    cap: &ValidatedAuthorization,
+) -> Result<Option<PublicationState>, StorageError> {
+    let tx = self.connection
+        .transaction_with_behavior(TransactionBehavior::Immediate)
+        .map_err(|_| StorageError::TransactionUnavailable)?;
+
+    let expected = Self::expected_subject(
+        cap,
+        AuthorizationOperation::ReadPublicationState,
+        "Publication",
+        publication_id.to_owned(),
+    )?;
+    Self::validate_cap_in_tx(&tx, cap, &expected)?;
+
+    Self::validate_scope_set(&cap.subject().scopes)?;
+
+    let row = tx.query_row(
+        "SELECT v.scope_json, v.memory_id, v.version_id, p.state
+         FROM publication_preparations p
+         JOIN versions v ON v.version_id = p.version_id
+         WHERE p.publication_id = ?1",
+        params![publication_id],
+        |row| Ok((
+            row.get::<_, String>(0)?,
+            row.get::<_, String>(1)?,
+            row.get::<_, String>(2)?,
+            row.get::<_, String>(3)?,
+        )),
+    ).optional().map_err(|_| StorageError::TransactionUnavailable)?;
+
+    let result = if let Some((scope_json, memory_id, version_id, state)) = row {
+        let stored_scopes: Vec<ScopeRef> = Self::decode(&scope_json)?;
+        Self::effective_projection_scopes(
+            &stored_scopes,
+            &cap.subject().scopes,
+            &cap.subject().scopes,
+        )?;
+
+        if Self::is_fenced(&tx, "Memory", &memory_id)?
+            || Self::is_fenced(&tx, "Version", &version_id)?
+        {
+            None
+        } else {
+            Some(match state.as_str() {
+                "PreparedHidden" => PublicationState::PreparedHidden,
+                "Published" => PublicationState::Published,
+                "Suppressed" => PublicationState::Suppressed,
+                _ => return Err(StorageError::InvalidSchema),
+            })
+        }
+    } else {
+        None
+    };
+
+    tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+    Ok(result)
+}
+fn commit_version(
+    &mut self,
+    request: CommitRequest,
+    cap: &ValidatedAuthorization,
+) -> Result<CommitReceipt, StorageError> {
+    let tx = self.connection
+        .transaction_with_behavior(TransactionBehavior::Immediate)
+        .map_err(|_| StorageError::TransactionUnavailable)?;
+
+    let expected = Self::expected_subject(
+        cap,
+        AuthorizationOperation::CommitVersion,
+        "Memory",
+        request.memory_id.as_str().to_owned(),
+    )?;
+    Self::validate_cap_in_tx(&tx, cap, &expected)?;
+
+    Self::validate_scope_set(&cap.subject().scopes)?;
+    if request.memory_id != request.new_version.memory_id {
+        return Err(StorageError::InvalidReference);
+    }
+    request.new_version.validate().map_err(|_| StorageError::InvalidSchema)?;
+    if request.idempotency_key.is_empty() || request.request_digest.is_empty() {
+        return Err(StorageError::InvalidSchema);
+    }
+
+    let memory_row = tx.query_row(
+        "SELECT scope_json, current_version_id FROM memories WHERE memory_id = ?1",
+        params![request.memory_id.as_str()],
+        |row| Ok((row.get::<_, String>(0)?, row.get::<_, Option<String>>(1)?)),
+    ).optional().map_err(|_| StorageError::TransactionUnavailable)?
+      .ok_or(StorageError::NotFoundOrNotVisible)?;
+
+    let memory_scopes: Vec<ScopeRef> = Self::decode(&memory_row.0)?;
+    Self::effective_projection_scopes(
+        &memory_scopes,
+        &cap.subject().scopes,
+        &cap.subject().scopes,
+    )?;
+
+    Self::ensure_not_forgotten(
+        &tx,
+        &request.memory_id,
+        Some(&request.new_version.memory_version_id),
+        request.new_version.parent_version_id.as_ref(),
+    )?;
+
+    if request.new_version.claims.iter().any(|claim| {
+        !scope_set_contains_all(&memory_scopes, &claim.scope_refs)
+            || !scope_set_contains_all(&cap.subject().scopes, &claim.scope_refs)
+    }) {
+        return Err(StorageError::ScopeMismatch);
+    }
+
+    if let Some((stored_memory_id, stored_digest, receipt_json)) = tx.query_row(
+        "SELECT memory_id, request_digest, receipt_json
+         FROM idempotency WHERE idempotency_key = ?1",
+        params![request.idempotency_key.as_str()],
+        |row| Ok((
+            row.get::<_, String>(0)?,
+            row.get::<_, String>(1)?,
+            row.get::<_, String>(2)?,
+        )),
+    ).optional().map_err(|_| StorageError::TransactionUnavailable)? {
+        if stored_memory_id == request.memory_id.as_str()
+            && stored_digest == request.request_digest
+        {
+            let receipt = Self::decode(&receipt_json)?;
+            tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+            return Ok(receipt);
+        }
+        return Err(StorageError::IdempotencyConflict);
+    }
+
+    let current_id = memory_row.1.as_deref();
+    if current_id != request.expected_current_version.as_ref().map(OpaqueId::as_str) {
+        return Err(StorageError::StaleVersion);
+    }
+
+    if let Some(current_id) = current_id {
+        let current_json: String = tx.query_row(
+            "SELECT version_json FROM versions WHERE version_id = ?1",
+            params![current_id],
+            |row| row.get(0),
+        ).map_err(|_| StorageError::TransactionUnavailable)?;
+        let current: MemoryVersion = Self::decode(&current_json)?;
+        request.new_version.validate_successor(&current)
+            .map_err(|_| StorageError::StaleVersion)?;
+    } else if request.new_version.version_number != 1
+        || request.new_version.parent_version_id.is_some()
+    {
+        return Err(StorageError::StaleVersion);
+    }
+
+    let next_sequence: i64 = tx.query_row(
+        "SELECT COALESCE(MAX(commit_sequence), 0) + 1 FROM commit_log",
+        [],
+        |row| row.get(0),
+    ).map_err(|_| StorageError::TransactionUnavailable)?;
+    if next_sequence <= 0 {
+        return Err(StorageError::TransactionUnavailable);
+    }
+
+    let version_json = Self::encode(&request.new_version)?;
+    tx.execute(
+        "INSERT INTO versions(
+            version_id, memory_id, version_number, parent_version_id,
+            scope_json, version_json, commit_sequence
+         ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+        params![
+            request.new_version.memory_version_id.as_str(),
+            request.memory_id.as_str(),
+            request.new_version.version_number as i64,
+            request.new_version.parent_version_id.as_ref().map(OpaqueId::as_str),
+            memory_row.0,
+            version_json,
+            next_sequence
+        ],
+    ).map_err(|_| StorageError::InvalidReference)?;
+
+    let memory_json: String = tx.query_row(
+        "SELECT memory_json FROM memories WHERE memory_id = ?1",
+        params![request.memory_id.as_str()],
+        |row| row.get(0),
+    ).map_err(|_| StorageError::TransactionUnavailable)?;
+    let mut memory: Memory = Self::decode(&memory_json)?;
+    memory.current_version_id = Some(request.new_version.memory_version_id.clone());
+
+    tx.execute(
+        "UPDATE memories SET current_version_id = ?1, memory_json = ?2
+         WHERE memory_id = ?3",
+        params![
+            request.new_version.memory_version_id.as_str(),
+            Self::encode(&memory)?,
+            request.memory_id.as_str()
+        ],
+    ).map_err(|_| StorageError::TransactionUnavailable)?;
+
+    tx.execute(
+        "INSERT INTO commit_log(commit_sequence, memory_id, version_id)
+         VALUES (?1, ?2, ?3)",
+        params![
+            next_sequence,
+            request.memory_id.as_str(),
+            request.new_version.memory_version_id.as_str()
+        ],
+    ).map_err(|_| StorageError::TransactionUnavailable)?;
+
+    let receipt = CommitReceipt {
+        memory_id: request.memory_id.clone(),
+        resulting_version_id: request.new_version.memory_version_id.clone(),
+        commit_sequence: CommitSequence(next_sequence as u64),
+        idempotency_key: request.idempotency_key.clone(),
+    };
+    tx.execute(
+        "INSERT INTO idempotency(
+            idempotency_key, memory_id, request_digest, receipt_json
+         ) VALUES (?1, ?2, ?3, ?4)",
+        params![
+            request.idempotency_key,
+            request.memory_id.as_str(),
+            request.request_digest,
+            Self::encode(&receipt)?
+        ],
+    ).map_err(|_| StorageError::IdempotencyConflict)?;
+
+    tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+    Ok(receipt)
+}
+
+fn prepare_version(
+    &mut self,
+    request: PrepareRequest,
+    cap: &ValidatedAuthorization,
+) -> Result<PreparedCommitReceipt, StorageError> {
+    let tx = self.connection
+        .transaction_with_behavior(TransactionBehavior::Immediate)
+        .map_err(|_| StorageError::TransactionUnavailable)?;
+
+    let expected = Self::expected_subject(
+        cap,
+        AuthorizationOperation::PrepareVersion,
+        "Memory",
+        request.memory_id.as_str().to_owned(),
+    )?;
+    Self::validate_cap_in_tx(&tx, cap, &expected)?;
+
+    Self::validate_scope_set(&cap.subject().scopes)?;
+    if request.memory_id != request.new_version.memory_id {
+        return Err(StorageError::InvalidReference);
+    }
+    request.new_version.validate().map_err(|_| StorageError::InvalidSchema)?;
+    if request.idempotency_key.is_empty()
+        || request.request_digest.is_empty()
+        || request.publication_id.is_empty()
+        || request.generation > i64::MAX as u64
+    {
+        return Err(StorageError::InvalidSchema);
+    }
+
+    let memory_row = tx.query_row(
+        "SELECT scope_json, current_version_id FROM memories WHERE memory_id = ?1",
+        params![request.memory_id.as_str()],
+        |row| Ok((row.get::<_, String>(0)?, row.get::<_, Option<String>>(1)?)),
+    ).optional().map_err(|_| StorageError::TransactionUnavailable)?
+      .ok_or(StorageError::NotFoundOrNotVisible)?;
+
+    let memory_scopes: Vec<ScopeRef> = Self::decode(&memory_row.0)?;
+    Self::effective_projection_scopes(
+        &memory_scopes,
+        &cap.subject().scopes,
+        &cap.subject().scopes,
+    )?;
+    Self::ensure_not_forgotten(
+        &tx,
+        &request.memory_id,
+        Some(&request.new_version.memory_version_id),
+        request.new_version.parent_version_id.as_ref(),
+    )?;
+
+    if request.new_version.claims.iter().any(|claim| {
+        !scope_set_contains_all(&memory_scopes, &claim.scope_refs)
+            || !scope_set_contains_all(&cap.subject().scopes, &claim.scope_refs)
+    }) {
+        return Err(StorageError::ScopeMismatch);
+    }
+
+    if let Some((stored_memory, stored_digest, stored_publication, stored_generation)) =
+        tx.query_row(
+            "SELECT memory_id, request_digest, publication_id, generation
+             FROM publication_preparations WHERE idempotency_key = ?1",
+            params![request.idempotency_key.as_str()],
+            |row| Ok((
+                row.get::<_, String>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, String>(2)?,
+                row.get::<_, i64>(3)?,
+            )),
+        ).optional().map_err(|_| StorageError::TransactionUnavailable)?
+    {
+        if stored_memory != request.memory_id.as_str()
+            || stored_digest != request.request_digest
+            || stored_publication != request.publication_id
+            || stored_generation != request.generation as i64
+        {
             return Err(StorageError::IdempotencyConflict);
         }
 
-        let current_id = memory_row.1.as_deref();
-        if current_id
-            != request
-                .expected_current_version
-                .as_ref()
-                .map(OpaqueId::as_str)
-        {
-            return Err(StorageError::StaleVersion);
-        }
+        let version_id: String = tx.query_row(
+            "SELECT version_id FROM publication_preparations WHERE idempotency_key = ?1",
+            params![request.idempotency_key.as_str()],
+            |row| row.get(0),
+        ).map_err(|_| StorageError::TransactionUnavailable)?;
 
-        if let Some(current_id) = current_id {
-            let current_json: String = tx
-                .query_row(
-                    "SELECT version_json FROM versions WHERE version_id = ?1",
-                    params![current_id],
-                    |row| row.get(0),
-                )
-                .map_err(|_| StorageError::TransactionUnavailable)?;
-            let current: MemoryVersion = Self::decode(&current_json)?;
-            request
-                .new_version
-                .validate_successor(&current)
-                .map_err(|_| StorageError::StaleVersion)?;
-        } else if request.new_version.version_number != 1
-            || request.new_version.parent_version_id.is_some()
-        {
-            return Err(StorageError::StaleVersion);
-        }
-
-        let scope_json = memory_row.0.clone();
-        let version_json = Self::encode(&request.new_version)?;
-        let next_sequence: i64 = tx
-            .query_row(
-                "SELECT COALESCE(MAX(commit_sequence), 0) + 1 FROM commit_log",
-                [],
-                |row| row.get(0),
-            )
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-
-        tx.execute(
-            "INSERT INTO versions(version_id, memory_id, version_number, parent_version_id, scope_json, version_json, commit_sequence)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-            params![
-                request.new_version.memory_version_id.as_str(),
-                request.memory_id.as_str(),
-                request.new_version.version_number as i64,
-                request.new_version.parent_version_id.as_ref().map(OpaqueId::as_str),
-                scope_json,
-                version_json,
-                next_sequence
-            ],
-        )
-        .map_err(|_| StorageError::InvalidReference)?;
-
-        let mut updated_memory: Memory = Self::decode(
-            &tx.query_row(
-                "SELECT memory_json FROM memories WHERE memory_id = ?1",
-                params![request.memory_id.as_str()],
-                |row| row.get::<_, String>(0),
-            )
-            .map_err(|_| StorageError::TransactionUnavailable)?,
-        )?;
-        updated_memory.current_version_id = Some(request.new_version.memory_version_id.clone());
-        let memory_json = Self::encode(&updated_memory)?;
-
-        tx.execute(
-            "UPDATE memories SET current_version_id = ?1, memory_json = ?2 WHERE memory_id = ?3",
-            params![
-                request.new_version.memory_version_id.as_str(),
-                memory_json,
-                request.memory_id.as_str()
-            ],
-        )
-        .map_err(|_| StorageError::TransactionUnavailable)?;
-
-        tx.execute(
-            "INSERT INTO commit_log(commit_sequence, memory_id, version_id) VALUES (?1, ?2, ?3)",
-            params![
-                next_sequence,
-                request.memory_id.as_str(),
-                request.new_version.memory_version_id.as_str()
-            ],
-        )
-        .map_err(|_| StorageError::TransactionUnavailable)?;
-
-        let receipt = CommitReceipt {
-            memory_id: request.memory_id.clone(),
-            resulting_version_id: request.new_version.memory_version_id.clone(),
-            commit_sequence: CommitSequence(next_sequence as u64),
-            idempotency_key: request.idempotency_key.clone(),
-        };
-        let receipt_json = Self::encode(&receipt)?;
-        tx.execute(
-            "INSERT INTO idempotency(idempotency_key, memory_id, request_digest, receipt_json) VALUES (?1, ?2, ?3, ?4)",
-            params![request.idempotency_key, request.memory_id.as_str(), request.request_digest, receipt_json],
-        )
-        .map_err(|_| StorageError::IdempotencyConflict)?;
-
-        tx.commit()
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-        Ok(receipt)
-    }
-
-    fn prepare_version(
-        &mut self,
-        request: PrepareRequest,
-        scope: &[ScopeRef],
-    ) -> Result<PreparedCommitReceipt, StorageError> {
-        Self::validate_scope_set(scope)?;
-        if request.memory_id != request.new_version.memory_id {
-            return Err(StorageError::InvalidReference);
-        }
-        request
-            .new_version
-            .validate()
-            .map_err(|_| StorageError::InvalidSchema)?;
-        if request.idempotency_key.is_empty()
-            || request.request_digest.is_empty()
-            || request.publication_id.is_empty()
-            || request.generation > i64::MAX as u64
-        {
-            return Err(StorageError::InvalidSchema);
-        }
-
-        let tx = self
-            .connection
-            .transaction_with_behavior(TransactionBehavior::Immediate)
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-
-        let memory_row = tx
-            .query_row(
-                "SELECT scope_json, current_version_id FROM memories WHERE memory_id = ?1",
-                params![request.memory_id.as_str()],
-                |row| Ok((row.get::<_, String>(0)?, row.get::<_, Option<String>>(1)?)),
-            )
-            .optional()
-            .map_err(|_| StorageError::TransactionUnavailable)?
-            .ok_or(StorageError::NotFoundOrNotVisible)?;
-
-        Self::scope_allowed(&memory_row.0, scope)?;
-        Self::ensure_not_forgotten(
-            &tx,
-            &request.memory_id,
-            Some(&request.new_version.memory_version_id),
-            request.new_version.parent_version_id.as_ref(),
-        )?;
-        let memory_scopes: Vec<ScopeRef> = Self::decode(&memory_row.0)?;
-        if request.new_version.claims.iter().any(|claim| {
-            !scope_set_contains_all(&memory_scopes, &claim.scope_refs)
-                || !scope_set_contains_all(scope, &claim.scope_refs)
-        }) {
-            return Err(StorageError::ScopeMismatch);
-        }
-
-        // Replay of an identical preparation returns the original receipt.
-        if let Some((stored_memory, stored_digest, stored_publication, stored_generation)) = tx
-            .query_row(
-                "SELECT memory_id, request_digest, publication_id, generation
-                 FROM publication_preparations WHERE idempotency_key = ?1",
-                params![request.idempotency_key.as_str()],
-                |row| {
-                    Ok((
-                        row.get::<_, String>(0)?,
-                        row.get::<_, String>(1)?,
-                        row.get::<_, String>(2)?,
-                        row.get::<_, i64>(3)?,
-                    ))
-                },
-            )
-            .optional()
-            .map_err(|_| StorageError::TransactionUnavailable)?
-        {
-            if stored_memory != request.memory_id.as_str()
-                || stored_digest != request.request_digest
-                || stored_publication != request.publication_id
-                || stored_generation != request.generation as i64
-            {
-                return Err(StorageError::IdempotencyConflict);
-            }
-            let version_id: String = tx
-                .query_row(
-                    "SELECT version_id FROM publication_preparations WHERE idempotency_key = ?1",
-                    params![request.idempotency_key.as_str()],
-                    |row| row.get(0),
-                )
-                .map_err(|_| StorageError::TransactionUnavailable)?;
-            tx.commit()
-                .map_err(|_| StorageError::TransactionUnavailable)?;
-            return Ok(PreparedCommitReceipt {
-                memory_id: request.memory_id,
-                prepared_version_id: OpaqueId::new(version_id)
-                    .map_err(|_| StorageError::InvalidSchema)?,
-                publication_id: request.publication_id,
-                generation: request.generation,
-                idempotency_key: request.idempotency_key,
-            });
-        }
-
-        // The legacy commit path owns its own idempotency namespace; refuse a key
-        // that it already consumed so a single key can never mean two commits.
-        let legacy_key_used: bool = tx
-            .query_row(
-                "SELECT EXISTS(SELECT 1 FROM idempotency WHERE idempotency_key = ?1)",
-                params![request.idempotency_key.as_str()],
-                |row| row.get(0),
-            )
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-        if legacy_key_used {
-            return Err(StorageError::IdempotencyConflict);
-        }
-
-        let publication_exists: bool = tx
-            .query_row(
-                "SELECT EXISTS(SELECT 1 FROM publication_preparations WHERE publication_id = ?1)",
-                params![request.publication_id.as_str()],
-                |row| row.get(0),
-            )
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-        if publication_exists {
-            return Err(StorageError::PublicationStateConflict);
-        }
-
-        let current_id = memory_row.1.as_deref();
-        if current_id
-            != request
-                .expected_current_version
-                .as_ref()
-                .map(OpaqueId::as_str)
-        {
-            return Err(StorageError::StaleVersion);
-        }
-
-        if let Some(current_id) = current_id {
-            if request
-                .new_version
-                .parent_version_id
-                .as_ref()
-                .map(OpaqueId::as_str)
-                != Some(current_id)
-            {
-                return Err(StorageError::StaleVersion);
-            }
-            let current_json: String = tx
-                .query_row(
-                    "SELECT version_json FROM versions WHERE version_id = ?1",
-                    params![current_id],
-                    |row| row.get(0),
-                )
-                .map_err(|_| StorageError::TransactionUnavailable)?;
-            let current: MemoryVersion = Self::decode(&current_json)?;
-            request
-                .new_version
-                .validate_successor(&current)
-                .map_err(|_| StorageError::StaleVersion)?;
-        } else if request.new_version.version_number != 1
-            || request.new_version.parent_version_id.is_some()
-        {
-            return Err(StorageError::StaleVersion);
-        }
-
-        // Hidden versions take strictly-decreasing negative sequences so the
-        // existing NOT NULL UNIQUE constraint holds without touching the
-        // canonical positive sequence, which is allocated from commit_log only.
-        let min_negative: Option<i64> = tx
-            .query_row(
-                "SELECT MIN(commit_sequence) FROM versions WHERE commit_sequence < 0",
-                [],
-                |row| row.get(0),
-            )
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-        let reserved_sequence = min_negative
-            .unwrap_or(0)
-            .checked_sub(1)
-            .ok_or(StorageError::TransactionUnavailable)?;
-
-        let scope_json = memory_row.0;
-        let version_json = Self::encode(&request.new_version)?;
-        tx.execute(
-            "INSERT INTO versions(version_id, memory_id, version_number, parent_version_id, scope_json, version_json, commit_sequence)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-            params![
-                request.new_version.memory_version_id.as_str(),
-                request.memory_id.as_str(),
-                request.new_version.version_number as i64,
-                request.new_version.parent_version_id.as_ref().map(OpaqueId::as_str),
-                scope_json,
-                version_json,
-                reserved_sequence
-            ],
-        )
-        .map_err(|_| StorageError::InvalidReference)?;
-
-        tx.execute(
-            "INSERT INTO publication_preparations(version_id, memory_id, publication_id, generation,
-                request_digest, idempotency_key, expected_current_version, state, commit_sequence)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 'PreparedHidden', NULL)",
-            params![
-                request.new_version.memory_version_id.as_str(),
-                request.memory_id.as_str(),
-                request.publication_id.as_str(),
-                request.generation as i64,
-                request.request_digest.as_str(),
-                request.idempotency_key.as_str(),
-                request.expected_current_version.as_ref().map(OpaqueId::as_str),
-            ],
-        )
-        .map_err(|_| StorageError::PublicationStateConflict)?;
-
-        tx.commit()
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-        Ok(PreparedCommitReceipt {
+        let receipt = PreparedCommitReceipt {
             memory_id: request.memory_id,
-            prepared_version_id: request.new_version.memory_version_id,
+            prepared_version_id: OpaqueId::new(version_id)
+                .map_err(|_| StorageError::InvalidSchema)?,
             publication_id: request.publication_id,
             generation: request.generation,
             idempotency_key: request.idempotency_key,
-        })
-    }
-
-    fn publish_prepared(
-        &mut self,
-        publication_id: &str,
-        expected_current_version: Option<OpaqueId>,
-        scope: &[ScopeRef],
-    ) -> Result<CommitReceipt, StorageError> {
-        Self::validate_scope_set(scope)?;
-        if publication_id.is_empty() {
-            return Err(StorageError::InvalidSchema);
-        }
-
-        let tx = self
-            .connection
-            .transaction_with_behavior(TransactionBehavior::Immediate)
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-
-        let row = tx
-            .query_row(
-                "SELECT p.memory_id, p.version_id, p.idempotency_key, p.request_digest,
-                        p.expected_current_version, p.state, p.commit_sequence,
-                        m.scope_json, m.current_version_id, m.memory_json, v.version_json
-                 FROM publication_preparations p
-                 JOIN memories m ON m.memory_id = p.memory_id
-                 JOIN versions v ON v.version_id = p.version_id
-                 WHERE p.publication_id = ?1",
-                params![publication_id],
-                |row| {
-                    Ok((
-                        row.get::<_, String>(0)?,
-                        row.get::<_, String>(1)?,
-                        row.get::<_, String>(2)?,
-                        row.get::<_, String>(3)?,
-                        row.get::<_, Option<String>>(4)?,
-                        row.get::<_, String>(5)?,
-                        row.get::<_, Option<i64>>(6)?,
-                        row.get::<_, String>(7)?,
-                        row.get::<_, Option<String>>(8)?,
-                        row.get::<_, String>(9)?,
-                        row.get::<_, String>(10)?,
-                    ))
-                },
-            )
-            .optional()
-            .map_err(|_| StorageError::TransactionUnavailable)?
-            .ok_or(StorageError::NotFoundOrNotVisible)?;
-
-        let (
-            memory_id_text,
-            version_id_text,
-            idempotency_key,
-            request_digest,
-            stored_expected,
-            state,
-            stored_sequence,
-            scope_json,
-            current_id,
-            memory_json,
-            version_json,
-        ) = row;
-
-        Self::scope_allowed(&scope_json, scope)?;
-        let memory_id = OpaqueId::new(memory_id_text).map_err(|_| StorageError::InvalidSchema)?;
-        let version_id =
-            OpaqueId::new(version_id_text.clone()).map_err(|_| StorageError::InvalidSchema)?;
-
-        let prepared_version: MemoryVersion = Self::decode(&version_json)?;
-
-        Self::ensure_not_forgotten(
-            &tx,
-            &memory_id,
-            Some(&version_id),
-            prepared_version.parent_version_id.as_ref(),
-        )?;
-
-        // Replay of a published preparation restores the original receipt and
-        // never allocates a second sequence.
-        if state == "Published" {
-            let sequence = stored_sequence
-                .filter(|value| *value > 0)
-                .ok_or(StorageError::PublicationStateConflict)?;
-            let receipt = CommitReceipt {
-                memory_id,
-                resulting_version_id: version_id,
-                commit_sequence: CommitSequence(sequence as u64),
-                idempotency_key,
-            };
-            tx.commit()
-                .map_err(|_| StorageError::TransactionUnavailable)?;
-            return Ok(receipt);
-        }
-        if state != "PreparedHidden" {
-            return Err(StorageError::PublicationStateConflict);
-        }
-
-        if current_id.as_deref() != stored_expected.as_deref()
-            || current_id.as_deref() != expected_current_version.as_ref().map(OpaqueId::as_str)
-        {
-            return Err(StorageError::StaleVersion);
-        }
-
-        let memory_scopes: Vec<ScopeRef> = Self::decode(&scope_json)?;
-        let version: MemoryVersion = Self::decode(&version_json)?;
-        version
-            .validate()
-            .map_err(|_| StorageError::InvalidSchema)?;
-        if version.claims.iter().any(|claim| {
-            !scope_set_contains_all(&memory_scopes, &claim.scope_refs)
-                || !scope_set_contains_all(scope, &claim.scope_refs)
-        }) {
-            return Err(StorageError::ScopeMismatch);
-        }
-
-        // Re-validate the parent at publish time; the prepare-time check alone
-        // cannot vouch for a pointer that may have moved since.
-        if let Some(current_id) = current_id.as_deref() {
-            if version.parent_version_id.as_ref().map(OpaqueId::as_str) != Some(current_id) {
-                return Err(StorageError::StaleVersion);
-            }
-            let current_json: String = tx
-                .query_row(
-                    "SELECT version_json FROM versions WHERE version_id = ?1",
-                    params![current_id],
-                    |row| row.get(0),
-                )
-                .map_err(|_| StorageError::TransactionUnavailable)?;
-            let current: MemoryVersion = Self::decode(&current_json)?;
-            version
-                .validate_successor(&current)
-                .map_err(|_| StorageError::StaleVersion)?;
-        } else if version.version_number != 1 || version.parent_version_id.is_some() {
-            return Err(StorageError::StaleVersion);
-        }
-
-        let key_exists: bool = tx
-            .query_row(
-                "SELECT EXISTS(SELECT 1 FROM idempotency WHERE idempotency_key = ?1)",
-                params![idempotency_key.as_str()],
-                |row| row.get(0),
-            )
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-        if key_exists {
-            return Err(StorageError::IdempotencyConflict);
-        }
-
-        let next_sequence: i64 = tx
-            .query_row(
-                "SELECT COALESCE(MAX(commit_sequence), 0) + 1 FROM commit_log",
-                [],
-                |row| row.get(0),
-            )
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-        if next_sequence <= 0 {
-            return Err(StorageError::TransactionUnavailable);
-        }
-
-        let changed = tx
-            .execute(
-                "UPDATE versions SET commit_sequence = ?1 WHERE version_id = ?2 AND commit_sequence < 0",
-                params![next_sequence, version_id_text.as_str()],
-            )
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-        if changed != 1 {
-            return Err(StorageError::PublicationStateConflict);
-        }
-
-        let mut updated_memory: Memory = Self::decode(&memory_json)?;
-        updated_memory.current_version_id = Some(version_id.clone());
-        let updated_memory_json = Self::encode(&updated_memory)?;
-        tx.execute(
-            "UPDATE memories SET current_version_id = ?1, memory_json = ?2 WHERE memory_id = ?3",
-            params![version_id.as_str(), updated_memory_json, memory_id.as_str()],
-        )
-        .map_err(|_| StorageError::TransactionUnavailable)?;
-
-        tx.execute(
-            "INSERT INTO commit_log(commit_sequence, memory_id, version_id) VALUES (?1, ?2, ?3)",
-            params![next_sequence, memory_id.as_str(), version_id.as_str()],
-        )
-        .map_err(|_| StorageError::TransactionUnavailable)?;
-
-        let receipt = CommitReceipt {
-            memory_id: memory_id.clone(),
-            resulting_version_id: version_id.clone(),
-            commit_sequence: CommitSequence(next_sequence as u64),
-            idempotency_key: idempotency_key.clone(),
         };
-        let receipt_json = Self::encode(&receipt)?;
-        tx.execute(
-            "INSERT INTO idempotency(idempotency_key, memory_id, request_digest, receipt_json) VALUES (?1, ?2, ?3, ?4)",
-            params![idempotency_key.as_str(), memory_id.as_str(), request_digest.as_str(), receipt_json],
-        )
-        .map_err(|_| StorageError::IdempotencyConflict)?;
-
-        let changed = tx
-            .execute(
-                "UPDATE publication_preparations SET state = 'Published', commit_sequence = ?1
-                 WHERE publication_id = ?2 AND state = 'PreparedHidden'",
-                params![next_sequence, publication_id],
-            )
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-        if changed != 1 {
-            return Err(StorageError::PublicationStateConflict);
-        }
-
-        tx.commit()
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-        Ok(receipt)
+        tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+        return Ok(receipt);
     }
 
-    fn forget_memory(
-        &mut self,
-        memory_id: &OpaqueId,
-        reason_digest: &str,
-        scope: &[ScopeRef],
-    ) -> Result<i64, StorageError> {
-        Self::validate_scope_set(scope)?;
+    let legacy_key_used: bool = tx.query_row(
+        "SELECT EXISTS(
+            SELECT 1 FROM idempotency WHERE idempotency_key = ?1
+         )",
+        params![request.idempotency_key.as_str()],
+        |row| row.get(0),
+    ).map_err(|_| StorageError::TransactionUnavailable)?;
+    if legacy_key_used {
+        return Err(StorageError::IdempotencyConflict);
+    }
 
-        if reason_digest.is_empty() {
-            return Err(StorageError::InvalidSchema);
-        }
+    let publication_exists: bool = tx.query_row(
+        "SELECT EXISTS(
+            SELECT 1 FROM publication_preparations WHERE publication_id = ?1
+         )",
+        params![request.publication_id.as_str()],
+        |row| row.get(0),
+    ).map_err(|_| StorageError::TransactionUnavailable)?;
+    if publication_exists {
+        return Err(StorageError::PublicationStateConflict);
+    }
 
-        let tx = self
-            .connection
-            .transaction_with_behavior(TransactionBehavior::Immediate)
-            .map_err(|_| StorageError::TransactionUnavailable)?;
+    let current_id = memory_row.1.as_deref();
+    if current_id != request.expected_current_version.as_ref().map(OpaqueId::as_str) {
+        return Err(StorageError::StaleVersion);
+    }
 
-        let (scope_json, memory_json): (String, String) = tx
-            .query_row(
-                "SELECT scope_json, memory_json FROM memories WHERE memory_id = ?1",
-                params![memory_id.as_str()],
-                |row| Ok((row.get(0)?, row.get(1)?)),
-            )
-            .optional()
-            .map_err(|_| StorageError::TransactionUnavailable)?
-            .ok_or(StorageError::NotFoundOrNotVisible)?;
-
-        Self::scope_allowed(&scope_json, scope)?;
-
-        if let Some(sequence) = tx
-            .query_row(
-                "SELECT fence_sequence FROM canonical_forget_fences
-                 WHERE target_kind = 'Memory' AND target_id = ?1",
-                params![memory_id.as_str()],
-                |row| row.get::<_, i64>(0),
-            )
-            .optional()
-            .map_err(|_| StorageError::TransactionUnavailable)?
+    if let Some(current_id) = current_id {
+        if request.new_version.parent_version_id.as_ref().map(OpaqueId::as_str)
+            != Some(current_id)
         {
-            tx.commit()
-                .map_err(|_| StorageError::TransactionUnavailable)?;
-            return Ok(sequence);
+            return Err(StorageError::StaleVersion);
         }
-
-        let sequence = Self::next_fence_sequence(&tx)?;
-        let mut memory: Memory = Self::decode(&memory_json)?;
-        memory.lifecycle_state = MemoryLifecycle::Forgotten;
-        let updated_memory_json = Self::encode(&memory)?;
-
-        tx.execute(
-            "UPDATE memories SET memory_json = ?1 WHERE memory_id = ?2",
-            params![updated_memory_json, memory_id.as_str()],
-        )
-        .map_err(|_| StorageError::TransactionUnavailable)?;
-
-        tx.execute(
-            "INSERT INTO canonical_forget_fences
-                (target_kind, target_id, fence_sequence, reason_digest, recorded_at)
-             VALUES ('Memory', ?1, ?2, ?3, ?4)",
-            params![
-                memory_id.as_str(),
-                sequence,
-                reason_digest,
-                Self::recorded_at()
-            ],
-        )
-        .map_err(|_| StorageError::TransactionUnavailable)?;
-
-        tx.commit()
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-        Ok(sequence)
+        let current_json: String = tx.query_row(
+            "SELECT version_json FROM versions WHERE version_id = ?1",
+            params![current_id],
+            |row| row.get(0),
+        ).map_err(|_| StorageError::TransactionUnavailable)?;
+        let current: MemoryVersion = Self::decode(&current_json)?;
+        request.new_version.validate_successor(&current)
+            .map_err(|_| StorageError::StaleVersion)?;
+    } else if request.new_version.version_number != 1
+        || request.new_version.parent_version_id.is_some()
+    {
+        return Err(StorageError::StaleVersion);
     }
 
-    fn forget_version(
-        &mut self,
-        memory_id: &OpaqueId,
-        version_id: &OpaqueId,
-        reason_digest: &str,
-        scope: &[ScopeRef],
-    ) -> Result<i64, StorageError> {
-        Self::validate_scope_set(scope)?;
+    let min_negative: Option<i64> = tx.query_row(
+        "SELECT MIN(commit_sequence) FROM versions WHERE commit_sequence < 0",
+        [],
+        |row| row.get(0),
+    ).map_err(|_| StorageError::TransactionUnavailable)?;
+    let reserved_sequence = min_negative.unwrap_or(0).checked_sub(1)
+        .ok_or(StorageError::TransactionUnavailable)?;
 
-        if reason_digest.is_empty() {
-            return Err(StorageError::InvalidSchema);
-        }
+    tx.execute(
+        "INSERT INTO versions(
+            version_id, memory_id, version_number, parent_version_id,
+            scope_json, version_json, commit_sequence
+         ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+        params![
+            request.new_version.memory_version_id.as_str(),
+            request.memory_id.as_str(),
+            request.new_version.version_number as i64,
+            request.new_version.parent_version_id.as_ref().map(OpaqueId::as_str),
+            memory_row.0,
+            Self::encode(&request.new_version)?,
+            reserved_sequence
+        ],
+    ).map_err(|_| StorageError::InvalidReference)?;
 
-        let tx = self
-            .connection
-            .transaction_with_behavior(TransactionBehavior::Immediate)
-            .map_err(|_| StorageError::TransactionUnavailable)?;
+    tx.execute(
+        "INSERT INTO publication_preparations(
+            version_id, memory_id, publication_id, generation,
+            request_digest, idempotency_key, expected_current_version,
+            state, commit_sequence
+         ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 'PreparedHidden', NULL)",
+        params![
+            request.new_version.memory_version_id.as_str(),
+            request.memory_id.as_str(),
+            request.publication_id,
+            request.generation as i64,
+            request.request_digest,
+            request.idempotency_key,
+            request.expected_current_version.as_ref().map(OpaqueId::as_str),
+        ],
+    ).map_err(|_| StorageError::PublicationStateConflict)?;
 
-        let scope_json: String = tx
-            .query_row(
-                "SELECT scope_json FROM memories WHERE memory_id = ?1",
-                params![memory_id.as_str()],
-                |row| row.get(0),
-            )
-            .optional()
-            .map_err(|_| StorageError::TransactionUnavailable)?
-            .ok_or(StorageError::NotFoundOrNotVisible)?;
-
-        Self::scope_allowed(&scope_json, scope)?;
-
-        // Order matters: confirm the version belongs to this memory, then honour
-        // an existing version fence before reporting the memory-level fence, so
-        // repeated forgets stay idempotent across a later memory-level forget.
-        let version_exists: bool = tx
-            .query_row(
-                "SELECT EXISTS(
-                    SELECT 1 FROM versions
-                    WHERE memory_id = ?1 AND version_id = ?2
-                 )",
-                params![memory_id.as_str(), version_id.as_str()],
-                |row| row.get(0),
-            )
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-
-        if !version_exists {
-            return Err(StorageError::NotFoundOrNotVisible);
-        }
-
-        if let Some(sequence) = tx
-            .query_row(
-                "SELECT fence_sequence FROM canonical_forget_fences
-                 WHERE target_kind = 'Version' AND target_id = ?1",
-                params![version_id.as_str()],
-                |row| row.get::<_, i64>(0),
-            )
-            .optional()
-            .map_err(|_| StorageError::TransactionUnavailable)?
-        {
-            tx.commit()
-                .map_err(|_| StorageError::TransactionUnavailable)?;
-            return Ok(sequence);
-        }
-
-        if Self::is_fenced(&tx, "Memory", memory_id.as_str())? {
-            return Err(StorageError::Forgotten);
-        }
-
-        let sequence = Self::next_fence_sequence(&tx)?;
-
-        tx.execute(
-            "INSERT INTO canonical_forget_fences
-                (target_kind, target_id, fence_sequence, reason_digest, recorded_at)
-             VALUES ('Version', ?1, ?2, ?3, ?4)",
-            params![
-                version_id.as_str(),
-                sequence,
-                reason_digest,
-                Self::recorded_at()
-            ],
-        )
-        .map_err(|_| StorageError::TransactionUnavailable)?;
-
-        tx.commit()
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-        Ok(sequence)
-    }
-
-    fn list_changes(
-        &self,
-        after: Option<CommitSequence>,
-        scope: &[ScopeRef],
-        limit: usize,
-    ) -> Result<ChangePage, StorageError> {
-        Self::validate_scope_set(scope)?;
-        if limit == 0 {
-            return Ok(ChangePage {
-                records: vec![],
-                next_cursor: after,
-            });
-        }
-        let start = after.map(|c| c.0 as i64).unwrap_or(0);
-        let mut stmt = self
-            .connection
-            .prepare(
-                "SELECT c.commit_sequence, c.memory_id, c.version_id, m.scope_json
-                 FROM commit_log c JOIN memories m ON m.memory_id = c.memory_id
-                 WHERE c.commit_sequence > ?1
-                   AND NOT EXISTS (
-                       SELECT 1 FROM canonical_forget_fences f
-                       WHERE (f.target_kind = 'Memory' AND f.target_id = c.memory_id)
-                          OR (f.target_kind = 'Version' AND f.target_id = c.version_id)
-                   )
-                 ORDER BY c.commit_sequence ASC",
-            )
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-        let rows = stmt
-            .query_map(params![start], |row| {
-                Ok((
-                    row.get::<_, i64>(0)?,
-                    row.get::<_, String>(1)?,
-                    row.get::<_, String>(2)?,
-                    row.get::<_, String>(3)?,
-                ))
-            })
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-
-        // Apply the page limit to authorized records, not raw commit-log rows.
-        // Read until one extra visible record is found so the cursor never
-        // advances past an item that belongs on the next page.
-        let mut records = Vec::new();
-        for row in rows {
-            let (sequence, memory_id, version_id, scope_json) =
-                row.map_err(|_| StorageError::TransactionUnavailable)?;
-            match Self::scope_allowed(&scope_json, scope) {
-                Ok(()) => {
-                    records.push(ChangeRecord {
-                        commit_sequence: CommitSequence(sequence as u64),
-                        memory_id: OpaqueId::new(memory_id)
-                            .map_err(|_| StorageError::InvalidSchema)?,
-                        version_id: OpaqueId::new(version_id)
-                            .map_err(|_| StorageError::InvalidSchema)?,
-                    });
-                    if records.len() > limit {
-                        break;
-                    }
-                }
-                Err(StorageError::ScopeMismatch) => continue,
-                Err(error) => return Err(error),
-            }
-        }
-        if records.len() > limit {
-            records.pop();
-        }
-        let next_cursor = records.last().map(|r| r.commit_sequence);
-        Ok(ChangePage {
-            records,
-            next_cursor,
-        })
-    }
-
-    fn resolve_idempotency(
-        &self,
-        idempotency_key: &str,
-        request_digest: &str,
-        scope: &[ScopeRef],
-    ) -> Result<Option<CommitReceipt>, StorageError> {
-        Self::validate_scope_set(scope)?;
-        let row = self
-            .connection
-            .query_row(
-                "SELECT i.request_digest, i.receipt_json, m.scope_json
-                 FROM idempotency i
-                 JOIN memories m ON m.memory_id = i.memory_id
-                 WHERE i.idempotency_key = ?1
-                   AND NOT EXISTS (
-                       SELECT 1 FROM canonical_forget_fences f
-                       WHERE f.target_kind = 'Memory' AND f.target_id = i.memory_id
-                   )",
-                params![idempotency_key],
-                |row| {
-                    Ok((
-                        row.get::<_, String>(0)?,
-                        row.get::<_, String>(1)?,
-                        row.get::<_, String>(2)?,
-                    ))
-                },
-            )
-            .optional()
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-        match row {
-            None => Ok(None),
-            Some((stored_digest, receipt_json, scope_json)) => {
-                Self::scope_allowed(&scope_json, scope)?;
-                if stored_digest != request_digest {
-                    return Err(StorageError::IdempotencyConflict);
-                }
-
-                let receipt: CommitReceipt = Self::decode(&receipt_json)?;
-
-                // A version-level Forget also suppresses replay of its receipt.
-                if Self::is_fenced(
-                    &self.connection,
-                    "Version",
-                    receipt.resulting_version_id.as_str(),
-                )? {
-                    return Ok(None);
-                }
-
-                Ok(Some(receipt))
-            }
-        }
-    }
+    let receipt = PreparedCommitReceipt {
+        memory_id: request.memory_id,
+        prepared_version_id: request.new_version.memory_version_id,
+        publication_id: request.publication_id,
+        generation: request.generation,
+        idempotency_key: request.idempotency_key,
+    };
+    tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+    Ok(receipt)
 }
+
+fn publish_prepared(
+    &mut self,
+    publication_id: &str,
+    expected_current_version: Option<OpaqueId>,
+    cap: &ValidatedAuthorization,
+) -> Result<CommitReceipt, StorageError> {
+    let tx = self.connection
+        .transaction_with_behavior(TransactionBehavior::Immediate)
+        .map_err(|_| StorageError::TransactionUnavailable)?;
+
+    let expected = Self::expected_subject(
+        cap,
+        AuthorizationOperation::PublishPrepared,
+        "Publication",
+        publication_id.to_owned(),
+    )?;
+    Self::validate_cap_in_tx(&tx, cap, &expected)?;
+
+    Self::validate_scope_set(&cap.subject().scopes)?;
+    if publication_id.is_empty() {
+        return Err(StorageError::InvalidSchema);
+    }
+
+    let row = tx.query_row(
+        "SELECT p.memory_id, p.version_id, p.idempotency_key, p.request_digest,
+                p.expected_current_version, p.state, p.commit_sequence,
+                m.scope_json, m.current_version_id, m.memory_json, v.version_json
+         FROM publication_preparations p
+         JOIN memories m ON m.memory_id = p.memory_id
+         JOIN versions v ON v.version_id = p.version_id
+         WHERE p.publication_id = ?1",
+        params![publication_id],
+        |row| Ok((
+            row.get::<_, String>(0)?, row.get::<_, String>(1)?,
+            row.get::<_, String>(2)?, row.get::<_, String>(3)?,
+            row.get::<_, Option<String>>(4)?, row.get::<_, String>(5)?,
+            row.get::<_, Option<i64>>(6)?, row.get::<_, String>(7)?,
+            row.get::<_, Option<String>>(8)?, row.get::<_, String>(9)?,
+            row.get::<_, String>(10)?,
+        )),
+    ).optional().map_err(|_| StorageError::TransactionUnavailable)?
+      .ok_or(StorageError::NotFoundOrNotVisible)?;
+
+    let (
+        memory_text, version_text, idempotency_key, request_digest,
+        stored_expected, state, stored_sequence, scope_json, current_id,
+        memory_json, version_json,
+    ) = row;
+
+    let memory_id = OpaqueId::new(memory_text)
+        .map_err(|_| StorageError::InvalidSchema)?;
+    let version_id = OpaqueId::new(version_text.clone())
+        .map_err(|_| StorageError::InvalidSchema)?;
+
+    let memory_scopes: Vec<ScopeRef> = Self::decode(&scope_json)?;
+    Self::effective_projection_scopes(
+        &memory_scopes,
+        &cap.subject().scopes,
+        &cap.subject().scopes,
+    )?;
+
+    let version: MemoryVersion = Self::decode(&version_json)?;
+    version.validate().map_err(|_| StorageError::InvalidSchema)?;
+    Self::ensure_not_forgotten(
+        &tx,
+        &memory_id,
+        Some(&version_id),
+        version.parent_version_id.as_ref(),
+    )?;
+
+    if state == "Published" {
+        let sequence = stored_sequence.filter(|n| *n > 0)
+            .ok_or(StorageError::PublicationStateConflict)?;
+        let receipt = CommitReceipt {
+            memory_id,
+            resulting_version_id: version_id,
+            commit_sequence: CommitSequence(sequence as u64),
+            idempotency_key,
+        };
+        tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+        return Ok(receipt);
+    }
+    if state != "PreparedHidden" {
+        return Err(StorageError::PublicationStateConflict);
+    }
+
+    if current_id.as_deref() != stored_expected.as_deref()
+        || current_id.as_deref() != expected_current_version.as_ref().map(OpaqueId::as_str)
+    {
+        return Err(StorageError::StaleVersion);
+    }
+
+    if version.claims.iter().any(|claim| {
+        !scope_set_contains_all(&memory_scopes, &claim.scope_refs)
+            || !scope_set_contains_all(&cap.subject().scopes, &claim.scope_refs)
+    }) {
+        return Err(StorageError::ScopeMismatch);
+    }
+
+    if let Some(current_id) = current_id.as_deref() {
+        if version.parent_version_id.as_ref().map(OpaqueId::as_str) != Some(current_id) {
+            return Err(StorageError::StaleVersion);
+        }
+        let current_json: String = tx.query_row(
+            "SELECT version_json FROM versions WHERE version_id = ?1",
+            params![current_id],
+            |row| row.get(0),
+        ).map_err(|_| StorageError::TransactionUnavailable)?;
+        let current: MemoryVersion = Self::decode(&current_json)?;
+        version.validate_successor(&current)
+            .map_err(|_| StorageError::StaleVersion)?;
+    } else if version.version_number != 1 || version.parent_version_id.is_some() {
+        return Err(StorageError::StaleVersion);
+    }
+
+    let key_exists: bool = tx.query_row(
+        "SELECT EXISTS(
+            SELECT 1 FROM idempotency WHERE idempotency_key = ?1
+         )",
+        params![idempotency_key.as_str()],
+        |row| row.get(0),
+    ).map_err(|_| StorageError::TransactionUnavailable)?;
+    if key_exists {
+        return Err(StorageError::IdempotencyConflict);
+    }
+
+    let next_sequence: i64 = tx.query_row(
+        "SELECT COALESCE(MAX(commit_sequence), 0) + 1 FROM commit_log",
+        [],
+        |row| row.get(0),
+    ).map_err(|_| StorageError::TransactionUnavailable)?;
+    if next_sequence <= 0 {
+        return Err(StorageError::TransactionUnavailable);
+    }
+
+    let changed = tx.execute(
+        "UPDATE versions SET commit_sequence = ?1
+         WHERE version_id = ?2 AND commit_sequence < 0",
+        params![next_sequence, version_text],
+    ).map_err(|_| StorageError::TransactionUnavailable)?;
+    if changed != 1 {
+        return Err(StorageError::PublicationStateConflict);
+    }
+
+    let mut memory: Memory = Self::decode(&memory_json)?;
+    memory.current_version_id = Some(version_id.clone());
+    tx.execute(
+        "UPDATE memories SET current_version_id = ?1, memory_json = ?2
+         WHERE memory_id = ?3",
+        params![version_id.as_str(), Self::encode(&memory)?, memory_id.as_str()],
+    ).map_err(|_| StorageError::TransactionUnavailable)?;
+
+    tx.execute(
+        "INSERT INTO commit_log(commit_sequence, memory_id, version_id)
+         VALUES (?1, ?2, ?3)",
+        params![next_sequence, memory_id.as_str(), version_id.as_str()],
+    ).map_err(|_| StorageError::TransactionUnavailable)?;
+
+    let receipt = CommitReceipt {
+        memory_id: memory_id.clone(),
+        resulting_version_id: version_id.clone(),
+        commit_sequence: CommitSequence(next_sequence as u64),
+        idempotency_key: idempotency_key.clone(),
+    };
+    tx.execute(
+        "INSERT INTO idempotency(
+            idempotency_key, memory_id, request_digest, receipt_json
+         ) VALUES (?1, ?2, ?3, ?4)",
+        params![
+            idempotency_key,
+            memory_id.as_str(),
+            request_digest,
+            Self::encode(&receipt)?
+        ],
+    ).map_err(|_| StorageError::IdempotencyConflict)?;
+
+    let changed = tx.execute(
+        "UPDATE publication_preparations
+         SET state = 'Published', commit_sequence = ?1
+         WHERE publication_id = ?2 AND state = 'PreparedHidden'",
+        params![next_sequence, publication_id],
+    ).map_err(|_| StorageError::TransactionUnavailable)?;
+    if changed != 1 {
+        return Err(StorageError::PublicationStateConflict);
+    }
+
+    tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+    Ok(receipt)
+}
+fn forget_memory(
+    &mut self,
+    memory_id: &OpaqueId,
+    reason_digest: &str,
+    cap: &ValidatedAuthorization,
+) -> Result<i64, StorageError> {
+    let tx = self.connection
+        .transaction_with_behavior(TransactionBehavior::Immediate)
+        .map_err(|_| StorageError::TransactionUnavailable)?;
+
+    let expected = Self::expected_subject(
+        cap,
+        AuthorizationOperation::ForgetMemory,
+        "Memory",
+        memory_id.as_str().to_owned(),
+    )?;
+    Self::validate_cap_in_tx(&tx, cap, &expected)?;
+
+    Self::validate_scope_set(&cap.subject().scopes)?;
+    if reason_digest.is_empty() {
+        return Err(StorageError::InvalidSchema);
+    }
+
+    let (scope_json, memory_json): (String, String) = tx.query_row(
+        "SELECT scope_json, memory_json FROM memories WHERE memory_id = ?1",
+        params![memory_id.as_str()],
+        |row| Ok((row.get(0)?, row.get(1)?)),
+    ).optional().map_err(|_| StorageError::TransactionUnavailable)?
+      .ok_or(StorageError::NotFoundOrNotVisible)?;
+
+    let stored_scopes: Vec<ScopeRef> = Self::decode(&scope_json)?;
+    Self::effective_projection_scopes(
+        &stored_scopes,
+        &cap.subject().scopes,
+        &cap.subject().scopes,
+    )?;
+
+    if let Some(sequence) = tx.query_row(
+        "SELECT fence_sequence FROM canonical_forget_fences
+         WHERE target_kind = 'Memory' AND target_id = ?1",
+        params![memory_id.as_str()],
+        |row| row.get::<_, i64>(0),
+    ).optional().map_err(|_| StorageError::TransactionUnavailable)? {
+        tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+        return Ok(sequence);
+    }
+
+    let sequence = Self::next_fence_sequence(&tx)?;
+    let mut memory: Memory = Self::decode(&memory_json)?;
+    memory.lifecycle_state = MemoryLifecycle::Forgotten;
+
+    tx.execute(
+        "UPDATE memories SET memory_json = ?1 WHERE memory_id = ?2",
+        params![Self::encode(&memory)?, memory_id.as_str()],
+    ).map_err(|_| StorageError::TransactionUnavailable)?;
+
+    tx.execute(
+        "INSERT INTO canonical_forget_fences
+            (target_kind, target_id, fence_sequence, reason_digest, recorded_at)
+         VALUES ('Memory', ?1, ?2, ?3, ?4)",
+        params![memory_id.as_str(), sequence, reason_digest, Self::recorded_at()],
+    ).map_err(|_| StorageError::TransactionUnavailable)?;
+
+    tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+    Ok(sequence)
+}
+
+fn forget_version(
+    &mut self,
+    memory_id: &OpaqueId,
+    version_id: &OpaqueId,
+    reason_digest: &str,
+    cap: &ValidatedAuthorization,
+) -> Result<i64, StorageError> {
+    let tx = self.connection
+        .transaction_with_behavior(TransactionBehavior::Immediate)
+        .map_err(|_| StorageError::TransactionUnavailable)?;
+
+    let expected = Self::expected_subject(
+        cap,
+        AuthorizationOperation::ForgetVersion,
+        "Version",
+        Self::composite_version_target(memory_id, version_id),
+    )?;
+    Self::validate_cap_in_tx(&tx, cap, &expected)?;
+
+    Self::validate_scope_set(&cap.subject().scopes)?;
+    if reason_digest.is_empty() {
+        return Err(StorageError::InvalidSchema);
+    }
+
+    let scope_json: String = tx.query_row(
+        "SELECT scope_json FROM memories WHERE memory_id = ?1",
+        params![memory_id.as_str()],
+        |row| row.get(0),
+    ).optional().map_err(|_| StorageError::TransactionUnavailable)?
+      .ok_or(StorageError::NotFoundOrNotVisible)?;
+
+    let stored_scopes: Vec<ScopeRef> = Self::decode(&scope_json)?;
+    Self::effective_projection_scopes(
+        &stored_scopes,
+        &cap.subject().scopes,
+        &cap.subject().scopes,
+    )?;
+
+    let version_exists: bool = tx.query_row(
+        "SELECT EXISTS(
+            SELECT 1 FROM versions WHERE memory_id = ?1 AND version_id = ?2
+         )",
+        params![memory_id.as_str(), version_id.as_str()],
+        |row| row.get(0),
+    ).map_err(|_| StorageError::TransactionUnavailable)?;
+    if !version_exists {
+        return Err(StorageError::NotFoundOrNotVisible);
+    }
+
+    if let Some(sequence) = tx.query_row(
+        "SELECT fence_sequence FROM canonical_forget_fences
+         WHERE target_kind = 'Version' AND target_id = ?1",
+        params![version_id.as_str()],
+        |row| row.get::<_, i64>(0),
+    ).optional().map_err(|_| StorageError::TransactionUnavailable)? {
+        tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+        return Ok(sequence);
+    }
+
+    if Self::is_fenced(&tx, "Memory", memory_id.as_str())? {
+        return Err(StorageError::Forgotten);
+    }
+
+    let sequence = Self::next_fence_sequence(&tx)?;
+    tx.execute(
+        "INSERT INTO canonical_forget_fences
+            (target_kind, target_id, fence_sequence, reason_digest, recorded_at)
+         VALUES ('Version', ?1, ?2, ?3, ?4)",
+        params![version_id.as_str(), sequence, reason_digest, Self::recorded_at()],
+    ).map_err(|_| StorageError::TransactionUnavailable)?;
+
+    tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+    Ok(sequence)
+}
+
+fn list_changes(
+    &mut self,
+    after: Option<CommitSequence>,
+    cap: &ValidatedAuthorization,
+    projection_scope: &[ScopeRef],
+    limit: usize,
+) -> Result<ChangePage, StorageError> {
+    let tx = self.connection
+        .transaction_with_behavior(TransactionBehavior::Immediate)
+        .map_err(|_| StorageError::TransactionUnavailable)?;
+
+    let expected = Self::expected_subject(
+        cap,
+        AuthorizationOperation::ListChanges,
+        "ChangeFeed",
+        "memory-change-feed-v1".to_owned(),
+    )?;
+    Self::validate_cap_in_tx(&tx, cap, &expected)?;
+
+    Self::validate_scope_set(&cap.subject().scopes)?;
+    Self::validate_scope_set(projection_scope)?;
+    if !scope_set_contains_all(&cap.subject().scopes, projection_scope) {
+        return Err(StorageError::ScopeMismatch);
+    }
+
+    if limit == 0 {
+        let page = ChangePage {
+            records: vec![],
+            next_cursor: after,
+        };
+        tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+        return Ok(page);
+    }
+
+    let start = after.map(|cursor| cursor.0 as i64).unwrap_or(0);
+    let mut stmt = tx.prepare(
+        "SELECT c.commit_sequence, c.memory_id, c.version_id, m.scope_json
+         FROM commit_log c
+         JOIN memories m ON m.memory_id = c.memory_id
+         WHERE c.commit_sequence > ?1
+           AND NOT EXISTS (
+               SELECT 1 FROM canonical_forget_fences f
+               WHERE (f.target_kind = 'Memory' AND f.target_id = c.memory_id)
+                  OR (f.target_kind = 'Version' AND f.target_id = c.version_id)
+           )
+         ORDER BY c.commit_sequence ASC",
+    ).map_err(|_| StorageError::TransactionUnavailable)?;
+
+    let rows = stmt.query_map(params![start], |row| Ok((
+        row.get::<_, i64>(0)?,
+        row.get::<_, String>(1)?,
+        row.get::<_, String>(2)?,
+        row.get::<_, String>(3)?,
+    ))).map_err(|_| StorageError::TransactionUnavailable)?;
+
+    let mut records = Vec::new();
+    for row in rows {
+        let (sequence, memory_text, version_text, scope_json) =
+            row.map_err(|_| StorageError::TransactionUnavailable)?;
+        let stored_scopes: Vec<ScopeRef> = Self::decode(&scope_json)?;
+
+        match Self::effective_projection_scopes(
+            &stored_scopes,
+            &cap.subject().scopes,
+            projection_scope,
+        ) {
+            Ok(_) => {
+                records.push(ChangeRecord {
+                    commit_sequence: CommitSequence(sequence as u64),
+                    memory_id: OpaqueId::new(memory_text)
+                        .map_err(|_| StorageError::InvalidSchema)?,
+                    version_id: OpaqueId::new(version_text)
+                        .map_err(|_| StorageError::InvalidSchema)?,
+                });
+                if records.len() > limit {
+                    break;
+                }
+            }
+            Err(StorageError::ScopeMismatch) => continue,
+            Err(error) => return Err(error),
+        }
+    }
+
+    if records.len() > limit {
+        records.pop();
+    }
+    let next_cursor = records.last().map(|record| record.commit_sequence);
+    let page = ChangePage { records, next_cursor };
+
+    drop(stmt);
+    tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+    Ok(page)
+}
+
+fn resolve_idempotency(
+    &mut self,
+    idempotency_key: &str,
+    request_digest: &str,
+    cap: &ValidatedAuthorization,
+) -> Result<Option<CommitReceipt>, StorageError> {
+    let tx = self.connection
+        .transaction_with_behavior(TransactionBehavior::Immediate)
+        .map_err(|_| StorageError::TransactionUnavailable)?;
+
+    let expected = Self::expected_subject(
+        cap,
+        AuthorizationOperation::ResolveIdempotency,
+        "IdempotencyKey",
+        idempotency_key.to_owned(),
+    )?;
+    Self::validate_cap_in_tx(&tx, cap, &expected)?;
+
+    Self::validate_scope_set(&cap.subject().scopes)?;
+    if idempotency_key.is_empty() || request_digest.is_empty() {
+        return Err(StorageError::InvalidSchema);
+    }
+
+    let row = tx.query_row(
+        "SELECT i.request_digest, i.receipt_json, m.scope_json, i.memory_id
+         FROM idempotency i
+         JOIN memories m ON m.memory_id = i.memory_id
+         WHERE i.idempotency_key = ?1
+           AND NOT EXISTS (
+               SELECT 1 FROM canonical_forget_fences f
+               WHERE f.target_kind = 'Memory' AND f.target_id = i.memory_id
+           )",
+        params![idempotency_key],
+        |row| Ok((
+            row.get::<_, String>(0)?,
+            row.get::<_, String>(1)?,
+            row.get::<_, String>(2)?,
+            row.get::<_, String>(3)?,
+        )),
+    ).optional().map_err(|_| StorageError::TransactionUnavailable)?;
+
+    let result = match row {
+        None => None,
+        Some((stored_digest, receipt_json, scope_json, _memory_id)) => {
+            let stored_scopes: Vec<ScopeRef> = Self::decode(&scope_json)?;
+            Self::effective_projection_scopes(
+                &stored_scopes,
+                &cap.subject().scopes,
+                &cap.subject().scopes,
+            )?;
+
+            if stored_digest != request_digest {
+                return Err(StorageError::IdempotencyConflict);
+            }
+
+            let receipt: CommitReceipt = Self::decode(&receipt_json)?;
+            if Self::is_fenced(
+                &tx,
+                "Version",
+                receipt.resulting_version_id.as_str(),
+            )? {
+                None
+            } else {
+                Some(receipt)
+            }
+        }
+    };
+
+    tx.commit().map_err(|_| StorageError::TransactionUnavailable)?;
+    Ok(result)
+}
+}
+
 
 #[cfg(test)]
 mod tests {

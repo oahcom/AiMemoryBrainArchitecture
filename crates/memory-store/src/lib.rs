@@ -1,10 +1,11 @@
 //! Minimal Phase 1 Memory Store facade.
-//! 仅负责领域校验、Scope 边界与 Storage Port 编排；不拥有持久化实现。
+//! 仅负责领域输入校验与 Storage Port 编排；不拥有持久化实现或授权决策。
 
 use memory_domain::{Memory, MemoryVersion, OpaqueId, ScopeRef};
 use memory_storage::{
     CommitReceipt, CommitRequest, MemoryStorage, PrepareRequest, PreparedCommitReceipt,
-    PublicationState, StorageError,
+    PublicationState, ScopedMemoryProjection, ScopedMemoryVersionProjection, StorageError,
+    ValidatedAuthorization,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -46,55 +47,70 @@ impl<S: MemoryStorage> MemoryStore<S> {
     pub fn create_memory(
         &mut self,
         memory: Memory,
-        scope: &[ScopeRef],
+        cap: &ValidatedAuthorization,
     ) -> Result<(), MemoryStoreError> {
-        memory.validate().map_err(MemoryStoreError::InvalidDomain)?;
-        validate_scope(scope)?;
-        self.storage.create_memory(memory, scope)?;
+        memory
+            .validate()
+            .map_err(MemoryStoreError::InvalidDomain)?;
+
+        self.storage.create_memory(memory, cap)?;
         Ok(())
     }
 
     pub fn read_current(
-        &self,
+        &mut self,
         memory_id: &OpaqueId,
-        scope: &[ScopeRef],
-    ) -> Result<Option<MemoryRevision>, MemoryStoreError> {
-        validate_scope(scope)?;
-        Ok(self.storage.read_current(memory_id, scope)?)
+        cap: &ValidatedAuthorization,
+        projection_scope: &[ScopeRef],
+    ) -> Result<Option<ScopedMemoryVersionProjection>, MemoryStoreError> {
+        validate_projection_scope(projection_scope)?;
+        Ok(self
+            .storage
+            .read_current(memory_id, cap, projection_scope)?)
     }
 
     pub fn read_memory(
-        &self,
+        &mut self,
         memory_id: &OpaqueId,
-        scope: &[ScopeRef],
-    ) -> Result<Option<Memory>, MemoryStoreError> {
-        validate_scope(scope)?;
-        Ok(self.storage.read_memory(memory_id, scope)?)
+        cap: &ValidatedAuthorization,
+        projection_scope: &[ScopeRef],
+    ) -> Result<Option<ScopedMemoryProjection>, MemoryStoreError> {
+        validate_projection_scope(projection_scope)?;
+        Ok(self
+            .storage
+            .read_memory(memory_id, cap, projection_scope)?)
     }
 
     pub fn read_revision(
-        &self,
+        &mut self,
         memory_id: &OpaqueId,
         revision_id: &OpaqueId,
-        scope: &[ScopeRef],
-    ) -> Result<Option<MemoryRevision>, MemoryStoreError> {
-        validate_scope(scope)?;
-        Ok(self.storage.read_version(memory_id, revision_id, scope)?)
+        cap: &ValidatedAuthorization,
+        projection_scope: &[ScopeRef],
+    ) -> Result<Option<ScopedMemoryVersionProjection>, MemoryStoreError> {
+        validate_projection_scope(projection_scope)?;
+        Ok(self
+            .storage
+            .read_version(memory_id, revision_id, cap, projection_scope)?)
     }
 
     pub fn write_revision(
         &mut self,
         write: RevisionWrite,
-        scope: &[ScopeRef],
+        cap: &ValidatedAuthorization,
     ) -> Result<CommitReceipt, MemoryStoreError> {
-        validate_scope(scope)?;
         write
             .revision
             .validate()
             .map_err(MemoryStoreError::InvalidDomain)?;
+
         if write.memory_id != write.revision.memory_id {
             return Err(MemoryStoreError::MemoryIdentityMismatch);
         }
+
+        validate_required_string(&write.idempotency_key, "idempotency_key")?;
+        validate_required_string(&write.request_digest, "request_digest")?;
+
         Ok(self.storage.commit_version(
             CommitRequest {
                 memory_id: write.memory_id,
@@ -103,7 +119,7 @@ impl<S: MemoryStorage> MemoryStore<S> {
                 idempotency_key: write.idempotency_key,
                 request_digest: write.request_digest,
             },
-            scope,
+            cap,
         )?)
     }
 
@@ -112,82 +128,79 @@ impl<S: MemoryStorage> MemoryStore<S> {
     /// The version becomes durable but is neither the current pointer nor
     /// readable through `read_revision` until `publish_prepared` authorizes it.
     /// `PrepareRequest` keeps together everything that must survive the staging
-    /// window: the expected current version (a stale value yields
-    /// `StaleVersion`), the `idempotency_key`/`request_digest` pair, and the
-    /// publication identity (`publication_id`, `generation`) that
-    /// `publish_prepared` and `publication_state` address afterwards.
+    /// window: the expected current version, the idempotency pair, and the
+    /// publication identity addressed by `publish_prepared` and
+    /// `publication_state`.
     pub fn prepare_version(
         &mut self,
         request: PrepareRequest,
-        scope: &[ScopeRef],
+        cap: &ValidatedAuthorization,
     ) -> Result<PreparedCommitReceipt, MemoryStoreError> {
-        validate_scope(scope)?;
-        Ok(self.storage.prepare_version(request, scope)?)
+        Ok(self.storage.prepare_version(request, cap)?)
     }
 
     /// Publish a prepared revision.
     ///
-    /// `expected_current_version` is the concurrency fence, not a hint: it must
-    /// equal both the value captured at prepare time and the memory's current
-    /// pointer, otherwise `StaleVersion` is returned. Passing a wrong value here
-    /// would turn a stale-version conflict into a silent overwrite, so the
-    /// storage re-validates the parent at publish time as well.
+    /// `expected_current_version` is a concurrency fence, not a hint.
+    /// Storage revalidates the captured parent and current pointer when
+    /// publishing.
     pub fn publish_prepared(
         &mut self,
         publication_id: &str,
         expected_current_version: Option<OpaqueId>,
-        scope: &[ScopeRef],
+        cap: &ValidatedAuthorization,
     ) -> Result<CommitReceipt, MemoryStoreError> {
-        validate_scope(scope)?;
-        Ok(self
-            .storage
-            .publish_prepared(publication_id, expected_current_version, scope)?)
+        validate_required_string(publication_id, "publication_id")?;
+
+        Ok(self.storage.publish_prepared(
+            publication_id,
+            expected_current_version,
+            cap,
+        )?)
     }
 
-    /// The persisted publication state of one publication.
+    /// Return the persisted state of one publication.
     ///
-    /// Authoritative for callers outside the storage layer: it reads the stored
-    /// preparation row rather than a local view, so a `Published` answer means
-    /// the canonical commit already happened. Visibility follows `read_current`:
-    /// absent or forgotten yields `Ok(None)`, non-intersecting scope yields
-    /// `ScopeMismatch`.
+    /// Visibility and authorization are determined by storage from the
+    /// transactionally revalidated authorization capability.
     pub fn publication_state(
-        &self,
+        &mut self,
         publication_id: &str,
-        scope: &[ScopeRef],
+        cap: &ValidatedAuthorization,
     ) -> Result<Option<PublicationState>, MemoryStoreError> {
-        validate_scope(scope)?;
-        Ok(self.storage.publication_state(publication_id, scope)?)
+        validate_required_string(publication_id, "publication_id")?;
+        Ok(self.storage.publication_state(publication_id, cap)?)
     }
 
     pub fn resolve_idempotency(
-        &self,
+        &mut self,
         key: &str,
         request_digest: &str,
-        scope: &[ScopeRef],
+        cap: &ValidatedAuthorization,
     ) -> Result<Option<CommitReceipt>, MemoryStoreError> {
-        validate_scope(scope)?;
+        validate_required_string(key, "idempotency_key")?;
+        validate_required_string(request_digest, "request_digest")?;
+
         Ok(self
             .storage
-            .resolve_idempotency(key, request_digest, scope)?)
+            .resolve_idempotency(key, request_digest, cap)?)
     }
 
     /// Permanently hide a Memory and all of its versions.
     ///
     /// `reason_digest` is an opaque digest, not free text. Repeating the call
-    /// with a different digest returns the original fence sequence (idempotent).
-    /// A forgotten Memory is unobservable through reads (`Ok(None)`) by design:
-    /// a third "forgotten" response would leak its existence.
+    /// returns the original fence sequence.
     pub fn forget_memory(
         &mut self,
         memory_id: &OpaqueId,
         reason_digest: &str,
-        scope: &[ScopeRef],
+        cap: &ValidatedAuthorization,
     ) -> Result<i64, MemoryStoreError> {
-        validate_scope(scope)?;
+        validate_required_string(reason_digest, "reason_digest")?;
+
         Ok(self
             .storage
-            .forget_memory(memory_id, reason_digest, scope)?)
+            .forget_memory(memory_id, reason_digest, cap)?)
     }
 
     /// Permanently hide one version of a Memory; other versions stay readable.
@@ -196,26 +209,50 @@ impl<S: MemoryStorage> MemoryStore<S> {
         memory_id: &OpaqueId,
         version_id: &OpaqueId,
         reason_digest: &str,
-        scope: &[ScopeRef],
+        cap: &ValidatedAuthorization,
     ) -> Result<i64, MemoryStoreError> {
-        validate_scope(scope)?;
+        validate_required_string(reason_digest, "reason_digest")?;
+
         Ok(self
             .storage
-            .forget_version(memory_id, version_id, reason_digest, scope)?)
+            .forget_version(memory_id, version_id, reason_digest, cap)?)
     }
 }
 
-fn validate_scope(scope: &[ScopeRef]) -> Result<(), MemoryStoreError> {
-    if scope.is_empty() {
+/// Validate only the shape of a requested projection scope.
+///
+/// This is deliberately not an authorization check. Storage must verify that
+/// the capability is valid for the operation and target, and that every
+/// requested projection scope is covered by the capability, inside its
+/// transaction.
+fn validate_projection_scope(
+    projection_scope: &[ScopeRef],
+) -> Result<(), MemoryStoreError> {
+    if projection_scope.is_empty() {
         return Err(MemoryStoreError::InvalidDomain(
-            memory_domain::DomainError::EmptyRequiredField("scope"),
+            memory_domain::DomainError::EmptyRequiredField("projection_scope"),
         ));
     }
-    scope
+
+    projection_scope
         .iter()
         .try_for_each(ScopeRef::validate)
         .map_err(MemoryStoreError::InvalidDomain)
 }
+
+fn validate_required_string(
+    value: &str,
+    field: &'static str,
+) -> Result<(), MemoryStoreError> {
+    if value.trim().is_empty() {
+        return Err(MemoryStoreError::InvalidDomain(
+            memory_domain::DomainError::EmptyRequiredField(field),
+        ));
+    }
+
+    Ok(())
+}
+
 
 #[cfg(test)]
 mod tests {

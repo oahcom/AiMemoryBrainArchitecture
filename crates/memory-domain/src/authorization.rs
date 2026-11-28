@@ -665,3 +665,195 @@ mod tests {
         }
     }
 }
+
+
+// ---------------------------------------------------------------------------
+// Authorization subject and canonical encoding
+// ---------------------------------------------------------------------------
+
+use crate::{ScopeKind, ScopeRef};
+
+/// Authenticated principal identity. This is an identity claim, not proof of
+/// authentication; the authority must establish its trust independently.
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct PrincipalRef {
+    id: OpaqueId,
+}
+
+impl PrincipalRef {
+    pub fn new(id: OpaqueId) -> Self {
+        Self { id }
+    }
+
+    pub fn as_str(&self) -> &str {
+        self.id.as_str()
+    }
+}
+
+/// Operations protected by the single authorization boundary.
+#[derive(serde::Serialize, serde::Deserialize, Clone, Copy, Debug, Eq, PartialEq)]
+pub enum AuthorizationOperation {
+    CreateMemory,
+    ReadMemory,
+    ReadVersion,
+    CommitVersion,
+    PrepareVersion,
+    PublishPrepared,
+    ReadPublicationState,
+    ForgetMemory,
+    ForgetVersion,
+    ListChanges,
+    ResolveIdempotency,
+    AppendEvent,
+    ReadEvent,
+    PublishFact,
+    AttestFact,
+}
+
+/// An exact, typed resource binding. Both fields are included in the
+/// canonical subject encoding.
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct AuthorizationTarget {
+    pub target_kind: String,
+    pub target_id: String,
+}
+
+impl AuthorizationTarget {
+    pub fn new(
+        target_kind: impl Into<String>,
+        target_id: impl Into<String>,
+    ) -> Result<Self, DomainError> {
+        let target_kind = target_kind.into();
+        let target_id = target_id.into();
+
+        if target_kind.is_empty() {
+            return Err(DomainError::EmptyRequiredField("target_kind"));
+        }
+        if target_id.is_empty() {
+            return Err(DomainError::EmptyRequiredField("target_id"));
+        }
+
+        Ok(Self {
+            target_kind,
+            target_id,
+        })
+    }
+}
+
+/// Versioned authorization subject. Scope entries are normalized during
+/// encoding; callers must not treat the supplied scopes as authority.
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct AuthorizationSubjectV1 {
+    pub principal_ref: PrincipalRef,
+    pub operation: AuthorizationOperation,
+    pub scopes: Vec<ScopeRef>,
+    pub target: AuthorizationTarget,
+    pub epoch: u64,
+}
+
+impl AuthorizationSubjectV1 {
+    pub fn new(
+        principal_ref: PrincipalRef,
+        operation: AuthorizationOperation,
+        scopes: Vec<ScopeRef>,
+        target: AuthorizationTarget,
+        epoch: u64,
+    ) -> Result<Self, DomainError> {
+        if scopes.is_empty() {
+            return Err(DomainError::EmptyRequiredField("scopes"));
+        }
+
+        for scope in &scopes {
+            scope.validate()?;
+        }
+
+        Ok(Self {
+            principal_ref,
+            operation,
+            scopes,
+            target,
+            epoch,
+        })
+    }
+
+    /// Stable, versioned, length-prefixed encoding.
+    ///
+    /// ScopeKind is encoded explicitly rather than relying on enum ordering.
+    /// Scope entries are sorted by their complete encoded bytes and deduplicated.
+    /// No serde representation or platform-dependent integer layout is used.
+    pub fn as_bytes(&self) -> Result<Vec<u8>, DomainError> {
+        if self.scopes.is_empty() {
+            return Err(DomainError::EmptyRequiredField("scopes"));
+        }
+
+        let mut scopes = Vec::with_capacity(self.scopes.len());
+
+        for scope in &self.scopes {
+            scope.validate()?;
+            let mut encoded = Vec::new();
+            push_field(&mut encoded, scope.scope_id.as_str().as_bytes())?;
+            push_field(&mut encoded, scope_kind_literal(&scope.scope_kind).as_bytes())?;
+            push_field(&mut encoded, scope.namespace_key.as_bytes())?;
+            scopes.push(encoded);
+        }
+
+        scopes.sort();
+        scopes.dedup();
+
+        let mut output = Vec::new();
+        push_field(&mut output, b"AuthorizationSubjectV1")?;
+        push_field(&mut output, self.principal_ref.as_str().as_bytes())?;
+        push_field(&mut output, operation_literal(self.operation).as_bytes())?;
+        push_field(&mut output, self.target.target_kind.as_bytes())?;
+        push_field(&mut output, self.target.target_id.as_bytes())?;
+        push_field(&mut output, &self.epoch.to_be_bytes())?;
+        push_field(&mut output, &(scopes.len() as u64).to_be_bytes())?;
+
+        for scope in scopes {
+            push_field(&mut output, &scope)?;
+        }
+
+        Ok(output)
+    }
+}
+
+fn push_field(output: &mut Vec<u8>, value: &[u8]) -> Result<(), DomainError> {
+    let length = u64::try_from(value.len())
+        .map_err(|_| DomainError::InvalidCanonicalCommitField("authorization_encoding"))?;
+    output.extend_from_slice(&length.to_be_bytes());
+    output.extend_from_slice(value);
+    Ok(())
+}
+
+fn scope_kind_literal(kind: &ScopeKind) -> &'static str {
+    match kind {
+        ScopeKind::User => "User",
+        ScopeKind::Project => "Project",
+        ScopeKind::Agent => "Agent",
+        ScopeKind::AgentInstance => "AgentInstance",
+        ScopeKind::Task => "Task",
+        ScopeKind::Session => "Session",
+        ScopeKind::Environment => "Environment",
+        ScopeKind::System => "System",
+    }
+}
+
+fn operation_literal(operation: AuthorizationOperation) -> &'static str {
+    match operation {
+        AuthorizationOperation::CreateMemory => "CreateMemory",
+        AuthorizationOperation::ReadMemory => "ReadMemory",
+        AuthorizationOperation::ReadVersion => "ReadVersion",
+        AuthorizationOperation::CommitVersion => "CommitVersion",
+        AuthorizationOperation::PrepareVersion => "PrepareVersion",
+        AuthorizationOperation::PublishPrepared => "PublishPrepared",
+        AuthorizationOperation::ReadPublicationState => "ReadPublicationState",
+        AuthorizationOperation::ForgetMemory => "ForgetMemory",
+        AuthorizationOperation::ForgetVersion => "ForgetVersion",
+        AuthorizationOperation::ListChanges => "ListChanges",
+        AuthorizationOperation::ResolveIdempotency => "ResolveIdempotency",
+        AuthorizationOperation::AppendEvent => "AppendEvent",
+        AuthorizationOperation::ReadEvent => "ReadEvent",
+        AuthorizationOperation::PublishFact => "PublishFact",
+        AuthorizationOperation::AttestFact => "AttestFact",
+    }
+}

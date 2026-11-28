@@ -228,6 +228,7 @@ name = "memory-event-store"
 version = "0.1.0"
 dependencies = [
  "memory-domain",
+ "memory-storage",
  "serde",
 ]
 
@@ -237,6 +238,7 @@ version = "0.1.0"
 dependencies = [
  "memory-domain",
  "memory-event-store",
+ "memory-storage",
  "rusqlite",
  "serde",
  "serde_json",
@@ -260,6 +262,7 @@ dependencies = [
  "rusqlite",
  "serde",
  "serde_json",
+ "sha2",
 ]
 
 [[package]]
