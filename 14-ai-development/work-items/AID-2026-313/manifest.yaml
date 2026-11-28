@@ -1,0 +1,102 @@
+work_item_id: AID-2026-313
+title: "Unwrap IPv6 6to4, Teredo and IPv4-mapped before the MCP connector SSRF decision"
+class: SECURITY/FIX
+risk: R2
+risk_rationale: >-
+  The change is confined to one predicate in scripts/mcp_connector.py in
+  oahcom/chatgpt-session-ops and tightens it: addresses that previously passed
+  now fail. It removes an SSRF bypass and adds no new reachability. No schema,
+  protocol, credential or deployment surface changes.
+status: IN_REVIEW
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner acceptance not recorded"
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository: oahcom/chatgpt-session-ops
+base_branch: main
+base_commit_sha: "ea7bdd36607bcf99d8b68ccd647f4ee2ea7639e5"
+pull_request: 161
+pull_request_url: https://github.com/oahcom/chatgpt-session-ops/pull/161
+
+scope:
+  objective: >-
+    Close the IPv6 transition-form SSRF bypass: assert_safe_url judged only the
+    outer address, so 2002::1 (6to4 carrying 0.0.0.0) and 2002:c0a8:101::1
+    (6to4 carrying 192.168.1.1) were accepted.
+  included:
+    - "Decode the IPv4 address carried by 6to4 (2002::/16), Teredo (2001::/32) and IPv4-mapped (::ffff:0:0/96)."
+    - "Apply the existing rejection set to the embedded address, one level deep."
+    - "Negative tests for six non-public embedded forms, positive tests for two public ones."
+    - "Keep every other SSRF policy decision, error code and check order unchanged."
+  excluded:
+    - "NAT64 64:ff9b::/96 unwrapping (not authorized by the ruling)."
+    - "Any change to deployment, credentials, MCP transport or the account registry."
+    - "Any Issue state change, renumbering, or correction of existing aid-ledger rows."
+
+evidence: 14-ai-development/work-items/AID-2026-313/session-evidence.md
+
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-313/prompt-v1.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-313/session-evidence.md
+    relationship: evidence
+  - path: "https://github.com/oahcom/chatgpt-session-ops/pull/161"
+    relationship: reference
+
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs: []
+    implementing_ai_session: "subagent-session-2026-11-27-aid313"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-313/session-evidence.md
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-313/prompt-v1.md
+    executed_prompt_sha256: "7fb1d53aaf31c80a95222872f9b8608fd5208953c79ee2560051ead6b7b74679"
+    executed_prompt_bytes: 3821
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: "RECORDED"
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    _embedded_ipv4 decodes the carried address through ipaddress' own
+    ipv4_mapped / sixtofour / teredo properties; _is_public_destination applies
+    the previous predicate to the envelope and then to the embedded address.
+    Reproduced at the base commit (both 6to4 forms accepted), fixed at head.
+    Full suite: 1256 tests, 2 failures, both pre-existing CJK-console cases in
+    tests/test_cdp_import_order.py that fail identically at the base commit. The
+    first CI run failed on this work item's own positive control, because CI runs
+    3.11 where 2002::/16 is still private; 0e11c33 moves the control to an address
+    that is public on both releases. CI on 0e11c33: unit tests, tools/tests
+    guards, SDK integration and e2e all success.
+  files_changed:
+    - scripts/mcp_connector.py
+    - tests/test_mcp_connector_url_guard.py
+  tests:
+    - "python -m unittest tests.test_mcp_connector_url_guard  # 21 tests OK on 3.11.15 and 3.12.3"
+    - "python -m unittest discover -s tests  # 1256 tests, 2 pre-existing failures (3.12.3)"
+    - "base ea7bdd3: same commands -> 16 tests / 1 failure, 1251 tests / 3 failures"
+    - "GitHub Actions on 0e11c33: unit tests success, tools/tests guards success, e2e success, SDK integration success"
+
+# Initial registration only:
+# permits this newly introduced Work Item to enter main before its
+# implementation commit is reachable from the target branch.
+prompt_file: "14-ai-development/work-items/AID-2026-313/prompt-v1.md"
+
+# SHA-256 of the exact prompt-v1.md bytes.
+# The checker independently recalculates this from both the head file
+# and the immutable Git blob.
+prompt_sha256: "7fb1d53aaf31c80a95222872f9b8608fd5208953c79ee2560051ead6b7b74679"
+
+# Git blob object ID of the exact same prompt-v1.md bytes.
+# This is a blob OID, not a commit SHA.
+prompt_file_blob_sha: "4f5e6c0985d3bad62b9fbae5fa523b1b3fe4e530"
+
+# Explicitly declares this as the narrowly scoped first-registration state.
+prompt_commit_trace_initial_registration: true
+
+# IMPORTANT:
+# Do not add prompt_file_commit_sha here.
+# Do not add implementation.implementation_commit_sha here.
+# Do not add implementation.merge_commit_sha here.
+# The initial-registration exception rejects those pins.
