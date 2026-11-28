@@ -13,6 +13,10 @@ date: "2026-11-28"
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
 base_commit_sha: "31c1e5d83e7dad326dbd4b69d4a8e19534718ff1"
+prompt_file: "14-ai-development/work-items/AID-2026-326/prompt-v1.md"
+prompt_sha256: "228d7d3d9b22dd6a4908b00583378c55a3bde03f7962f7fabe03a16c771a1c09"
+prompt_file_blob_sha: "9721457bf64f03929abf8153dcc214d8e4f55755"
+prompt_file_commit_sha: "15fe58287566d3b7370499b2b0837b5a43ebcb38"
 
 scope:
   included:
@@ -58,7 +62,13 @@ session_evidence:
 
 implementation:
   status: IMPLEMENTED
-  summary: "Documentation-only branch change records final Owner D-10 semantics in the canonical System Boundaries source and its EN/ZH-CN mirrors. No executable behavior changed. Independent review and PR checks remain pending."
+  implementation_commit_sha: "1c208822c880b2666395e6a199fdee236f830341"
+  merge_commit_sha: "7d985e1560d3c91e31757abed015f2f2076b1680"
+  merge_commit_kind: GITHUB_TEST_MERGE_CANDIDATE
+  merge_candidate_head_sha: "3595ce6ed3b45287a59a7658ad0a38b2797267fb"
+  merge_candidate_base_sha: "efbdebfaa9fede98c9f2501e2fb941f344d0ca03"
+  merge_candidate_status: UNMERGED
+  summary: "Documentation-only branch change records final Owner D-10 semantics in the canonical System Boundaries source and its EN/ZH-CN mirrors. No executable behavior changed. The implementation commit is pinned below; merge_commit_sha is a GitHub-generated unmerged test-merge candidate used only as the traceability ancestry target."
   files_changed:
     - "01-system-architecture/system-boundaries.md"
     - "docs/en/01-system-architecture/system-boundaries.md"
