@@ -58,3 +58,45 @@ The actual user input included the following instructions (verbatim excerpts): â
 ## AI-visible output
 
 GitHub API confirmed main at 40195e8bf96b9cc6aa254066b9b72968f29ac361 (2026-11-27T03:57:43Z), the 16 protected required contexts, the existing full-history checkout, and the insertion point immediately after manifest parsing. A branch named fix/aid-268-manifest-blob-pins was created. Implementation artifacts are being prepared; no CI execution or merge is claimed yet.
+
+
+## Follow-up session â€” squash-merge pin-ledger correction
+
+**Work Item:** AID-2026-268  
+**Related issue:** #1547  
+**Branch:** `fix/2026-11-28-pin-ledger-squash-commit`  
+**Branch head at evidence capture:** `05cbf98e6`  
+**Session role:** CI integrity repair  
+**AI-assisted work:** YES
+
+### Scope
+
+Correct the two manifest pin-ledger entries for AID-2026-101 and AID-2026-102 that referenced the original PR branch commit rather than the squash commit reachable from `main`.
+
+The correction changes both `repin_commit` references to the full squash commit SHA:
+
+`2ab66153dbcdd8a8f2d68d234914751a748a8f74`
+
+The change also documents the squash-merge commit reference requirement and adds regression tests for accepted squash commits and rejected unreachable PR branch commits.
+
+### Files changed
+
+- `scripts/ci/manifest-pin-ledger.md`
+- `scripts/ci/check_manifest_blob_pins.py`
+- `tests/test_manifest_pin_ledger.py`
+
+### AI assistance
+
+AI assistance was used to formulate the narrow squash-merge rule, the checker comment, and the positive and negative regression-test cases. The work remains within the existing AID-2026-268 manifest blob-pin integrity scope.
+
+### Verification observed
+
+- `python -m unittest tests.test_manifest_pin_ledger`: 7 tests passed.
+- `python scripts/ci/check_manifest_blob_pins.py --commit HEAD`: `incomplete=0`.
+- The two corrected ledger references use the full SHA of the squash commit reachable from the target history.
+
+These are branch-local results and do not claim that the PR has merged or that the required GitHub checks have passed.
+
+### Scope boundary
+
+No Work Item ID was newly allocated. No unrelated manifest, baseline, or historical pin transition was changed. The two ledger edits correct commit identity references; they do not represent new repin events.
