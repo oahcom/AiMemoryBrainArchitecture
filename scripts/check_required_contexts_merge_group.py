@@ -11,11 +11,13 @@ Three conditions, each silent when broken:
    document-management.yml this way; `GOV-DOC-002 metadata checks` left the
    queue with 15/16 and nothing went red.
 
-2. SERIALIZATION. document-management.yml enforces a target-branch invariant,
-   so its concurrency group must key off the target branch on every event and
-   must not evict pending runs: `cancel-in-progress: false` plus `queue: max`.
-   `github.ref_name` is the queue candidate's ref on `merge_group`, which splits
-   one branch into one group per candidate.
+2. CONCURRENCY ISOLATION. document-management.yml is read-only and re-fetches
+   the current target base, so it does not serialize across pull requests; it
+   isolates by workflow, event type and pull-request number instead, with
+   `github.ref_name` as the non-PR fallback (AID-2026-013, `0962fbdc5`).
+   `cancel-in-progress: false` is required, `queue` must stay undeclared, and a
+   target-branch selector (`pull_request.base.ref`, `merge_group.base_ref`,
+   `github.ref` as a group key) must not come back.
 
 3. COUNT. A workflow comment stating "<N> required contexts live in this file"
    must state the number of declared contexts that workflow actually produces.
@@ -40,7 +42,7 @@ from check_declared_check_contexts import (
     workflow_files,
 )
 
-SERIALIZED_WORKFLOW = "document-management.yml"
+ISOLATED_WORKFLOW = "document-management.yml"
 
 JOB_ID_RE = re.compile(r"^  ([A-Za-z_][\w-]*):\s*$")
 JOB_NAME_RE = re.compile(r"^    name:\s*(.+?)\s*$")
@@ -163,8 +165,8 @@ def count_claims(text: str) -> list[tuple[int, int]]:
     return claims
 
 
-def serialization_violations(path: str, text: str) -> list[str]:
-    """document-management.yml must serialize by target branch, not candidate."""
+def concurrency_isolation_violations(path: str, text: str) -> list[str]:
+    """document-management.yml must isolate per workflow/event/PR (AID-2026-013)."""
     problems = []
     stripped = strip_yaml_comments(text).splitlines()
     bounds = block(stripped, "concurrency:")
@@ -177,31 +179,44 @@ def serialization_violations(path: str, text: str) -> list[str]:
         problems.append(
             f"::error::{path}:{start}: concurrency must set `cancel-in-progress: false`"
         )
-    if not re.search(r"^\s*queue:\s*max\s*$", body, re.MULTILINE):
+
+    # `queue: max` would turn per-PR isolation back into same-group queueing.
+    if re.search(r"^\s*queue\s*:", body, re.MULTILINE):
         problems.append(
-            f"::error::{path}:{start}: concurrency must set `queue: max`; with a "
-            "single pending slot a new candidate evicts the older pending run"
+            f"::error::{path}:{start}: concurrency must not declare `queue`; "
+            "per-PR/event isolation uses the default single-pending behaviour"
         )
 
-    # The target-branch selectors must be in the `group` expression itself. A
-    # `merge_group.base_ref` in a neighbouring comment or a sibling key is not a
-    # grouping decision, so the whole concurrency block is not evidence enough.
+    # The isolation tokens must be in the `group` expression itself: a token in
+    # a neighbouring comment or a sibling key is not a grouping decision.
     group = concurrency_group_expression(stripped, start, end)
-    if "github.ref_name" in group:
-        problems.append(
-            f"::error::{path}:{start}: the concurrency `group` must not use "
-            "`github.ref_name`; on merge_group it is the queue candidate ref, "
-            "which splits one target branch into one group per candidate"
-        )
-    for selector, event in (
-        ("github.event.pull_request.base.ref", "pull_request"),
-        ("github.event.merge_group.base_ref", "merge_group"),
-        ("github.ref", "push"),
+    for token in (
+        "github.workflow",
+        "github.event_name",
+        "github.event.pull_request.number",
+        "github.ref_name",
     ):
-        if selector not in group:
+        if token not in group:
             problems.append(
-                f"::error::{path}:{start}: the concurrency `group` must select the "
-                f"target branch for {event} via `{selector}`"
+                f"::error::{path}:{start}: the concurrency `group` must include "
+                f"`{token}`; AID-2026-013 isolates by workflow, event and PR"
+            )
+
+    # `github.ref` is a prefix of `github.ref_name`, so a plain substring test
+    # would flag the required fallback. Only a bare `github.ref` is forbidden.
+    if re.search(r"github\.ref(?![\w])", group):
+        problems.append(
+            f"::error::{path}:{start}: the concurrency `group` must not key off "
+            "the target branch via `github.ref`; AID-2026-013 isolates per PR"
+        )
+    for token in (
+        "github.event.pull_request.base.ref",
+        "github.event.merge_group.base_ref",
+    ):
+        if token in group:
+            problems.append(
+                f"::error::{path}:{start}: the concurrency `group` must not use "
+                f"target-branch selector `{token}`; AID-2026-013 isolates per PR"
             )
     return problems
 
@@ -242,8 +257,8 @@ def main(root: Path | None = None) -> int:
         subscription = merge_group_subscription(text)
         for context, line in job_contexts(text).items():
             produced.setdefault(context, []).append((relative, line, subscription))
-        if path.name == SERIALIZED_WORKFLOW:
-            violations.extend(serialization_violations(relative, text))
+        if path.name == ISOLATED_WORKFLOW:
+            violations.extend(concurrency_isolation_violations(relative, text))
 
         declared_here = [c for c in contexts if any(p[0] == relative for p in produced.get(c, []))]
         for line, claimed in count_claims(text):
@@ -292,7 +307,10 @@ def main(root: Path | None = None) -> int:
         return 1
 
     for context in contexts:
-        path, line, subscription = produced[context][0]
+        path, line, subscription = next(
+            source for source in produced[context]
+            if source[2] is not None and source[2][1]
+        )
         print(
             f"OK  {context}  {path}:{line}  "
             f"merge_group={path}:{subscription[0]} (checks_requested)",

@@ -43,9 +43,10 @@ scope:
       detail: >-
         Restore `merge_group: types: [checks_requested]`; resolve the
         uniqueness base from `merge_group.base_sha` and the head from
-        `merge_group.head_sha`; key the concurrency group off the target branch
-        for pull_request, merge_group and push, with `cancel-in-progress: false`
-        and `queue: max`.
+        `merge_group.head_sha`. The concurrency block stays as AID-2026-013
+        (`0962fbdc5`) put it on main: per workflow, event and pull-request
+        number, `github.ref_name` as the non-PR fallback,
+        `cancel-in-progress: false`, no `queue`.
     - path: ".github/workflows/gates.yml"
       detail: >-
         Correct the required-context count comment from six to seven; the file
@@ -104,10 +105,11 @@ implementation:
   summary: >-
     Restores the merge_group subscription and the fail-closed merge-group base
     and head resolution that #1453 removed from document-management.yml,
-    serializes the workflow by target branch with `queue: max`, corrects the
-    gates.yml context count, and adds a self-tested repository-hygiene gate that
-    fails when a declared required context's workflow stops subscribing to
-    merge_group.
+    preserves the per-pull-request concurrency decision of AID-2026-013,
+    corrects the gates.yml context count, and adds a self-tested
+    repository-hygiene gate that fails when a declared required context's
+    workflow stops subscribing to merge_group or when the workflow's
+    concurrency isolation is replaced by target-branch queueing.
   files_changed:
     - ".github/workflows/document-management.yml"
     - ".github/workflows/gates.yml"

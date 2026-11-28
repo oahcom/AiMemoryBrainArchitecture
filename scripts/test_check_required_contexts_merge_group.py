@@ -43,11 +43,13 @@ jobs:
       - run: "true"
 """
 
-SERIALIZED = """\
+# The concurrency shape AID-2026-013 put on main (0962fbdc5): workflow, event
+# and PR number, with github.ref_name as the non-PR fallback.
+ISOLATED = """\
 name: Architecture document management gate
 concurrency:
-  group: ${{{{ github.workflow }}}}-{group}
-  cancel-in-progress: false
+  group: {group}
+  cancel-in-progress: {cancel}
 {queue}
 on:
   pull_request:
@@ -66,15 +68,15 @@ jobs:
       - run: "true"
 """
 
+MAIN_GROUP = (
+    "${{ github.workflow }}-${{ github.event_name }}-"
+    "${{ github.event.pull_request.number || github.ref_name }}"
+)
+
 MERGE_GROUP = """\
   merge_group:
     types: [checks_requested]
 """
-
-FULL_GROUP = (
-    "${{ github.event.pull_request.base.ref || "
-    "github.event.merge_group.base_ref || github.ref }}"
-)
 
 
 class GateTest(unittest.TestCase):
@@ -95,8 +97,9 @@ class GateTest(unittest.TestCase):
                 code = gate.main(root)
             return code, error.getvalue()
 
-    def serialized(self, group: str = FULL_GROUP, queue: str = "  queue: max") -> str:
-        return SERIALIZED.format(group=group, queue=queue)
+    def isolated(self, group: str = MAIN_GROUP, cancel: str = "false",
+                 queue: str = "") -> str:
+        return ISOLATED.format(group=group, cancel=cancel, queue=queue)
 
     def test_missing_merge_group_is_a_violation(self):
         code, error = self.run_gate({"fixture.yml": WORKFLOW.format(events="")})
@@ -117,13 +120,20 @@ class GateTest(unittest.TestCase):
         self.assertEqual(code, 0, error)
         self.assertIn("PASS (2 contexts)", error)
 
-    def test_serialization_requires_queue_max_and_base_ref(self):
+    def test_main_concurrency_isolation_passes(self):
+        code, error = self.run_gate({"document-management.yml": self.isolated()})
+        self.assertEqual(code, 0, error)
+
+    def test_isolation_tokens_are_required(self):
         cases = {
-            "no queue": self.serialized(queue=""),
-            "ref_name": self.serialized(group="github.ref_name"),
-            "no push selector": self.serialized(
-                group="${{ github.event.pull_request.base.ref || "
-                "github.event.merge_group.base_ref }}"
+            "no event_name": self.isolated(
+                group="${{ github.workflow }}-${{ github.event.pull_request.number || github.ref_name }}"
+            ),
+            "no pr number": self.isolated(
+                group="${{ github.workflow }}-${{ github.event_name }}-${{ github.ref_name }}"
+            ),
+            "no ref_name fallback": self.isolated(
+                group="${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number }}"
             ),
         }
         for label, text in cases.items():
@@ -131,9 +141,29 @@ class GateTest(unittest.TestCase):
                 code, error = self.run_gate({"document-management.yml": text})
                 self.assertEqual(code, 1, error)
 
-    def test_serialized_document_management_passes(self):
-        code, error = self.run_gate({"document-management.yml": self.serialized()})
-        self.assertEqual(code, 0, error)
+    def test_queue_and_target_branch_are_rejected(self):
+        cases = {
+            "queue max": self.isolated(queue="  queue: max"),
+            "base_ref": self.isolated(
+                group="${{ github.workflow }}-${{ github.event_name }}-"
+                "${{ github.event.pull_request.number || github.ref_name }}-"
+                "${{ github.event.merge_group.base_ref }}"
+            ),
+            "pull_request base": self.isolated(
+                group="${{ github.workflow }}-${{ github.event_name }}-"
+                "${{ github.event.pull_request.number || github.ref_name }}-"
+                "${{ github.event.pull_request.base.ref }}"
+            ),
+            "github.ref": self.isolated(
+                group="${{ github.workflow }}-${{ github.event_name }}-"
+                "${{ github.event.pull_request.number || github.ref }}"
+            ),
+            "cancel in progress": self.isolated(cancel="true"),
+        }
+        for label, text in cases.items():
+            with self.subTest(label):
+                code, error = self.run_gate({"document-management.yml": text})
+                self.assertEqual(code, 1, error)
 
     def test_wrong_context_count_comment_is_a_violation(self):
         text = "# Seven required contexts live in this file.\n" + WORKFLOW.format(

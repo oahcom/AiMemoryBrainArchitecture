@@ -1,19 +1,14 @@
 name: Architecture document management gate
 
-# Work-item uniqueness is a shared target-branch invariant, not a
-# per-candidate invariant. PRs targeting the same branch must not run this
-# gate in independent concurrency groups. Do not cancel a running decision
-# when another candidate arrives.
+# This job is read-only and re-fetches the current target base before evaluating
+# uniqueness, so concurrent pull requests do not need a global serial decision.
+# Branch freshness vs base requires an out-of-date PR to catch up and rerun
+# this workflow, including its required contexts, after synchronization.
+# We abandon global serialization, which never actually held: the single pending
+# slot replaced queued runs. Keep running decisions safe within each pull request.
 concurrency:
-  group: >-
-    ${{ github.workflow }}-${{
-      github.event.pull_request.base.ref
-      && format('refs/heads/{0}', github.event.pull_request.base.ref)
-      || github.event.merge_group.base_ref
-      || github.ref
-    }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref_name }}
   cancel-in-progress: false
-  queue: max
 
 on:
   pull_request:

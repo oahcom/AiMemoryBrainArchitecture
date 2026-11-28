@@ -74,6 +74,12 @@ concurrency form (`cancel-in-progress: false` plus `queue: max`, keyed off
 `pull_request.base.ref` / `merge_group.base_ref` / `github.ref`), and the
 `gates.yml` count correction from six to seven.
 
+That concurrency form conflicted with `0962fbdc5` (AID-2026-013) on main, which
+had already replaced global serialization with per-pull-request isolation. The
+conflict was escalated and resolved in favour of the existing main decision: the
+target-branch block and `queue: max` were withdrawn, AID-2026-013 is not
+superseded, and the gate checks the per-PR isolation instead.
+
 The full prompt is pinned at `14-ai-development/work-items/AID-2026-294/prompt-v1.md`
 (25170 bytes, SHA-256 `056b9208fb9425913d3fa57cc8f30414423119b2a98908d706a58f0ed138de55`).
 
@@ -88,8 +94,11 @@ The session cut `fix/2026-11-28-docmgmt-merge-group` from `origin/main`
   `merge_group` uses `merge_group.base_sha` / `merge_group.head_sha` and exits 2
   (INCOMPLETE) when either is unusable, `push` keeps `github.event.before`, and
   any other event exits 2 instead of calling the checker without arguments.
-- `.github/workflows/document-management.yml`: concurrency keyed by target
-  branch for all three events, `cancel-in-progress: false`, `queue: max`.
+- `.github/workflows/document-management.yml`: concurrency keeps the
+  AID-2026-013 shape — workflow, event and pull-request number, with
+  `github.ref_name` as the non-PR fallback, `cancel-in-progress: false` and no
+  `queue`. The target-branch form drafted earlier in this session was withdrawn
+  when the conflict with AID-2026-013 surfaced; that decision is not superseded.
 - `.github/workflows/gates.yml`: `Six required contexts` corrected to `Seven`.
 - `scripts/check_required_contexts_merge_group.py`: read-only gate over the
   sixteen declared contexts, the concurrency shape, and per-workflow
