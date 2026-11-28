@@ -50,13 +50,15 @@ document_metadata:
 Record the final Owner D-10 decision from Issue #1210 (comment 7174534633) in the canonical `01-system-architecture/system-boundaries.md` and its EN/ZH-CN mirrors. The decision is final; do not reopen or reinterpret it.
 
 Record these exact semantics:
-- One deployment has one logical Brain authority; tenant and shard are partition boundaries within that authority.
-- `CanonicalCommitCursor` is partitioned per tenant/shard; there is no total order across shards.
-- A cross-shard transaction produces one cursor entry per participating shard and is atomic all-or-none.
-- Authority identity and epoch/incarnation are explicit; cursors from different authorities are not comparable.
-- Aggregate revisions and lifecycle cursors are separate.
-- `ForgetFence`, `ProducerRegistrationHighWater`, and similar fences are per-authority and must carry authority identity so a fence from one shard cannot be read as covering another.
+- One deployment has one logical Brain authority. Tenant and shard are partition boundaries within that authority, not separate authorities.
+- `CanonicalCommitCursor` is partitioned per tenant/shard. There is no total order across tenants or shards. A globally ordered cursor across tenants is rejected because it would require a global serialization point or distributed consensus not specified by this architecture.
+- Cursor entries are ordered only within their own tenant/shard partition.
+- Authority identity and epoch/incarnation are explicit parts of cursor identity. Rollover is an epoch change. Cursors from different authorities or epochs are not comparable; comparison across them is an error, never a numeric ordering.
+- A cross-shard transaction produces one cursor entry per participating shard, ordered within each shard. The transaction is atomic all-or-none; atomicity does not imply a cross-shard total order, and no API may imply one.
+- Aggregate revisions and lifecycle cursors remain separate domains.
+- `ForgetFence`, `ProducerRegistrationHighWater`, and similar fences are per-authority and must carry authority identity and applicable target/partition scope so a fence from one shard cannot be read as covering another.
+- Required negative cases: `cursor_comparison_across_authority_rejected` and `cross_shard_commit_exposes_no_total_order`.
 
-In scope: add a clearly marked decision section to the canonical system-boundaries source, update its English and Chinese mirrors and source-revision pins, create this Work Item's evidence/session records, and register one INDEX row.
+In scope: add a clearly marked decision section to the canonical System Boundaries source, update its English and Chinese mirrors and source-revision pins, create this Work Item's evidence/session records, register one INDEX row, and maintain PR #1475's required bilingual, related-issue, session-evidence and exact-head validation declarations.
 
-Out of scope: code, runtime, API/schema/DDL, tests, workflows, branch protection, Issue/PR body edits, and changes to the detailed D/F/G consumer documents. Do not claim that the system-boundaries document is formally approved or that downstream consumers are aligned. Preserve the document's Draft approval and Unverified evidence-verification metadata. Explicitly record the unresolved multi-shard transaction representation and F/G consistent-snapshot protocol as follow-up work, not as newly decided wire semantics.
+Out of scope: code, runtime, API/schema/DDL, tests, workflows, branch protection, Issue #1210 body edits, unrelated PR-body edits, and changes to the detailed D/F/G consumer documents. Do not claim that the System Boundaries document is formally approved or that downstream consumers are aligned. Preserve the document's Draft approval and Unverified evidence-verification metadata. Explicitly record the unresolved multi-shard transaction representation and F/G consistent-snapshot/cut protocol as follow-up work, not as newly decided wire semantics. No code or runtime implementation is authorized.
