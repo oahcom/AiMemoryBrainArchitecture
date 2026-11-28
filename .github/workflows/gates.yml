@@ -202,8 +202,8 @@ jobs:
       # as PASS. This runs the wrapper's own tests, including that shape.
       - name: Self-check the ratchet wrapper
         run: python3 scripts/ci/test_gate_ratchet.py
-      # GOV-DOC-001 full scan: 77 normative paths lack an en/zh-CN counterpart.
-      # 77 is the entry count of scripts/ci/baselines/bilingual-docs.txt, the
+      # GOV-DOC-001 full scan: 76 normative paths lack an en/zh-CN counterpart.
+      # 76 is the entry count of scripts/ci/baselines/bilingual-docs.txt, the
       # baseline handed to the ratchet below; scripts/ci/test_gate_ratchet.py
       # asserts the comment and that file agree, so change both together.
       # Red on main, so ratchet rather than gate.
