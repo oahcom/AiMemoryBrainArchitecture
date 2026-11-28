@@ -1,0 +1,92 @@
+work_item_id: AID-2026-345
+title: Correct manifest pin ledger repin anchors after squash integration
+class: GOV/CI
+risk: R1
+risk_rationale: >-
+  This is a narrowly scoped governance-ledger correction. It changes two
+  existing repin_commit references to identify the squash commit that carries
+  the recorded transitions in main. It does not change pin values, checker
+  behavior, workflow behavior, or the manifest blob-pin baseline.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: f0843a8f38a420883921cfda96b515204967f885
+
+prompt_commit_trace_initial_registration: true
+prompt_file: "14-ai-development/work-items/AID-2026-345/prompt-v1.md"
+prompt_sha256: "5a0636915c526167602344fea1628884c414be5d3b169ba343e6b2ff7838deef"
+prompt_file_blob_sha: "2b03c2fdbada2cb991e0eb05854981457cf13b18"
+
+scope:
+  summary: >-
+    Correct the two repin_commit cells in the manifest pin ledger to reference
+    the squash commit on main that carries the recorded pin transitions, and
+    add the AID-2026-345 work-item records and INDEX entry.
+  files_changed:
+    - scripts/ci/manifest-pin-ledger.md
+    - 14-ai-development/work-items/AID-2026-345/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-345/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-345/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-345/evidence.md
+    - 14-ai-development/work-items/INDEX.md
+  boundaries:
+    - Change only the two existing repin_commit cells in the ledger.
+    - Preserve both records' manifest, field, path, previous_pin, and new_pin values.
+    - Add the rebase-correction explanation to the ledger.
+    - Do not modify the checker, workflow, baseline, or other work-item records.
+
+evidence:
+  - 14-ai-development/work-items/AID-2026-345/evidence.md
+  - 14-ai-development/work-items/AID-2026-345/session-evidence.md
+
+documentation:
+  - path: scripts/ci/manifest-pin-ledger.md
+    relationship: implementation
+    description: Corrected ledger anchors and rebase-correction explanation.
+  - path: 14-ai-development/work-items/AID-2026-345/manifest.yaml
+    relationship: schema
+    description: Work-item manifest and initial-registration trace metadata.
+  - path: 14-ai-development/work-items/AID-2026-345/prompt-v1.md
+    relationship: reference
+    description: Initial task prompt snapshot.
+  - path: 14-ai-development/work-items/AID-2026-345/session-evidence.md
+    relationship: evidence
+    description: AI session identity and session evidence record.
+  - path: 14-ai-development/work-items/AID-2026-345/evidence.md
+    relationship: evidence
+    description: Supplied baseline failure and measured squash-commit evidence.
+  - path: 14-ai-development/work-items/INDEX.md
+    relationship: reference
+    description: Work-item registry index entry.
+
+session_evidence:
+  - implementing_ai_session: "6b0a1bf9-0474-83ec-bb98-ceeb26101261"
+    session_reference_status: RECORDED
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-345/session-evidence.md"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-345/prompt-v1.md"
+    executed_prompt_sha256: "5a0636915c526167602344fea1628884c414be5d3b169ba343e6b2ff7838deef"
+    executed_prompt_bytes: 3545
+    executed_prompt_provenance: NOT_VERIFIED
+    issue_refs:
+      - "#1350"
+
+implementation:
+  status: IN_PROGRESS
+  summary: >-
+    The proposed correction replaces the two branch-only repin_commit
+    references with the squash commit 2ab66153dbcdd8a8f2d68d234914751a748a8f74.
+    Implementation and post-change CI verification remain pending.
+  files_changed:
+    - scripts/ci/manifest-pin-ledger.md
+    - 14-ai-development/work-items/AID-2026-345/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-345/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-345/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-345/evidence.md
+    - 14-ai-development/work-items/INDEX.md
+  tests: []
