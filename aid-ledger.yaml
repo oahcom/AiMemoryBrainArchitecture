@@ -5,7 +5,7 @@
 # One AID maps to exactly one work_item_id.
 
 schema: 1
-updated_at_utc: "2026-11-28T06:20:00Z"
+updated_at_utc: "2026-11-28T08:12:00Z"
 entries:
   - id: AID-2026-082
     state: MERGED
@@ -317,3 +317,7 @@ entries:
     state: RESERVED
     carrier: "branch feat/gate-contract-harness (PR pending)"
     note: "2026-11-28 scan (origin/main f0843a8f; 10073 origin refs; 173 distinct AID work-item directories added anywhere in history): occupied above 329 are 330/331/332/333/336/340/341/342/344/345/347; this ledger holds 333 and 345; open-PR title/body search for AID-2026-334 returns no claim (one unrelated body mention in PR #1329). 334 is free on the main work-items tree, on every origin ref and in this ledger. Scope: Gate Contract Harness package 1 -- registry scripts/ci/gate-contracts.yaml, executor scripts/ci/run_gate_contract.py, static validator scripts/ci/check_gate_contracts.py, fixture builder, their tests, and three migrations (protocol-index CLI backstop, manifest blob-pin exact status assertion, session-evidence self-test silent skip), wired into the existing Repository hygiene (hard gate) context; no required context renamed or added."
+  - id: AID-2026-335
+    state: RESERVED
+    carrier: "branch feat/p0-authz-invariants (PR pending)"
+    note: "2026-11-28 scan (origin/main da83ba235; local refs plus origin/aid-ledger a7e5fe14; ledger holds 330-334/336/340-345/347): 335 is absent from the origin/main work-items tree, from every commit message reachable via git log --all, from origin/aid-ledger, and from ref names containing 335 (only PR-number refs such as refs/pull/335 exist). Lowest free number at or above 330 after 330-334. Scope: P0 authorization invariants -- one I-issued authorization decision seam replacing caller-supplied Scope as the access grant for Memory read (I1: #1128 #1129 #1136 #1139), canonical write and publication (I2: #1132 #1133), Event ingress (I3: #1134) and partial-Scope visibility (I4: #1128 #1129), with one negative test per invariant in memory-store, memory-storage, memory-storage-sqlite, memory-event-store-sqlite and brain-cli. Supersedes the earlier read-boundary claim AID-2026-281 for these issues."
