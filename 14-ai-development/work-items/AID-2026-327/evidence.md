@@ -1,5 +1,6 @@
 ---
 document_metadata:
+  steward: "user-authorized operator (delegated by account owner)"
   domain: ai-development
   role: work-record
   lifecycle:
@@ -17,7 +18,7 @@ document_metadata:
     evidence_verification:
       verification_status: Unverified
       last_verified_date: "2026-11-28"
-      last_verification_note: "Local suite passes; independent review is pending."
+      last_verification_note: "Repository observations recorded at the base SHA and branch head; independent review and current-head CI are pending."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -30,12 +31,11 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: null
-    canonical_scope_id: null
+    canonical_scope: "Evidence for recording the final Owner D-10 cursor authority decision."
+    canonical_scope_id: "ai-development/aid-2026-327-evidence"
     canonical_scope_keywords:
-      - "work-item-uniqueness"
-      - "shared-id"
-      - "duplicate-declaration"
+      - "AID-2026-327"
+      - "d10-cursor-authority"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
@@ -43,136 +43,68 @@ document_metadata:
     source: null
     en: null
     zh-CN: null
-  steward: "user-authorized operator (delegated by account owner)"
 ---
-# AID-2026-327 — Evidence
 
-**Attribution:** user-authorized operator (delegated by account owner)
-**Date:** 2026-11-28
-**Issue:** #1341
-**Implementation base observed:** 31c1e5d83e7dad326dbd4b69d4a8e19534718ff1
+# Evidence — AID-2026-327
 
-## Session role / use case
+## Decision authority
 
-Implementation session for Issue #1341. Scope: replace the shared-ID
-modification/deletion rejection in the work-item uniqueness gate with a
-tree-level duplicate-declaration rule, and prove the replacement against the
-pinned first-parent window of main.
+- Repository: oahcom/AiMemoryBrainArchitecture
+- Base branch: main
+- Base commit: 4a6cdd0e7c5dc0db53be37a2f945e02c59d5abf9
+- Final Owner decision: [Issue #1210, comment 7174534633](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1210#issuecomment-7174534633), dated 2026-11-27.
+- This Work Item records the final decision; it does not reopen it.
 
-## Actual AI input
+## Decision recorded
 
-The executed instruction is recorded verbatim in `prompt-v1.md`. It required:
-read the old rule's real code location; replace it with the section 4 rule
-(candidate-tree duplicate declarations only); separate `introduced_ids` from
-`occupied_ids`; treat `base_tip` as the occupancy basis and `merge_base` as
-provenance only; and produce a regression fixture over the eight most recent
-first-parent commits plus three positive cases.
+The canonical System Boundaries section 15 records:
+1. One deployment has one logical Brain authority; tenant and shard are partition boundaries within that authority.
+2. CanonicalCommitCursor is partitioned per tenant/shard; there is no total order across tenants or shards.
+3. Authority identity and epoch/incarnation are explicit cursor identity; cursors from different authorities or epochs are incomparable.
+4. A cross-shard transaction produces one cursor entry per participating shard and commits all or none; this does not create a cross-shard total order.
+5. Aggregate revisions and lifecycle cursors remain separate domains.
+6. ForgetFence and ProducerRegistrationHighWater are per-authority and carry authority identity plus applicable target/partition scope.
+7. Required rejection cases are cursor_comparison_across_authority_rejected and cross_shard_commit_exposes_no_total_order.
 
-Two review rulings then constrained the implementation: canonical manifest
-paths (not `git grep` over arbitrary YAML) as the record set, with legacy
-identity shapes read from content; deletion of the unreachable `occupied`
-branch; a pinned old-rule oracle instead of a weak subset assertion; a hard
-failure when the pinned window is missing; a target-tree-only claim ledger; and
-a merge-group-aware workflow. The exact ruling text is in the session record.
+## Branch result
 
-## AI-visible output
+- Branch: docs/aid-2026-327-d10-cursor-authority
+- Canonical source blob after section 15: 8934b92bdaa89cf9697c7c4b14d15ca6dfca7328
+- English and Chinese mirrors are pinned to that canonical blob.
+- The canonical source remains Draft / Unverified. Steward metadata is set to Architecture Governance; no formal approval is claimed.
+- No code, runtime, API, schema, DDL, tests, workflows, branch-protection, or Issue-body changes are included.
+- Detailed D/F/G consumer specifications, multi-shard transaction representation, and F/G consistent-snapshot/cut protocol remain follow-up work.
 
-Measured state of this change.
+## Prompt-to-implementation trace pins
 
-Two earlier rules produced false verdicts. The first, in the `#1413` carrier,
-treated a modified or deleted path under an id the target branch already owned
-as a competing declaration: `competing_claims()`,
-`elif status in ("M", "D", "T", "R", "C")`, present in the pinned oracle at
-`scripts/ci/fixtures/legacy_shared_id_rule_1413.py:160`. The second is the
-tree-only verdict merged by PR #1477 (commit `a0500d519`): it reported
-`VIOLATION new_paths=...` for any file added under an existing work-item
-directory and `DELETION` with exit 1 for a directory absent from the candidate,
-without ever reading a manifest identity. Section 4.4 requires both of those
-outcomes to pass, so this change replaces the tree-only verdict rather than
-adding to it.
+- Prompt file: `14-ai-development/work-items/AID-2026-327/prompt-v1.md`
+- Prompt SHA-256: `1f632841337ee0f3b2e652d3f5c7d938dd6e6ce7845c42bcece3c173c97da545`
+- Prompt Git blob: `f230db28d3bf77556f8132fcd08d15bdbc1e0362`
+- Prompt commit: `2878317ed1c9acbdd6cdf4c77654ed62aa416e48`
+- Implementation commit: `3cdbf702bde3149cb0d9041dc48289637699e7ac`
+- Pre-merge ancestry target: `2878317ed1c9acbdd6cdf4c77654ed62aa416e48`, explicitly not an actual merge commit. It is recorded in the manifest as `PR_HEAD_TRACE_TARGET_NOT_MERGED`.
+- PR #1495 is draft and unmerged. The trace pins are not a claim of merge or formal acceptance.
 
-Pinned first-parent window (base = first parent, old rule = the #1413 copy):
+## Rebase and carrier
 
-```text
-commit     base       verdict_old  verdict_new  triggering_ids
-31c1e5d83  159095f3c  VIOLATION    PASS         45
-159095f3c  56c3fe1b2  PASS         PASS         0
-56c3fe1b2  561e9f247  PASS         PASS         0
-561e9f247  981397d99  PASS         PASS         0
-981397d99  460f437eb  PASS         PASS         0
-460f437eb  6482901cb  PASS         PASS         0
-6482901cb  da69e43f8  VIOLATION    PASS         1
-da69e43f8  cd1722e75  PASS         PASS         0
-```
+- PR: #1495 (draft, open, unmerged).
+- The branch was merged with current main at `9c25f56fa82d579877a5a24cd1c5d08f37a207ab` using a two-parent merge commit `caaf86515a259ca66b84e4e746416c669b8d0eb4`.
+- The resulting PR diff is based on that main commit and reports zero commits behind; only the three System Boundaries files, four AID-2026-327 records, and INDEX are changed.
+- Earlier stale branch runs are historical and do not establish current-head acceptance. New exact-head CI remains pending.
 
-The old rule rejected two of the eight commits, not the four asserted in the
-ruling narrative. The measured set is pinned in the test; the difference is
-reported rather than explained away.
+## Issue-level session-evidence declaration
 
-Triggering ids for `31c1e5d83`: AID-2026-001, 003, 009, 054–064, 066–085,
-089–099, 252 (45 ids, all `M`/`D` under shared ids). For `6482901cb`:
-AID-2026-291 (1 id).
+Issue #1210 predates the repository's AI Session Evidence effective date (2026-12-01). Its historical issue-level declaration is therefore mapped as `LEGACY_UNDECLARED` with `N/A` issue-scoped evidence references in the PR table. The PR-level session evidence still records this current documentation session.
 
-Positive cases executed by the suite:
+## Existing-gate boundary
 
-```text
-two work-item directories declaring one id          -> VIOLATION (DUPLICATE_WORK_ITEM_ID)
-base record + candidate second path in merge tree   -> VIOLATION (DUPLICATE_WORK_ITEM_ID)
-other pull request's CLAIMED ledger entry           -> VIOLATION (claim ledger)
-record with no supported identity field             -> VIOLATION (WORK_ITEM_ID_MISSING)
-record whose id disagrees with its directory        -> VIOLATION (WORK_ITEM_PATH_ID_MISMATCH)
-candidate-supplied ledger, base has none            -> INCOMPLETE (not authoritative)
-```
+The current-head `Existing gates` workflow reports a manifest-schema ratchet failure for `14-ai-development/work-items/AID-2026-016/manifest.yaml` (missing legacy `documentation` and `implementation` keys). That exact file/blob is already present at the PR base commit and is unchanged on this branch. The D-10 PR does not modify AID-2026-016; this is a pre-existing mainline gate blocker, not attributed to this Work Item. All other observed checks at the last tested head passed except this Existing-gates aggregate.
 
-Legal shared-id operations executed by the suite: same-path modification,
-deletion, and additive files under an existing record all PASS.
+- A second freshness merge incorporated the then-current main `b333ad1cf0e86992621d41cc1dac87eb3141353c` in two-parent commit `7a0c2cb32142071081d70bba613031eb3207ab89`. This is the latest explicit main ancestry pin; later main advances may require another refresh before merge.
 
-## Record discovery and identity
+## Provenance and validation limits
 
-Records are enumerated by canonical path
-`14-ai-development/work-items/<AID-or-FIX-id>/manifest.yaml`. The id is read
-from content: top-level `work_item_id`, legacy top-level `aid`, or legacy
-nested `work_item.proposed_id`. The directory name is used only to check
-agreement with the declared id. An unreadable or unparseable blob is
-INCOMPLETE; a parsed record with no usable identity, or one that disagrees with
-its own directory, is a VIOLATION.
-
-At the observed commit the enumeration yields 138 records (AID and FIX
-families), including the legacy shapes; no duplicate declaration and no
-identity conflict exists on main, so the gate passes on the target tree.
-
-## Claim ledger trust boundary
-
-The ledger is read from the target tree only. If the target tree has no ledger
-and the candidate supplies one, the gate is INCOMPLETE: a candidate may not
-define the occupancy evidence that decides its own verdict. `--pull-request`
-without `--repository` is INCOMPLETE, and the own-claim exemption requires both
-the pull request number and the repository to match.
-
-## Workflow
-
-`document-management.yml` had no `merge_group` trigger at the observed commit,
-although it carries a required context. This change adds
-`merge_group: types: [checks_requested]`, uses
-`github.event.merge_group.head_sha` and `github.event.merge_group.base_sha`,
-serializes on `github.event.merge_group.base_ref`, removes the stale
-pull_request base SHA from the enforcement step, and fails closed on an
-unrecognized event.
-
-## Verification status
-
-```text
-python scripts/ci/test_work_item_uniqueness.py
-[regression] rows=8 old_red=2 old_pass=6 new_red=0 new_pass=8
-Ran 28 tests
-OK
-```
-
-The branch carries one merge of `origin/main` at
-`473f06d76f7a06ff91615a2dae0ddd75295391c0`; on the two checker files the merge
-kept this branch's version and discarded #1477's tree-only implementation and
-its incompatible tests, as the ruling required. No other file was resolved by
-whole-side selection.
-
-No merge of the pull request, no force push, no branch-protection change, and
-no real merge-queue run is claimed by this document.
+- The prompt snapshot is operator-authored and not a verbatim platform prompt; executed prompt provenance is NOT_VERIFIED.
+- Prompt digest/byte-count metadata has not been independently computed for this Work Item and is intentionally not asserted.
+- The external implementing-session identifier is not recorded; no identity is inferred.
+- No independent review or current-head CI result is claimed.

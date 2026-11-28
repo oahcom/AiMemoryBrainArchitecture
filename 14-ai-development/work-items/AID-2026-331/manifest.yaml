@@ -1,0 +1,184 @@
+work_item_id: AID-2026-331
+title: "Define and Migrate Historical Reference Semantics"
+class: DOC
+risk: R1
+risk_rationale: >-
+  Documentation-only work item recording two Owner rulings: Option C for
+  authored-index and related-evidence references, and
+  PROMPT-SNAPSHOT-REFERENCE-SEMANTICS-001 for executed prompt snapshots.
+  This work item does not change executable behavior or rewrite digests.
+status: PROPOSED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "AI-assisted documentation prepared from two Owner rulings and supplied repository evidence"
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "b333ad1cf0e86992621d41cc1dac87eb3141353c"
+tracking_issue: "#1350"
+
+scope:
+  summary: >-
+    Define and document both Owner rulings. Under Option C, authored_indexes[]
+    is a historical authorship reference and related_evidence[] requires an
+    explicit per-entry historical/current reference_mode. Under
+    PROMPT-SNAPSHOT-REFERENCE-SEMANTICS-001, executed prompt snapshot digest
+    and byte count are point-in-time session evidence, not candidate-tree
+    blob-pin assertions. Record the migration dispositions without rewriting
+    any declared digest or byte count.
+  in_scope:
+    - "Define authored_indexes[] as historical authorship references verified at the exact declared path in reachable Git history."
+    - "Define related_evidence[].reference_mode as required per entry, with only historical and current values."
+    - "Define fail-closed behavior for missing, invalid, or unclassifiable related-evidence modes."
+    - "Define mode-specific historical and candidate-current resolution."
+    - "Define the three Option C diagnostic outcomes and preserve their distinct meanings."
+    - "Record preservation of all six existing authored-index digests."
+    - "Record preservation of all three existing related-evidence digests and the required historical mode migration."
+    - "Define executed_prompt_snapshot_file digest and byte count as point-in-time session evidence under PROMPT-SNAPSHOT-REFERENCE-SEMANTICS-001."
+    - "Record that the four AID-2026-101/-102 candidate-tree failures are false positives under the chosen point-in-time semantics."
+    - "Record that snapshot verification must use the session's recorded commit or unambiguous entry history."
+    - "Record missing execution-commit provenance as a separate defect when historical bytes cannot be resolved unambiguously."
+    - "Record that Session Evidence check 11 remains the enforcing PR-head-tree validator for digest and byte count."
+    - "Record that AID-2026-336 removes duplicate prompt-snapshot assertions from the blob-pin checker's candidate-tree comparison."
+    - "Record the two rulings' non-acceptance and issue-status boundaries."
+  files_out_of_scope:
+    - "14-ai-development/work-items/AID-2026-100/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-101/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-102/manifest.yaml"
+    - "scripts/ci/check_manifest_blob_pins.py"
+    - "scripts/ci/test_check_manifest_blob_pins.py"
+    - "scripts/governance/session_evidence/validate.py"
+    - ".github/workflows/session-evidence.yml"
+    - "14-ai-development/prompt-and-evidence-template.md"
+  change_boundary: >-
+    Documentation-only. This work item defines and records the two Owner
+    decisions. It does not rewrite any digest or byte-count declaration,
+    apply the manifest migrations, change a checker, validator, workflow,
+    or template, or claim implementation, acceptance, or closure. The
+    AID-2026-101/-102 execution-commit provenance assessment remains a
+    migration/implementation evidence task.
+
+evidence:
+  - "Owner A (acct3) Option C ruling for authored_indexes[] and related_evidence[]."
+  - "Owner ruling PROMPT-SNAPSHOT-REFERENCE-SEMANTICS-001 for AID-2026-101 and AID-2026-102."
+  - "Six authored-index path/blob observations: declared digests, current digests, and same-path historical presence."
+  - "Three related-evidence path/blob observations: declared digests, current digests, and same-path historical presence."
+  - "The Owner requires preservation of all nine authored-index and related-evidence digests."
+  - "AID-2026-101 and AID-2026-102 each have declared prompt snapshot byte count 4470 and current file byte count 4412."
+  - "The two prompt snapshot digest and two byte-count candidate-tree findings are the four failures reclassified by the Owner as false positives."
+  - "Complete verified SHA-256 values and execution commit identifiers for the two prompt snapshots are not established in the evidence available for this documentation draft."
+  - "The Owner requires historical verification at the session-recorded commit or unambiguous entry history, with missing provenance reported separately."
+  - "Session Evidence check 11 remains authoritative for PR-head-tree digest and byte-count enforcement."
+  - "The Owner expressly requires removal of duplicate prompt-snapshot digest and byte-count assertions from the blob-pin checker's candidate-tree comparison."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-331/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-331/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-331/reference-semantics.md"
+    relationship: normative
+  - path: "14-ai-development/work-items/AID-2026-331/migration-table.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
+
+dependency_refs:
+  - "#1350"
+  - "PROMPT-SNAPSHOT-REFERENCE-SEMANTICS-001"
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+prompt_id: AID-2026-331-PROMPT
+prompt_version: "v1"
+
+created_at: "2026-11-27"
+updated_at: "2026-11-27"
+implementation_branch: ""
+implementation_commits: []
+changed_paths:
+  - "14-ai-development/work-items/AID-2026-331/manifest.yaml"
+  - "14-ai-development/work-items/AID-2026-331/reference-semantics.md"
+  - "14-ai-development/work-items/AID-2026-331/migration-table.md"
+  - "14-ai-development/work-items/AID-2026-331/session-evidence.md"
+  - "14-ai-development/work-items/AID-2026-331/prompt-v1.md"
+  - "14-ai-development/work-items/INDEX.md"
+
+verification:
+  status: NOT_RUN
+  commit_sha: ""
+  commands:
+    - "python scripts/ci/check_manifest_parse.py"
+    - "python scripts/ci/check_work_item_manifest_schema.py"
+    - "python scripts/ci/check_document_management.py --require-changed origin/main"
+    - "python scripts/ci/check_repository_hygiene.py --base <base> --head <head>"
+  evidence_refs: []
+
+evidence_tiering:
+  repository: "oahcom/AiMemoryBrainArchitecture"
+  change_class: DOC_EDITORIAL
+  review_level: R1
+  evidence_level: "1"
+  assessed_by: NOT_ASSIGNED
+  assessed_at: ""
+  rationale: >-
+    Documentation-only codification of two explicit Owner rulings and the
+    supplied declaration observations. No executable behavior or digest
+    repair is included in this change boundary.
+  base_head: "b333ad1cf0e86992621d41cc1dac87eb3141353c"
+  classification_basis: "Documentation-only change boundary"
+  classification_confirmed_by: NOT_ASSIGNED
+  classification_record: ""
+  downgrade_justification: ""
+  downgrade_confirmed_by: ""
+  downgrade_confirmation_record: ""
+  escalation_target: ""
+  checker_result: NOT_RUN
+  declaration_path: "evidence-declaration.yaml"
+
+review:
+  status: NOT_STARTED
+  report_ref: ""
+  findings: []
+
+implementation:
+  status: NOT_STARTED
+  summary: >-
+    Documentation-only record of Option C and
+    PROMPT-SNAPSHOT-REFERENCE-SEMANTICS-001. Preserve all nine authored-index
+    and related-evidence digests. Preserve both prompt snapshot digest and
+    byte-count declarations; classify their four candidate-tree findings as
+    false positives under the point-in-time rule. Record the required
+    historical provenance assessment for AID-2026-101/-102. AID-2026-336
+    implements the checker changes, including removal of duplicate
+    candidate-tree prompt snapshot assertions, while preserving Session
+    Evidence check 11. No checker, validator, workflow, or template is
+    changed by this work item. Prompt snapshot digest and byte count for
+    this work item's own prompt remain substitution placeholders.
+  files_changed:
+    - "14-ai-development/work-items/AID-2026-331/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-331/reference-semantics.md"
+    - "14-ai-development/work-items/AID-2026-331/migration-table.md"
+    - "14-ai-development/work-items/AID-2026-331/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-331/prompt-v1.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "python scripts/ci/check_manifest_parse.py"
+    - "python scripts/ci/check_work_item_manifest_schema.py"
+    - "python scripts/ci/check_document_management.py --require-changed origin/main"
+    - "python scripts/ci/check_repository_hygiene.py --base <base> --head <head>"
+
+session_evidence:
+  - role: DOCUMENTATION
+    issue_refs:
+      - "#1350"
+    implementing_ai_session: NOT_VERIFIED
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-331/prompt-v1.md"
+    executed_prompt_sha256: "de27a516afd6194e8fa0a48d2f5dff34768f3f2b379be3f8cb415cc640c08432"
+    executed_prompt_bytes: 7747
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-331/session-evidence.md"

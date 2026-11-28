@@ -1,5 +1,6 @@
 ---
 document_metadata:
+  steward: "user-authorized operator (delegated by account owner)"
   domain: ai-development
   role: work-record
   lifecycle:
@@ -12,12 +13,12 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-327/manifest.yaml"
+        - "14-ai-development/work-items/AID-2026-327/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
       last_verified_date: "2026-11-28"
-      last_verification_note: "Local test suite passes; independent review is pending."
+      last_verification_note: "This prompt is a scope snapshot, not a verbatim platform payload; provenance remains unverified."
     usage_status: Active
     modification_status: Modified
     supersession:
@@ -30,12 +31,11 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: null
-    canonical_scope_id: null
+    canonical_scope: "Preserves the bounded task prompt snapshot for AID-2026-327; it does not establish repository-wide requirements."
+    canonical_scope_id: "ai-development/aid-2026-327-prompt"
     canonical_scope_keywords:
-      - "work-item-uniqueness"
-      - "shared-id"
-      - "duplicate-declaration"
+      - "AID-2026-327"
+      - "d10-cursor-authority"
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
@@ -43,42 +43,22 @@ document_metadata:
     source: null
     en: null
     zh-CN: null
-  steward: "user-authorized operator (delegated by account owner)"
 ---
-# Prompt Snapshot — AID-2026-327
 
-## Task
+# AID-2026-327 Prompt v1
 
-Replace the shared-ID verdict of the work-item uniqueness gate with the rule
-recorded as section 4 of the `#1413` ruling. A duplicate declaration is one
-work-item id declared by two different registry record paths inside the same
-candidate tree. A modified or deleted path under an id the target branch
-already owns is not a duplicate declaration.
+Record the final Owner D-10 decision from Issue #1210 (comment 7174534633) in the canonical `01-system-architecture/system-boundaries.md` and its EN/ZH-CN mirrors. The decision is final; do not reopen or reinterpret it.
 
-## Required design
+Record these exact semantics:
+- One deployment has one logical Brain authority. Tenant and shard are partition boundaries within that authority, not separate authorities.
+- `CanonicalCommitCursor` is partitioned per tenant/shard. There is no total order across tenants or shards. A globally ordered cursor across tenants is rejected because it would require a global serialization point or distributed consensus not specified by this architecture.
+- Cursor entries are ordered only within their own tenant/shard partition.
+- Authority identity and epoch/incarnation are explicit parts of cursor identity. Rollover is an epoch change. Cursors from different authorities or epochs are not comparable; comparison across them is an error, never a numeric ordering.
+- A cross-shard transaction produces one cursor entry per participating shard, ordered within each shard. The transaction is atomic all-or-none; atomicity does not imply a cross-shard total order, and no API may imply one.
+- Aggregate revisions and lifecycle cursors remain separate domains.
+- `ForgetFence`, `ProducerRegistrationHighWater`, and similar fences are per-authority and must carry authority identity and applicable target/partition scope so a fence from one shard cannot be read as covering another.
+- Required negative cases: `cursor_comparison_across_authority_rejected` and `cross_shard_commit_exposes_no_total_order`.
 
-- `build_id_map(tree)` reads `work_item_id` from each registry record's content,
-  not from the directory name; an unreadable record is INCOMPLETE.
-- `check_candidate_tree` rejects only an id declared by two or more record
-  paths in the candidate tree.
-- `introduced_ids = head - base`; `occupied_ids = set(base_map)`; a shared id
-  asserts exactly one declaration in the candidate tree.
-- `introduced_ids` is additionally checked against the claim ledger for another
-  pull request's valid `CLAIMED` or `MERGED` entry.
-- `base_tip` decides occupancy; `merge_base` must not.
+In scope: add a clearly marked decision section to the canonical System Boundaries source, update its English and Chinese mirrors and source-revision pins, create this Work Item's evidence/session records, register one INDEX row, and preserve the required bilingual, related-issue, session-evidence and exact-head validation declarations for review.
 
-## Regression requirement
-
-Take the eight most recent first-parent commits of main, record each head SHA
-and its first parent, run the old rule and the new rule on every pair, and
-record `commit / verdict_old / verdict_new / triggering_paths`. Every commit
-the old rule rejected must pass now, and no real duplicate may be released.
-Add three positive cases: one id declared under `registry/` and `archive/`; two
-different work-item directories declaring one id; and an id already occupied on
-the base tip.
-
-## Execution constraints
-
-Local worktree only; no force-push, no rebase, no merge, no change to other
-pull requests. The report must state measured PR states rather than repeating
-earlier claims.
+Out of scope: code, runtime, API/schema/DDL, tests, workflows, branch protection, Issue #1210 body edits, unrelated PR-body edits, and changes to the detailed D/F/G consumer documents. Do not claim that the System Boundaries document is formally approved or that downstream consumers are aligned. Preserve the document's Draft approval and Unverified evidence-verification metadata. Explicitly record the unresolved multi-shard transaction representation and F/G consistent-snapshot/cut protocol as follow-up work, not as newly decided wire semantics. No code or runtime implementation is authorized.
