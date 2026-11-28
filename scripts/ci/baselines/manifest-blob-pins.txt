@@ -1,19 +1,11 @@
-# AID-2026-268 manifest blob-pin baseline
-# Current baseline contains exactly 4 observed failures.
-# The other 11 previously recorded entries have been fixed and removed.
-# Two remaining failures are historical prompt byte-count mismatches:
-# AID-2026-101 and AID-2026-102 each declare 4470 bytes, while
-# their current prompt-v1.md files contain 4412 bytes.
-# Their corresponding prompt SHA-256 mismatches are no longer present
-# in the current failure set and are therefore not retained here.
-# Two additional failures are historical PATH_MISSING entries for
-# AID-2026-261/prompt-v1.md. The path remains absent from the candidate
-# tree, while the historical declarations remain present:
-# one declares a byte count of 0 and the other declares an all-zero SHA-256.
-# These four entries remain because gate_ratchet requires the baseline
-# to equal the current failure set exactly. A fixed entry is stale;
-# removing an entry that still fails is a regression.
-MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-101/prompt-v1.md declared=4470 actual=4412
-MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-102/prompt-v1.md declared=4470 actual=4412
-PATH_MISSING path=14-ai-development/work-items/AID-2026-261/prompt-v1.md; declared=0
+# Issue #1462: this file is anchored to the PR base commit by gate_ratchet.py.
+# Candidate changes may remove existing entries but may not add entries.
+# A baseline addition is a failure, even when the underlying checker reports it.
+# Manifest blob pin ratchet baseline.
+# Measured against main bf7fd91cbb3ccad4d2dba5662b14b849e446d706.
+# This is the history-scan anchor for the append-only manifest pin ledger.
+# Pin transitions before this commit are historical context, not new ledger entries.
+# The two PATH_MISSING entries below are intentional AID-2026-261 sentinels.
+# Do not remove or alter them without an explicit owner decision.
 PATH_MISSING path=14-ai-development/work-items/AID-2026-261/prompt-v1.md; declared=0000000000000000000000000000000000000000000000000000000000000000
+PATH_MISSING path=14-ai-development/work-items/AID-2026-261/prompt-v1.md; declared=0

@@ -6,7 +6,7 @@ risk_rationale: >-
   Adds a read-only validator, its regression suite, one schema file and one
   workflow job. It migrates no registry data, rewrites no existing manifest and
   deletes no existing gate; the manifest blob-pin auditor keeps running.
-status: IN_REVIEW
+status: MERGED
 id_status: PROVISIONAL
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -57,6 +57,8 @@ session_evidence:
 implementation:
   status: IMPLEMENTED
   pull_request: 1503
+  merge_commit_sha: 5f6fc4c44b6055a0cfd3ab0da9850fc80c127746
+  merged_at: "2026-11-28T03:29:48Z"
   summary: >-
     Adds the registry record schema, a JSONL-emitting validator with the
     specification's exit-code contract, 64 regression cases over throwaway Git

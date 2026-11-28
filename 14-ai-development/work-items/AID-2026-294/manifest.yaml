@@ -8,7 +8,7 @@ risk_rationale: >-
   workflow edits change which events schedule an existing job; they do not add,
   remove or rename a required context, and they do not touch branch protection,
   rulesets or merge-queue settings.
-status: DISPATCHED
+status: MERGED
 id_status: PROVISIONAL
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -103,7 +103,10 @@ session_evidence:
     session_reference_status: "RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-294/session-evidence.md"
 implementation:
-  status: IN_PROGRESS
+  status: IMPLEMENTED
+  pull_request: 1491
+  merge_commit_sha: 3894677073191bf6b7ac113e9baf5874c864fffb
+  merged_at: "2026-11-28T02:55:19Z"
   summary: >-
     Restores the merge_group subscription and the fail-closed merge-group base
     and head resolution that #1453 removed from document-management.yml,
@@ -143,11 +146,6 @@ prompt_sha256: "056b9208fb9425913d3fa57cc8f30414423119b2a98908d706a58f0ed138de55
 # This is a blob OID, not a commit SHA.
 prompt_file_blob_sha: "a9437b105f26f2cb55dab015325363f6e334699e"
 
-# Explicitly declares this as the narrowly scoped first-registration state.
-prompt_commit_trace_initial_registration: true
+# Initial registration exception no longer applies after merge.
+prompt_commit_trace_initial_registration: false
 
-# IMPORTANT:
-# Do not add prompt_file_commit_sha here.
-# Do not add implementation.implementation_commit_sha here.
-# Do not add implementation.merge_commit_sha here.
-# The initial-registration exception rejects those pins.
