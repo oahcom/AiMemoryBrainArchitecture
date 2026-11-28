@@ -386,3 +386,7 @@ class ManifestBlobPinTests(unittest.TestCase):
             sum(line.startswith("MISMATCH ") for line in lines),
             1,
         )
+
+
+if __name__ == "__main__":
+    unittest.main()
