@@ -2,20 +2,18 @@
 # Candidate changes may remove existing entries but may not add entries.
 # A baseline addition is a failure, even when the underlying checker reports it.
 # AID-2026-268 manifest blob-pin baseline
-# Current baseline contains exactly 4 observed failures.
-# The other 11 previously recorded entries have been fixed and removed.
-# Two remaining failures are historical prompt byte-count mismatches:
-# AID-2026-101 and AID-2026-102 each declare 4470 bytes, while
-# their current prompt-v1.md files contain 4412 bytes.
-# Their corresponding prompt SHA-256 mismatches are no longer present
-# in the current failure set and are therefore not retained here.
-# Two additional failures are historical PATH_MISSING entries for
-# AID-2026-261/prompt-v1.md. The path remains absent from the candidate
-# tree, while the historical declarations remain present:
-# one declares a byte count of 0 and the other declares an all-zero SHA-256.
-# These four entries remain because gate_ratchet requires the baseline
-# to equal the current failure set exactly. A fixed entry is stale;
-# removing an entry that still fails is a regression.
+# Merged from base(15) / ours(39) / theirs(4) during the #1426 integration.
+# Ruling of 2026-11-28 (Owner session 6b0a1b64):
+#   deleted as superseded by current manifest values: 11
+#   deleted as duplicate legacy-format entries:        2
+#   transferred to standalone defect records:          6
+#   retained in pending historical review ledger:     18
+#   active ratchet findings retained at daa935f7a:     4
+# The active baseline contains only findings reproduced by the
+# current main checker at the pinned target commit.
+# Historical diagnostics not reproduced by the current checker
+# are tracked separately and are not treated as fixed or resolved.
+
 MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-101/prompt-v1.md declared=4470 actual=4412
 MISMATCH session_evidence[0].executed_prompt_snapshot_file path=14-ai-development/work-items/AID-2026-102/prompt-v1.md declared=4470 actual=4412
 PATH_MISSING path=14-ai-development/work-items/AID-2026-261/prompt-v1.md; declared=0
