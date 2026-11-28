@@ -49,6 +49,26 @@ jobs:
             echo "AI-SESSION-EVIDENCE: NOT_APPLICABLE (base tree has no tests/session_evidence)"
           fi
 
+      # The merge-group candidate resolver is a new module: a trusted base that
+      # predates it cannot run it, and a missing module must never read as a
+      # green self-test. The guard is explicit (a file test), not an inferred
+      # exit code.
+      - name: Guard merge-group candidate module in trusted base
+        if: github.event_name == 'merge_group'
+        run: |
+          set -eu
+          if [ ! -f scripts/governance/merge_group/candidate.py ]; then
+            echo "AI-SESSION-EVIDENCE: INCOMPLETE"
+            echo "::error::trusted base lacks scripts/governance/merge_group/candidate.py"
+            exit 2
+          fi
+
+      - name: Self-test merge-group resolver in trusted base
+        if: github.event_name == 'merge_group'
+        run: |
+          set -eu
+          python3 -m unittest discover -s tests/merge_group -p "test_*.py" -v
+
   self-test-pr-head:
     name: Session Evidence self-test (head)
     runs-on: ubuntu-latest
@@ -66,6 +86,18 @@ jobs:
             python3 -m unittest discover -s tests/session_evidence -p "test_*.py"
           else
             echo "AI-SESSION-EVIDENCE: NOT_APPLICABLE (PR head tree has no tests/session_evidence)"
+          fi
+
+      # The head tree must carry the resolver's own tests. A missing directory
+      # is a defect in the change under test, not a reason to skip.
+      - name: Self-test merge-group resolver in PR head
+        run: |
+          set -eu
+          if [ -d tests/merge_group ]; then
+            python3 -m unittest discover -s tests/merge_group -p "test_*.py" -v
+          else
+            echo "::error::PR head lacks tests/merge_group"
+            exit 1
           fi
 
   validate:
@@ -86,18 +118,52 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
+          MERGE_GROUP_HEAD_SHA: ${{ github.event.merge_group.head_sha }}
         run: |
           set +e
-          # The merge_group payload carries no pull_request object. The queue
-          # ref is refs/heads/gh-readonly-queue/<base>/pr-<N>-<sha>; the
-          # validator needs that PR number to read the body it judges.
-          if [ -z "$PR_NUMBER" ]; then
-            PR_NUMBER=$(printf '%s' "$GITHUB_REF" | sed -n 's#.*/pr-\([0-9]\+\)-.*#\1#p')
-            export PR_NUMBER
+          # A merge_group payload carries no pull_request object and its queue
+          # ref names only the last entry, never the PR set. The shared
+          # resolver reads the whole queue, fixes the tail prefix and writes
+          # one member record per PR; the validator then judges each body
+          # against the single candidate tree.
+          if [ "$GITHUB_EVENT_NAME" = "merge_group" ]; then
+            if [ ! -f scripts/governance/merge_group/candidate.py ]; then
+              echo "AI-SESSION-EVIDENCE: INCOMPLETE"
+              echo "AI-SESSION-EVIDENCE: INCOMPLETE" >> "$GITHUB_STEP_SUMMARY"
+              echo "::error::trusted base lacks merge-group candidate resolver"
+              result=2
+            else
+              python3 scripts/governance/merge_group/candidate.py \
+                --output "$RUNNER_TEMP/merge-group-members.json"
+              result=$?
+
+              case "$result" in
+                0)
+                  export MERGE_GROUP_MEMBERS_JSON="$RUNNER_TEMP/merge-group-members.json"
+                  python3 -m scripts.governance.session_evidence.validate
+                  result=$?
+                  ;;
+                1)
+                  echo "AI-SESSION-EVIDENCE: VIOLATION" >> "$GITHUB_STEP_SUMMARY"
+                  ;;
+                2)
+                  echo "AI-SESSION-EVIDENCE: INCOMPLETE" >> "$GITHUB_STEP_SUMMARY"
+                  ;;
+                *)
+                  echo "AI-SESSION-EVIDENCE: INCOMPLETE" >> "$GITHUB_STEP_SUMMARY"
+                  echo "::error::unexpected merge-group candidate resolver exit code: $result"
+                  result=2
+                  ;;
+              esac
+            fi
+          else
+            python3 -m scripts.governance.session_evidence.validate
+            result=$?
           fi
-          python3 -m scripts.governance.session_evidence.validate
-          result=$?
+
           if [ "$result" -eq 0 ]; then
             echo "validation_result=success" >> "$GITHUB_OUTPUT"
           else
