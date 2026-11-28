@@ -2,6 +2,7 @@
 document_metadata:
   domain: ai-development
   role: guide
+  steward: "Architecture Governance"
   lifecycle:
     approval:
       decision_status: Draft
@@ -316,6 +317,17 @@ marked fails the check, so no second pass condition can appear silently. `81` is
 historical value: it is the count of the 81-finding review snapshot at
 `c58878f` (`reviews/bmcp-architecture-followup/BMCP-ARCH-001.en.md`), never the
 count of this baseline today.
+
+### 4.1 Baseline trust boundary
+
+The baseline used to judge a candidate MUST be read from a trusted base revision,
+not from the candidate checkout. A candidate MUST NOT be evaluated against a
+baseline it supplies or modifies.
+For a pull request the trusted revision MUST be the pull request's base commit;
+for a merge-queue candidate it MUST be the merge group's base commit.
+`gates.yml` checks out `merge_group.head_sha || pull_request.head.sha` (`:145`),
+so the ratchet today reads the baseline from the candidate tree. No check verifies
+the baseline's provenance; this requirement is **not yet enforced by a check**.
 
 Regenerate a baseline only when the failure set legitimately changed:
 
