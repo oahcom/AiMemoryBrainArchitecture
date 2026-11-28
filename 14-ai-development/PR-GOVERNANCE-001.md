@@ -1,5 +1,6 @@
 ---
 document_metadata:
+  steward: "Architecture Governance"
   domain: ai-development
   role: normative-standard
   lifecycle:
@@ -260,7 +261,7 @@ If the current GitHub plan/visibility does not support required controls for thi
 
 **Measured platform state, `2026-11-25`, from `GET /repos/oahcom/AiMemoryBrainArchitecture` and `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection` (HTTP 200).** This is a dated measurement, not a standing assertion; re-read it before relying on it. The repository reports `private: false`, `visibility: public`, so the plan/visibility limitation above is moot here and is not available as a ground for BLOCKED.
 
-- **Status checks — enforced.** 16 required contexts, `strict: true`, `enforce_admins: {enabled: true}`, `allow_force_pushes: {enabled: false}`, `allow_deletions: {enabled: false}`. A required check that fails or is absent on the exact Head cannot merge through the normal path. The sixteen names are declared below so that each must still be produced by a workflow in this tree:
+- **Status checks — enforced.** 16 platform-required contexts (the governance declaration lists 17 contexts; Protection fingerprint is not yet platform-required), `strict: true`, `enforce_admins: {enabled: true}`, `allow_force_pushes: {enabled: false}`, `allow_deletions: {enabled: false}`. A required check that fails or is absent on the exact Head cannot merge through the normal path. The sixteen names are declared below so that each must still be produced by a workflow in this tree:
 
 <!-- declared-check-contexts: read by scripts/check_declared_check_contexts.py -->
 ```text
@@ -280,6 +281,7 @@ Session Evidence
 Session Evidence self-test (base)
 Session Evidence self-test (head)
 rust-workspace-test
+Protection fingerprint
 ```
 
 - **Pull-request reviews — not enforced.** `required_pull_request_reviews` is absent from the protection payload (the key is not present, not `null`). This is not an unset flag waiting to be flipped: the repository has one write identity, so `author == merger == approver` at the account layer, and requiring an approving review would deadlock every PR. `required_conversation_resolution` is also `{enabled: false}`. No PR body, workflow comment, label or AI self-review may be read as a review gate this repository does not have; §6.1 remains a process requirement only.
