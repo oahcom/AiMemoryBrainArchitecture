@@ -46,8 +46,17 @@ LEDGER_HEADER = (
     "new_pin",
     "repin_commit",
 )
+LEDGER_HEADER_V2 = (
+    "manifest",
+    "field",
+    "path",
+    "reference_mode",
+    "previous_pin",
+    "new_pin",
+    "repin_commit",
+)
 LEDGER_SEPARATOR = re.compile(
-    r"^\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*){5}\|?$"
+    r"^\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*){5,6}\|?$"
 )
 
 
@@ -67,13 +76,14 @@ class Pin:
     declared: str
     source_commit: str
     algorithm: str = "git"
+    reference_mode: str = "current"
 
     @property
-    def identity(self) -> tuple[str, str, str]:
-        return (self.manifest, self.field, self.path)
+    def identity(self) -> tuple[str, str, str, str]:
+        return (self.manifest, self.field, self.path, self.reference_mode)
 
     @property
-    def value_identity(self) -> tuple[str, str, str, str]:
+    def value_identity(self) -> tuple[str, str, str, str, str]:
         return (*self.identity, self.algorithm)
 
 
@@ -85,10 +95,11 @@ class LedgerRecord:
     previous_pin: str
     new_pin: str
     repin_commit: str
+    reference_mode: str = "current"
 
     @property
-    def identity(self) -> tuple[str, str, str]:
-        return (self.manifest, self.field, self.path)
+    def identity(self) -> tuple[str, str, str, str]:
+        return (self.manifest, self.field, self.path, self.reference_mode)
 
     @property
     def algorithm(self) -> str:
@@ -99,13 +110,23 @@ class LedgerRecord:
         return "git"
 
     @property
-    def value_identity(self) -> tuple[str, str, str, str]:
+    def value_identity(self) -> tuple[str, str, str, str, str]:
         return (*self.identity, self.algorithm)
+
+
+@dataclass(frozen=True)
+class ReferenceModeIssue:
+    manifest: str
+    field: str
+    reason: str
 
 
 class Git:
     def __init__(self, root: Path):
         self.root = root
+        self._historical_blob_cache: dict[
+            tuple[str, str, str], bool
+        ] = {}
 
     def run(self, *args: str) -> bytes:
         try:
@@ -161,6 +182,65 @@ class Git:
         if result.returncode:
             raise Violation(f"PATH_MISSING path={path}")
         return result.stdout
+
+    def historical_blob_exists(
+        self,
+        commit: str,
+        path: str,
+        declared_blob: str,
+    ) -> bool:
+        """Prove a declared blob existed at this path anywhere in reachable history."""
+        resolved = self.resolve_commit(commit, "historical reference commit")
+        if not path or path.startswith("/") or ".." in Path(path).parts:
+            raise Incomplete(f"invalid historical reference path: {path!r}")
+        if not HEX40.fullmatch(declared_blob):
+            raise Incomplete(
+                f"historical reference is not a full Git blob SHA: "
+                f"{declared_blob!r}"
+            )
+
+        cache_key = (resolved, path, declared_blob)
+        cached = self._historical_blob_cache.get(cache_key)
+        if cached is not None:
+            return cached
+
+        output = self.run(
+            "log",
+            "--format=%H",
+            "--diff-filter=AMR",
+            resolved,
+            "--",
+            path,
+        )
+        commits = [
+            line.strip()
+            for line in output.decode("ascii", "strict").splitlines()
+            if line.strip()
+        ]
+
+        found = False
+        for historical_commit in commits:
+            if not HEX40.fullmatch(historical_commit):
+                raise Incomplete(
+                    f"invalid commit in historical path log: "
+                    f"{historical_commit!r}"
+                )
+            spec = f"{historical_commit}:{path}"
+            object_type = self.run("cat-file", "-t", spec)
+            if object_type.decode("ascii", "strict").strip() != "blob":
+                continue
+            blob_sha = self.run("rev-parse", "--verify", spec)
+            resolved_blob = blob_sha.decode("ascii", "strict").strip()
+            if not HEX40.fullmatch(resolved_blob):
+                raise Incomplete(
+                    f"historical path did not resolve to a full blob SHA: {spec}"
+                )
+            if resolved_blob == declared_blob:
+                found = True
+                break
+
+        self._historical_blob_cache[cache_key] = found
+        return found
 
     def has_path(self, commit: str, path: str) -> bool:
         """Test tree membership without turning an expected absent path into an error."""
@@ -309,9 +389,12 @@ def extract_manifest_pins(
     manifest_path: str,
     document: dict,
     default_commit: str,
+    reference_mode_issues: list[ReferenceModeIssue] | None = None,
+    allow_missing_reference_mode: bool = False,
 ) -> list[Pin]:
-    """Extract supported path/digest pairs, preserving the declared field name."""
+    """Extract supported pins and apply the Owner Option C reference semantics."""
     pins: list[Pin] = []
+    issues = reference_mode_issues if reference_mode_issues is not None else []
 
     def add(
         field: str,
@@ -319,6 +402,7 @@ def extract_manifest_pins(
         declared: Any,
         source_commit: Any = None,
         algorithm: str = "git",
+        reference_mode: str = "current",
     ) -> None:
         if declared is None or (
             isinstance(declared, str) and not declared.strip()
@@ -346,6 +430,7 @@ def extract_manifest_pins(
                     else default_commit
                 ),
                 algorithm=algorithm,
+                reference_mode=reference_mode,
             )
         )
 
@@ -388,22 +473,60 @@ def extract_manifest_pins(
                     f"authored_indexes[{index}].{path_key}",
                     item.get(path_key),
                     item.get(digest_key),
+                    reference_mode="historical",
                 )
 
     for index, item in enumerate(document.get("related_evidence", []) or []):
         if not isinstance(item, dict):
             continue
-        for path_key, digest_key in (
+
+        digest_keys = (
             ("path", "blob"),
             ("en_mirror", "en_mirror_blob"),
             ("zh_cn_mirror", "zh_cn_mirror_blob"),
-        ):
-            if digest_key in item:
-                add(
-                    f"related_evidence[{index}].{path_key}",
-                    item.get(path_key),
-                    item.get(digest_key),
+        )
+        declared_pairs = [
+            (path_key, digest_key)
+            for path_key, digest_key in digest_keys
+            if digest_key in item
+        ]
+        if not declared_pairs:
+            continue
+
+        mode_present = "reference_mode" in item
+        mode_value = item.get("reference_mode")
+
+        if not mode_present:
+            if allow_missing_reference_mode:
+                reference_mode = "current"
+            else:
+                issues.append(
+                    ReferenceModeIssue(
+                        manifest_path,
+                        f"related_evidence[{index}].reference_mode",
+                        "missing reference_mode",
+                    )
                 )
+                reference_mode = "current"
+        elif mode_value not in ("historical", "current"):
+            issues.append(
+                ReferenceModeIssue(
+                    manifest_path,
+                    f"related_evidence[{index}].reference_mode",
+                    f"invalid reference_mode {mode_value!r}",
+                )
+            )
+            reference_mode = "current"
+        else:
+            reference_mode = mode_value
+
+        for path_key, digest_key in declared_pairs:
+            add(
+                f"related_evidence[{index}].{path_key}",
+                item.get(path_key),
+                item.get(digest_key),
+                reference_mode=reference_mode,
+            )
 
     if "evidence_blob" in document:
         add("evidence_file", document.get("evidence_file"), document.get("evidence_blob"))
@@ -457,6 +580,8 @@ def load_manifest_pins(
     git: Git,
     commit: str,
     manifest_path: str,
+    reference_mode_issues: list[ReferenceModeIssue] | None = None,
+    allow_missing_reference_mode: bool = False,
 ) -> list[Pin]:
     resolved = git.resolve_commit(commit)
     raw = git.object_bytes(resolved, manifest_path)
@@ -470,18 +595,37 @@ def load_manifest_pins(
         raise Incomplete(
             f"manifest {manifest_path} at {resolved} is not a YAML mapping"
         )
-    return extract_manifest_pins(manifest_path, document, resolved)
+    return extract_manifest_pins(
+        manifest_path,
+        document,
+        resolved,
+        reference_mode_issues=reference_mode_issues,
+        allow_missing_reference_mode=allow_missing_reference_mode,
+    )
 
 
-def read_all_pins(git: Git, commit: str) -> tuple[list[str], list[Pin]]:
+def read_all_pins(
+    git: Git,
+    commit: str,
+    allow_missing_reference_mode: bool = False,
+) -> tuple[list[str], list[Pin], list[ReferenceModeIssue]]:
     resolved = git.resolve_commit(commit)
     manifests = discover_manifests(git, resolved)
     if not manifests:
         raise Incomplete(f"no manifests found in commit {resolved}")
     pins: list[Pin] = []
+    issues: list[ReferenceModeIssue] = []
     for manifest_path in manifests:
-        pins.extend(load_manifest_pins(git, resolved, manifest_path))
-    return manifests, pins
+        pins.extend(
+            load_manifest_pins(
+                git,
+                resolved,
+                manifest_path,
+                reference_mode_issues=issues,
+                allow_missing_reference_mode=allow_missing_reference_mode,
+            )
+        )
+    return manifests, pins, issues
 
 
 def verify_blob_sha256_declarations(
@@ -579,134 +723,203 @@ def pin_map_for_manifest(
     git: Git,
     commit: str,
     manifest_path: str,
-) -> dict[tuple[str, str, str, str], Pin]:
+) -> dict[tuple[str, str, str, str, str], Pin]:
     pins = load_manifest_pins(git, commit, manifest_path)
-    result: dict[tuple[str, str, str, str], Pin] = {}
+    result: dict[tuple[str, str, str, str, str], Pin] = {}
     for pin in pins:
         if pin.value_identity in result:
             raise Incomplete(
                 f"pin identity is not unique at {commit}: "
-                f"{pin.manifest}::{pin.field}::{pin.path}::{pin.algorithm}"
+                f"{pin.manifest}::{pin.field}::{pin.path}::"
+                f"{pin.reference_mode}::{pin.algorithm}"
             )
         result[pin.value_identity] = pin
     return result
 
 
 def parse_ledger(raw: bytes) -> list[LedgerRecord]:
-    """Parse a valid ledger table; a header-only table is a valid empty ledger."""
+    """Parse legacy six-column and mode-aware seven-column ledger tables."""
     try:
         content = raw.decode("utf-8")
     except UnicodeError as exc:
         raise Incomplete(f"{LEDGER_PATH} is not UTF-8: {exc}") from exc
 
     lines = content.splitlines()
-    header_index = None
+    headers: list[tuple[int, tuple[str, ...]]] = []
+
     for index, line in enumerate(lines):
-        cells = [
+        if not line.strip().startswith("|"):
+            continue
+        cells = tuple(
             cell.strip().strip("`")
             for cell in line.strip().strip("|").split("|")
-        ]
-        if tuple(cells) == LEDGER_HEADER:
-            header_index = index
-            break
-    if header_index is None:
-        raise Incomplete(f"{LEDGER_PATH} has no exact six-column ledger header")
-    if header_index + 1 >= len(lines) or not LEDGER_SEPARATOR.fullmatch(
-        lines[header_index + 1].strip()
-    ):
-        raise Incomplete(f"{LEDGER_PATH} has an invalid Markdown table separator")
+        )
+        if cells in (LEDGER_HEADER, LEDGER_HEADER_V2):
+            headers.append((index, cells))
+
+    if not headers:
+        raise Incomplete(
+            f"{LEDGER_PATH} has no exact six-column or seven-column ledger header"
+        )
 
     records: list[LedgerRecord] = []
-    for line_number, line in enumerate(
-        lines[header_index + 2:], start=header_index + 3
-    ):
-        stripped = line.strip()
-        if not stripped:
-            continue
-        if not stripped.startswith("|") or not stripped.endswith("|"):
+    seen_transitions: set[tuple[tuple[str, str, str, str, str], str]] = set()
+
+    for header_index, header in headers:
+        columns = len(header)
+        if header_index + 1 >= len(lines) or not LEDGER_SEPARATOR.fullmatch(
+            lines[header_index + 1].strip()
+        ):
             raise Incomplete(
-                f"{LEDGER_PATH}:{line_number}: ledger row must be a pipe table row"
+                f"{LEDGER_PATH}: invalid Markdown table separator "
+                f"after line {header_index + 1}"
             )
-        cells = [
-            cell.strip().strip("`")
-            for cell in stripped[1:-1].split("|")
+
+        separator_cells = [
+            cell.strip()
+            for cell in lines[header_index + 1].strip().strip("|").split("|")
         ]
-        if len(cells) != 6 or any(not cell for cell in cells):
+        if len(separator_cells) != columns:
             raise Incomplete(
-                f"{LEDGER_PATH}:{line_number}: expected six non-empty cells"
-            )
-        manifest, field, path, previous_pin, new_pin, repin_commit = cells
-        if manifest.startswith("/") or ".." in Path(manifest).parts:
-            raise Incomplete(
-                f"{LEDGER_PATH}:{line_number}: invalid manifest path {manifest!r}"
-            )
-        if path.startswith("/") or ".." in Path(path).parts:
-            raise Incomplete(
-                f"{LEDGER_PATH}:{line_number}: invalid pinned path {path!r}"
-            )
-        if not field.strip():
-            raise Incomplete(f"{LEDGER_PATH}:{line_number}: field must be non-empty")
-
-        valid_previous = (
-            previous_pin.isdigit()
-            or bool(HEX40.fullmatch(previous_pin))
-            or bool(HEX64.fullmatch(previous_pin))
-        )
-        valid_new = (
-            new_pin.isdigit()
-            or bool(HEX40.fullmatch(new_pin))
-            or bool(HEX64.fullmatch(new_pin))
-        )
-        if not valid_previous:
-            raise Incomplete(
-                f"{LEDGER_PATH}:{line_number}: invalid previous_pin {previous_pin!r}"
-            )
-        if not valid_new:
-            raise Incomplete(
-                f"{LEDGER_PATH}:{line_number}: invalid new_pin {new_pin!r}"
-            )
-        if not HEX40.fullmatch(repin_commit):
-            raise Incomplete(
-                f"{LEDGER_PATH}:{line_number}: repin_commit must be a full lowercase SHA"
+                f"{LEDGER_PATH}: separator must have {columns} columns"
             )
 
-        record = LedgerRecord(
-            manifest, field, path, previous_pin, new_pin, repin_commit
-        )
-        if record.algorithm == "bytes":
-            valid_kind = previous_pin.isdigit() and new_pin.isdigit()
-        elif record.algorithm == "sha256":
-            valid_kind = bool(HEX64.fullmatch(previous_pin)) and bool(
-                HEX64.fullmatch(new_pin)
+        for line_number in range(header_index + 2, len(lines)):
+            stripped = lines[line_number].strip()
+            if not stripped:
+                break
+            if not stripped.startswith("|") or not stripped.endswith("|"):
+                break
+
+            cells = [
+                cell.strip().strip("`")
+                for cell in stripped[1:-1].split("|")
+            ]
+            if len(cells) != columns or any(not cell for cell in cells):
+                raise Incomplete(
+                    f"{LEDGER_PATH}:{line_number + 1}: "
+                    f"expected {columns} non-empty cells"
+                )
+
+            if columns == 6:
+                manifest, field, path, previous_pin, new_pin, repin_commit = cells
+                reference_mode = "current"
+            else:
+                (
+                    manifest,
+                    field,
+                    path,
+                    reference_mode,
+                    previous_pin,
+                    new_pin,
+                    repin_commit,
+                ) = cells
+                if reference_mode not in ("historical", "current"):
+                    raise Incomplete(
+                        f"{LEDGER_PATH}:{line_number + 1}: "
+                        f"invalid reference_mode {reference_mode!r}"
+                    )
+
+            if manifest.startswith("/") or ".." in Path(manifest).parts:
+                raise Incomplete(
+                    f"{LEDGER_PATH}:{line_number + 1}: "
+                    f"invalid manifest path {manifest!r}"
+                )
+            if path.startswith("/") or ".." in Path(path).parts:
+                raise Incomplete(
+                    f"{LEDGER_PATH}:{line_number + 1}: "
+                    f"invalid pinned path {path!r}"
+                )
+            if not field.strip():
+                raise Incomplete(
+                    f"{LEDGER_PATH}:{line_number + 1}: field must be non-empty"
+                )
+
+            valid_previous = (
+                previous_pin.isdigit()
+                or bool(HEX40.fullmatch(previous_pin))
+                or bool(HEX64.fullmatch(previous_pin))
             )
-        else:
-            valid_kind = bool(HEX40.fullmatch(previous_pin)) and bool(
-                HEX40.fullmatch(new_pin)
+            valid_new = (
+                new_pin.isdigit()
+                or bool(HEX40.fullmatch(new_pin))
+                or bool(HEX64.fullmatch(new_pin))
             )
-        if not valid_kind:
-            raise Incomplete(
-                f"{LEDGER_PATH}:{line_number}: mixed pin kinds in ledger row"
+            if not valid_previous:
+                raise Incomplete(
+                    f"{LEDGER_PATH}:{line_number + 1}: "
+                    f"invalid previous_pin {previous_pin!r}"
+                )
+            if not valid_new:
+                raise Incomplete(
+                    f"{LEDGER_PATH}:{line_number + 1}: "
+                    f"invalid new_pin {new_pin!r}"
+                )
+            if not HEX40.fullmatch(repin_commit):
+                raise Incomplete(
+                    f"{LEDGER_PATH}:{line_number + 1}: "
+                    "repin_commit must be a full lowercase SHA"
+                )
+
+            record = LedgerRecord(
+                manifest=manifest,
+                field=field,
+                path=path,
+                previous_pin=previous_pin,
+                new_pin=new_pin,
+                repin_commit=repin_commit,
+                reference_mode=reference_mode,
             )
-        records.append(record)
+
+            if record.algorithm == "bytes":
+                valid_kind = previous_pin.isdigit() and new_pin.isdigit()
+            elif record.algorithm == "sha256":
+                valid_kind = bool(HEX64.fullmatch(previous_pin)) and bool(
+                    HEX64.fullmatch(new_pin)
+                )
+            else:
+                valid_kind = bool(HEX40.fullmatch(previous_pin)) and bool(
+                    HEX40.fullmatch(new_pin)
+                )
+            if not valid_kind:
+                raise Incomplete(
+                    f"{LEDGER_PATH}:{line_number + 1}: mixed pin kinds in ledger row"
+                )
+
+            transition_key = (record.value_identity, record.repin_commit)
+            if transition_key in seen_transitions:
+                raise Incomplete(
+                    f"{LEDGER_PATH}:{line_number + 1}: "
+                    "duplicate ledger transition across ledger tables"
+                )
+            seen_transitions.add(transition_key)
+            records.append(record)
+
     return records
 
 
 def pin_value_at(
     git: Git,
     commit: str,
-    identity: tuple[str, str, str],
+    identity: tuple[str, str, str, str],
     algorithm: str,
 ) -> str:
-    manifest_path, field, path = identity
+    manifest_path, field, path, reference_mode = identity
     pins = load_manifest_pins(git, commit, manifest_path)
     matches = [
         pin for pin in pins
-        if pin.field == field and pin.path == path and pin.algorithm == algorithm
+        if (
+            pin.field == field
+            and pin.path == path
+            and pin.reference_mode == reference_mode
+            and pin.algorithm == algorithm
+        )
     ]
     if len(matches) != 1:
         raise Incomplete(
             f"cannot uniquely resolve pin identity at {commit}: "
-            f"{manifest_path}::{field}::{path}::{algorithm} (matches={len(matches)})"
+            f"{manifest_path}::{field}::{path}::{reference_mode}::{algorithm} "
+            f"(matches={len(matches)})"
         )
     return matches[0].declared
 
@@ -737,7 +950,7 @@ def verify_unledgered_history(
     baseline_commit: str,
     target_commit: str,
     records: list[LedgerRecord],
-    target_mismatch_identities: set[tuple[str, str, str, str]],
+    target_mismatch_identities: set[tuple[str, str, str, str, str]],
 ) -> list[str]:
     """Check only target-mismatching identities after the committed baseline.
 
@@ -748,10 +961,10 @@ def verify_unledgered_history(
     commits = git.first_parent_commits(baseline, target_commit)
 
     records_by_transition: dict[
-        tuple[tuple[str, str, str, str], str], LedgerRecord
+        tuple[tuple[str, str, str, str, str], str], LedgerRecord
     ] = {}
     active_records: dict[
-        tuple[tuple[str, str, str, str], str], LedgerRecord
+        tuple[tuple[str, str, str, str, str], str], LedgerRecord
     ] = {}
     for record in records:
         repin = git.resolve_commit(record.repin_commit, "ledger repin commit")
@@ -762,14 +975,14 @@ def verify_unledgered_history(
             raise Incomplete(
                 f"duplicate ledger record for "
                 f"{record.manifest}::{record.field}::{record.path} "
-                f"({record.algorithm}) at {repin}"
+                f"({record.reference_mode}, {record.algorithm}) at {repin}"
             )
         records_by_transition[key] = record
         active_records[key] = record
 
     violations: list[str] = []
     scanned_transitions: set[
-        tuple[tuple[str, str, str, str], str]
+        tuple[tuple[str, str, str, str, str], str]
     ] = set()
 
     for commit in commits:
@@ -800,7 +1013,7 @@ def verify_unledgered_history(
 
                 label = (
                     f"{old_pin.manifest}::{old_pin.field}::{old_pin.path}"
-                    f" ({old_pin.algorithm})"
+                    f" ({old_pin.reference_mode}, {old_pin.algorithm})"
                 )
                 if record is None:
                     violations.append(
@@ -826,7 +1039,8 @@ def verify_unledgered_history(
             violations.append(
                 f"VIOLATION ledger repin is not a matching first-parent "
                 f"manifest transition: {record.manifest}::{record.field}::"
-                f"{record.path} ({record.algorithm}) at {record.repin_commit}"
+                f"{record.path} ({record.reference_mode}, {record.algorithm}) "
+                f"at {record.repin_commit}"
             )
     return violations
 
@@ -836,10 +1050,10 @@ def verify_ledger(
     target_commit: str,
     target_manifests: list[str],
     target_pins: list[Pin],
-    target_mismatch_identities: set[tuple[str, str, str, str]],
+    target_mismatch_identities: set[tuple[str, str, str, str, str]],
     allow_missing_ledger: bool = False,
 ) -> tuple[list[str], int]:
-    """Validate ledger chains and prove recorded transitions in Git."""
+    """Validate mode-separated ledger chains and prove recorded transitions."""
     resolved_target = git.resolve_commit(target_commit)
     tree_paths = set(
         git.run(
@@ -857,12 +1071,12 @@ def verify_ledger(
         )
 
     records = parse_ledger(git.object_bytes(resolved_target, LEDGER_PATH))
-    grouped: dict[tuple[str, str, str, str], list[LedgerRecord]] = defaultdict(list)
+    grouped: dict[tuple[str, str, str, str, str], list[LedgerRecord]] = defaultdict(list)
     for record in records:
         grouped[record.value_identity].append(record)
 
     target_pin_map: dict[
-        tuple[str, str, str, str], list[Pin]
+        tuple[str, str, str, str, str], list[Pin]
     ] = defaultdict(list)
     for pin in target_pins:
         target_pin_map[pin.value_identity].append(pin)
@@ -870,7 +1084,7 @@ def verify_ledger(
     baseline_commit = read_baseline_commit(git, resolved_target)
 
     for value_identity, chain in grouped.items():
-        manifest_path, field, path, algorithm = value_identity
+        manifest_path, field, path, reference_mode, algorithm = value_identity
         if manifest_path not in target_manifests:
             raise Incomplete(
                 f"ledger identity references absent manifest: {manifest_path}"
@@ -887,7 +1101,7 @@ def verify_ledger(
             if previous_new is not None and record.previous_pin != previous_new:
                 raise Incomplete(
                     f"ledger history discontinuity for "
-                    f"{manifest_path}::{field}::{path}: "
+                    f"{manifest_path}::{field}::{path}::{reference_mode}: "
                     f"expected previous_pin={previous_new}, "
                     f"found {record.previous_pin}"
                 )
@@ -896,14 +1110,16 @@ def verify_ledger(
             if parent_value != record.previous_pin:
                 raise Incomplete(
                     f"ledger previous_pin does not match first parent for "
-                    f"{manifest_path}::{field}::{path} at {repin}: "
-                    f"ledger={record.previous_pin} actual={parent_value}"
+                    f"{manifest_path}::{field}::{path}::{reference_mode} "
+                    f"at {repin}: ledger={record.previous_pin} "
+                    f"actual={parent_value}"
                 )
             if repin_value != record.new_pin:
                 raise Incomplete(
                     f"ledger new_pin does not match repin commit for "
-                    f"{manifest_path}::{field}::{path} at {repin}: "
-                    f"ledger={record.new_pin} actual={repin_value}"
+                    f"{manifest_path}::{field}::{path}::{reference_mode} "
+                    f"at {repin}: ledger={record.new_pin} "
+                    f"actual={repin_value}"
                 )
             if not git.is_ancestor(repin, resolved_target):
                 raise Incomplete(
@@ -917,12 +1133,13 @@ def verify_ledger(
         if len(target_matches) != 1:
             raise Incomplete(
                 f"latest ledger identity is not unique in target tree: "
-                f"{manifest_path}::{field}::{path}::{algorithm}"
+                f"{manifest_path}::{field}::{path}::"
+                f"{reference_mode}::{algorithm}"
             )
         if target_matches[0].declared != latest:
             raise Incomplete(
                 f"target pin does not equal latest ledger new_pin for "
-                f"{manifest_path}::{field}::{path}: "
+                f"{manifest_path}::{field}::{path}::{reference_mode}: "
                 f"ledger={latest} target={target_matches[0].declared}"
             )
 
@@ -936,23 +1153,121 @@ def verify_ledger(
     return history_violations, len(records)
 
 
+def verify_reference_modes(
+    git: Git,
+    target_commit: str,
+    pins: list[Pin],
+    issues: list[ReferenceModeIssue],
+) -> tuple[int, int, int, list[str]]:
+    """Verify historical pins against any reachable blob at the declared path."""
+    mismatch = 0
+    incomplete = 0
+    ok = 0
+    problems: list[str] = []
+
+    for issue in issues:
+        incomplete += 1
+        problems.append(
+            f"INCOMPLETE {issue.field} manifest={issue.manifest}: "
+            f"{issue.reason}"
+        )
+
+    for pin in pins:
+        if pin.reference_mode != "historical":
+            continue
+
+        if pin.algorithm != "git":
+            incomplete += 1
+            problems.append(
+                f"INCOMPLETE {pin.field} path={pin.path}: "
+                "historical reference_mode requires a Git blob SHA-1 pin"
+            )
+            continue
+
+        if not HEX40.fullmatch(pin.declared):
+            incomplete += 1
+            problems.append(
+                f"INCOMPLETE {pin.field} path={pin.path}: "
+                f"invalid historical Git blob declaration {pin.declared!r}"
+            )
+            continue
+
+        if not pin.path:
+            mismatch += 1
+            problems.append(
+                f"MISMATCH {pin.field} path=<not-declared> "
+                f"declared={pin.declared} "
+                "actual=not-found-in-reachable-history"
+            )
+            continue
+
+        try:
+            exists = git.historical_blob_exists(
+                target_commit,
+                pin.path,
+                pin.declared,
+            )
+        except Incomplete as exc:
+            incomplete += 1
+            problems.append(
+                f"INCOMPLETE {pin.field} path={pin.path}: {exc}"
+            )
+            continue
+
+        if exists:
+            ok += 1
+        else:
+            mismatch += 1
+            problems.append(
+                f"MISMATCH {pin.field} path={pin.path} "
+                f"declared={pin.declared} "
+                "actual=not-found-in-reachable-history"
+            )
+
+    return ok, mismatch, incomplete, problems
+
+
 def verify(
     root: Path,
     commit: str,
     verbose: bool = True,
     allow_missing_ledger: bool = False,
+    allow_missing_reference_mode: bool = False,
 ) -> int:
     git = Git(root)
     resolved = git.resolve_commit(commit, "candidate commit")
-    manifests, pins_list = read_all_pins(git, resolved)
+    manifests, pins_list, reference_mode_issues = read_all_pins(
+        git,
+        resolved,
+        allow_missing_reference_mode=allow_missing_reference_mode,
+    )
 
     ok = mismatch = missing = incomplete = 0
     unbound = 0
     problems: list[str] = []
-    mismatch_identities: set[tuple[str, str, str, str]] = set()
+    mismatch_identities: set[tuple[str, str, str, str, str]] = set()
     pins = len(pins_list)
 
+    (
+        historical_ok,
+        historical_mismatch,
+        historical_incomplete,
+        historical_problems,
+    ) = verify_reference_modes(
+        git,
+        resolved,
+        pins_list,
+        reference_mode_issues,
+    )
+    ok += historical_ok
+    mismatch += historical_mismatch
+    incomplete += historical_incomplete
+    problems.extend(historical_problems)
+
     for pin in pins_list:
+        if pin.reference_mode == "historical":
+            continue
+
         declared = pin.declared
         path = pin.path
         kind = pin.field
@@ -1086,6 +1401,12 @@ def main(argv: list[str] | None = None) -> int:
         help="Allow a pre-ledger base measurement to omit the ledger; "
              "never use for candidate verification.",
     )
+    parser.add_argument(
+        "--allow-missing-reference-mode",
+        action="store_true",
+        help="Treat an absent related_evidence.reference_mode as legacy "
+             "current mode for base measurement only; invalid values still fail.",
+    )
     args = parser.parse_args(argv)
 
     try:
@@ -1095,6 +1416,7 @@ def main(argv: list[str] | None = None) -> int:
             args.root,
             commit,
             allow_missing_ledger=args.allow_missing_ledger,
+            allow_missing_reference_mode=args.allow_missing_reference_mode,
         )
     except Incomplete as exc:
         print(f"INCOMPLETE: {exc}", file=sys.stderr)

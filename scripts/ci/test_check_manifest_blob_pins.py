@@ -79,7 +79,7 @@ class BlobPinsTest(unittest.TestCase):
         self.assertEqual(code, 1, out + err)
         self.assertIn("MISMATCH authored_indexes[0].en_mirror", out)
         self.assertIn(f"declared={wrong}", out)
-        self.assertIn(f"actual={self.blob_sha(data)}", out)
+        self.assertIn("actual=not-found-in-reachable-history", out)
 
     def test_changed_byte_is_rejected_with_declared_and_actual_digest(self):
         data = b"committed bytes\n"
@@ -175,12 +175,12 @@ class BlobPinsTest(unittest.TestCase):
         self.assertIn("pins=2 ok=0 mismatch=2 path_missing=0 incomplete=0", out)
         self.assertIn(
             f"MISMATCH authored_indexes[0].root path=pair-a.md "
-            f"declared={wrong} actual={digest_a}",
+            f"declared={wrong} actual=not-found-in-reachable-history",
             out,
         )
         self.assertIn(
             f"MISMATCH authored_indexes[0].en_mirror path=pair-b.md "
-            f"declared={digest_a} actual={digest_b}",
+            f"declared={digest_a} actual=not-found-in-reachable-history",
             out,
         )
 
@@ -210,7 +210,7 @@ class BlobPinsTest(unittest.TestCase):
         self.assertIn("pins=2 ok=1 mismatch=1 path_missing=0 incomplete=0", out)
         self.assertIn(
             f"MISMATCH authored_indexes[0].en_mirror path=file-en.md "
-            f"declared={digest_root} actual={self.blob_sha(data_mirror)}",
+            f"declared={digest_root} actual=not-found-in-reachable-history",
             out,
         )
         self.assertNotIn("MISMATCH authored_indexes[0].root", out)
@@ -242,7 +242,7 @@ class BlobPinsTest(unittest.TestCase):
         self.assertIn("pins=2 ok=1 mismatch=1 path_missing=0 incomplete=0", out)
         self.assertIn(
             f"MISMATCH authored_indexes[1].root path=identity-b.md "
-            f"declared={wrong} actual={self.blob_sha(data_b)}",
+            f"declared={wrong} actual=not-found-in-reachable-history",
             out,
         )
         self.assertNotIn("MISMATCH authored_indexes[0].root", out)
@@ -298,6 +298,7 @@ class BlobPinsTest(unittest.TestCase):
             },
             "related_evidence": [
                 {
+                    "reference_mode": "current",
                     "path": "related-path.md",
                     "blob": sha("related-path.md"),
                     "en_mirror": "related-en.md",
@@ -357,6 +358,7 @@ class BlobPinsTest(unittest.TestCase):
             "work_item_id": "AID-2026-900",
             "related_evidence": [
                 {
+                    "reference_mode": "current",
                     "en_mirror": "related-en.md",
                     "en_mirror_blob": digest_zh,
                     "zh_cn_mirror": "related-zh.md",
