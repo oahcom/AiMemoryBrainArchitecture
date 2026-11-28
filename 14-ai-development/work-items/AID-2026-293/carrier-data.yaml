@@ -1,0 +1,49 @@
+work_item_id: AID-2026-293
+
+risks:
+  - {id: R-01, evidence_state: PENDING_SEARCH_EXECUTION, planned_search_command: "git grep -n -i -E 'serialization authority|linearization point|serializable' <baseline> -- 01-system-architecture 03-memory-brain 04-memory-compiler"}
+  - {id: R-02, evidence_state: PENDING_SEARCH_EXECUTION, planned_search_command: "git grep -n -i -E 'Fact/Claim|valid-time|recorded-time|Evidence' <baseline> -- 01-system-architecture 03-memory-brain"}
+  - {id: R-03, evidence_state: PENDING_SEARCH_EXECUTION, planned_search_command: "git grep -n -i -E 'ForgetFence|no-resurrection|backup restore' <baseline> -- 03-memory-brain 04-memory-compiler 05-memory-runtime 06-memory-context 09-security-governance"}
+  - {id: R-04, evidence_state: PENDING_SEARCH_EXECUTION, planned_search_command: "git grep -n -i -E 'Applied acknowledgement|Provider Outcome|CanonicalCommitReceipt' <baseline> -- 01-system-architecture 04-memory-compiler 06-memory-context"}
+  - {id: R-05, evidence_state: PENDING_SEARCH_EXECUTION, planned_search_command: "git grep -n -i -E 'schema revision|validator revision|Blob|compatibility' <baseline> -- 01-system-architecture 04-memory-compiler 09-security-governance"}
+  - {id: R-06, evidence_state: PENDING_SEARCH_EXECUTION, planned_search_command: "git grep -n -i -E 'Principal|Scope|Actor|Environment|PermissionEpoch' <baseline> -- 01-system-architecture 03-memory-brain 09-security-governance"}
+  - {id: R-07, evidence_state: PENDING_SEARCH_EXECUTION, planned_search_command: "git grep -n -i -E 'replay|recovery cutoff|cursor monotonicity|manifest' <baseline> -- 01-system-architecture 03-memory-brain 04-memory-compiler"}
+  - {id: R-08, evidence_state: PENDING_SEARCH_EXECUTION, planned_search_command: "git grep -n -i -E 'authorization receipt|policy epoch|revocation' <baseline> -- 01-system-architecture 09-security-governance"}
+  - {id: R-09, evidence_state: PENDING_SEARCH_EXECUTION, planned_search_command: "git grep -n -i -E 'RPO|RTO|disaster recovery|restore drill' <baseline> -- 01-system-architecture 09-security-governance"}
+  - {id: R-10, evidence_state: PENDING_SEARCH_EXECUTION, planned_search_command: "git grep -n -i -E 'governance cost|contract complexity|deprecation' <baseline> -- reviews docs 14-ai-development"}
+
+modules:
+  - id: A
+    scores: {change_surface: 4, coupling: 5, irreversibility: 3, concurrency_state: 4}
+    evidence_gap: "EVIDENCE_GAP: module-specific source line not revalidated for this four-dimensional score."
+  - id: B
+    scores: {change_surface: 5, coupling: 5, irreversibility: 4, concurrency_state: 4}
+    evidence_gap: "EVIDENCE_GAP: module-specific source line not revalidated for this four-dimensional score."
+  - id: C
+    scores: {change_surface: 4, coupling: 5, irreversibility: 4, concurrency_state: 5}
+    evidence_gap: "EVIDENCE_GAP: module-specific source line not revalidated for this four-dimensional score."
+  - id: D
+    scores: {change_surface: 5, coupling: 5, irreversibility: 5, concurrency_state: 5}
+    evidence_gap: "EVIDENCE_GAP: module-specific source line not revalidated for this four-dimensional score."
+  - id: E
+    scores: {change_surface: 5, coupling: 5, irreversibility: 4, concurrency_state: 5}
+    evidence_gap: "EVIDENCE_GAP: module-specific source line not revalidated for this four-dimensional score."
+  - id: F
+    scores: {change_surface: 4, coupling: 5, irreversibility: 4, concurrency_state: 5}
+    evidence_gap: "EVIDENCE_GAP: module-specific source line not revalidated for this four-dimensional score."
+  - id: G
+    scores: {change_surface: 4, coupling: 5, irreversibility: 4, concurrency_state: 5}
+    evidence_gap: "EVIDENCE_GAP: module-specific source line not revalidated for this four-dimensional score."
+  - id: H
+    scores: {change_surface: 4, coupling: 5, irreversibility: 5, concurrency_state: 5}
+    evidence_gap: "EVIDENCE_GAP: module-specific source line not revalidated for this four-dimensional score."
+  - id: I
+    scores: {change_surface: 5, coupling: 5, irreversibility: 5, concurrency_state: 5}
+    evidence_gap: "EVIDENCE_GAP: module-specific source line not revalidated for this four-dimensional score."
+  - id: Storage
+    scores: {change_surface: 5, coupling: 5, irreversibility: 5, concurrency_state: 5}
+    evidence_gap: "EVIDENCE_GAP: module-specific source line not revalidated for this four-dimensional score."
+
+statuses:
+  ac6_negative_cases: PENDING_COORDINATOR_EXECUTION
+  ac8_independent_review: PENDING_INDEPENDENT_REVIEW

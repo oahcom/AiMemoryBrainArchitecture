@@ -1,0 +1,210 @@
+work_item_id: AID-2026-293
+title: "Supply in-tree evidence, complexity, validation and independent-review carriers for Issue #262"
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  This work item supplies documentary and machine-checkable carriers for
+  architecture-risk evidence and review. Its completion does not itself
+  establish architecture correctness, independent review, or Owner acceptance.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: NOT_ASSIGNED
+accountable_owner: NOT_ASSIGNED
+acceptance_authority: NOT_ASSIGNED
+attribution:
+  type: AI_ASSISTED
+  implementing_ai_session: "6b0a1b12-1ddc-83ec-a062-a1ba87fe6020"
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 31c1e5d83e7dad326dbd4b69d4a8e19534718ff1
+
+scope:
+  issue_refs:
+    - "#262"
+  in_scope:
+    - "AC3: attach line-addressable evidence or an explicit executed-search result to each of the ten risk rows."
+    - "AC4: provide four-dimensional module complexity assessments with scoring criteria and evidence gaps."
+    - "AC6: provide a runnable structural carrier checker and its negative-case tests."
+    - "AC8: provide bilingual independent-review templates with reviewer-owned fields left unfilled."
+  out_of_scope:
+    - "Changing architecture implementation or runtime behavior."
+    - "Declaring architecture risks resolved."
+    - "Claiming independent review or Owner acceptance."
+    - "Changing Issue #262."
+
+evidence:
+  baseline:
+    commit: 31c1e5d83e7dad326dbd4b69d4a8e19534718ff1
+  ac3:
+    status: EVIDENCE_ATTACHED_PENDING_INDEPENDENT_CONFIRMATION
+    risk_rows_with_supporting_evidence: 9
+    risk_rows_without_supporting_line: 1
+    no_supporting_line_row: R-09
+    path_line_verified: 11
+    path_line_verification:
+      result: PASS
+      total: 11
+      ok: 11
+      mismatch: 0
+      baseline: 31c1e5d8
+    evidence_selection:
+      a_variant_rows:
+        - R-01
+        - R-02
+        - R-03
+        - R-04
+        - R-05
+        - R-06
+        - R-07
+        - R-08
+        - R-10
+      b_variant_rows:
+        - R-09
+    r09_search:
+      result: NO_SUPPORTING_LINE
+      executed_search: >-
+        git grep -n -i -E "RPO|RTO|disaster recovery|restore drill"
+        31c1e5d83e7dad326dbd4b69d4a8e19534718ff1 --
+        01-system-architecture 03-memory-brain 04-memory-compiler
+        05-memory-runtime 06-memory-context 09-security-governance reviews docs
+      hits: 392
+      interpretation: >-
+        Keyword matches only; none supports the risk statement.
+    coordinator_independently_executed: false
+    owner_acceptance: PENDING
+  ac4:
+    status: CARRIER_CONTENT_PRESENT_PENDING_ACCEPTANCE
+    dimensions:
+      - change_surface
+      - coupling
+      - irreversibility
+      - concurrency_and_state
+    scoring_scale: "1-5"
+    historical_eight_number_format_retained: true
+    owner_acceptance: PENDING
+  ac6:
+    status: CARRIER_CHECK_PASS_PENDING_COORDINATOR_NEGATIVE_CASE_EXECUTION
+    checker: scripts/ci/check_aid_2026_293_carriers.py
+    test_file: scripts/ci/test_check_aid_2026_293_carriers.py
+    local_test_result:
+      command: python -m unittest scripts.ci.test_check_aid_2026_293_carriers
+      result: "Ran 8 tests; OK"
+      exit_code: 0
+    local_carrier_check:
+      command: >-
+        python scripts/ci/check_aid_2026_293_carriers.py --root .
+        --data 14-ai-development/work-items/AID-2026-293/carrier-data.yaml
+      result: "AID-2026-293 CARRIER CHECK PASS / R1-R7: 7/7 structural rules satisfied"
+      exit_code: 0
+    execution_context: LOCAL_WORKTREE
+    ci_result: NOT_ESTABLISHED
+    coordinator_negative_case_execution: PENDING
+    owner_acceptance: PENDING
+  ac8:
+    status: REVIEW_TEMPLATE_PRESENT_PENDING_INDEPENDENT_REVIEW
+    review_status: PENDING_INDEPENDENT_REVIEW
+    reviewer_fields: TO_BE_FILLED_BY_INDEPENDENT_REVIEWER
+    owner_acceptance: PENDING
+
+documentation:
+  - path: reviews/architecture/SYS-RISK-001.en.md
+    relationship: normative
+  - path: reviews/architecture/SYS-RISK-001.zh-CN.md
+    relationship: normative
+  - path: reviews/complexity/architecture-complexity-assessment.en.md
+    relationship: design
+  - path: reviews/complexity/architecture-complexity-assessment.zh-CN.md
+    relationship: design
+  - path: reviews/architecture/SYS-RISK-001-REVIEW.md
+    relationship: reference
+  - path: reviews/architecture/SYS-RISK-001-REVIEW.zh-CN.md
+    relationship: reference
+  - path: scripts/ci/check_aid_2026_293_carriers.py
+    relationship: code
+  - path: scripts/ci/test_check_aid_2026_293_carriers.py
+    relationship: code
+  - path: 14-ai-development/work-items/AID-2026-293/carrier-data.yaml
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-293/manifest.yaml
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-293/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-293/session-evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-293/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/INDEX.md
+    relationship: reference
+
+session_evidence:
+  - role: "Implementing AI: preparation of AC3/AC4/AC6/AC8 documentary and validation carriers"
+    issue_refs:
+      - "#262"
+    implementing_ai_session: "6b0a1b12-1ddc-83ec-a062-a1ba87fe6020"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-293/session-evidence.md
+
+implementation:
+  status: IN_PROGRESS
+  summary: >-
+    The AC3/AC4/AC6/AC8 carrier content and associated work-item records have
+    been written to the worktree. AC3 has 11 path:line references mechanically
+    verified with zero mismatches, covering nine evidence-supported rows and
+    one explicit NO_SUPPORTING_LINE search result. The local AC6 unit tests
+    and structural carrier checker pass. These results do not establish
+    coordinator execution of AC6 negative cases, CI success, independent
+    review, or Owner acceptance. AC3, AC4, AC6 and AC8 remain pending acceptance.
+  files_changed:
+    - reviews/architecture/SYS-RISK-001.en.md
+    - reviews/architecture/SYS-RISK-001.zh-CN.md
+    - reviews/complexity/architecture-complexity-assessment.en.md
+    - reviews/complexity/architecture-complexity-assessment.zh-CN.md
+    - reviews/architecture/SYS-RISK-001-REVIEW.md
+    - reviews/architecture/SYS-RISK-001-REVIEW.zh-CN.md
+    - scripts/ci/check_aid_2026_293_carriers.py
+    - scripts/ci/test_check_aid_2026_293_carriers.py
+    - 14-ai-development/work-items/AID-2026-293/carrier-data.yaml
+    - 14-ai-development/work-items/AID-2026-293/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-293/evidence.md
+    - 14-ai-development/work-items/AID-2026-293/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-293/prompt-v1.md
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - name: "AC6 local unit tests"
+      command: python -m unittest scripts.ci.test_check_aid_2026_293_carriers
+      result: "Ran 8 tests; OK"
+      exit_code: 0
+      context: LOCAL_WORKTREE
+    - name: "AC6 local structural carrier check"
+      command: >-
+        python scripts/ci/check_aid_2026_293_carriers.py --root .
+        --data 14-ai-development/work-items/AID-2026-293/carrier-data.yaml
+      result: "AID-2026-293 CARRIER CHECK PASS / R1-R7: 7/7 structural rules satisfied"
+      exit_code: 0
+      context: LOCAL_WORKTREE
+    - name: "AC3 path-line verification"
+      result: "total=11 ok=11 mismatch=0"
+      baseline: 31c1e5d8
+      exit_code: 0
+      context: LOCAL_WORKTREE
+    - name: "Coordinator execution of AC6 negative cases"
+      result: PENDING
+    - name: "CI execution"
+      result: NOT_ESTABLISHED
+
+review:
+  status: PENDING_INDEPENDENT_REVIEW
+  reviewer: TO_BE_FILLED_BY_INDEPENDENT_REVIEWER
+  review_result: TO_BE_FILLED_BY_INDEPENDENT_REVIEWER
+  reviewed_blob_sha: TO_BE_FILLED_BY_INDEPENDENT_REVIEWER
+
+acceptance:
+  gate: PENDING
+  acceptance_authority: NOT_ASSIGNED
+  decision: PENDING
+  evidence:
+    ac3: PENDING_OWNER_ACCEPTANCE
+    ac4: PENDING_OWNER_ACCEPTANCE
+    ac6: PENDING_COORDINATOR_NEGATIVE_CASE_EXECUTION_AND_OWNER_ACCEPTANCE
+    ac8: PENDING_INDEPENDENT_REVIEW
+  ac8_reviewer_disposition: TO_BE_FILLED_BY_INDEPENDENT_REVIEWER
