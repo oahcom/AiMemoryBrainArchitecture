@@ -181,10 +181,10 @@ session_evidence:
   - role: IMPLEMENTER
     issue_refs:
       - "#1464"
-    implementing_ai_session: MIGRATION-POLICY
+    implementing_ai_session: NOT_EXPOSED_BY_PLATFORM
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-297/prompt-v1.md
     executed_prompt_sha256: bb40415cce14edde08a0753e6c4c3ded9060c67fa7bef0e49bb64fbfa15d52d6
     executed_prompt_bytes: 7572
     executed_prompt_provenance: NOT_VERIFIED
-    session_reference_status: RECORDED
+    session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-297/session-evidence.md

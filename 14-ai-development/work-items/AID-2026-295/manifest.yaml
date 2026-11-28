@@ -47,13 +47,13 @@ session_evidence:
   - role: IMPLEMENTATION_SESSION
     issue_refs:
       - "#1350"
-    implementing_ai_session: "opencode-9router-hermes"
+    implementing_ai_session: "NOT_EXPOSED_BY_PLATFORM"
     session_evidence_ref: 14-ai-development/work-items/AID-2026-295/session-evidence.md
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-295/prompt-v1.md
     executed_prompt_sha256: "36457aae35d6349cfbbed67b8c3ccb25bd98b61fe7fb7d179eded2e92c24b53e"
     executed_prompt_bytes: 5416
     executed_prompt_provenance: NOT_VERIFIED
-    session_reference_status: RECORDED
+    session_reference_status: NOT_RECORDED
 implementation:
   status: IMPLEMENTED
   pull_request: 1503

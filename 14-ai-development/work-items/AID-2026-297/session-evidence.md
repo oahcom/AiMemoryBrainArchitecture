@@ -55,18 +55,18 @@ document_metadata:
 role: IMPLEMENTER
 issue_refs:
   - "#1464"
-implementing_ai_session: MIGRATION-POLICY
+implementing_ai_session: NOT_EXPOSED_BY_PLATFORM
 executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-297/prompt-v1.md
 executed_prompt_sha256: __EXECUTED_PROMPT_SHA256__
 executed_prompt_bytes: __EXECUTED_PROMPT_BYTES__
 executed_prompt_provenance: NOT_VERIFIED
-session_reference_status: RECORDED
+session_reference_status: NOT_RECORDED
 session_evidence_ref: session-evidence.md
 ```
 
-`implementing_ai_session` is recorded as the single value `MIGRATION-POLICY`. It is not a concatenation of multiple session identifiers.
+`MIGRATION-POLICY` was supplied as a recording label in the task instructions. It is not an actual platform session identifier.
 
-The session token is a recording identifier. Its relationship to an independently attested execution environment has not been established.
+Neither the retained prompt snapshot nor the session evidence establishes an attributable conversation UUID or platform session identifier. The implementing session identity is therefore declared `NOT_EXPOSED_BY_PLATFORM`, with `session_reference_status: NOT_RECORDED`. This records unavailable identity evidence; it does not deny that implementation work occurred.
 
 The prompt snapshot is to be supplied by the delivery operator. Its digest and byte count must be calculated from the finalized file bytes. This record does not assert that the snapshot is an authenticated byte-for-byte copy of the original prompt transmission.
 
