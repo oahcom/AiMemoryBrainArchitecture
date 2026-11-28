@@ -22,16 +22,12 @@ document_metadata:
       - trust-boundary
       - ownership
       - forget
-      - cursor
-      - tenant
-      - shard
     canonical_conflict_status: None
     normative_status: Normative
   bilingual_counterpart:
     source: null
     en: "docs/en/01-system-architecture/system-boundaries.md"
     zh-CN: "docs/zh-CN/01-system-architecture/system-boundaries.md"
-  steward: "Architecture Governance"
 ---
 # System Boundaries
 
