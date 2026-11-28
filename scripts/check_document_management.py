@@ -77,7 +77,7 @@ EXCLUSION_KINDS = {"not-documentation"}
 # in policy section 2 with a reason, not by borrowing another gate's constant.
 GOVERNED_ENTRY = "document_metadata"
 SCHEMA_FILE = "00-governance/architecture-document-metadata.schema.yaml"
-SCHEMA_VERSION = "2"
+SCHEMA_VERSION = "3"
 # The scope registry publishes a version; publishing one and never reading
 # it is the defect this gate keeps finding. A registry written for a
 # different shape must not be interpreted as if it were current.
@@ -213,7 +213,13 @@ RESOLUTION_KEYS = {
     "resolution_decision_id", "resolved_date", "selected_document",
     "resolution_evidence",
 }
-BILINGUAL_KEYS = {"source", "en", "zh-CN"}
+BILINGUAL_KEYS = {
+    "source",
+    "source_absence_reason",
+    "en",
+    "zh-CN",
+    "mirrors",
+}
 
 # The four dimensions. A schema missing any of them cannot describe a
 # classification, so schema() refuses to load rather than checking nothing.
@@ -1470,69 +1476,212 @@ def check_scope_and_relations(root: Path, docs: dict[str, dict]) -> list[str]:
             if conflicted:
                 print(f"  conflict: scope {scope_id!r} has no authoritative source")
 
-    # DM-12 bilingual counterpart: exists, classified, same group, no missing
-    # link.
+    # DM-12 bilingual counterpart: existence, classification, language,
+    # same-source membership, metadata parity, and complete group closure.
     #
-    # Model: a source document names its mirrors under en / zh-CN. A mirror
-    # names the source under `source`, and may name its sibling mirror. Every
-    # document in one group therefore resolves to the same source, and the
-    # source lists every mirror that names it. That last check is what a plain
-    # pairwise symmetry test cannot catch: with A<->en only, a third mirror
-    # could be absent from both and nobody would notice.
-    lang_prefix = {"en": "docs/en/", "zh-CN": "docs/zh-CN/"}
+    # A normal group has one authoritative source. Its en / zh-CN fields
+    # name the primary language mirrors; `mirrors` names additional mirrors.
+    # Every mirror names the same source, and the source must list every
+    # mirror that names it.
+    #
+    # A source-less group is explicit, not implicit: every member declares
+    # NO_AUTHORITATIVE_SOURCE, supplies the same non-empty reason, and links
+    # to every other member. A singleton or incomplete group is an error.
+    lang_prefix = {
+        "en": "docs/en/",
+        "zh-CN": "docs/zh-CN/",
+    }
+    mirror_prefixes = tuple(lang_prefix.values())
 
     def source_of(meta: dict, rel: str) -> str | None:
         node = meta.get("bilingual_counterpart")
-        if not isinstance(node, dict) or not node.get("source"):
+        if not isinstance(node, dict):
             return None
-        return rel_path(node["source"], f"{rel}: bilingual_counterpart.source", errors)
+        source = node.get("source")
+        if source == NO_AUTHORITATIVE_SOURCE:
+            return NO_AUTHORITATIVE_SOURCE
+        if source is None:
+            return None
+        return rel_path(
+            source,
+            f"{rel}: bilingual_counterpart.source",
+            errors,
+        )
+
+    def absence_reason_of(meta: dict):
+        node = meta.get("bilingual_counterpart")
+        if not isinstance(node, dict):
+            return None
+        return node.get("source_absence_reason")
+
+    def counterpart_targets(meta: dict, rel: str) -> list[str]:
+        """Resolve all declared mirror targets, failing closed on bad shape."""
+        node = meta.get("bilingual_counterpart")
+        if not isinstance(node, dict):
+            return []
+
+        targets: list[str] = []
+        seen: set[str] = set()
+
+        def add_target(field: str, value, expected_prefix: str | None) -> None:
+            if value is None:
+                return
+
+            target_rel = rel_path(
+                value,
+                f"{rel}: bilingual_counterpart.{field}",
+                errors,
+            )
+            if target_rel is None:
+                return
+
+            if target_rel == rel:
+                errors.append(
+                    f"DM-12 {rel}: bilingual_counterpart.{field} points to itself"
+                )
+                return
+
+            if target_rel in seen:
+                errors.append(
+                    f"DM-12 {rel}: counterpart {target_rel} is declared more "
+                    "than once"
+                )
+                return
+            seen.add(target_rel)
+
+            if expected_prefix is not None:
+                if not target_rel.startswith(expected_prefix):
+                    errors.append(
+                        f"DM-12 {rel}: bilingual_counterpart.{field} must point "
+                        f"under {expected_prefix}, got {target_rel}"
+                    )
+            elif not target_rel.startswith(mirror_prefixes):
+                errors.append(
+                    f"DM-12 {rel}: bilingual_counterpart.mirrors entry must "
+                    f"point under docs/en/ or docs/zh-CN/, got {target_rel}"
+                )
+
+            target_path = root / target_rel
+            if target_path.is_symlink() or not target_path.is_file():
+                errors.append(
+                    f"DM-12 {rel}: counterpart {target_rel} is not a regular "
+                    "repository file"
+                )
+                return
+
+            # Do not let a file reached through a symlinked parent become a
+            # classified mirror by following the link.
+            parent = target_path.parent
+            unsafe_parent = False
+            while parent != root and root in parent.parents:
+                if parent.is_symlink():
+                    unsafe_parent = True
+                    break
+                parent = parent.parent
+            if unsafe_parent:
+                errors.append(
+                    f"DM-12 {rel}: counterpart {target_rel} is reached through "
+                    "a symlinked parent"
+                )
+                return
+
+            other = docs.get(target_rel)
+            if other is None:
+                errors.append(
+                    f"DM-12 {rel}: counterpart {target_rel} exists but carries "
+                    "no document_metadata, so parity cannot be verified"
+                )
+                return
+
+            targets.append(target_rel)
+
+        for lang, expected_prefix in lang_prefix.items():
+            add_target(lang, node.get(lang), expected_prefix)
+
+        mirrors = node.get("mirrors", [])
+        if not isinstance(mirrors, list):
+            errors.append(
+                f"DM-12 {rel}: bilingual_counterpart.mirrors must be a list"
+            )
+        else:
+            for index, value in enumerate(mirrors):
+                add_target(f"mirrors[{index}]", value, None)
+
+        return targets
+
+    # Resolve every outgoing counterpart declaration once. The same resolved
+    # set is used for pairwise validation, reverse closure, and source-less
+    # group closure; no second interpretation of the fields is permitted.
+    targets_by_document: dict[str, set[str]] = {}
+    listed_by_source: dict[str, set[str]] = defaultdict(set)
 
     for rel, meta in docs.items():
         counterpart = meta.get("bilingual_counterpart")
         if not isinstance(counterpart, dict):
+            targets_by_document[rel] = set()
             continue
+
         own_source = source_of(meta, rel)
-        if own_source and own_source.startswith(("docs/en/", "docs/zh-CN/")):
+        absence_reason = absence_reason_of(meta)
+
+        if own_source == NO_AUTHORITATIVE_SOURCE:
+            if not isinstance(absence_reason, str) or not absence_reason.strip():
+                errors.append(
+                    f"DM-12 {rel}: source is NO_AUTHORITATIVE_SOURCE but "
+                    "source_absence_reason is missing or empty"
+                )
+            if not rel.startswith(mirror_prefixes):
+                errors.append(
+                    f"DM-12 {rel}: NO_AUTHORITATIVE_SOURCE is valid only for "
+                    "a document under docs/en/ or docs/zh-CN/"
+                )
+        elif absence_reason is not None:
             errors.append(
-                f"DM-12 {rel}: source must be the authoritative file, not a mirror "
-                f"({own_source})"
+                f"DM-12 {rel}: source_absence_reason is only valid when "
+                "source is NO_AUTHORITATIVE_SOURCE"
             )
-        for lang, target in counterpart.items():
-            if not target:
-                continue
-            target_rel = rel_path(
-                target, f"{rel}: bilingual_counterpart.{lang}", errors
+
+        if (
+            own_source
+            and own_source != NO_AUTHORITATIVE_SOURCE
+            and own_source.startswith(mirror_prefixes)
+        ):
+            errors.append(
+                f"DM-12 {rel}: source must be the authoritative file, not a "
+                f"mirror ({own_source})"
             )
-            if target_rel is None:
-                continue
-            if target_rel == rel:
-                errors.append(f"DM-12 {rel}: bilingual_counterpart.{lang} points to itself")
-                continue
-            if not (root / target_rel).is_file():
-                errors.append(
-                    f"DM-12 {rel}: bilingual_counterpart.{lang} does not exist: "
-                    f"{target_rel}"
-                )
-                continue
-            expected = lang_prefix.get(lang)
-            if expected and not target_rel.startswith(expected):
-                errors.append(
-                    f"DM-12 {rel}: bilingual_counterpart.{lang} must point under "
-                    f"{expected}, got {target_rel}"
-                )
-            other = docs.get(target_rel)
-            if other is None:
-                errors.append(
-                    f"DM-12 {rel}: counterpart {target_rel} exists but carries no "
-                    "document_metadata, so parity cannot be verified"
-                )
-                continue
-            # Both ends must belong to the same group.
+
+        targets = counterpart_targets(meta, rel)
+        targets_by_document[rel] = set(targets)
+        listed_by_source[rel].update(targets)
+
+        for target_rel in targets:
+            other = docs[target_rel]
             others_source = source_of(other, target_rel)
-            if own_source:
-                # A mirror may point at its own source, or at a sibling mirror
-                # of that same source; anything else is a stray link.
-                if target_rel != own_source and others_source != own_source:
+            other_reason = absence_reason_of(other)
+
+            # Every member of a source-less group must declare the same
+            # explicit absence state. It cannot point into a normal group.
+            if own_source == NO_AUTHORITATIVE_SOURCE:
+                if others_source != NO_AUTHORITATIVE_SOURCE:
+                    errors.append(
+                        f"DM-12 {rel} -> {target_rel}: source-less group member "
+                        "does not declare NO_AUTHORITATIVE_SOURCE"
+                    )
+                if other_reason != absence_reason:
+                    errors.append(
+                        f"DM-12 {rel} -> {target_rel}: "
+                        "source_absence_reason disagrees"
+                    )
+
+            # A normal mirror may link to its source or to a sibling mirror
+            # that declares that same source. A source document has no source
+            # of its own; its mirrors must name it.
+            elif own_source:
+                if (
+                    target_rel != own_source
+                    and others_source != own_source
+                ):
                     errors.append(
                         f"DM-12 {rel} -> {target_rel}: neither its source "
                         f"({own_source}) nor a sibling mirror of it "
@@ -1540,65 +1689,102 @@ def check_scope_and_relations(root: Path, docs: dict[str, dict]) -> list[str]:
                     )
             elif others_source != rel:
                 errors.append(
-                    f"DM-12 {rel} <-> {target_rel}: the counterpart does not name "
-                    f"{rel} as its source"
+                    f"DM-12 {rel} <-> {target_rel}: the counterpart does not "
+                    f"name {rel} as its source"
                 )
-            for field in (("domain",), ("role",), ("authority", "normative_status")):
-                mine, theirs = dig(meta, *field), dig(other, *field)
+
+            for field in (
+                ("domain",),
+                ("role",),
+                ("authority", "normative_status"),
+            ):
+                mine = dig(meta, *field)
+                theirs = dig(other, *field)
                 if mine != theirs:
                     errors.append(
-                        f"DM-12 {rel}: {'.'.join(field)} {mine!r} disagrees with "
-                        f"{target_rel} ({theirs!r})"
+                        f"DM-12 {rel}: {'.'.join(field)} {mine!r} disagrees "
+                        f"with {target_rel} ({theirs!r})"
                     )
-            # Only one carrier of canonical authority; the mirror is a copy.
-            if dig(other, "authority", "canonical_status") == "Canonical" and (
-                dig(meta, "authority", "canonical_status") == "Canonical"
+
+            # Only one carrier of canonical authority; a mirror is a copy.
+            if (
+                dig(other, "authority", "canonical_status") == "Canonical"
+                and dig(meta, "authority", "canonical_status") == "Canonical"
             ):
                 errors.append(
-                    f"DM-12 {rel}: both a document and its mirror claim Canonical "
-                    f"({target_rel})"
+                    f"DM-12 {rel}: both a document and its mirror claim "
+                    f"Canonical ({target_rel})"
                 )
 
-    # Every mirror must appear in its source's list: no silent third party.
-    # default=set() matters: a source with no bilingual_counterpart block has
-    # no entry here, and `.get()` returning None used to skip the check
-    # entirely. "The source never declared anything" is the strongest form of
-    # "the source does not list this mirror", not a reason to stay silent.
-    listed_by_source: dict[str, set[str]] = defaultdict(set)
+    # Every normal mirror must appear in its source's list. The source's
+    # reverse-closure set includes en, zh-CN, and every additional mirror.
     for rel, meta in docs.items():
-        node = meta.get("bilingual_counterpart")
-        if not isinstance(node, dict):
-            continue
-        for lang, value in node.items():
-            if value and lang in lang_prefix:
-                target_rel = rel_path(value, f"{rel}: bilingual_counterpart.{lang}", errors)
-                if target_rel is not None:
-                    listed_by_source[rel].add(target_rel)
-
-    for rel, meta in docs.items():
-        # A mirror that declares nothing is invisible to the closure check
-        # above: no source ever lists it, and nothing asks why. Being under a
-        # language mirror root is the declaration.
-        in_mirror_root = rel.startswith(("docs/en/", "docs/zh-CN/"))
-        if in_mirror_root and not source_of(meta, rel):
-            errors.append(
-                f"DM-12 {rel}: lives under a language mirror root but declares no "
-                "bilingual_counterpart.source, so it belongs to no group"
-            )
+        in_mirror_root = rel.startswith(mirror_prefixes)
         source_rel = source_of(meta, rel)
-        if not source_rel:
+
+        if in_mirror_root and not source_rel:
+            errors.append(
+                f"DM-12 {rel}: lives under a language mirror root but declares "
+                "no bilingual_counterpart.source, so it belongs to no group"
+            )
+
+        if not source_rel or source_rel == NO_AUTHORITATIVE_SOURCE:
             continue
+
         if source_rel not in docs:
             errors.append(
-                f"DM-12 {rel}: names {source_rel} as its source, but that file is "
-                "not a classified governed document"
+                f"DM-12 {rel}: names {source_rel} as its source, but that file "
+                "is not a classified governed document"
             )
             continue
+
         if rel not in listed_by_source[source_rel]:
             errors.append(
-                f"DM-12 {rel}: names {source_rel} as its source, but {source_rel} "
-                "does not list this mirror"
+                f"DM-12 {rel}: names {source_rel} as its source, but "
+                f"{source_rel} does not list this mirror"
             )
+
+    # A source-less group is a closed, fully connected group, not a collection
+    # of documents that happen to use the sentinel. Every member must name
+    # every other member, and no member may point outside the group.
+    source_less_members = {
+        rel
+        for rel, meta in docs.items()
+        if source_of(meta, rel) == NO_AUTHORITATIVE_SOURCE
+    }
+
+    unseen = set(source_less_members)
+    while unseen:
+        seed = unseen.pop()
+        group = {seed}
+        pending = [seed]
+
+        while pending:
+            current = pending.pop()
+            for target_rel in targets_by_document.get(current, set()):
+                if target_rel in source_less_members and target_rel not in group:
+                    group.add(target_rel)
+                    unseen.discard(target_rel)
+                    pending.append(target_rel)
+
+        if len(group) < 2:
+            errors.append(
+                f"DM-12 {seed}: isolated NO_AUTHORITATIVE_SOURCE member; "
+                "a source-less group must contain at least two linked members"
+            )
+            continue
+
+        for rel in sorted(group):
+            declared = targets_by_document.get(rel, set())
+            expected = group - {rel}
+            if declared != expected:
+                missing = sorted(expected - declared)
+                extra = sorted(declared - expected)
+                errors.append(
+                    f"DM-12 {rel}: source-less group must list every other "
+                    f"member; missing={missing}, outside_group={extra}"
+                )
+
 
     # DM-13 supersession graph.
     graph: dict[str, list[str]] = {}

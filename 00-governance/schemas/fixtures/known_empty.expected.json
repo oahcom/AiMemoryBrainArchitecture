@@ -1,0 +1,4 @@
+{
+  "valid": true,
+  "reason": "KNOWN_EMPTY keeps an explicit empty value; empty is not the same as missing"
+}
