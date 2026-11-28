@@ -14,8 +14,8 @@ COMMIT = "9a2063ae1fa5d905b3817cd4eddba065a06daa73"
 
 SUMMARY = (
     "main=9a2063ae1fa5d905b3817cd4eddba065a06daa73 "
-    "manifests=108 pins=172 ok=82 mismatch=86 "
-    "path_missing=0 incomplete=0 unbound=4"
+    "manifests=108 pins=14 ok=7 mismatch=1 "
+    "path_missing=0 incomplete=0 excluded=146 unbound=4"
 )
 
 
@@ -56,12 +56,15 @@ class NegativeAssertionTests(unittest.TestCase):
             f"print({SUMMARY!r})",
         ]
         lines.extend(
-            f"print('MISMATCH fixture-{i} path=file-{i} declared=old actual=new')"
-            for i in range(86)
-        )
-        lines.extend(
             f"print('UNBOUND_BLOB_SHA256 manifest=m{i} pointer=/p/f field=f declared=d')"
             for i in range(4)
+        )
+        lines.append(
+            "print('REFERENCE_MODE_MISSING_OR_INVALID manifest=m "
+            "pin_id=related_evidence[0] field=related_evidence[0] "
+            "scope=related_evidence locator=reference_mode declared=None "
+            "actual=\"\" reason=\"reference_mode must be historical or "
+            "current\" classification=\"policy\" basis=\"manifest\"')"
         )
         lines.append("sys.exit(1)")
         return "\n".join(lines) + "\n"

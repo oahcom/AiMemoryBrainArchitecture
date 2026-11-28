@@ -1,7 +1,11 @@
+# scripts/ci/check_manifest_blob_pins.py
 #!/usr/bin/env python3
-"""Verify every declared manifest blob pin against committed Git objects.
+"""Verify in-scope manifest blob pins against a commit tree or reachable history.
 
-Exit status: 0 PASS, 1 VIOLATION, 2 INCOMPLETE (including unreadable Git data).
+Exit status:
+  0 PASS
+  1 VIOLATION (a declared reference does not resolve as required)
+  2 INCOMPLETE (malformed or ambiguous declaration, or unreadable Git data)
 """
 from __future__ import annotations
 
@@ -15,56 +19,181 @@ from pathlib import Path
 import yaml
 
 MANIFEST_ROOT = "14-ai-development/work-items"
-HEX40 = re.compile(r"^[0-9a-f]{40}$")
+HEX40 = re.compile(r"^[0-9a-fA-F]{40}$")
+RAW_DIFF = re.compile(
+    rb"^:[0-7]{6} [0-7]{6} ([0-9a-f]{40}) ([0-9a-f]{40}) "
+    rb"([A-Z][0-9]*)\t(.*)$"
+)
+ZERO40 = "0" * 40
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
-# A blob_sha256 declaration is a claim about committed file bytes. The name
-# token may carry a qualifier suffix (model_blob_sha256_lf); the declaration is
-# still a blob digest and still needs a path. An unbound one is a violation,
-# never an out-of-scope field: PR #1417 comment 7212343821 rejected exactly
-# that exclusion.
+
+# AID-2026-296: SHA-256 claims over committed file bytes.
+# Qualifier suffixes such as model_blob_sha256_lf remain in scope.
 BLOB_SHA256_KEY = re.compile(r"^(?P<base>(?:.*_)?)blob_sha256(?:_[a-z0-9]+)*$")
+
+# Exact, documented exclusions. These are not general-purpose suffix rules.
+PROMPT_METADATA_KEYS = {
+    "prompt_sha256",
+    "prompt_bytes",
+    "prompt_original_payload_sha256",
+    "prompt_original_payload_bytes",
+}
+UNDEFINED_BLOB_KEYS = {
+    "latest_invariant_source_blob",
+    "prior_invariant_source_blob",
+    "latest_forget_fence_contract_blob",
+    "latest_system_boundaries_blob",
+    "latest_context_version_blob",
+    "latest_applied_evidence_blob",
+}
+OUT_OF_SCOPE_FAMILIES = {"gate_a_reconstruction", "d_source_blobs"}
+
+INDEX_PAIRS = (
+    ("root", "root_blob"),
+    ("en_mirror", "en_mirror_blob"),
+    ("zh_cn_mirror", "zh_cn_mirror_blob"),
+)
+RELATED_PAIRS = (
+    ("path", "blob"),
+    ("en_mirror", "en_mirror_blob"),
+    ("zh_cn_mirror", "zh_cn_mirror_blob"),
+)
 
 
 class Incomplete(Exception):
-    pass
+    """The checker cannot establish a trustworthy result."""
 
 
 class Violation(Exception):
-    pass
+    """A required candidate-tree path is absent."""
 
 
 class Git:
     def __init__(self, root: Path):
         self.root = root
+        self._history_cache: dict[tuple[str, str], set[str]] = {}
+        self._tree_cache: dict[tuple[str, str], str | None] = {}
 
     def run(self, *args: str) -> bytes:
         try:
-            p = subprocess.run(["git", *args], cwd=self.root, stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE, check=False)
+            process = subprocess.run(
+                ["git", *args],
+                cwd=self.root,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+            )
         except OSError as exc:
             raise Incomplete(f"cannot execute git: {exc}") from exc
-        if p.returncode:
-            raise Incomplete(p.stderr.decode("utf-8", "replace").strip() or
-                             f"git {' '.join(args)} failed ({p.returncode})")
-        return p.stdout
+
+        if process.returncode:
+            detail = process.stderr.decode("utf-8", "replace").strip()
+            raise Incomplete(
+                detail or f"git {' '.join(args)} failed ({process.returncode})"
+            )
+        return process.stdout
+
+    def resolve_commit(self, revision: str) -> str:
+        """Resolve any commit-ish revision to a full, lowercase 40-hex SHA."""
+        if not isinstance(revision, str) or not revision.strip():
+            raise Incomplete(f"invalid or absent source commit: {revision!r}")
+
+        try:
+            resolved = self.run(
+                "rev-parse", "--verify", f"{revision}^{{commit}}"
+            ).decode("ascii").strip().lower()
+        except (Incomplete, UnicodeError) as exc:
+            raise Incomplete(
+                f"invalid or absent source commit: {revision!r}"
+            ) from exc
+
+        if not HEX40.fullmatch(resolved):
+            raise Incomplete(
+                f"source revision did not resolve to a full commit SHA: "
+                f"{revision!r}"
+            )
+        return resolved
+
+    def tree_blob(self, commit: str, path: str) -> str | None:
+        key = (commit, path)
+        if key in self._tree_cache:
+            return self._tree_cache[key]
+
+        try:
+            output = self.run("rev-parse", "--verify", f"{commit}:{path}")
+        except Incomplete:
+            self._tree_cache[key] = None
+            return None
+
+        oid = output.decode("ascii", "replace").strip().lower()
+        if not HEX40.fullmatch(oid):
+            self._tree_cache[key] = None
+            return None
+
+        try:
+            kind = self.run("cat-file", "-t", oid).decode().strip()
+        except Incomplete:
+            raise
+
+        if kind != "blob":
+            self._tree_cache[key] = None
+            return None
+
+        self._tree_cache[key] = oid
+        return oid
 
     def object_bytes(self, commit: str, path: str) -> bytes:
-        if not isinstance(commit, str) or not re.fullmatch(r"[0-9a-fA-F]{7,40}", commit):
-            raise Incomplete(f"invalid or absent source commit for {path}: {commit!r}")
-        # Git accepts abbreviated object IDs in historical manifest notes.
-        # Resolve once to a full commit; an unavailable/ambiguous prefix is INCOMPLETE.
-        try:
-            resolved = self.run("rev-parse", "--verify", f"{commit}^{{commit}}").decode().strip()
-        except Incomplete as exc:
-            raise Incomplete(f"source commit unavailable for {path}: {commit}") from exc
-        if not HEX40.fullmatch(resolved):
-            raise Incomplete(f"source commit did not resolve uniquely for {path}: {commit}")
+        resolved = self.resolve_commit(commit)
         spec = f"{resolved}:{path}"
-        p = subprocess.run(["git", "cat-file", "blob", spec], cwd=self.root,
-                           stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
-        if p.returncode:
-            raise Violation(f"PATH_MISSING path={path}")
-        return p.stdout
+        try:
+            process = subprocess.run(
+                ["git", "cat-file", "blob", spec],
+                cwd=self.root,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+            )
+        except OSError as exc:
+            raise Incomplete(f"cannot execute git cat-file: {exc}") from exc
+
+        if process.returncode:
+            raise Violation(f"path is absent from source commit: {path}")
+        return process.stdout
+
+    def historical_blobs(self, commit: str, path: str) -> set[str]:
+        """Collect blob IDs recorded at this exact path in reachable history."""
+        resolved = self.resolve_commit(commit)
+        cache_key = (resolved, path)
+        if cache_key in self._history_cache:
+            return self._history_cache[cache_key]
+
+        raw = self.run(
+            "log",
+            "--full-history",
+            "--format=",
+            "--raw",
+            "--no-abbrev",
+            "-m",
+            "--no-renames",
+            resolved,
+            "--",
+            path,
+        )
+
+        blobs: set[str] = set()
+        for line in raw.splitlines():
+            match = RAW_DIFF.match(line)
+            if not match:
+                continue
+            old_oid = match.group(1).decode("ascii").lower()
+            new_oid = match.group(2).decode("ascii").lower()
+            if old_oid != ZERO40:
+                blobs.add(old_oid)
+            if new_oid != ZERO40:
+                blobs.add(new_oid)
+
+        self._history_cache[cache_key] = blobs
+        return blobs
 
 
 def git_blob_sha(data: bytes) -> str:
@@ -76,7 +205,7 @@ def as_mapping(value):
     return value if isinstance(value, dict) else {}
 
 
-def nonempty(value):
+def nonempty(value) -> bool:
     return isinstance(value, str) and bool(value.strip())
 
 
@@ -85,7 +214,7 @@ def pointer_token(key):
 
 
 def walk_declarations(node, pointer=""):
-    """Yield (pointer, field, value, containing mapping) for every blob_sha256 key."""
+    """Yield (JSON pointer, field, value, containing mapping)."""
     stack = [(pointer, node)]
     while stack:
         ptr, current = stack.pop()
@@ -101,250 +230,624 @@ def walk_declarations(node, pointer=""):
 
 
 def bind_path(container, field):
-    """Find the path a blob_sha256 declaration binds to, in its own mapping only."""
-    base = BLOB_SHA256_KEY.match(field).group("base").rstrip("_")
+    """Bind a blob_sha256 declaration to a path in its own mapping."""
+    match = BLOB_SHA256_KEY.match(field)
+    if not match:
+        return None, None
+
+    base = match.group("base").rstrip("_")
     names = [f"{base}_path", f"{base}_file"] if base else []
+
     for name in names + ["path", "file"]:
         value = container.get(name)
         if nonempty(value):
             return name, value.strip()
-    # A bare base key ("root" for "root_blob_sha256") counts only when the
-    # value reads as a path, so a description string cannot be mistaken for one.
+
     value = container.get(base) if base else None
-    if nonempty(value) and ("/" in value or re.search(r"\.[A-Za-z0-9]{1,8}$", value)):
+    if nonempty(value) and (
+        "/" in value or re.search(r"\.[A-Za-z0-9]{1,8}$", value)
+    ):
         return base, value.strip()
+
     return None, None
 
 
-def discover_manifests(git: Git, commit: str):
-    names = git.run("ls-tree", "-r", "--name-only", commit).decode("utf-8").splitlines()
-    return sorted(p for p in names
-                  if p.startswith(MANIFEST_ROOT + "/") and p.endswith("/manifest.yaml"))
+def is_pin_like_key(key) -> bool:
+    if not isinstance(key, str):
+        return False
+    lowered = key.lower()
+    return (
+        lowered.endswith("_blob")
+        or lowered.endswith("_sha256")
+        or lowered.endswith("_bytes")
+        or lowered in {"blob", "root_blob"}
+    )
+
+
+def discover_manifests(git: Git, commit: str) -> list[str]:
+    names = git.run("ls-tree", "-r", "--name-only", commit)
+    paths = names.decode("utf-8").splitlines()
+    return sorted(
+        path for path in paths
+        if path.startswith(MANIFEST_ROOT + "/")
+        and path.endswith("/manifest.yaml")
+    )
+
+
+class Checker:
+    def __init__(self, git: Git, commit: str, verbose: bool = True):
+        self.git = git
+        self.commit = git.resolve_commit(commit)
+        self.verbose = verbose
+        self.manifests = 0
+        self.pins = 0
+        self.ok = 0
+        self.mismatch = 0
+        self.missing = 0
+        self.incomplete = 0
+        self.excluded = 0
+        self.unbound = 0
+        self.problems: list[str] = []
+
+    def incomplete_finding(self, context: str, reason: str):
+        self.incomplete += 1
+        self.problems.append(f"INCOMPLETE {context}: {reason}")
+
+    def semantic_finding(
+        self,
+        code: str,
+        *,
+        manifest: str,
+        field: str,
+        scope: str,
+        locator: str,
+        declared,
+        actual: str = "",
+        reason: str,
+        classification: str,
+        basis: str,
+    ):
+        if code == "HISTORICAL_REFERENCE_NOT_FOUND":
+            self.mismatch += 1
+        elif code == "CURRENT_REFERENCE_MISMATCH":
+            if "absent" in reason:
+                self.missing += 1
+            else:
+                self.mismatch += 1
+
+        self.problems.append(
+            f'{code} manifest={manifest} pin_id={field} field={field} '
+            f'scope={scope} locator={locator} declared="{declared}" '
+            f'actual="{actual}" reason="{reason}" '
+            f'classification="{classification}" basis="{basis}"'
+        )
+
+    def resolve_family(self, doc: dict, family: str, manifest_path: str):
+        """Resolve a family from root/nested locations, rejecting conflicts.
+
+        Returns (present, value, source_mapping). Equal duplicate declarations
+        are evaluated once. Different duplicate declarations fail closed.
+        """
+        nested = as_mapping(doc.get("baseline_and_source_evidence"))
+        locations = []
+        if family in doc:
+            locations.append(("top-level", doc[family], doc))
+        if family in nested:
+            locations.append(("baseline_and_source_evidence", nested[family], nested))
+
+        if not locations:
+            return False, None, None
+
+        if len(locations) == 2 and locations[0][1] != locations[1][1]:
+            self.incomplete_finding(
+                f"manifest={manifest_path}",
+                f"conflicting {family} declarations at top level and "
+                "baseline_and_source_evidence",
+            )
+            return True, None, None
+
+        return True, locations[0][1], locations[0][2]
+
+    def resolve_pair(
+        self, doc: dict, family: str, path_key: str, digest_key: str,
+        manifest_path: str,
+    ):
+        """Resolve a path/digest pair from either supported mapping."""
+        nested = as_mapping(doc.get("baseline_and_source_evidence"))
+        top_present = path_key in doc or digest_key in doc
+        nested_present = path_key in nested or digest_key in nested
+
+        if not top_present and not nested_present:
+            return False, None, None
+
+        top_pair = (doc.get(path_key), doc.get(digest_key))
+        nested_pair = (nested.get(path_key), nested.get(digest_key))
+
+        if top_present and nested_present and top_pair != nested_pair:
+            self.incomplete_finding(
+                f"manifest={manifest_path}",
+                f"conflicting {family} declaration for {path_key} "
+                "at top level and baseline_and_source_evidence",
+            )
+            return True, None, None
+
+        source = doc if top_present else nested
+        return True, source.get(path_key), source.get(digest_key)
+
+    def check_pin(
+        self,
+        *,
+        manifest: str,
+        field: str,
+        path,
+        declared,
+        reference_mode: str = "current",
+        algorithm: str = "git",
+        source_commit: str | None = None,
+        count_pin: bool = True,
+    ):
+        if declared is None or (isinstance(declared, str) and not declared.strip()):
+            return
+
+        if count_pin:
+            self.pins += 1
+
+        if not nonempty(path):
+            self.incomplete_finding(
+                f"{field}",
+                f"corresponding exact path is absent for digest {declared!r}",
+            )
+            return
+
+        if algorithm == "bytes":
+            if isinstance(declared, bool) or not isinstance(declared, (int, str)):
+                self.incomplete_finding(
+                    field, f"invalid byte-count declaration {declared!r}"
+                )
+                return
+        elif not isinstance(declared, str) or not declared.strip():
+            self.incomplete_finding(
+                field, f"invalid digest declaration {declared!r}"
+            )
+            return
+
+        if reference_mode == "historical":
+            try:
+                history = self.git.historical_blobs(self.commit, path)
+            except Incomplete as exc:
+                self.incomplete_finding(f"{field} path={path}", str(exc))
+                return
+
+            if declared.lower() not in history:
+                self.semantic_finding(
+                    "HISTORICAL_REFERENCE_NOT_FOUND",
+                    manifest=manifest,
+                    field=field,
+                    scope="reachable-history",
+                    locator=path,
+                    declared=declared,
+                    reason=(
+                        "path has no reachable blob history"
+                        if not history
+                        else "declared blob is not recorded at this exact path "
+                             "in reachable history"
+                    ),
+                    classification="historical",
+                    basis=self.commit,
+                )
+                return
+
+            self.ok += 1
+            return
+
+        if reference_mode not in {"current", None}:
+            self.incomplete_finding(
+                field, f"unsupported reference mode {reference_mode!r}"
+            )
+            return
+
+        try:
+            selected_commit = (
+                self.git.resolve_commit(source_commit)
+                if source_commit is not None
+                else self.commit
+            )
+            if algorithm == "bytes" or algorithm == "sha256":
+                data = self.git.object_bytes(selected_commit, path)
+                if algorithm == "bytes":
+                    actual = str(len(data))
+                    expected = str(int(declared))
+                else:
+                    actual = hashlib.sha256(data).hexdigest()
+                    expected = declared.lower()
+            elif source_commit is not None:
+                data = self.git.object_bytes(selected_commit, path)
+                actual = git_blob_sha(data)
+                expected = declared.lower()
+            else:
+                actual_oid = self.git.tree_blob(selected_commit, path)
+                if actual_oid is None:
+                    self.semantic_finding(
+                        "CURRENT_REFERENCE_MISMATCH",
+                        manifest=manifest,
+                        field=field,
+                        scope="candidate-tree",
+                        locator=path,
+                        declared=declared,
+                        reason="path is absent from candidate commit tree",
+                        classification="current",
+                        basis=selected_commit,
+                    )
+                    return
+                actual = actual_oid
+                expected = declared.lower()
+        except Violation as exc:
+            self.semantic_finding(
+                "CURRENT_REFERENCE_MISMATCH",
+                manifest=manifest,
+                field=field,
+                scope="source-commit",
+                locator=path,
+                declared=declared,
+                reason=str(exc),
+                classification="current",
+                basis=source_commit or self.commit,
+            )
+            return
+        except (Incomplete, ValueError) as exc:
+            self.incomplete_finding(f"{field} path={path}", str(exc))
+            return
+
+        if actual != expected:
+            self.semantic_finding(
+                "CURRENT_REFERENCE_MISMATCH",
+                manifest=manifest,
+                field=field,
+                scope="candidate-tree" if source_commit is None else "source-commit",
+                locator=path,
+                declared=declared,
+                actual=actual,
+                reason="declared digest or byte count differs from actual content",
+                classification="current",
+                basis=selected_commit,
+            )
+        else:
+            self.ok += 1
+
+    def check_index_pairs(self, doc: dict, manifest_path: str):
+        nested = as_mapping(doc.get("baseline_and_source_evidence"))
+        for path_key, digest_key in INDEX_PAIRS:
+            present, path, digest = self.resolve_pair(
+                doc, "top-level index", path_key, digest_key, manifest_path
+            )
+            if present and digest is not None:
+                self.check_pin(
+                    manifest=manifest_path,
+                    field=f"index.{path_key}",
+                    path=path,
+                    declared=digest,
+                )
+
+    def check_authored_indexes(self, doc: dict, manifest_path: str):
+        present, entries, _ = self.resolve_family(
+            doc, "authored_indexes", manifest_path
+        )
+        if not present or entries is None:
+            return
+        if not isinstance(entries, list):
+            self.incomplete_finding(
+                f"manifest={manifest_path}", "authored_indexes is not a list"
+            )
+            return
+
+        allowed = {key for pair in INDEX_PAIRS for key in pair}
+        for index, entry in enumerate(entries):
+            context = f"authored_indexes[{index}]"
+            if not isinstance(entry, dict):
+                self.incomplete_finding(
+                    context, "declaration record is not a mapping"
+                )
+                continue
+
+            found = False
+            for path_key, digest_key in INDEX_PAIRS:
+                if digest_key in entry:
+                    found = True
+                    self.check_pin(
+                        manifest=manifest_path,
+                        field=f"{context}.{path_key}",
+                        path=entry.get(path_key),
+                        declared=entry.get(digest_key),
+                        reference_mode="historical",
+                    )
+                elif path_key in entry:
+                    # A path without its paired digest is not itself a pin.
+                    continue
+
+            for key in entry:
+                if is_pin_like_key(key) and key not in allowed:
+                    self.incomplete_finding(
+                        context,
+                        f"unrecognized declaration-bearing key {key!r}",
+                    )
+
+            if not found and any(is_pin_like_key(key) for key in entry):
+                # The key-specific diagnostic above is the authoritative one.
+                pass
+
+    def check_related_evidence(self, doc: dict, manifest_path: str):
+        present, entries, _ = self.resolve_family(
+            doc, "related_evidence", manifest_path
+        )
+        if not present or entries is None:
+            return
+        if not isinstance(entries, list):
+            self.incomplete_finding(
+                f"manifest={manifest_path}", "related_evidence is not a list"
+            )
+            return
+
+        allowed = {key for pair in RELATED_PAIRS for key in pair}
+        allowed.add("reference_mode")
+
+        for index, entry in enumerate(entries):
+            context = f"related_evidence[{index}]"
+            if not isinstance(entry, dict):
+                self.incomplete_finding(
+                    context, "declaration record is not a mapping"
+                )
+                continue
+
+            declared_pairs = [
+                (path_key, digest_key)
+                for path_key, digest_key in RELATED_PAIRS
+                if digest_key in entry
+            ]
+
+            mode = entry.get("reference_mode")
+            if mode not in {"historical", "current"}:
+                # Count the declared pins even though they cannot be evaluated.
+                self.pins += sum(
+                    1 for _, digest_key in declared_pairs
+                    if entry.get(digest_key) is not None
+                    and not (
+                        isinstance(entry.get(digest_key), str)
+                        and not entry[digest_key].strip()
+                    )
+                )
+                self.mismatch += 1
+                self.problems.append(
+                    f"REFERENCE_MODE_MISSING_OR_INVALID manifest={manifest_path} "
+                    f"pin_id={context} field={context} scope=related_evidence "
+                    f"locator=reference_mode declared={mode!r} actual=\"\" "
+                    "reason=\"reference_mode must be historical or current\" "
+                    "classification=\"policy\" basis=\"manifest\""
+                )
+                continue
+
+            for path_key, digest_key in declared_pairs:
+                self.check_pin(
+                    manifest=manifest_path,
+                    field=f"{context}.{path_key}",
+                    path=entry.get(path_key),
+                    declared=entry.get(digest_key),
+                    reference_mode=mode,
+                )
+
+            for key in entry:
+                if is_pin_like_key(key) and key not in allowed:
+                    self.incomplete_finding(
+                        context,
+                        f"unrecognized declaration-bearing key {key!r}",
+                    )
+
+    def check_evidence_blob(self, doc: dict, manifest_path: str):
+        nested = as_mapping(doc.get("baseline_and_source_evidence"))
+        top_present = "evidence_blob" in doc or "evidence_file" in doc
+        nested_present = "evidence_blob" in nested or "evidence_file" in nested
+        if not top_present and not nested_present:
+            return
+
+        top_pair = (doc.get("evidence_file"), doc.get("evidence_blob"))
+        nested_pair = (nested.get("evidence_file"), nested.get("evidence_blob"))
+        if top_present and nested_present and top_pair != nested_pair:
+            self.incomplete_finding(
+                f"manifest={manifest_path}",
+                "conflicting evidence_file/evidence_blob declarations",
+            )
+            return
+
+        source = doc if top_present else nested
+        if "evidence_blob" not in source:
+            self.incomplete_finding(
+                f"manifest={manifest_path}",
+                "evidence_file is present without evidence_blob",
+            )
+            return
+
+        self.check_pin(
+            manifest=manifest_path,
+            field="evidence_file",
+            path=source.get("evidence_file"),
+            declared=source.get("evidence_blob"),
+        )
+
+    def check_known_exclusions(self, doc: dict, manifest_path: str):
+        nested = as_mapping(doc.get("baseline_and_source_evidence"))
+
+        # Exact legacy prompt metadata keys are deliberately outside this gate.
+        # Session Evidence check 11 remains authoritative for prompt snapshots.
+        for container in (doc, nested):
+            self.excluded += sum(1 for key in container if key in PROMPT_METADATA_KEYS)
+            self.excluded += sum(1 for key in container if key in UNDEFINED_BLOB_KEYS)
+
+        # These two families are known, explicitly out of scope, and are not
+        # interpreted or resolved by AID-336.
+        for family in OUT_OF_SCOPE_FAMILIES:
+            present, value, _ = self.resolve_family(doc, family, manifest_path)
+            if present and value is not None:
+                if isinstance(value, list):
+                    self.excluded += len(value)
+                else:
+                    self.excluded += 1
+
+        # Reject unknown declaration-bearing keys at the manifest mapping
+        # levels. Exact exclusions above are the only silent exceptions.
+        known = (
+            PROMPT_METADATA_KEYS
+            | UNDEFINED_BLOB_KEYS
+            | OUT_OF_SCOPE_FAMILIES
+            | {
+                "root_blob", "en_mirror_blob", "zh_cn_mirror_blob",
+                "evidence_blob", "authored_indexes", "related_evidence",
+                "baseline_and_source_evidence", "d_source_blobs",
+                "gate_a_reconstruction", "executed_prompt_sha256",
+                "executed_prompt_bytes",
+            }
+        )
+        for container_name, container in (
+            ("manifest", doc),
+            ("baseline_and_source_evidence", nested),
+        ):
+            for key in container:
+                if (
+                    is_pin_like_key(key)
+                    and key not in known
+                    and not (
+                        isinstance(key, str)
+                        and BLOB_SHA256_KEY.match(key)
+                    )
+                ):
+                    self.incomplete_finding(
+                        f"manifest={manifest_path}",
+                        f"unrecognized declaration-bearing key "
+                        f"{container_name}.{key}",
+                    )
+
+    def check_blob_sha256(self, doc: dict, manifest_path: str):
+        """Check every in-scope blob_sha256 declaration in the manifest."""
+        for pointer, field, declared, container in walk_declarations(doc):
+            if declared is None or (
+                isinstance(declared, str) and not declared.strip()
+            ):
+                continue
+
+            self.pins += 1
+
+            if not isinstance(declared, str):
+                self.incomplete_finding(
+                    f"blob_sha256 manifest={manifest_path} pointer={pointer}",
+                    f"invalid digest declaration {declared!r}",
+                )
+                continue
+
+            declared = declared.strip()
+            if not HEX64.fullmatch(declared.lower()):
+                self.incomplete_finding(
+                    f"blob_sha256 manifest={manifest_path} pointer={pointer}",
+                    f"invalid SHA-256 digest declaration {declared!r}",
+                )
+                continue
+
+            _, path = bind_path(container, field)
+            if not path:
+                self.unbound += 1
+                self.problems.append(
+                    f"UNBOUND_BLOB_SHA256 manifest={manifest_path} "
+                    f"pointer={pointer} field={field} declared={declared}"
+                )
+                continue
+
+            try:
+                data = self.git.object_bytes(self.commit, path)
+            except Violation:
+                self.missing += 1
+                self.problems.append(
+                    f"PATH_MISSING blob_sha256 manifest={manifest_path} "
+                    f"pointer={pointer} path={path} declared={declared}"
+                )
+                continue
+            except Incomplete as exc:
+                self.incomplete_finding(
+                    f"blob_sha256 manifest={manifest_path} "
+                    f"pointer={pointer} path={path}",
+                    str(exc),
+                )
+                continue
+
+            actual = hashlib.sha256(data).hexdigest()
+            if actual != declared.lower():
+                self.mismatch += 1
+                self.problems.append(
+                    f"MISMATCH blob_sha256 manifest={manifest_path} "
+                    f"pointer={pointer} path={path} declared={declared} "
+                    f"actual={actual}"
+                )
+            else:
+                self.ok += 1
+
+    def run(self):
+        paths = discover_manifests(self.git, self.commit)
+        if not paths:
+            raise Incomplete(f"no manifests found in commit {self.commit}")
+
+        self.manifests = len(paths)
+        for manifest_path in paths:
+            try:
+                raw = self.git.object_bytes(self.commit, manifest_path)
+                document = yaml.safe_load(raw.decode("utf-8"))
+            except (UnicodeError, yaml.YAMLError, Incomplete, Violation) as exc:
+                self.incomplete_finding(f"manifest={manifest_path}", str(exc))
+                continue
+
+            if not isinstance(document, dict):
+                self.incomplete_finding(
+                    f"manifest={manifest_path}",
+                    "top-level YAML is not a mapping",
+                )
+                continue
+
+            self.check_known_exclusions(document, manifest_path)
+            self.check_index_pairs(document, manifest_path)
+            self.check_authored_indexes(document, manifest_path)
+            self.check_related_evidence(document, manifest_path)
+            self.check_evidence_blob(document, manifest_path)
+            self.check_blob_sha256(document, manifest_path)
+
+        if self.verbose:
+            print(
+                f"main={self.commit} manifests={self.manifests} "
+                f"pins={self.pins} ok={self.ok} mismatch={self.mismatch} "
+                f"path_missing={self.missing} incomplete={self.incomplete} "
+                f"excluded={self.excluded} unbound={self.unbound}"
+            )
+            for problem in self.problems:
+                print(problem)
+
+        if self.incomplete:
+            return 2
+        if self.mismatch or self.missing or self.unbound:
+            return 1
+        return 0
 
 
 def verify(root: Path, commit: str, verbose: bool = True):
     git = Git(root)
-    manifests = discover_manifests(git, commit)
-    if not manifests:
-        raise Incomplete(f"no manifests found in commit {commit}")
-    ok = mismatch = missing = incomplete = pins = unbound = 0
-    problems = []
-
-    def check(path, declared, source_commit, kind, algorithm="git"):
-        nonlocal ok, mismatch, missing, incomplete, pins
-        # Empty/null placeholders are not blob identities and are outside this
-        # checker's scope. A non-empty malformed declaration is INCOMPLETE.
-        if declared is None or (isinstance(declared, str) and not declared.strip()):
-            return
-        pins += 1
-        if algorithm == "bytes":
-            if isinstance(declared, bool) or not isinstance(declared, (int, str)) or str(declared).strip() == "":
-                incomplete += 1
-                problems.append(f"INCOMPLETE {kind}: invalid byte-count declaration {declared!r}")
-                return
-        elif not isinstance(declared, str) or not declared.strip():
-            incomplete += 1
-            problems.append(f"INCOMPLETE {kind}: invalid digest declaration {declared!r}")
-            return
-        if not nonempty(path):
-            missing += 1
-            problems.append(f"PATH_MISSING {kind} path=<not-declared> declared={declared}")
-            return
-        try:
-            data = git.object_bytes(source_commit, path)
-        except Violation as exc:
-            missing += 1
-            problems.append(f"{exc}; declared={declared}")
-            return
-        except Incomplete as exc:
-            incomplete += 1
-            problems.append(f"INCOMPLETE {kind} path={path}: {exc}")
-            return
-        actual = (hashlib.sha256(data).hexdigest() if algorithm == "sha256"
-                  else git_blob_sha(data))
-        if algorithm == "bytes":
-            try:
-                expected_bytes = int(declared)
-            except (TypeError, ValueError):
-                incomplete += 1
-                problems.append(f"INCOMPLETE {kind} path={path}: invalid byte count {declared!r}")
-                return
-            actual = str(len(data))
-            declared = str(expected_bytes)
-        if actual != str(declared).lower():
-            mismatch += 1
-            problems.append(f"MISMATCH {kind} path={path} declared={declared} actual={actual}")
-        else:
-            ok += 1
-
-    for manifest_path in manifests:
-        try:
-            raw = git.object_bytes(commit, manifest_path)
-            doc = yaml.safe_load(raw.decode("utf-8"))
-        except (UnicodeError, yaml.YAMLError, Incomplete, Violation) as exc:
-            incomplete += 1
-            problems.append(f"INCOMPLETE manifest={manifest_path}: {exc}")
-            continue
-        if not isinstance(doc, dict):
-            incomplete += 1
-            problems.append(f"INCOMPLETE manifest={manifest_path}: top-level YAML is not a mapping")
-            continue
-
-        # A. Root and language mirrors: root/en_mirror/zh_cn_mirror with
-        # root_blob/en_mirror_blob/zh_cn_mirror_blob (candidate tree).
-        for path_key, digest_key in (
-            ("root", "root_blob"),
-            ("en_mirror", "en_mirror_blob"),
-            ("zh_cn_mirror", "zh_cn_mirror_blob"),
-        ):
-            if digest_key in doc:
-                check(doc.get(path_key), doc.get(digest_key), commit,
-                      f"index.{path_key}")
-
-        # B. gate_a_reconstruction[].root -> reconstructed_root_blob.
-        # The source commit is explicit on the entry, or in its source note;
-        # it is never silently replaced by the candidate commit.
-        for i, item in enumerate(doc.get("gate_a_reconstruction", []) or []):
-            if not isinstance(item, dict):
-                continue
-            if "reconstructed_root_blob" in item:
-                source = item.get("source_commit") or item.get("commit")
-                if not source and nonempty(item.get("note")):
-                    match = re.search(r"\bcommit\s+([0-9a-f]{40})\b", item["note"])
-                    source = match.group(1) if match else None
-                check(item.get("root"), item.get("reconstructed_root_blob"), source,
-                      f"gate_a_reconstruction[{i}].root")
-
-        # B2. authored_indexes[] uses the same root and mirror pin shape
-        # as the top-level index fields, but is a list in AID-2026-100-style records.
-        source_evidence = as_mapping(doc.get("baseline_and_source_evidence"))
-        authored_indexes = source_evidence.get("authored_indexes", doc.get("authored_indexes", []))
-        for i, item in enumerate(authored_indexes or []):
-            if not isinstance(item, dict):
-                continue
-            for path_key, digest_key in (
-                ("root", "root_blob"),
-                ("en_mirror", "en_mirror_blob"),
-                ("zh_cn_mirror", "zh_cn_mirror_blob"),
-            ):
-                if digest_key in item:
-                    check(item.get(path_key), item.get(digest_key), commit,
-                          f"authored_indexes[{i}].{path_key}")
-
-        # C. related_evidence[].path/blob and language mirrors.
-        for i, item in enumerate(doc.get("related_evidence", []) or []):
-            if not isinstance(item, dict):
-                continue
-            for path_key, digest_key in (
-                ("path", "blob"),
-                ("en_mirror", "en_mirror_blob"),
-                ("zh_cn_mirror", "zh_cn_mirror_blob"),
-            ):
-                if digest_key in item:
-                    check(item.get(path_key), item.get(digest_key), commit,
-                          f"related_evidence[{i}].{path_key}")
-
-        # D. Execution evidence file/blob pair.
-        if "evidence_blob" in doc:
-            check(doc.get("evidence_file"), doc.get("evidence_blob"), commit,
-                  "evidence_file")
-
-        # E. Cross-commit D source blobs: "<name>: <git-blob-sha>" resolved
-        # against d_source_commit, not the candidate tree.
-        if "d_source_blobs" in doc:
-            source = doc.get("d_source_commit")
-            entries = doc.get("d_source_blobs")
-            if not isinstance(entries, list):
-                incomplete += 1
-                problems.append(f"INCOMPLETE manifest={manifest_path}: d_source_blobs is not a list")
-            else:
-                for i, entry in enumerate(entries):
-                    if not isinstance(entry, str) or ":" not in entry:
-                        incomplete += 1
-                        problems.append(f"INCOMPLETE manifest={manifest_path}: malformed d_source_blobs[{i}]")
-                        continue
-                    name, digest = entry.rsplit(":", 1)
-                    check(name.strip(), digest.strip(), source,
-                          f"d_source_blobs[{i}]")
-
-        # F. Prompt snapshots: SHA-256 and byte length are both over committed
-        # bytes. These are not Git blob IDs.
-        prompt = as_mapping(doc.get("prompt"))
-        if "prompt_sha256" in prompt:
-            check(prompt.get("prompt_file"), prompt.get("prompt_sha256"), commit,
-                  "prompt.prompt_file", "sha256")
-        if "prompt_bytes" in prompt:
-            check(prompt.get("prompt_file"), prompt.get("prompt_bytes"), commit,
-                  "prompt.prompt_file", "bytes")
-        for i, item in enumerate(doc.get("session_evidence", []) or []):
-            if not isinstance(item, dict):
-                continue
-            path_key = "executed_prompt_snapshot_file"
-            sha_key = "executed_prompt_sha256"
-            bytes_key = "executed_prompt_bytes"
-            if sha_key in item:
-                check(item.get(path_key), item.get(sha_key), commit,
-                      f"session_evidence[{i}].{path_key}", "sha256")
-            if bytes_key in item:
-                check(item.get(path_key), item.get(bytes_key), commit,
-                      f"session_evidence[{i}].{path_key}", "bytes")
-
-        # G. Any blob_sha256 / *_blob_sha256 declaration, wherever it sits.
-        # A digest with no bindable path is UNBOUND_BLOB_SHA256 and fails: it
-        # cannot be verified, so it is not in scope to skip.
-        for pointer, field, declared, container in walk_declarations(doc):
-            if declared is None or (isinstance(declared, str) and not declared.strip()):
-                continue
-            pins += 1
-            if isinstance(declared, bool) or not isinstance(declared, str):
-                incomplete += 1
-                problems.append(f"INCOMPLETE blob_sha256 manifest={manifest_path} "
-                                f"pointer={pointer}: invalid digest declaration {declared!r}")
-                continue
-            declared = declared.strip()
-            _, path = bind_path(container, field)
-            if not path:
-                unbound += 1
-                problems.append(f"UNBOUND_BLOB_SHA256 manifest={manifest_path} "
-                                f"pointer={pointer} field={field} declared={declared}")
-                continue
-            try:
-                data = git.object_bytes(commit, path)
-            except Violation:
-                missing += 1
-                problems.append(f"PATH_MISSING blob_sha256 manifest={manifest_path} "
-                                f"pointer={pointer} path={path} declared={declared}")
-                continue
-            except Incomplete as exc:
-                incomplete += 1
-                problems.append(f"INCOMPLETE blob_sha256 manifest={manifest_path} "
-                                f"pointer={pointer} path={path}: {exc}")
-                continue
-            actual = hashlib.sha256(data).hexdigest()
-            if actual != declared.lower():
-                mismatch += 1
-                problems.append(f"MISMATCH blob_sha256 manifest={manifest_path} "
-                                f"pointer={pointer} path={path} declared={declared} "
-                                f"actual={actual}")
-            else:
-                ok += 1
-
-    if verbose:
-        print(f"main={commit} manifests={len(manifests)} pins={pins} ok={ok} "
-              f"mismatch={mismatch} path_missing={missing} incomplete={incomplete} "
-              f"unbound={unbound}")
-        for problem in problems:
-            print(problem)
-    return 2 if incomplete else (1 if mismatch or missing or unbound else 0)
+    checker = Checker(git, commit, verbose=verbose)
+    return checker.run()
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[2])
+    parser.add_argument(
+        "--root", type=Path, default=Path(__file__).resolve().parents[2]
+    )
     parser.add_argument("--commit", default="HEAD")
     args = parser.parse_args(argv)
+
     try:
-        commit = Git(args.root).run("rev-parse", f"{args.commit}^{{commit}}").decode().strip()
+        git = Git(args.root)
+        commit = git.resolve_commit(args.commit)
         return verify(args.root, commit)
     except Incomplete as exc:
         print(f"INCOMPLETE: {exc}", file=sys.stderr)

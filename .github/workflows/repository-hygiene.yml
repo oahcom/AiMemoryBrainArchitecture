@@ -112,7 +112,7 @@ jobs:
             --baseline scripts/ci/baselines/manifest-blob-pins.txt \
             --baseline-ref "$BASELINE_REF" \
             --format schema \
-            --command "python3 scripts/ci/check_manifest_blob_pins.py --commit HEAD | sed -n '/^MISMATCH /p; /^PATH_MISSING /p; /^INCOMPLETE /p; /^UNBOUND_BLOB_SHA256 /p'"
+            --command "python3 scripts/ci/check_manifest_blob_pins.py --commit HEAD | sed -n '/^MISMATCH /p; /^PATH_MISSING /p; /^INCOMPLETE /p; /^UNBOUND_BLOB_SHA256 /p; /^HISTORICAL_REFERENCE_NOT_FOUND /p; /^CURRENT_REFERENCE_MISMATCH /p; /^REFERENCE_MODE_MISSING_OR_INVALID /p'"
 
       - name: Self-check manifest blob pin verification
         run: python3 scripts/ci/test_check_manifest_blob_pins.py
