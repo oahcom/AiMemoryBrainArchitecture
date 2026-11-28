@@ -11,6 +11,9 @@ class PinSpec:
 
 
 FIELD_REGISTRY = {
+    "blob": PinSpec(("path",), "git-blob-sha1"),
+    "source_commit": PinSpec((), "NON_BLOB", "none"),
+    "d_source_commit": PinSpec((), "NON_BLOB", "none"),
     "after_blob": PinSpec((), "UNCLASSIFIED_FIELD"),
     "aid_082_manifest_blob": PinSpec((), "UNCLASSIFIED_FIELD"),
     "aid_095_matrix_blob": PinSpec((), "UNCLASSIFIED_FIELD"),

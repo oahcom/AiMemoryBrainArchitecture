@@ -784,9 +784,15 @@ def verify(
         print(
             f"main={resolved_commit} manifests={len(manifests)} "
             f"pins={result.pins} ok={result.ok} "
+            f"mismatch={sum(f.kind == 'MISMATCH' for f in result.findings)} "
+            f"path_missing={sum(f.kind == 'PATH_MISSING' for f in result.findings)} "
+            f"incomplete={sum(f.kind in {'UNRESOLVED', 'SCOPE_UNRESOLVABLE'} for f in result.findings)} "
+            f"unclassified={sum(f.kind == 'UNCLASSIFIED' for f in result.findings)} "
+            f"no_scope={sum(f.kind == 'NO_SCOPE' for f in result.findings)} "
+            f"unresolved={sum(f.kind == 'UNRESOLVED' for f in result.findings)} "
+            f"scope_unresolvable={sum(f.kind == 'SCOPE_UNRESOLVABLE' for f in result.findings)} "
             f"findings={len(result.findings)} "
-            f"violations={sum(f.kind not in {'UNRESOLVED', 'SCOPE_UNRESOLVABLE'} for f in result.findings)} "
-            f"incomplete={sum(f.kind in {'UNRESOLVED', 'SCOPE_UNRESOLVABLE'} for f in result.findings)}"
+            f"violations={sum(f.kind not in {'UNRESOLVED', 'SCOPE_UNRESOLVABLE'} for f in result.findings)}"
         )
         for finding in result.findings:
             # One newline per finding in both modes. The explain prefix is
