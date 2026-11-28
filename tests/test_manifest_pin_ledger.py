@@ -97,6 +97,20 @@ class LedgerRepository:
         self._write_manifest(declared_pin or self.new_pin)
         return self._commit("repin manifest blob")
 
+    def make_squash_repin(self) -> tuple[str, str]:
+        """Repin on a pull request branch, then squash-merge it onto the base.
+
+        Mirrors a GitHub squash merge: the branch commit never becomes part of
+        the target branch history, only the resulting squash commit does.
+        """
+        base_branch = self._git("rev-parse", "--abbrev-ref", "HEAD")
+        self._git("checkout", "-q", "-b", "pr-branch")
+        branch_commit = self.make_repin_commit()
+        self._git("checkout", "-q", base_branch)
+        self._git("merge", "-q", "--squash", "pr-branch")
+        self._git("commit", "-q", "-m", "squash-merge the repin")
+        return branch_commit, self._git("rev-parse", "HEAD")
+
     def add_ledger(self, rows: list[tuple[str, str, str, str, str, str]]) -> str:
         lines = [
             "|manifest|field|path|previous_pin|new_pin|repin_commit|",
@@ -209,6 +223,27 @@ class ManifestPinLedgerTests(unittest.TestCase):
 
         self.assertEqual(status, 2, output)
         self.assertIn("target pin does not equal latest ledger new_pin", output)
+
+    def test_squash_commit_is_accepted_as_repin_commit(self) -> None:
+        _, squash = self.repo.make_squash_repin()
+        self.repo.add_ledger([self.repo.valid_row(squash)])
+
+        status, output = self.repo.checker()
+
+        self.assertEqual(status, 0, output)
+        self.assertIn("ledger_records=1", output)
+        self.assertNotIn("INCOMPLETE ", output)
+
+    def test_unmerged_branch_commit_is_rejected_as_repin_commit(self) -> None:
+        branch_commit, squash_commit = self.repo.make_squash_repin()
+        self.assertNotEqual(branch_commit, squash_commit)
+        self.repo.add_ledger([self.repo.valid_row(branch_commit)])
+
+        status, output = self.repo.checker()
+
+        self.assertEqual(status, 2, output)
+        self.assertIn("is not an ancestor", output)
+        self.assertIn(branch_commit, output)
 
 
 if __name__ == "__main__":
