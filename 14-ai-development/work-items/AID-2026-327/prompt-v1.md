@@ -32,7 +32,7 @@ document_metadata:
   authority:
     canonical_status: Non-Canonical
     canonical_scope: "Preserves the bounded task prompt snapshot for AID-2026-327; it does not establish repository-wide requirements."
-    canonical_scope_id: "ai-development/aid-2026-326-prompt"
+    canonical_scope_id: "ai-development/aid-2026-327-prompt"
     canonical_scope_keywords:
       - "AID-2026-327"
       - "d10-cursor-authority"
