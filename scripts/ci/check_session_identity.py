@@ -627,7 +627,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.write_baseline and args.bootstrap_baseline:
         parser.error("--write-baseline and --bootstrap-baseline are mutually exclusive")
-    if args.diff_base and (args.write_baseline or args.bootstrap_baseline):
+    if args.diff_base is not None and (args.write_baseline or args.bootstrap_baseline):
         parser.error("--diff-base is mutually exclusive with baseline mutation modes")
     if args.base_ref and not args.bootstrap_baseline:
         parser.error("--base-ref requires --bootstrap-baseline")
@@ -652,7 +652,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 2
 
-    if args.diff_base:
+    if args.diff_base is not None:
         return _diff_base_check(root, args.diff_base, violations)
 
     if args.bootstrap_baseline:
