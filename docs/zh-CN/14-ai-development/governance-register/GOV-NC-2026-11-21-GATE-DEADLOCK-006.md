@@ -2,6 +2,7 @@
 document_metadata:
   domain: ai-development
   role: work-record
+  steward: "user-authorized operator (delegated by account owner)"
   lifecycle:
     approval:
       decision_status: Draft
@@ -278,7 +279,7 @@ PY
 # 补 docs/en/<path> + docs/zh-CN/<path> 后重跑，NEW 归零
 ```
 
-**登记状态**：`ACCEPTED` / `F-2_APPROVED; F-1_EQUIVALENT_FOR_TEMPLATE_ONLY` / main 上空 diff 恒为 `EXIT=2`（`81dd9a72d2` 起解除，见 §12）/ 判定分界是「是否补双侧镜像」而非「改了哪个文件」（§2.1）/ 引入方式为直推无 PR / 推荐修法 F-2 已获 Owner 批准但未执行，实际执行 F-1（§14）
+**登记状态**：`RESOLVED_ON_MAIN` / `F-2_APPROVED; F-1_EQUIVALENT_FOR_TEMPLATE_ONLY` / main 上空 diff 自 `81dd9a72d2` 起已解除（见 §12）/ 判定分界是「是否补双侧镜像」而非「改了哪个文件」（§2.1）/ 引入方式为直推无 PR / 推荐修法 F-2 已获 Owner 批准但未执行，实际执行 F-1（§14）
 
 Owner 裁定（2026-11-21）摘要：
 
