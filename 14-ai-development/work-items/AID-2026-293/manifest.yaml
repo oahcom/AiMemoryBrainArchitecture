@@ -174,5 +174,5 @@ session_evidence:
     executed_prompt_sha256: "56a87cb377a96c5c04b5f50103d0b5c495d9754a297be93ff71d9aff96ced9c9"
     executed_prompt_bytes: 26644
     executed_prompt_provenance: NOT_VERIFIED
-    session_reference_status: RECORDED
+    session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-293/session-evidence.md
