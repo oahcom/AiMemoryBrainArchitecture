@@ -104,7 +104,7 @@ implementation:
     document.
   pull_request: PENDING
   merge_commit: ""
-  implementation_commit: "c0c9314117b11cc6ee2cfd38c5a1031878531b10"
+  implementation_commit: "538980961d7f76bac61fa508762fdc15f65dbc1c"
   ci_status: NOT_CLAIMED
   files_changed:
     - "14-ai-development/work-items/AID-2026-350/decision-request.md"
