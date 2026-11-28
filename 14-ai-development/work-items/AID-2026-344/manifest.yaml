@@ -90,7 +90,7 @@ session_evidence:
 
 implementation:
   status: IN_PROGRESS
-  summary: "Checker and inline regression tests re-authored after coordinator execution exposed import-path, CLI-contract, prompt-path-resolution, lifecycle, and population-accounting defects. This rebuild re-registers the same content under AID-2026-344 because AID-2026-327 is occupied on main by #1495 (D-10 cursor authority), which shares only the directory name and no file. The rewrite restores the --emit-baseline CLI contract that .github/workflows/gates.yml requires to snapshot the comparison base, and keeps a placeholder implementation SHA under a blocked lifecycle at commit_pending so the historical #1453 replay still exits 0. The revised commands were executed locally by the coordinator (EXECUTED_BY_COORDINATOR_NOT_IN_CI) against this branch head; PR #1520 carries the rebuilt #1494 content and is open, not merged. Independent review and Owner acceptance remain pending."
+  summary: "Checker and inline regression tests re-authored after coordinator execution exposed import-path, CLI-contract, prompt-path-resolution, lifecycle, and population-accounting defects. This rebuild re-registers the same content under AID-2026-344 because AID-2026-327 is occupied on main by #1495 (D-10 cursor authority), which shares only the directory name and no file, and because AID-2026-341 was taken by #1506 while this rebuild was in review. The rewrite restores the --emit-baseline CLI contract that .github/workflows/gates.yml requires to snapshot the comparison base, and keeps a placeholder implementation SHA under a blocked lifecycle at commit_pending so the historical #1453 replay still exits 0. The revised commands were executed locally by the coordinator (EXECUTED_BY_COORDINATOR_NOT_IN_CI) against this branch head; PR #1526 carries the rebuilt #1494 content and is open, not merged. Independent review and Owner acceptance remain pending."
   files_changed:
     - scripts/ci/check_prompt_commit_trace.py
     - scripts/ci/test_check_prompt_commit_trace.py
@@ -103,7 +103,7 @@ implementation:
     - "python -m unittest scripts.ci.test_check_prompt_commit_trace -v -> exit 0 (14 tests; OK; EXECUTED_BY_COORDINATOR_NOT_IN_CI against this branch head)"
     - "python scripts/ci/check_prompt_commit_trace.py --root . --commit 5ef8889302f4a730cbe4d8a13c72991b4754a59a --base 5ef8889302f4a730cbe4d8a13c72991b4754a59a --audit-only -> exit 0 (manifests=160; PRIMARY TRACEABLE=3)"
     - "python scripts/ci/check_work_item_manifest_schema.py --tree HEAD --baseline 14-ai-development/reports/work-item-manifest-ac4-baseline.json -> exit 0"
-  pull_request: "PR #1520 OPEN; NOT MERGED (rebuild of closed #1494)"
+  pull_request: "PR #1526 OPEN; NOT MERGED (rebuild of closed #1494)"
 # Initial registration only: no implementation or merge pin may appear here,
 # because the exception rejects those pins.
 # merge_commit_sha is deliberately absent: this pull request is not merged.

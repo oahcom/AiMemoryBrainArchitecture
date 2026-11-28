@@ -121,10 +121,10 @@ The following records distinguish coordinator-local execution from CI and indepe
 - Traceability index: EXECUTED_BY_COORDINATOR_NOT_IN_CI; 0 requirements / 150 work items / 0 errors / 125 warnings, exit 0.
 - Manifest schema check: EXECUTED_BY_COORDINATOR_NOT_IN_CI; 0 new violations, exit 0.
 - Document management: EXECUTED_BY_COORDINATOR_NOT_IN_CI; 1208 governed / 838 classified / 370 unclassified, exit 2. The unclassified state is pre-existing and not introduced by this PR.
-- PR creation: COMPLETED; PR #1520 is open as the rebuild of closed #1494. No merge SHA exists because the PR has not been merged.
+- PR creation: COMPLETED; PR #1526 is open as the rebuild of closed #1494. No merge SHA exists because the PR has not been merged.
 - CI green result: PENDING; no confirmed successful CI run is available.
 - Independent review: PENDING; independent review has not been performed.
 - Owner acceptance: PENDING; no Owner acceptance decision has been recorded.
 - Merge: PENDING; the PR remains open and has not been merged.
 
-The coordinator-local targeted test run passed 14 tests; this is not a CI result. Repository-wide test discovery failed as described above. PR #1520 is open. No successful CI run, merge SHA, or acceptance decision is asserted by this session record.
+The coordinator-local targeted test run passed 14 tests; this is not a CI result. Repository-wide test discovery failed as described above. PR #1526 is open. No successful CI run, merge SHA, or acceptance decision is asserted by this session record.

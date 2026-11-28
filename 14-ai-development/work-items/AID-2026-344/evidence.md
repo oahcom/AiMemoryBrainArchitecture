@@ -168,18 +168,18 @@ Expected strict `TRACEABLE` count: 0, based on the supplied absence of immutable
 
 `verification_status` is `Unverified`.
 
-Coordinator-local execution (not CI) is recorded above. PR #1520 is the open rebuild of the closed PR #1494. No merge or Owner acceptance is claimed by this record.
+Coordinator-local execution (not CI) is recorded above. PR #1526 is the open rebuild of the closed PR #1494. No merge or Owner acceptance is claimed by this record.
 
 The coordinator must supply the actual exit codes and output from the revised commands before any verification status is changed.
 
 ## 8. Rebuild under AID-2026-344
 
-The closed PR #1494 is rebuilt as PR #1520 under AID-2026-344, because AID-2026-327 is occupied on `main` by #1495, which shares only the directory name and no file content. The rename is mechanical: 26 identifier and path replacements across these four files.
+The closed PR #1494 is rebuilt as PR #1526 under AID-2026-344, because AID-2026-327 is occupied on `main` by #1495, which shares only the directory name and no file content, and because AID-2026-341 was taken by #1506 while this rebuild was in review. The rename is mechanical: 26 identifier and path replacements across these four files.
 
 Two defects made #1494 red; both are fixed in this rebuild:
 
 - `Prompt-to-commit trace (ratchet)` failed with `check_prompt_commit_trace.py: error: unrecognized arguments: --emit-baseline` (exit 2). The rewrite had dropped the snapshot CLI contract that `.github/workflows/gates.yml` uses; `--emit-baseline` is restored with the snapshot shape the ratchet consumes.
-- `Session Evidence` failed with `MISSING: PR description: missing Related issue(s)` (exit 1). PR #1520 declares governing Issue #265 — the Issue the PR that introduced this gate (#1427) links — the AI-assisted status, and this session evidence file.
+- `Session Evidence` failed with `MISSING: PR description: missing Related issue(s)` (exit 1). PR #1526 declares governing Issue #265 — the Issue the PR that introduced this gate (#1427) links — the AI-assisted status, and this session evidence file.
 
 One further reconciliation was needed. The `Reproduce the historical #1453 false-new-manifest failure` step replays the ratchet at `bdb4b0d4` against `460f437e` with the committed `AID-2026-291/baseline.json`, and it requires exit 0. The rewrite withdrew every implementation SHA under a blocked lifecycle, so a placeholder such as `PENDING` became `commit_absent` instead of `commit_pending`, and twelve base-present rows read as new findings. Only a real SHA is withdrawn now; a placeholder keeps its `commit_pending` classification. That step and the PR ratchet both exit 0 after the change.
 
