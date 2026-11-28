@@ -20,6 +20,10 @@ base_branch: main
 base_commit_sha: 473f06d76f7a06ff91615a2dae0ddd75295391c0
 prompt_status: RECORDED_NOT_FROZEN
 prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+prompt_file: "14-ai-development/work-items/AID-2026-341/prompt-v1.md"
+prompt_sha256: "8d269e25ee950a36804ef729e1fe24c6d2ae39061ecb81f29a2e884089708a36"
+prompt_file_blob_sha: "62f23ae533ba358dab4319ee255688554a8c67d3"
+prompt_commit_trace_initial_registration: true
 identifier_allocation:
   id_status: PROVISIONAL
   observed_main: 31c1e5d83e7dad326dbd4b69d4a8e19534718ff1
