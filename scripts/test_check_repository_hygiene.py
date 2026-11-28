@@ -238,6 +238,30 @@ class RepositoryHygieneTests(unittest.TestCase):
 
         self.assert_admission_passes(base, head)
 
+    def test_work_item_legacy_cohort_report_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/reports/work-item-legacy-cohort.json": (
+                '{"schema_version":1,"baseline_commit":"'
+                '0000000000000000000000000000000000000000",'
+                '"cohort":[]}\\n'
+            ),
+        })
+
+        self.assert_admission_passes(base, head)
+
+    def test_work_item_legacy_disposition_ledger_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/reports/work-item-legacy-disposition.json": (
+                '{"schema_version":1,"baseline_commit":"'
+                '0000000000000000000000000000000000000000",'
+                '"cohort":[],"generated_by":"test","entries":[]}\\n'
+            ),
+        })
+
+        self.assert_admission_passes(base, head)
+
     def test_steward_adoption_baseline_report_is_admitted(self):
         base = self.seed_base()
         head = self.commit({
@@ -1405,7 +1429,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-28.2 "
+            "Work-item manifest consistency version=2026-11-28.3 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
@@ -1448,7 +1472,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-28.2 "
+            "Work-item manifest consistency version=2026-11-28.3 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
@@ -1495,7 +1519,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-28.2 "
+            "Work-item manifest consistency version=2026-11-28.3 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
