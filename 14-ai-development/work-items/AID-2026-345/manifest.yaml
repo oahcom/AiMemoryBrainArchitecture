@@ -1,0 +1,165 @@
+work_item_id: AID-2026-345
+title: "Atomic work-item ID claim ledger"
+class: GATE/TEST
+risk: R2
+risk_rationale: >-
+  Adds one authoritative claim ref and makes the work-item uniqueness gate read
+  it. Two consequences need to be understood before merge: a pull request that
+  introduces a new work item must claim the id first, and a claim is never
+  released by time alone. No branch protection, merge-queue setting, other
+  pull request or existing work-item record is modified.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: daa935f7a7ecc808f1775be8cf153cf715961b08
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+prompt_file: "14-ai-development/work-items/AID-2026-345/prompt-v1.md"
+prompt_sha256: "012129df1d2f2b9d4c719ee6b7959e80f05de0630c414f0200d0b4d611eb517b"
+prompt_file_blob_sha: "8fcb05261bd3d1b8451631eaebecbae440d4f608"
+prompt_commit_trace_initial_registration: true
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: bf7fd91cbb3ccad4d2dba5662b14b849e446d706
+  assigned_id: AID-2026-345
+  scanned_refs:
+    - "origin/main at bf7fd91cbb3ccad4d2dba5662b14b849e446d706"
+    - "all origin/* refs (1,180 branch refs) for 14-ai-development/work-items/AID-2026-*"
+    - "pulls?state=open&per_page=100 (titles and bodies)"
+    - "origin/aid-ledger aid-ledger.yaml (64 entries)"
+  scanned_identity_sources:
+    - "14-ai-development/work-items/*/manifest.yaml work_item_id fields"
+    - "14-ai-development/work-items/*/manifest.yaml legacy aid fields"
+    - "14-ai-development/work-items/*/manifest.yaml legacy work_item.proposed_id fields"
+  observed_max_on_main: "AID-2026-344"
+  observed_max_in_pull_requests: "AID-2026-344"
+  conflict_result: >-
+    AID-2026-345 appears in no work-items tree on any origin ref and in no open
+    pull request title or body. 342, 343 and 344 are held by branch refs.
+  allocation_method: ATOMIC_CLAIM
+  reservation_status: PENDING
+  shared_allocator: "refs/heads/work-item-claims"
+  allocation_rule: >-
+    The number is taken by a non-force update of refs/heads/work-item-claims.
+    If two writers build a claim on the same ledger commit, only one push can
+    succeed; the other is rejected as non-fast-forward and must re-read the
+    ledger. A scan is still required first: the claim proves uniqueness at the
+    moment of the push, not that the number was never used.
+  recheck_rule: >-
+    Re-scan the work-items tree and the open pull request listing immediately
+    before the claim push, and re-run the gate against the latest target base
+    before the pull request is marked ready.
+scope:
+  objective: >-
+    Give work-item identity a single authoritative write point whose competing
+    writers cannot both succeed, and make the uniqueness gate fail closed when
+    it cannot read that point.
+  changes:
+    - path: "scripts/ci/check_work_item_uniqueness.py"
+      detail: >-
+        Add --registry-ref so the ledger is read from the authoritative ref
+        rather than the target tree; add EXPIRED to the known states; narrow the
+        own-claim exemption to a matching CLAIMED record; require a blocking
+        claim for a newly introduced id; report WORK_ITEM_ID_UNREGISTERED and
+        WORK_ITEM_ID_RELEASED as distinct verdicts; treat duplicate current
+        claims as a violation. The tree rule and every existing test contract
+        are unchanged when the flag is absent.
+    - path: "scripts/ci/claim_work_item.py"
+      detail: >-
+        The writer. Reads the authoritative ref, refuses an id that is CLAIMED
+        or MERGED by another pull request, writes one file, and pushes without
+        force. A rejected push is reported as LOST_THE_RACE and is never
+        retried automatically.
+    - path: "scripts/ci/migrate_work_item_claims.py"
+      detail: >-
+        Deterministic ledger construction: the main tree decides which ids
+        exist, Git history decides when, the GitHub API decides which pull
+        request, and the legacy aid-ledger is auxiliary. Unverifiable ids are
+        reported, never guessed.
+    - path: "scripts/ci/test_work_item_claims.py"
+      detail: >-
+        Thirteen tests: unregistered and released verdicts, own and foreign
+        claims, MERGED never exempted, missing or unreadable ref, duplicate
+        current claims, unsupported schema, missing required fields, a
+        candidate-supplied ledger, the same-id race and the refusal path.
+    - path: ".github/workflows/document-management.yml"
+      detail: >-
+        Fetch the ledger ref; pass the pull request identity at all three call
+        sites; resolve the merge-group pull request by head_ref and fail closed
+        when it is not exactly one; keep the push run on the tree rule because
+        the event carries no pull request identity.
+    - path: "14-ai-development/work-items/AID-2026-345/"
+      detail: "Record the contract, evidence, prompt snapshot and session evidence."
+    - path: "14-ai-development/work-items/INDEX.md"
+      detail: "Register AID-2026-345."
+  untouched:
+    - "all existing work-item records"
+    - "GitHub merge queue and branch protection settings"
+    - "every pull request other than this carrier"
+    - "Issue #1532 body after creation"
+non_goals:
+  - "Enabling the merge queue or changing branch protection through the API"
+  - "A per-id claim ref: one ref and one file is the single competition point"
+  - "Separating ledger write access with a dedicated GitHub App"
+  - "Evaluating claim ownership on a direct push to main"
+  - "Rewriting the 445-line checker: only the ledger loading and ownership rules change"
+evidence:
+  record: "14-ai-development/work-items/AID-2026-345/evidence.md"
+  prompt: "14-ai-development/work-items/AID-2026-345/prompt-v1.md"
+  session: "14-ai-development/work-items/AID-2026-345/session-evidence.md"
+documentation:
+  - path: "scripts/ci/check_work_item_uniqueness.py"
+    relationship: implementation
+  - path: "scripts/ci/claim_work_item.py"
+    relationship: implementation
+  - path: "scripts/ci/migrate_work_item_claims.py"
+    relationship: implementation
+  - path: "scripts/ci/test_work_item_claims.py"
+    relationship: implementation
+  - path: ".github/workflows/document-management.yml"
+    relationship: implementation
+  - path: "14-ai-development/work-items/AID-2026-345/evidence.md"
+    relationship: evidence
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1532"
+    implementing_ai_session: "CLAIM-LEDGER"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-345/prompt-v1.md"
+    executed_prompt_sha256: "012129df1d2f2b9d4c719ee6b7959e80f05de0630c414f0200d0b4d611eb517b"
+    executed_prompt_bytes: 4520
+    executed_prompt_provenance: "USER_AUTHORIZED_DELEGATED_REQUEST"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-345/session-evidence.md"
+implementation:
+  status: IN_PROGRESS
+  summary: >-
+    The gate reads the claim ledger from refs/heads/work-item-claims, requires a
+    blocking claim for a newly introduced id, and reports an unregistered id
+    differently from a released one. The writer's only atomic step is the
+    non-force ref update: of two competing claims exactly one lands, and the
+    loser's record is then rejected by the gate.
+  files_changed:
+    - "scripts/ci/check_work_item_uniqueness.py"
+    - "scripts/ci/claim_work_item.py"
+    - "scripts/ci/migrate_work_item_claims.py"
+    - "scripts/ci/test_work_item_claims.py"
+    - ".github/workflows/document-management.yml"
+    - "14-ai-development/work-items/AID-2026-345/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-345/evidence.md"
+    - "14-ai-development/work-items/AID-2026-345/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-345/session-evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "python scripts/ci/test_work_item_uniqueness.py -> Ran 28 tests, OK (unchanged contract)."
+    - "python scripts/ci/test_work_item_claims.py -> Ran 13 tests, OK."
+    - "Same-id race: one writer exit 0, the other exit 3 LOST_THE_RACE."
+    - "Different-id race: loser exit 3, then exit 0 after re-reading the ref."
+    - "Losing record: gate exit 1, 'already CLAIMED in the claim ledger by pull request 9001'."
