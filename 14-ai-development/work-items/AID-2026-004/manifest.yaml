@@ -30,7 +30,7 @@ source_translation_pairs:
     translation_initial_commit_sha: 0d2857a0fd026e49048031a7fd8b5d0d137ebf87
     translation_correction_commit_sha: e0e20ed30b4a21c2e26d0a4c0903a63c0293a46f
     source_sha_provenance: coordinator-supplied
-    translation_sha256: NOT_VERIFIED
+    translation_sha256: 6bd0ad33800a1ba05b40f32989ffc74e85bdd9afc7d3b2942d285c4256674c70
     reverified_source_blob_sha: 58af59af266b81109269156ea667df1a15edfb7b
     reverified_translation_blob_sha: b809d770f93f5a2244988f04f68ad913b29f5e76
     reverification_status: DIVERGED
@@ -55,7 +55,7 @@ source_translation_pairs:
     translation_commit_sha: 08b07d228dbe78a209a5af68c4988b292e65e9c8
     translation_blob_sha: 96aab56ce856484e24ad99ec6944a4c45ceb763b
     source_sha_provenance: coordinator-supplied
-    translation_sha256: NOT_VERIFIED
+    translation_sha256: 3c3a6a9036f9e2f2a2a2782b5992166cebe12320c17fffd97d550cf946235234
     reverified_source_blob_sha: 0a42d90391c166878031ecd2478ca9bb87c2f4a0
     reverified_translation_blob_sha: 0dd2f9ff7c5ad1f74c153fa57df9a92548644aba
     reverification_status: ALIGNED
@@ -79,7 +79,7 @@ source_translation_pairs:
     translation_commit_sha: e683ea275dfaf85fff0f9d18bb706d3bdb5d60a1
     translation_blob_sha: 87e4314d1df9bbff2321eb1053078bb5f7148d8d
     source_sha_provenance: coordinator-supplied
-    translation_sha256: NOT_VERIFIED
+    translation_sha256: 4c7b3cb5e04db39203f72aea831b33c7c898c7b1ac065829686f97d72c6c505b
     reverified_source_blob_sha: f9560a0b3f8e86e5abc8b17a5f84f1d592b66d24
     reverified_translation_blob_sha: eb9a34edceb75fe64308e9d966dc11924aa34037
     reverification_status: ALIGNED
@@ -113,7 +113,11 @@ prompt_id: AID-2026-004-PROMPT
 prompt_version: v1
 prompt_provenance_tier: T2 (coordinator/user-provided in-session task instructions)
 prompt_sha256: NOT_VERIFIED
+prompt_sha256_note: This work item never committed a prompt snapshot file, so the bytes to verify cannot be obtained
+prompt_sha256_provenance: NOT_VERIFIED
 prompt_bytes: NOT_VERIFIED
+prompt_bytes_note: This work item never committed a prompt snapshot file, so the byte count cannot be measured
+prompt_bytes_provenance: NOT_VERIFIED
 prompt_file_commit_sha: NOT_VERIFIED
 prompt_provenance_note: The task instruction was supplied in this ChatGPT conversation. A stable conversation permalink and raw immutable instruction snapshot are not available to this session; no synthetic anchor or digest is fabricated.
 verification_summary: English counterpart files were read back from main; source blob SHAs matched the coordinator-supplied source snapshots; heading-level and Markdown table-row counts matched for all three pairs. SHA-256 of exact file bytes NOT_VERIFIED. Runtime/test suites NOT RUN (documentation-only task).

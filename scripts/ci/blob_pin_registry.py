@@ -1,81 +1,120 @@
-"""Explicit registry of manifest fields that declare blob pins or non-blob refs.
-
-Unknown digest-shaped fields are deliberately not inferred from their names.
-Add a field only after its locator relationship has been verified in real
-manifest data.
-"""
+"""Authoritative registry of manifest blob pins and non-blob references."""
 
 from dataclasses import dataclass
-from typing import Tuple
 
 
 @dataclass(frozen=True)
 class PinSpec:
-    locator_keys: Tuple[str, ...]
-    algorithm: str
+    locator_keys: tuple[str, ...]
+    algorithm: str  # "sha256" | "git-blob-sha1" | "byte-length" | "NON_BLOB" | "UNCLASSIFIED_FIELD"
     scope_source: str = "locator"
 
 
 FIELD_REGISTRY = {
-    # Prompt content digests.
-    "prompt_sha256": PinSpec(
-        locator_keys=("prompt_file",),
-        algorithm="sha256",
-    ),
-    "executed_prompt_sha256": PinSpec(
-        locator_keys=("executed_prompt_snapshot_file",),
-        algorithm="sha256",
-    ),
-    "executed_prompt_bytes": PinSpec(
-        locator_keys=("executed_prompt_snapshot_file",),
-        algorithm="byte-length",
-    ),
-
-    # Git blob object IDs. The `file` sibling was observed in the nested
-    # records in AID-2026-001; do not generalize this mapping to other fields.
-    "git_blob_sha": PinSpec(
-        locator_keys=("file",),
-        algorithm="git-blob-sha1",
-    ),
-    "sha256_or_blob_sha": PinSpec(
-        locator_keys=("file",),
-        algorithm="git-blob-sha1",
-    ),
-
-    # Commit/tree/index references are not blob pins.
-    "implementation_commits": PinSpec(
-        locator_keys=(),
-        algorithm="NON_BLOB",
-        scope_source="none",
-    ),
-    "base_commit_sha": PinSpec(
-        locator_keys=(),
-        algorithm="NON_BLOB",
-        scope_source="none",
-    ),
-    "prompt_file_commit_sha": PinSpec(
-        locator_keys=(),
-        algorithm="NON_BLOB",
-        scope_source="none",
-    ),
-    "merged_head_sha": PinSpec(
-        locator_keys=(),
-        algorithm="NON_BLOB",
-        scope_source="none",
-    ),
-    "merge_commit_sha": PinSpec(
-        locator_keys=(),
-        algorithm="NON_BLOB",
-        scope_source="none",
-    ),
-    "tree_sha": PinSpec(
-        locator_keys=(),
-        algorithm="NON_BLOB",
-        scope_source="none",
-    ),
-    "index_sha": PinSpec(
-        locator_keys=(),
-        algorithm="NON_BLOB",
-        scope_source="none",
-    ),
+    "after_blob": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "aid_082_manifest_blob": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "aid_095_matrix_blob": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "aid_098_storage_candidate_blob": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "aid_099_h_contract_blob": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "aid_099_manifest_blob": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "aid_100_evidence_blob": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "aid_107_evidence_blob": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "aid_108_correction_manifest_blob": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "base_commit": PinSpec((), "NON_BLOB", "none"),
+    "base_commit_sha": PinSpec((), "NON_BLOB", "none"),
+    "base_sha": PinSpec((), "NON_BLOB"),
+    "base_tree_sha": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "baseline_commit": PinSpec((), "NON_BLOB", "none"),
+    "baseline_merge_commit_sha": PinSpec((), "NON_BLOB"),
+    "before_blob": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "blob_sha": PinSpec(("path", "test_matrix_path", ), "git-blob-sha1"),
+    "canonical_evidence_blob": PinSpec((), "NON_BLOB"),
+    "commit": PinSpec((), "NON_BLOB", "none"),
+    "commit_before_manifest_update": PinSpec((), "NON_BLOB", "none"),
+    "commit_sha": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "current_blob": PinSpec(("current_artifact", "superseded_artifact", ), "git-blob-sha1"),
+    "current_prompt_sha256": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "en_evidence_blob": PinSpec((), "NON_BLOB"),
+    "en_mirror_blob": PinSpec(("en_mirror", ), "git-blob-sha1"),
+    "evidence_blob": PinSpec(("evidence_file", ), "git-blob-sha1"),
+    "exact_head": PinSpec((), "NON_BLOB", "none"),
+    "exact_head_reviewed": PinSpec((), "NON_BLOB", "none"),
+    "exact_head_sha": PinSpec((), "NON_BLOB"),
+    "exact_main": PinSpec((), "NON_BLOB", "none"),
+    "executed_prompt_bytes": PinSpec(("executed_prompt_snapshot_file", ), "byte-length"),
+    "executed_prompt_sha256": PinSpec(("executed_prompt_snapshot_file", ), "sha256"),
+    "final_head_sha": PinSpec((), "NON_BLOB"),
+    "final_pr_head_sha": PinSpec((), "NON_BLOB"),
+    "forget_model_blob": PinSpec((), "NON_BLOB"),
+    "forget_tests_blob": PinSpec((), "NON_BLOB"),
+    "frontmatter_blob_sha": PinSpec(("path", ), "git-blob-sha1"),
+    "git_blob_sha": PinSpec(("file", ), "git-blob-sha1"),
+    "h_contract_blob": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "head": PinSpec((), "NON_BLOB", "none"),
+    "head_sha": PinSpec((), "NON_BLOB"),
+    "implementation_commit_sha": PinSpec((), "NON_BLOB"),
+    "implementation_commits": PinSpec((), "NON_BLOB", "none"),
+    "index_sha": PinSpec((), "NON_BLOB", "none"),
+    "instruction_sha256": PinSpec(("instruction_file", ), "sha256"),
+    "latest_applied_evidence_blob": PinSpec((), "NON_BLOB"),
+    "latest_context_version_blob": PinSpec((), "NON_BLOB"),
+    "latest_forget_fence_contract_blob": PinSpec((), "NON_BLOB"),
+    "latest_invariant_source_blob": PinSpec((), "NON_BLOB"),
+    "latest_main_merge_sha": PinSpec((), "NON_BLOB"),
+    "latest_main_sha": PinSpec((), "NON_BLOB"),
+    "latest_sync_main_commit_sha": PinSpec((), "NON_BLOB"),
+    "latest_system_boundaries_blob": PinSpec((), "NON_BLOB"),
+    "main_base_sha": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "measurement_commit_sha": PinSpec((), "NON_BLOB"),
+    "merge_base_commit_sha": PinSpec((), "NON_BLOB"),
+    "merge_commit": PinSpec((), "NON_BLOB", "none"),
+    "merge_commit_sha": PinSpec((), "NON_BLOB", "none"),
+    "merge_parents": PinSpec((), "NON_BLOB", "none"),
+    "merge_sha": PinSpec((), "NON_BLOB"),
+    "merged_head_sha": PinSpec((), "NON_BLOB", "none"),
+    "model_blob": PinSpec((), "NON_BLOB"),
+    "observed_main": PinSpec((), "NON_BLOB", "none"),
+    "observed_main_head": PinSpec((), "NON_BLOB", "none"),
+    "post_merge_main_sha": PinSpec((), "NON_BLOB"),
+    "previous_prompt_sha256": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "prior_invariant_source_blob": PinSpec((), "NON_BLOB"),
+    "prior_sync_bases": PinSpec((), "NON_BLOB", "none"),
+    "prompt_bytes": PinSpec(("prompt_file", "prompt_companion_file", ), "byte-length"),
+    "prompt_companion_commit_sha": PinSpec((), "NON_BLOB"),
+    "prompt_file_blob_sha": PinSpec(("prompt_file", ), "git-blob-sha1"),
+    "prompt_file_commit_sha": PinSpec((), "NON_BLOB", "none"),
+    "prompt_original_payload_bytes": PinSpec(("prompt_file", ), "byte-length"),
+    "prompt_original_payload_sha256": PinSpec(("prompt_original_payload_file", ), "sha256"),
+    "prompt_sha256": PinSpec(("prompt_file", ), "sha256"),
+    "raw_platform_message_bytes": PinSpec(("snapshot_file", ), "byte-length"),
+    "rebase_base_sha": PinSpec((), "NON_BLOB"),
+    "reconstructed_root_blob": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "registration_merge_commit_sha": PinSpec((), "NON_BLOB"),
+    "remediation_commits": PinSpec((), "NON_BLOB", "none"),
+    "restored_blob_sha": PinSpec(("path", ), "git-blob-sha1"),
+    "reverified_source_blob_sha": PinSpec(("source_path", "translation_path", ), "git-blob-sha1"),
+    "reverified_translation_blob_sha": PinSpec(("source_path", "translation_path", ), "git-blob-sha1"),
+    "reviewed_head_sha": PinSpec((), "NON_BLOB"),
+    "root_blob": PinSpec(("root", ), "git-blob-sha1"),
+    "sha": PinSpec((), "NON_BLOB", "none"),
+    "sha256_or_blob_sha": PinSpec(("file", ), "git-blob-sha1"),
+    "snapshot_git_blob_sha": PinSpec(("snapshot_file", ), "git-blob-sha1"),
+    "snapshot_sha256": PinSpec(("snapshot_file", ), "sha256"),
+    "source_blob": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "source_blob_sha": PinSpec(("path", "source_path", "translation_path", ), "git-blob-sha1"),
+    "source_commit_sha": PinSpec((), "NON_BLOB"),
+    "stdout_bytes": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "stdout_sha256": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "storage_contract_blob": PinSpec((), "UNCLASSIFIED_FIELD"),
+    "superseded_blob": PinSpec(("current_artifact", "superseded_artifact", ), "git-blob-sha1"),
+    "tested_head": PinSpec((), "NON_BLOB", "none"),
+    "tests_blob": PinSpec((), "NON_BLOB"),
+    "translation_blob_sha": PinSpec(("source_path", "translation_path", ), "git-blob-sha1"),
+    "translation_commit_sha": PinSpec((), "NON_BLOB"),
+    "translation_correction_commit_sha": PinSpec((), "NON_BLOB"),
+    "translation_initial_commit_sha": PinSpec((), "NON_BLOB"),
+    "translation_sha256": PinSpec(("translation_file", ), "sha256"),
+    "tree_sha": PinSpec((), "NON_BLOB", "none"),
+    "zh_cn_evidence_blob": PinSpec((), "NON_BLOB"),
+    "zh_cn_mirror_blob": PinSpec(("zh_cn_mirror", ), "git-blob-sha1"),
 }

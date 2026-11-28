@@ -42,8 +42,8 @@ prompt_version: v1
 prompt_file: 14-ai-development/work-items/AID-2026-003/prompt-v1.md
 prompt_companion_file: 14-ai-development/work-items/AID-2026-003/prompt-v1-errata.md
 prompt_provenance_tier: T1 (repo-file prompt, AI-EXEC-002 §2 v1.1)
-prompt_sha256: NOT_VERIFIED
-prompt_bytes: NOT_VERIFIED
+prompt_sha256: f797be6866b0127ea51efbcbf029f683c161429eb78739e0cb5b0b37e96a47d5
+prompt_bytes: 3154
 prompt_file_commit_sha: bb1ac7a59619e56769ac1e69c272a772f8c96b02
 prompt_file_blob_sha: 71332a2b8f412d1bb58d4d53bdb25880dc2f1431
 prompt_companion_commit_sha: 1822f98ea95dc163caf1b82f2b80b13135d48d60
@@ -79,4 +79,5 @@ policy_unification_ruling:
   instruction_provenance: User-provided owner-directed instruction in this ChatGPT conversation; stable conversation ID/permalink and raw message bytes are not exposed by the interface
   instruction_sha256: NOT_VERIFIED
   instruction_sha256_note: No exact raw-message byte stream or local hashing facility is exposed in this session; no synthetic digest or identifier was fabricated
+  instruction_sha256_provenance: NOT_VERIFIED
   historical_prompt_hashes: preserved unchanged; no retroactive reconstruction or reclassification
