@@ -19,8 +19,13 @@ repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
 base_commit_sha: "f77b1e63f0aca6b93f14fee5bd5c04510053ee23"
 tracking_issue: "#1464"
+prompt_id: AID-2026-293-PROMPT
+prompt_version: v1
 prompt_status: RECORDED_NOT_FROZEN
 prompt_file: 14-ai-development/work-items/AID-2026-293/prompt-v1.md
+prompt_sha256: 56a87cb377a96c5c04b5f50103d0b5c495d9754a297be93ff71d9aff96ced9c9
+prompt_file_blob_sha: 0f34b6e5f4c339cc6ed1764d6f482c079a4a2f46
+prompt_commit_trace_initial_registration: true
 
 scope:
   summary: >-
