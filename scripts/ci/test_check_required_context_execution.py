@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -31,6 +32,12 @@ CONTEXTS = [
 ]
 
 
+def iso(value):
+    return value.astimezone(timezone.utc).isoformat().replace(
+        "+00:00", "Z"
+    )
+
+
 def make_run(
     name,
     status="completed",
@@ -52,6 +59,7 @@ class RequiredContextExecutionTests(unittest.TestCase):
     def setUp(self):
         self.tempdir = tempfile.TemporaryDirectory()
         self.root = Path(self.tempdir.name)
+
         doc = self.root / checker.DOC_PATH
         doc.parent.mkdir(parents=True)
         doc.write_text(
@@ -62,10 +70,27 @@ class RequiredContextExecutionTests(unittest.TestCase):
             encoding="utf-8",
         )
 
+        self.current_time = datetime(
+            2026, 11, 27, 12, 0, 0, tzinfo=timezone.utc
+        )
+
         self.pr = {
             "head": {"sha": "a" * 40},
             "mergeable_state": "clean",
             "draft": False,
+            "updated_at": iso(
+                self.current_time - timedelta(seconds=30)
+            ),
+        }
+
+        self.commit_data = {
+            "commit": {
+                "committer": {
+                    "date": iso(
+                        self.current_time - timedelta(seconds=30)
+                    )
+                }
+            }
         }
 
         self.runs = [
@@ -85,6 +110,9 @@ class RequiredContextExecutionTests(unittest.TestCase):
             if "/check-runs?" in path:
                 return {"check_runs": list(self.runs)}
 
+            if "/commits/" in path:
+                return dict(self.commit_data)
+
             raise AssertionError(f"Unexpected API path: {path}")
 
         self.api_get = api_get
@@ -102,6 +130,8 @@ class RequiredContextExecutionTests(unittest.TestCase):
             "sleep": self.sleep,
             "retries": 5,
             "retry_delay": 0,
+            "min_age_seconds": 600,
+            "now": lambda: self.current_time,
         }
         options.update(kwargs)
         return checker.evaluate(**options)
@@ -116,7 +146,7 @@ class RequiredContextExecutionTests(unittest.TestCase):
         self.assertEqual(result["failed"], [])
         self.assertEqual(result["pending"], [])
 
-    def test_one_missing_context_is_absent(self):
+    def test_one_missing_context_is_not_yet_scheduled(self):
         missing_context = CONTEXTS[5]
         self.runs = [
             run for run in self.runs
@@ -125,9 +155,15 @@ class RequiredContextExecutionTests(unittest.TestCase):
 
         result = self.evaluate()
 
-        self.assertEqual(result["verdict"], "ABSENT")
-        self.assertEqual(checker.EXIT_CODES[result["verdict"]], 1)
+        self.assertEqual(result["verdict"], "INCOMPLETE")
+        self.assertEqual(checker.EXIT_CODES[result["verdict"]], 2)
         self.assertEqual(result["missing"], [missing_context])
+        self.assertEqual(result["reason"], "not-yet-scheduled")
+        self.assertEqual(result["head_age_seconds"], 30)
+        self.assertEqual(
+            result["head_age_source"],
+            "commit.committer.date",
+        )
 
     def test_dirty_head_is_stale_even_if_all_runs_are_green(self):
         self.pr["mergeable_state"] = "dirty"
@@ -154,6 +190,7 @@ class RequiredContextExecutionTests(unittest.TestCase):
         self.assertEqual(len(self.calls), 6)
         self.assertEqual(self.sleep.call_count, 5)
         self.assertEqual(result["mergeable_state"], "unknown")
+        self.assertEqual(result["reason"], "unknown-state")
 
     def test_latest_run_is_selected_by_started_at_not_list_order(self):
         name = CONTEXTS[0]
@@ -171,7 +208,7 @@ class RequiredContextExecutionTests(unittest.TestCase):
             run_id=101,
         )
 
-        # Deliberately put the old run last.
+        # Deliberately put the older failure last.
         self.runs.extend([new_success, old_failure])
 
         result = self.evaluate()
@@ -193,6 +230,7 @@ class RequiredContextExecutionTests(unittest.TestCase):
         self.assertEqual(result["verdict"], "INCOMPLETE")
         self.assertEqual(checker.EXIT_CODES[result["verdict"]], 2)
         self.assertEqual(result["missing"], [])
+        self.assertEqual(result["reason"], "api-error")
         self.assertIn("simulated network failure", result["error"])
 
     def test_in_progress_run_is_incomplete(self):
@@ -217,6 +255,7 @@ class RequiredContextExecutionTests(unittest.TestCase):
         self.assertEqual(result["verdict"], "INCOMPLETE")
         self.assertEqual(result["pending"], [name])
         self.assertEqual(result["missing"], [])
+        self.assertEqual(result["reason"], "pending")
 
     def test_completed_failure_is_failed_not_absent(self):
         name = CONTEXTS[7]
@@ -246,7 +285,9 @@ class RequiredContextExecutionTests(unittest.TestCase):
 
         self.assertEqual(result["verdict"], "INCOMPLETE")
         self.assertEqual(checker.EXIT_CODES[result["verdict"]], 2)
+        self.assertEqual(result["calls"] if "calls" in result else [], [])
         self.assertEqual(self.calls, [])
+        self.assertEqual(result["reason"], "api-error")
 
     def test_declaration_parse_failure_is_incomplete(self):
         doc = self.root / checker.DOC_PATH
@@ -277,6 +318,89 @@ class RequiredContextExecutionTests(unittest.TestCase):
 
         self.assertEqual(result["verdict"], "INCOMPLETE")
         self.assertIn("head changed", result["error"])
+
+    def test_missing_run_old_head_is_absent(self):
+        missing_context = CONTEXTS[2]
+        self.runs = [
+            run for run in self.runs
+            if run["name"] != missing_context
+        ]
+
+        self.commit_data["commit"]["committer"]["date"] = iso(
+            self.current_time - timedelta(seconds=1200)
+        )
+
+        result = self.evaluate()
+
+        self.assertEqual(result["verdict"], "ABSENT")
+        self.assertEqual(checker.EXIT_CODES[result["verdict"]], 1)
+        self.assertEqual(result["missing"], [missing_context])
+        self.assertEqual(result["head_age_seconds"], 1200)
+        self.assertIsNone(result["reason"])
+
+    def test_missing_run_dirty_head_remains_stale(self):
+        self.pr["mergeable_state"] = "dirty"
+        self.runs = []
+
+        result = self.evaluate()
+
+        self.assertEqual(result["verdict"], "STALE")
+        self.assertEqual(checker.EXIT_CODES[result["verdict"]], 1)
+        self.assertEqual(result["missing"], [])
+        self.assertEqual(result["stale"], CONTEXTS)
+
+    def test_commit_failure_falls_back_to_pull_updated_at(self):
+        missing_context = CONTEXTS[4]
+        self.runs = [
+            run for run in self.runs
+            if run["name"] != missing_context
+        ]
+
+        self.pr["updated_at"] = iso(
+            self.current_time - timedelta(seconds=30)
+        )
+
+        def api_get(path, token):
+            self.calls.append(path)
+
+            if "/pulls/" in path:
+                return dict(self.pr)
+
+            if "/check-runs?" in path:
+                return {"check_runs": list(self.runs)}
+
+            if "/commits/" in path:
+                raise OSError("commit endpoint unavailable")
+
+            raise AssertionError(f"Unexpected API path: {path}")
+
+        result = self.evaluate(api_get=api_get)
+
+        self.assertEqual(result["verdict"], "INCOMPLETE")
+        self.assertEqual(result["reason"], "not-yet-scheduled")
+        self.assertEqual(result["head_age_source"], "pull.updated_at")
+        self.assertEqual(result["head_age_seconds"], 30)
+
+    def test_unreadable_commit_date_falls_back_to_updated_at(self):
+        missing_context = CONTEXTS[4]
+        self.runs = [
+            run for run in self.runs
+            if run["name"] != missing_context
+        ]
+
+        self.commit_data = {
+            "commit": {
+                "committer": {
+                    "date": None
+                }
+            }
+        }
+
+        result = self.evaluate()
+
+        self.assertEqual(result["head_age_source"], "pull.updated_at")
+        self.assertEqual(result["head_age_seconds"], 30)
+        self.assertEqual(result["reason"], "not-yet-scheduled")
 
 
 if __name__ == "__main__":

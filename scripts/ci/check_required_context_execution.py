@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Verify that every declared required check actually ran on a PR's exact head.
+"""Verify actual execution of required PR check contexts on an exact head.
 
 Verdicts:
-    EXECUTED   all required contexts completed successfully on the head
-    ABSENT     at least one required context has no check run on the head
-    STALE      GitHub reports mergeable_state=dirty
-    FAILED     a latest required check run completed without success
-    INCOMPLETE required evidence could not be read or is still pending
+    EXECUTED    all required contexts completed successfully
+    ABSENT      a required context has no run after the freshness window
+    STALE       GitHub reports mergeable_state=dirty
+    FAILED      a latest completed run has a non-success conclusion
+    INCOMPLETE  execution is not yet established or evidence is unavailable
 
 Exit codes:
     0 EXECUTED
@@ -22,17 +22,20 @@ import os
 import re
 import sys
 import time
-import urllib.error
 import urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
 DEFAULT_REPO = "oahcom/AiMemoryBrainArchitecture"
 DEFAULT_API = "https://api.github.com"
 TIMEOUT_SECONDS = 20
+DEFAULT_MIN_AGE_SECONDS = 600
 DOC_PATH = Path("14-ai-development/PR-GOVERNANCE-001.md")
 MARKER = "<!-- declared-check-contexts"
 FENCE_RE = re.compile(r"^```")
+
+SCHEDULABLE_STATES = {"clean", "unstable", "behind", "blocked"}
 
 EXIT_CODES = {
     "EXECUTED": 0,
@@ -48,7 +51,7 @@ class IncompleteError(Exception):
 
 
 def declared_contexts(doc_text: str) -> list[str]:
-    """Parse the same fenced declaration used by check_declared_check_contexts.py."""
+    """Parse the canonical fenced declaration."""
     lines = doc_text.splitlines()
 
     start = next(
@@ -58,6 +61,7 @@ def declared_contexts(doc_text: str) -> list[str]:
         ),
         None,
     )
+
     if start is None:
         raise IncompleteError(
             f"declaration marker missing in {DOC_PATH}"
@@ -70,6 +74,7 @@ def declared_contexts(doc_text: str) -> list[str]:
         ),
         None,
     )
+
     if opening is None:
         raise IncompleteError(
             f"declaration opening fence missing in {DOC_PATH}"
@@ -82,6 +87,7 @@ def declared_contexts(doc_text: str) -> list[str]:
         if FENCE_RE.match(line):
             closing_found = True
             break
+
         name = line.strip()
         if name:
             contexts.append(name)
@@ -100,7 +106,7 @@ def declared_contexts(doc_text: str) -> list[str]:
 
 
 def _api_get(path: str, token: str) -> dict[str, Any]:
-    """GET a GitHub REST API endpoint. Kept injectable for offline tests."""
+    """GET a GitHub REST API endpoint. Injectable for offline tests."""
     request = urllib.request.Request(
         f"{os.environ.get('GITHUB_API_URL', DEFAULT_API).rstrip('/')}/{path.lstrip('/')}",
         headers={
@@ -117,9 +123,77 @@ def _api_get(path: str, token: str) -> dict[str, Any]:
         payload = json.load(response)
 
     if not isinstance(payload, dict):
-        raise IncompleteError("GitHub API returned a non-object payload")
+        raise IncompleteError(
+            "GitHub API returned a non-object payload"
+        )
 
     return payload
+
+
+def _parse_timestamp(value: Any) -> datetime | None:
+    """Parse an ISO-8601 timestamp into an aware UTC datetime."""
+    if not isinstance(value, str) or not value:
+        return None
+
+    try:
+        parsed = datetime.fromisoformat(
+            value.replace("Z", "+00:00")
+        )
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        return parsed.astimezone(timezone.utc)
+    except (ValueError, TypeError):
+        return None
+
+
+def _head_age(
+    repo: str,
+    pr: int,
+    sha: str,
+    pr_data: dict[str, Any],
+    token: str,
+    api_get: Callable[[str, str], dict[str, Any]],
+    now: datetime,
+) -> tuple[float | None, str | None]:
+    """Get head age from commit date, falling back to PR updated_at."""
+    commit_date = None
+
+    try:
+        commit_data = api_get(
+            f"repos/{repo}/commits/{sha}",
+            token,
+        )
+        commit = commit_data.get("commit")
+        if isinstance(commit, dict):
+            committer = commit.get("committer")
+            if isinstance(committer, dict):
+                commit_date = _parse_timestamp(
+                    committer.get("date")
+                )
+    except Exception:
+        # A commit endpoint failure does not itself make the audit
+        # incomplete if the PR updated_at fallback is available.
+        commit_date = None
+
+    if commit_date is not None:
+        source = "commit.committer.date"
+        timestamp = commit_date
+    else:
+        timestamp = _parse_timestamp(pr_data.get("updated_at"))
+        source = "pull.updated_at"
+
+    if timestamp is None:
+        return None, None
+
+    if now.tzinfo is None:
+        now = now.replace(tzinfo=timezone.utc)
+
+    age = max(
+        0.0,
+        (now.astimezone(timezone.utc) - timestamp).total_seconds(),
+    )
+
+    return age, source
 
 
 def _result(
@@ -133,6 +207,9 @@ def _result(
     retries_used: int = 0,
     checks: list[dict[str, Any]] | None = None,
     error: str | None = None,
+    head_age_seconds: float | None = None,
+    head_age_source: str | None = None,
+    reason: str | None = None,
 ) -> dict[str, Any]:
     return {
         "verdict": verdict,
@@ -144,6 +221,9 @@ def _result(
         "stale": stale or [],
         "retries_used": retries_used,
         "checks": checks or [],
+        "head_age_seconds": head_age_seconds,
+        "head_age_source": head_age_source,
+        "reason": reason,
         "error": error,
     }
 
@@ -154,44 +234,69 @@ def evaluate(
     token: str | None = None,
     retries: int = 5,
     retry_delay: float = 5.0,
+    min_age_seconds: float = DEFAULT_MIN_AGE_SECONDS,
     root: Path | None = None,
     api_get: Callable[[str, str], dict[str, Any]] | None = None,
     sleep: Callable[[float], None] | None = None,
+    now: Callable[[], datetime] | None = None,
 ) -> dict[str, Any]:
-    """Evaluate one PR. API and sleep dependencies are injectable."""
+    """Evaluate one PR with injectable API, clock and sleep dependencies."""
     api_get = api_get or _api_get
     sleep = sleep or time.sleep
+    now = now or (lambda: datetime.now(timezone.utc))
 
     if not token:
         return _result(
             "INCOMPLETE",
+            reason="api-error",
             error="GITHUB_TOKEN or GH_TOKEN is required",
         )
 
-    if retries < 0 or retry_delay < 0:
+    if (
+        retries < 0
+        or retry_delay < 0
+        or min_age_seconds < 0
+    ):
         return _result(
             "INCOMPLETE",
-            error="retries and retry-delay must be non-negative",
+            reason="api-error",
+            error=(
+                "retries, retry-delay and min-age-seconds "
+                "must be non-negative"
+            ),
         )
 
     try:
-        doc_path = (root or Path(__file__).resolve().parents[2]) / DOC_PATH
+        doc_path = (
+            root or Path(__file__).resolve().parents[2]
+        ) / DOC_PATH
+
         contexts = declared_contexts(
             doc_path.read_text(encoding="utf-8")
         )
     except Exception as exc:
         return _result(
             "INCOMPLETE",
-            error=f"cannot read required contexts: {type(exc).__name__}: {exc}",
+            reason="api-error",
+            error=(
+                f"cannot read required contexts: "
+                f"{type(exc).__name__}: {exc}"
+            ),
         )
 
     retries_used = 0
+    head_sha = None
+    mergeable_state = None
+    pr_data = None
 
     try:
-        pr_data = api_get(f"repos/{repo}/pulls/{pr}", token)
+        pr_path = f"repos/{repo}/pulls/{pr}"
+        pr_data = api_get(pr_path, token)
 
         if not isinstance(pr_data.get("head"), dict):
-            raise IncompleteError("PR response has no valid head object")
+            raise IncompleteError(
+                "PR response has no valid head object"
+            )
 
         head_sha = pr_data["head"].get("sha")
         mergeable_state = pr_data.get("mergeable_state")
@@ -199,18 +304,21 @@ def evaluate(
         if not isinstance(head_sha, str) or not head_sha:
             raise IncompleteError("PR response has no head.sha")
 
-        # GitHub mergeability is lazily computed. Unknown is never evidence.
+        # Unknown is a lazy GitHub mergeability computation state,
+        # never evidence of execution or staleness.
         while mergeable_state == "unknown" and retries_used < retries:
             sleep(retry_delay)
             retries_used += 1
 
-            pr_data = api_get(f"repos/{repo}/pulls/{pr}", token)
+            pr_data = api_get(pr_path, token)
 
             if not isinstance(pr_data.get("head"), dict):
-                raise IncompleteError("PR response has no valid head object")
+                raise IncompleteError(
+                    "PR response has no valid head object"
+                )
 
-            # A changing head invalidates the original observation.
             refreshed_sha = pr_data["head"].get("sha")
+
             if refreshed_sha != head_sha:
                 raise IncompleteError(
                     "PR head changed while waiting for mergeability"
@@ -224,6 +332,7 @@ def evaluate(
                 head_sha=head_sha,
                 mergeable_state=mergeable_state,
                 retries_used=retries_used,
+                reason="unknown-state",
                 error="mergeable_state remained unknown after retries",
             )
 
@@ -232,9 +341,7 @@ def evaluate(
                 "PR response has no valid mergeable_state"
             )
 
-        # Dirty means this head cannot be dispatched through the normal
-        # integration path. Existing check runs cannot establish execution
-        # for this head under the requested contract.
+        # Dirty takes precedence over all run and freshness results.
         if mergeable_state == "dirty":
             return _result(
                 "STALE",
@@ -250,6 +357,7 @@ def evaluate(
         )
 
         runs = response.get("check_runs")
+
         if not isinstance(runs, list):
             raise IncompleteError(
                 "check-runs response has no valid check_runs list"
@@ -259,25 +367,34 @@ def evaluate(
 
         for run in runs:
             if not isinstance(run, dict):
-                raise IncompleteError("check_runs contains a non-object entry")
+                raise IncompleteError(
+                    "check_runs contains a non-object entry"
+                )
 
             name = run.get("name")
+
             if not isinstance(name, str):
-                raise IncompleteError("check run has no valid name")
+                raise IncompleteError(
+                    "check run has no valid name"
+                )
 
             started_at = run.get("started_at")
-            if started_at is not None and not isinstance(started_at, str):
+
+            if (
+                started_at is not None
+                and not isinstance(started_at, str)
+            ):
                 raise IncompleteError(
                     f"invalid started_at for check run {name!r}"
                 )
 
             previous = latest_by_name.get(name)
 
-            # API response ordering is not guaranteed. Compare timestamps,
-            # never list position.
+            # Do not rely on API response ordering.
             if (
                 previous is None
-                or (started_at or "") > (previous.get("started_at") or "")
+                or (started_at or "")
+                > (previous.get("started_at") or "")
             ):
                 latest_by_name[name] = run
 
@@ -318,24 +435,88 @@ def evaluate(
             elif conclusion != "success":
                 failed.append(name)
 
-        # A missing context takes precedence over pending and failed runs.
-        # This keeps "never ran" distinct from "ran but failed".
+        # Missing execution is ambiguous until the head is old enough.
         if missing:
-            verdict = "ABSENT"
-        elif pending:
-            verdict = "INCOMPLETE"
-        elif failed:
-            verdict = "FAILED"
-        else:
-            verdict = "EXECUTED"
+            age, age_source = _head_age(
+                repo=repo,
+                pr=pr,
+                sha=head_sha,
+                pr_data=pr_data,
+                token=token,
+                api_get=api_get,
+                now=now(),
+            )
+
+            if age is None:
+                return _result(
+                    "INCOMPLETE",
+                    head_sha=head_sha,
+                    mergeable_state=mergeable_state,
+                    missing=missing,
+                    failed=failed,
+                    pending=pending,
+                    retries_used=retries_used,
+                    checks=check_details,
+                    reason="api-error",
+                    error="cannot determine head age from commit date or PR updated_at",
+                )
+
+            if (
+                age < min_age_seconds
+                and mergeable_state in SCHEDULABLE_STATES
+            ):
+                return _result(
+                    "INCOMPLETE",
+                    head_sha=head_sha,
+                    mergeable_state=mergeable_state,
+                    missing=missing,
+                    failed=failed,
+                    pending=pending,
+                    retries_used=retries_used,
+                    checks=check_details,
+                    head_age_seconds=age,
+                    head_age_source=age_source,
+                    reason="not-yet-scheduled",
+                )
+
+            return _result(
+                "ABSENT",
+                head_sha=head_sha,
+                mergeable_state=mergeable_state,
+                missing=missing,
+                failed=failed,
+                pending=pending,
+                retries_used=retries_used,
+                checks=check_details,
+                head_age_seconds=age,
+                head_age_source=age_source,
+            )
+
+        if pending:
+            return _result(
+                "INCOMPLETE",
+                head_sha=head_sha,
+                mergeable_state=mergeable_state,
+                pending=pending,
+                retries_used=retries_used,
+                checks=check_details,
+                reason="pending",
+            )
+
+        if failed:
+            return _result(
+                "FAILED",
+                head_sha=head_sha,
+                mergeable_state=mergeable_state,
+                failed=failed,
+                retries_used=retries_used,
+                checks=check_details,
+            )
 
         return _result(
-            verdict,
+            "EXECUTED",
             head_sha=head_sha,
             mergeable_state=mergeable_state,
-            missing=missing,
-            failed=failed,
-            pending=pending,
             retries_used=retries_used,
             checks=check_details,
         )
@@ -343,9 +524,10 @@ def evaluate(
     except Exception as exc:
         return _result(
             "INCOMPLETE",
-            head_sha=locals().get("head_sha"),
-            mergeable_state=locals().get("mergeable_state"),
+            head_sha=head_sha,
+            mergeable_state=mergeable_state,
             retries_used=retries_used,
+            reason="api-error",
             error=f"{type(exc).__name__}: {exc}",
         )
 
@@ -358,6 +540,16 @@ def print_human(result: dict[str, Any]) -> None:
         f"{result['mergeable_state'] or 'UNAVAILABLE'}"
     )
     print(f"Retries used: {result['retries_used']}")
+
+    if result["head_age_seconds"] is not None:
+        print(
+            f"Head age: {result['head_age_seconds']:.1f}s "
+            f"(source={result['head_age_source']})"
+        )
+
+    if result["reason"]:
+        print(f"Reason: {result['reason']}")
+
     print()
 
     for check in result["checks"]:
@@ -380,20 +572,42 @@ def print_human(result: dict[str, Any]) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Audit actual execution of all required PR check contexts."
+        description=(
+            "Audit actual execution of all required PR check contexts."
+        )
     )
+
     parser.add_argument("--pr", type=int, required=True)
     parser.add_argument("--repo", default=DEFAULT_REPO)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--retries", type=int, default=5)
     parser.add_argument("--retry-delay", type=float, default=5.0)
+    parser.add_argument(
+        "--min-age-seconds",
+        type=float,
+        default=DEFAULT_MIN_AGE_SECONDS,
+        help="Minimum head age before missing contexts become ABSENT (default: 600)",
+    )
 
     args = parser.parse_args(argv)
 
     if args.pr <= 0:
         parser.error("--pr must be a positive integer")
 
-    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    if (
+        args.retries < 0
+        or args.retry_delay < 0
+        or args.min_age_seconds < 0
+    ):
+        parser.error(
+            "--retries, --retry-delay and --min-age-seconds "
+            "must be non-negative"
+        )
+
+    token = (
+        os.environ.get("GITHUB_TOKEN")
+        or os.environ.get("GH_TOKEN")
+    )
 
     result = evaluate(
         pr=args.pr,
@@ -401,6 +615,7 @@ def main(argv: list[str] | None = None) -> int:
         token=token,
         retries=args.retries,
         retry_delay=args.retry_delay,
+        min_age_seconds=args.min_age_seconds,
     )
 
     if args.json:
