@@ -49,8 +49,8 @@ session_evidence:
     implementing_ai_session: "opencode-9router-hermes"
     session_evidence_ref: 14-ai-development/work-items/AID-2026-293/session-evidence.md
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-293/prompt-v1.md
-    executed_prompt_sha256: "fea23c5f1ac4f975e8d7a4a8166dd0edeb44aa2c889674c8423a59967b8b49d5"
-    executed_prompt_bytes: 4114
+    executed_prompt_sha256: "2d8e8a11431b05b772be2cdabbcf23dfca662a4ce2464fd9dab668fe280a7513"
+    executed_prompt_bytes: 5416
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
 implementation:
