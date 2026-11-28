@@ -1,0 +1,99 @@
+work_item_id: AID-2026-312
+title: "Register the LINE 01 development-baseline closeout (PR #1411) as a work item"
+class: DOC/EVIDENCE
+risk: R1
+risk_rationale: >-
+  Documentation and evidence registration only. No runtime, validator, API,
+  schema or wire semantics change; no merge, no Issue state change, no
+  renumbering and no correction of existing ledger rows.
+status: IN_REVIEW
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner acceptance not recorded"
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "a7cf5256e975ff25fd2f75b3b5051b16d8d77d36"
+pull_request: 1411
+pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1411
+
+scope:
+  objective: >-
+    Register the LINE 01 development-baseline closeout carried by PR #1411 as
+    a work item, so that the pull request can declare AI-assisted work: YES
+    with a real Session Evidence path instead of the untruthful
+    Work Item ID: NONE + YES combination.
+  identifiers:
+    reserved_aid: AID-2026-312
+    ledger_branch: aid-ledger
+    ledger_commit: c36794d0
+  constraints:
+    - Keep AI-assisted work: YES; do not declare NO.
+    - Reserve the identifier on aid-ledger before writing the work item.
+    - Do not merge, close, reopen or renumber anything.
+    - Do not modify existing ledger rows.
+    - Do not touch 14-ai-development/work-items/INDEX.md.
+    - No Runtime/API/Schema/Wire change.
+
+evidence: 14-ai-development/work-items/AID-2026-312/session-evidence.md
+
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-312/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-312/session-evidence.md
+    relationship: evidence
+  - path: 14-ai-development/reports/2026-11-27-wb-line01-closeout.md
+    relationship: evidence
+
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#262"
+    implementing_ai_session: "subagent-session-2026-11-27-aid312"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-312/session-evidence.md
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-312/prompt-v1.md
+    executed_prompt_sha256: "02b93ffb13e7f8bcbdf0991781f879e6c4729b4c20e916617017da214e39e119"
+    executed_prompt_bytes: 9544
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: "RECORDED"
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    Identifier AID-2026-312 reserved on aid-ledger (commit c36794d0, fast-forward
+    push 5592658f..c36794d0) after a scan of main, the ledger and every origin
+    branch head. This work item registers the closeout that PR #1411 already
+    carries; it adds no closeout content of its own.
+  files_changed:
+    - 14-ai-development/work-items/AID-2026-312/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-312/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-312/session-evidence.md
+  tests:
+    - "python scripts/governance/session_evidence/validate.py (PR_NUMBER=1411)"
+    - "python scripts/ci/check_manifest_parse.py"
+    - "python scripts/ci/check_work_item_manifest_schema.py"
+
+# Initial registration only:
+# permits this newly introduced Work Item to enter main before its
+# implementation commit is reachable from the target branch.
+prompt_file: "14-ai-development/work-items/AID-2026-312/prompt-v1.md"
+
+# SHA-256 of the exact prompt-v1.md bytes.
+# The checker independently recalculates this from both the head file
+# and the immutable Git blob.
+prompt_sha256: "02b93ffb13e7f8bcbdf0991781f879e6c4729b4c20e916617017da214e39e119"
+
+# Git blob object ID of the exact same prompt-v1.md bytes.
+# This is a blob OID, not a commit SHA.
+prompt_file_blob_sha: "087d6dd1ece1a72ebea356d801db6868275ffcd1"
+
+# Explicitly declares this as the narrowly scoped first-registration state.
+prompt_commit_trace_initial_registration: true
+
+# IMPORTANT:
+# Do not add prompt_file_commit_sha here.
+# Do not add implementation.implementation_commit_sha here.
+# Do not add implementation.merge_commit_sha here.
+# The initial-registration exception rejects those pins.
