@@ -3,7 +3,10 @@
 - Document ID: DOC-BRAIN-001
 - Version: 1.0
 - Owner: D — Memory Brain
-- Source revision: D branch session-d-memory-brain-2026-11-16, including Forget Fence and cursor contracts
+- Source revision: b991f61e412d5cf21824e3ca43b315c3af5f0b4b
+- Source: [Memory Brain subsystem architecture](../../../03-memory-brain/memory-brain-overview.md)
+- Source decision (2026-11-27): The D-owned overview is the canonical source for this guide; it is the sole overview anchor under `03-memory-brain/`.
+- Historical provenance: D branch session-d-memory-brain-2026-11-16, including Forget Fence and cursor contracts. The branch label is retained as provenance, not treated as a Git blob identifier.
 - Chinese counterpart: [权威记忆大脑架构指南](../../zh-CN/03-memory-brain/memory-brain-guide.md)
 - Status: Explanatory guide; cross-module execution and implementation evidence remain subject to integration gates
 

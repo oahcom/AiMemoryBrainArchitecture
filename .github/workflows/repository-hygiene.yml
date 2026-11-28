@@ -116,12 +116,8 @@ jobs:
       - name: Self-check source revision pointer verification
         run: python3 scripts/test_check_source_revision_pointers.py
 
-      - name: Ratchet source revision pointers
-        run: |
-          python3 scripts/ci/gate_ratchet.py \
-            --baseline scripts/ci/baselines/source-revision-pointers.txt \
-            --format schema \
-            --command "bash -o pipefail -c 'python3 scripts/check_source_revision_pointers.py | sed -n -e \"/^STALE /p\" -e \"/^UNRESOLVED /p\" -e \"/^NON_BLOB_REFERENCE /p\" -e \"/^BAD_DEREFERENCE /p\"'"
+      - name: Check source revision pointers (hard gate)
+        run: python3 scripts/check_source_revision_pointers.py
 
       # Each listed file is unreachable by unittest discover; discovery here would silently run
       # nothing. The explicit list is the defect tracked by #834.

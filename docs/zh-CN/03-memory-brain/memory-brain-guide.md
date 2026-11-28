@@ -3,7 +3,10 @@
 - 文档 ID：DOC-BRAIN-001
 - 版本：1.0
 - Owner：D — Memory Brain
-- 源版本：D 分支 session-d-memory-brain-2026-11-16，包含 Forget Fence 和 Cursor 契约
+- 源版本：b991f61e412d5cf21824e3ca43b315c3af5f0b4b
+- 源规范：[Memory Brain 子系统架构](../../../03-memory-brain/memory-brain-overview.md)
+- 源规范裁定（2026-11-27）：D 所有的 overview 是本指南的规范源；它是 `03-memory-brain/` 下唯一的 overview 锚点。
+- 历史来源记录：D 分支 session-d-memory-brain-2026-11-16，包含 Forget Fence 和 Cursor 契约。保留该分支标识作为 provenance，不将其视为 Git blob 标识。
 - 对应英文：[Canonical Memory Brain Architecture Guide](../../en/03-memory-brain/memory-brain-guide.md)
 - 状态：解释性指南；跨模块执行和实现证据仍受集成门禁约束
 
