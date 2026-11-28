@@ -118,8 +118,9 @@ merged head the ratchet reads `baseline=4 current=8 regressions=4`.
 
 ## Boundary
 
-No force push, no rebase, no merge, no edit to the primary worktree, no edit to
-PR #1426 or its branch, and no change to
-`scripts/ci/baselines/manifest-blob-pins.txt`. The red hard gate is reported as
-a newly discovered real violation. No Owner acceptance, CI success or merge is
-asserted by this document.
+No force push, no rebase, no edit to the primary worktree, no edit to PR #1426 or
+its branch, and no change to `scripts/ci/baselines/manifest-blob-pins.txt`. The
+base was merged into this branch once (merge commit) only because a conflicted PR
+produces no `refs/pull/1490/merge` and therefore no `pull_request` workflow runs
+at all. The red hard gate is reported as a newly discovered real violation. No
+Owner acceptance, CI success or merge is asserted by this document.

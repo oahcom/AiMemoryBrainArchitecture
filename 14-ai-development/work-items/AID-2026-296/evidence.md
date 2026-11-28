@@ -160,6 +160,28 @@ main=b333ad1cf0e86992621d41cc1dac87eb3141353c manifests=146 pins=256 ok=248 mism
 
 Four unbound findings, one manifest, unchanged by the merge.
 
+## CI result on head a4473f5e
+
+16 declared contexts: 15 SUCCESS, `Repository hygiene (hard gate)` FAILURE.
+
+```
+ratchet: baseline=4 current=8 regressions=4 fixed=0
+##[error]ratchet regression (new failure not in baseline): UNBOUND_BLOB_SHA256 manifest=14-ai-development/work-items/AID-2026-001/manifest.yaml pointer=/dev_baseline_integration/measurement_basis/model_blob_sha256_lf …
+##[error]ratchet regression (new failure not in baseline): UNBOUND_BLOB_SHA256 … model_blob_sha256_crlf …
+##[error]ratchet regression (new failure not in baseline): UNBOUND_BLOB_SHA256 … tests_blob_sha256_lf …
+##[error]ratchet regression (new failure not in baseline): UNBOUND_BLOB_SHA256 … tests_blob_sha256_crlf …
+ratchet: FAIL - 4 new failure(s) above baseline.
+```
+
+The red is the four real findings, kept red on purpose. Two non-required jobs
+(`Prompt-to-commit trace (ratchet)`, `Work Item manifest schema (read-only
+baseline)`) also fail on the base commit `620daa26`, so they are pre-existing on
+main; no AID-2026-296 manifest appears in the schema-baseline violation list.
+
+The first head `8918d2ea` produced zero check runs: a conflicted PR has no
+`refs/pull/1490/merge`, so no `pull_request` workflow runs at all. The base was
+merged into the branch (merge commit, no rebase, no force push) to clear it.
+
 ## Boundary
 
 No baseline entry was added or edited. No other workflow, branch protection,
