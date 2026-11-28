@@ -87,8 +87,9 @@ session_evidence:
     session_reference_status: RECORDED
 
 implementation:
-  status: IN_PROGRESS
+  status: IMPLEMENTED
   implementation_commit_sha: "422bca03249a9f33ab7a55db1e0f0d9c28f631c1"
+  merge_commit_sha: "3b4bc0039da978b9d9398cdc60a342dd851b61a7"
   summary: >-
     Establish a classified root-level canonical memory-brain-guide document
     and close the DM-12 relationship among the canonical document and its
@@ -99,7 +100,15 @@ implementation:
     entries from the source-revision-pointers ratchet baseline and update
     its stale orphan-mirror annotation. Completion requires the pointer
     scanner to report BAD=0 and the document-management checks to show no
-    DM-01/DM-12 errors for the three-document relationship group.
+    DM-01/DM-12 errors for the three-document relationship group. The
+    original implementation commit 422bca03249a9f33ab7a55db1e0f0d9c28f631c1
+    is reachable from the true merge commit
+    3b4bc0039da978b9d9398cdc60a342dd851b61a7. This follow-up records that
+    merge commit explicitly so the prompt-to-commit trace checker evaluates
+    reachability against the actual merged implementation rather than
+    falling back to the base commit. No implementation commit, prompt
+    provenance, session evidence, scope, or documentation references are
+    changed by this trace-metadata correction.
   files_changed:
     - "03-memory-brain/memory-brain-guide.md"
     - "docs/en/03-memory-brain/memory-brain-guide.md"
