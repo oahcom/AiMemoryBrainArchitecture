@@ -12,7 +12,7 @@ attribution: user-authorized operator (delegated by account owner)
 date: 2026-11-27
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: 79b38c944480926195edd64e3d751a1ce5010fb7
+base_commit_sha: 3da2e32cf0475a5d7645862a4a288988f69f09cc
 prompt_file: "14-ai-development/work-items/AID-2026-341/prompt-v1.md"
 prompt_sha256: "abb006235afa894a590677910daa6ed36218a4432eff735e21614e0f0541180d"
 prompt_file_blob_sha: "e354421418bbacf46d643042994d801fe9a98b82"
@@ -99,4 +99,6 @@ implementation:
     - "python scripts/ci/check_prompt_commit_trace.py --root . --commit <head> --base <head> --audit-only -> exit 0 (manifests=155; PRIMARY TRACEABLE=1)"
     - "python scripts/ci/check_work_item_manifest_schema.py --tree HEAD --baseline 14-ai-development/reports/work-item-manifest-ac4-baseline.json -> exit 0"
   pull_request: "PR #1494 CLOSED (content rebuilt here); NOT MERGED"
-  merge_commit_sha: NOT_MERGED
+# Initial registration only: no implementation or merge pin may appear here,
+# because the exception rejects those pins.
+# merge_commit_sha is deliberately absent: this pull request is not merged.
