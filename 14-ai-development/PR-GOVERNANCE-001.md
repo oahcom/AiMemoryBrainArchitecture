@@ -284,6 +284,10 @@ rust-workspace-test
 Protection fingerprint
 ```
 
+> Session identity enforcement is a step inside Repository hygiene (hard gate); Session identity ratchet is not a required context. Do not add it to this declaration without a separately approved required-context migration.
+>
+> 会话身份门禁是 Repository hygiene (hard gate) 内部的一个 step；Session identity ratchet 不是 required context。未经单独批准的 required-context 迁移，不得将其加入本声明。
+
 - **Pull-request reviews — not enforced.** `required_pull_request_reviews` is absent from the protection payload (the key is not present, not `null`). This is not an unset flag waiting to be flipped: the repository has one write identity, so `author == merger == approver` at the account layer, and requiring an approving review would deadlock every PR. `required_conversation_resolution` is also `{enabled: false}`. No PR body, workflow comment, label or AI self-review may be read as a review gate this repository does not have; §6.1 remains a process requirement only.
 - **The deliberately-failing-head experiment — passed, `2026-11-25`, and the result is dated for a reason.** Pull request #1038 added one always-failing `#[test]` at head `b5cf4f25`, `cargo fmt --all -- --check` still exited 0, and the required `rust-workspace-test` failed with check run `138943464904`. The merge was attempted through the API rather than read off a page: `PUT /repos/oahcom/AiMemoryBrainArchitecture/pulls/1038/merge` returned `405 Required status check "rust-workspace-test" is failing`. Immediately before that attempt the same payload reported `mergeable: true` with `mergeable_state: blocked` — the boolean is a cache that does not include check outcomes, so a merge gated on it would have concluded this head was mergeable. The pull request was closed unmerged and the branch kept so the run stays reachable. What this proves is the normal path on this date with this payload; it does NOT prove that a bypass route, a renamed job or a later payload behaves the same, and it MUST be re-run after any material change to the protection configuration or to the workflows that produce these contexts.
 
