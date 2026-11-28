@@ -632,8 +632,7 @@ class WorkItemUniquenessTests(unittest.TestCase):
 
         self.assertIn(
             "group: ${{ github.workflow }}-${{ github.event_name }}-${{ "
-            "github.event.pull_request.number || "
-            "github.event.merge_group.head_ref || github.ref_name }}",
+            "github.event.pull_request.number || github.ref_name }}",
             workflow,
         )
         self.assertIn("cancel-in-progress: false", workflow)
@@ -673,7 +672,7 @@ class WorkItemUniquenessTests(unittest.TestCase):
         # positions inside that step's target-branch branch, not against the
         # step name: the push branch legitimately has no fetch.
         branch_start = run_script.index(
-            'elif [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then'
+            'if [ "$EVENT_NAME" = "pull_request" ]; then'
         )
         branch_end = run_script.index("\n          else", branch_start)
         branch = run_script[branch_start:branch_end]
@@ -689,7 +688,7 @@ class WorkItemUniquenessTests(unittest.TestCase):
         workflow = WORKFLOW.read_text(encoding="utf-8")
 
         self.assertIn(
-            "CANDIDATE_SHA: ${{ github.event.merge_group.head_sha || github.sha }}",
+            "CANDIDATE_SHA: ${{ github.sha }}",
             workflow,
         )
         self.assertIn(
@@ -706,10 +705,13 @@ class WorkItemUniquenessTests(unittest.TestCase):
             workflow,
         )
 
-        self.assertNotIn(
-            "PR_BASE: ${{ github.event.pull_request.base.sha }}",
-            workflow.split("Enforce work-item uniqueness")[1].split("- name:")[0],
-        )
+        enforcement_step = workflow.split("Enforce work-item uniqueness")[1].split(
+            "- name:"
+        )[0]
+        # The event payload's base SHA can be stale by the time the job runs.
+        # The step may export it for other steps, but the decision itself must
+        # diff against the freshly fetched branch ref.
+        self.assertNotIn("$PR_BASE", enforcement_step.split("run: |", 1)[-1])
 
         self.assertLess(
             workflow.index("- name: Self-check the gate"),
@@ -732,20 +734,19 @@ class WorkItemUniquenessTests(unittest.TestCase):
             workflow,
         )
         self.assertIn(
-            "MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}",
+            "MG_BASE: ${{ github.event.merge_group.base_sha }}",
             workflow,
         )
         self.assertIn(
-            "BASE_REF: ${{ github.event.merge_group.base_ref || "
-            "github.event.pull_request.base.ref || github.ref_name }}",
+            "MG_HEAD: ${{ github.event.merge_group.head_sha }}",
             workflow,
         )
         self.assertIn(
-            "CANDIDATE_SHA: ${{ github.event.merge_group.head_sha || github.sha }}",
+            '--base "$MG_BASE" \\\n              --head "$MG_HEAD"',
             workflow,
         )
         self.assertIn(
-            "github.event.merge_group.head_ref",
+            "EVENT_NAME: ${{ github.event_name }}",
             workflow,
         )
         self.assertNotIn(
