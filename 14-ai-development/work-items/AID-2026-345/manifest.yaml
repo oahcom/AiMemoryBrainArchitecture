@@ -44,7 +44,10 @@ identifier_allocation:
     AID-2026-345 appears in no work-items tree on any origin ref and in no open
     pull request title or body. 342, 343 and 344 are held by branch refs.
   allocation_method: ATOMIC_CLAIM
-  reservation_status: PENDING
+  reservation_status: CLAIMED
+  reservation_ref: "refs/heads/work-item-claims"
+  reservation_commit_sha: "467e928a637ba22b58370a2061717e36de72d364"
+  reservation_pull_request: 1537
   shared_allocator: "refs/heads/work-item-claims"
   allocation_rule: >-
     The number is taken by a non-force update of refs/heads/work-item-claims.
@@ -56,6 +59,11 @@ identifier_allocation:
     Re-scan the work-items tree and the open pull request listing immediately
     before the claim push, and re-run the gate against the latest target base
     before the pull request is marked ready.
+  claim_evidence: >-
+    Claimed at 467e928a637ba22b58370a2061717e36de72d364 on
+    refs/heads/work-item-claims for pull request #1537, after re-scanning the
+    work-items tree (165 directories, max AID-2026-344), every origin ref and
+    the open pull request listing.
 scope:
   objective: >-
     Give work-item identity a single authoritative write point whose competing
