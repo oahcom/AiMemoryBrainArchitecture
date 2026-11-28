@@ -92,6 +92,7 @@ session_evidence:
         return result
 
     def commit_base_tree(self):
+        (self.work_items / ".gitkeep").write_text("", encoding="utf-8")
         self.git("init")
         self.git("config", "user.email", "ratchet-test@example.invalid")
         self.git("config", "user.name", "Ratchet Test")
