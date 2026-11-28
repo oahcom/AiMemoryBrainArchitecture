@@ -23,8 +23,8 @@ base_commit_sha: f0843a8f3
 prompt_sha256: fcaaf64a72c0fccd2da42df84cfe689a5f81f37cae0442bdd3d42c67b80825c4
 prompt_bytes: 8684
 prompt_file: "14-ai-development/work-items/AID-2026-349/prompt-v1.md"
-prompt_file_blob_sha: PIN_PROMPT_FILE_BLOB_SHA
-prompt_file_commit_sha: PIN_PROMPT_FILE_COMMIT_SHA
+prompt_file_blob_sha: 63ca3b9a2c6bcd6c8e6ee7390b4cd36fe8d5b473
+prompt_file_commit_sha: 307cfa305059c272a86a309c219198a8cfa57b9d
 
 scope:
   objective: >-
@@ -98,7 +98,7 @@ session_evidence:
 
 implementation:
   status: IN_PROGRESS
-  implementation_commit_sha: PIN_IMPLEMENTATION_COMMIT_SHA
+  implementation_commit_sha: 307cfa305059c272a86a309c219198a8cfa57b9d
   summary: >-
     Implemented a shared fail-closed document-group validator, connected it
     to both registered-document checkers through the opt-in
