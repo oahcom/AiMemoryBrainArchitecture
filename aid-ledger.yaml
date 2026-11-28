@@ -5,7 +5,7 @@
 # One AID maps to exactly one work_item_id.
 
 schema: 1
-updated_at_utc: "2026-11-28T02:59:54Z"
+updated_at_utc: "2026-11-28T05:11:49Z"
 entries:
   - id: AID-2026-082
     state: MERGED
@@ -275,19 +275,41 @@ entries:
       on origin/aid-ledger at ccbdc4244 was later than the existing claim.
       Do not use AID-2026-332 for GOV-DOC-002 Context Versioning mirrors.
   - id: AID-2026-341
-    state: RESERVED
-    carrier: "branch docs/aid-2026-341-gov-doc-002-context-versioning-bilingual-mirrors (PR pending)"
+    state: OCCUPIED_BY_OTHER
+    carrier: "PR #1506 (merge commit c895d2ee7)"
     note: >-
-      Reserved for "Complete GOV-DOC-002 steward metadata and Context Versioning
-      bilingual mirrors" tracked by Issue #1507. The collision scan used
-      origin/main 895d5dcbc and origin/aid-ledger ccbdc42: 1,186 refs examined
-      (1,160 successful fetches and 26 refs skipped because they had no
-      work-items tree), all 28 open PR heads fetched, and 62 ledger entries
-      inspected (MERGED 36, OCCUPIED_BY_OTHER 9, RESERVED 9, IN_FLIGHT 7,
-      FREE 1). AID-2026-340 is the highest occupied identifier. AID-2026-341
-      through AID-2026-350 are absent from refs, open PR heads, and ledger.
-      AID-2026-341 is the first identifier in that verified free range.
+      Reservation was made after an existing claim. AID-2026-341 is already
+      present in origin/main through PR #1506, merged by c895d2ee7
+      (Replace tree-only work-item rejection with manifest-ID uniqueness).
+      The existing main claim takes precedence over the later reservation
+      on the aid-ledger branch. This Work Item must not use AID-2026-341
+      and is renumbered to AID-2026-345.
   - id: AID-2026-333
     state: RESERVED
     carrier: "branch fix/aid-race-invariant (PR #1515 open)"
     note: "2026-11-28 scan (origin/main 389467707): main carries 325, 326 and 340 above 324; origin/aid-ledger carries AID-2026-331 as a directory and ledger entries for 281-287, 312, 313 and 332; scanned all 1180 origin/* refs for AID-2026-333 with no hit. The fix/aid-race-invariant branch now carries the AID-2026-333 manifest and PR #1515 is open. Scope: close the work-item uniqueness merge race by adding a two-parent duplicate-claim history detector and wiring it into the existing GOV-DOC-002 push path, while preserving the tree-only uniqueness checker and the restored pull_request and merge_group candidate checks. Row 6 remains GAP pending owner-side strict branch protection and a successful live two-PR qualification."
+  - id: AID-2026-345
+    state: RESERVED
+    carrier: "Issue #1507; pending PR; user-authorized operator"
+    note: >-
+      Reserved after the R3 three-source scan. Scan baselines:
+      origin/main 3162d7ed13a8544e45769ec158a6bed8860076d1;
+      origin/aid-ledger f25ba802ee31438ab740206c95a373bb4a69f90f.
+      The scan covered 1,202 origin refs; 26 refs had no
+      14-ai-development/work-items tree and were skipped. There were
+      18 open PRs at scan time (PR #1518 merged during the scan; its
+      state is based on the API state observed by the scan). The ledger
+      contained 64 entries: MERGED 36, OCCUPIED_BY_OTHER 10, RESERVED 10,
+      IN_FLIGHT 7, FREE 1. The highest existing work-item directory
+      number on origin/main was 344 (directories 340 through 344 exist).
+      The three-source counts included 342: refs 4 / PRs 3 / ledger 0;
+      343: refs 22 / PRs 13 / ledger 0; and 344: refs 18 / PRs 13 /
+      ledger 0. Reference counts were 340: refs 45 / PRs 13, and
+      341: refs 26 / PRs 13. Numbers 345 through 360 were all zero
+      across refs, open PRs, and ledger entries (16 consecutive
+      all-zero numbers). No scan evidence is available for 361 or above.
+      AID-2026-345 is selected as the lowest number in the verified
+      all-zero interval, preserving 346 through 360 as unreserved
+      capacity rather than claiming an unnecessarily large range.
+      AID-2026-341 is occupied by PR #1506 on main; this Work Item
+      therefore uses AID-2026-345. Re-scan before any later allocation.
