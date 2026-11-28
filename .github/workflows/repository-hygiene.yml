@@ -132,6 +132,16 @@ jobs:
       - name: Check that every test file is reachable from a workflow
         run: python3 scripts/ci/check_test_reachability.py
 
+      - name: Self-check source revision pointer verification
+        run: python3 scripts/test_check_source_revision_pointers.py
+
+      - name: Ratchet source revision pointers
+        run: |
+          python3 scripts/ci/gate_ratchet.py \
+            --baseline scripts/ci/baselines/source-revision-pointers.txt \
+            --format schema \
+            --command "bash -o pipefail -c 'python3 scripts/check_source_revision_pointers.py | sed -n -e \"/^STALE /p\" -e \"/^UNRESOLVED /p\" -e \"/^NON_BLOB_REFERENCE /p\" -e \"/^BAD_DEREFERENCE /p\"'"
+
       # Each listed file is unreachable by unittest discover; discovery here would silently run
       # nothing. The explicit list is the defect tracked by #834.
       - name: Run unreachable self-checks from the repository root
@@ -224,6 +234,25 @@ jobs:
           set -euo pipefail
           cd scripts
           python3 -m unittest -v test_check_declared_check_contexts
+
+      # A declared context produced by a workflow that never subscribes to
+      # `merge_group` is absent from every queue candidate, and the declared-
+      # contexts gate cannot see it: it compares names, not event wiring.
+      # #1453 dropped the `merge_group` block from document-management.yml and
+      # `GOV-DOC-002 metadata checks` left the queue silently. This holds the
+      # declaration to the wiring, and document-management.yml to target-branch
+      # serialization (`queue: max`, `merge_group.base_ref`).
+      - name: Check platform-required contexts are wired to merge_group
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/check_required_contexts_merge_group.py
+
+      - name: Self-check the merge_group wiring gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd scripts
+          python3 -m unittest -v test_check_required_contexts_merge_group
 
       - name: Probe declared-check-contexts exit contracts
         run: python3 scripts/probe_declared_check_contexts.py

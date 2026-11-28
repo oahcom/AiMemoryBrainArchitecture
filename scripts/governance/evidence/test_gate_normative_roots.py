@@ -52,6 +52,7 @@ EMBEDDED_PROVENANCE_SHA_SNAPSHOT = {
     '14-ai-development/PR-GOVERNANCE-001.md': ('3754d049db840b049728afd814faac968bf10749', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
     '14-ai-development/README.md': ('55d44b9276456f88bd2193de8b06aff146c228a4', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
     '14-ai-development/ai-development-standard.md': ('55d44b9276456f88bd2193de8b06aff146c228a4', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
+    '14-ai-development/design/protection-fingerprint-ratchet.md': ('2c82bd07f9e5699c52c01fbb2d4b302bab7b3079', '4f1fc57d8c103f914652395b40b5641505c5c388'),
     '14-ai-development/iteration-lifecycle.md': ('55d44b9276456f88bd2193de8b06aff146c228a4', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
     '14-ai-development/owner-automation-operating-model.md': ('6faa3b038c02bce27b3b4443d6f1be95cf5c5beb', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
     '14-ai-development/prompt-and-evidence-template.md': ('55d44b9276456f88bd2193de8b06aff146c228a4', 'e949d82b6cc3681a04631aa429e1bc2ab815305b'),
@@ -253,7 +254,7 @@ class GateRootsTest(unittest.TestCase):
             errors="replace",
         )
 
-    def test_all_21_embedded_provenance_pairs_match_full_history_snapshot(self):
+    def test_all_22_embedded_provenance_pairs_match_full_history_snapshot(self):
         self.gate.ROOT = GATE.parents[1]
         self.assertEqual(
             set(self.gate.EMBEDDED_BILINGUAL_SOURCES),
