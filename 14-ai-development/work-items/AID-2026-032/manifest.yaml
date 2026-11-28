@@ -32,7 +32,7 @@ identifier_allocation:
   assigned_id: AID-2026-032
   scanned_refs:
     - "refs/heads/main at f0843a8f38a420883921cfda96b515204967f885"
-    - "all-state pull-request titles and bodies, 14 open PRs sampled"
+    - "14 open pull-request titles and bodies"
     - "remote branch refs matching *032* (pull/1032 is a GitHub PR ref, not an AID)"
   scanned_identity_sources:
     - "14-ai-development/work-items/*/manifest.yaml work_item_id fields"
