@@ -25,6 +25,7 @@ from __future__ import annotations
 import argparse
 import io
 import re
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -420,6 +421,313 @@ def _extract_work_items_archive(root: Path, ref: str) -> Path:
     return temporary
 
 
+def _session_identity_snapshot(root: Path) -> dict:
+    """
+    Return {(work_item_dir_name, entry_index): entry}.
+
+    Parsing failures are fatal to preflight: an incomplete base/head
+    comparison must never be interpreted as an empty change set.
+    """
+    result = {}
+
+    for manifest in _discover_manifests(root):
+        relative = manifest.relative_to(root).as_posix()
+        work_item = manifest.parent.name
+
+        try:
+            document = _read_yaml(manifest)
+        except (OSError, UnicodeError, yaml.YAMLError) as exc:
+            raise RuntimeError(
+                f"cannot parse {relative}: {type(exc).__name__}: {exc}"
+            ) from exc
+
+        if not isinstance(document, dict):
+            raise RuntimeError(
+                f"{relative}: manifest must be a YAML mapping"
+            )
+
+        if "session_evidence" not in document:
+            continue
+
+        entries = document["session_evidence"]
+        if not isinstance(entries, list):
+            raise RuntimeError(
+                f"{relative}: session_evidence must be a list"
+            )
+
+        for index, entry in enumerate(entries, start=1):
+            result[(work_item, index)] = entry
+
+    return result
+
+
+def _identity_pair(entry: Any) -> tuple:
+    """
+    Preserve raw YAML values. Do not strip, uppercase or normalize them:
+    any change to either identity field must trigger preflight.
+    """
+    if not isinstance(entry, dict):
+        return (None, None)
+
+    return (
+        entry.get("implementing_ai_session"),
+        entry.get("session_reference_status"),
+    )
+
+
+def _validate_session_identity_evidence(
+    root: Path,
+    work_item: str,
+    entry: Any,
+) -> list[Violation]:
+    """
+    Verify that a RECORDED session ID is explicitly attested by the
+    evidence file declared by this same session_evidence entry.
+
+    Authoritative source:
+      session_evidence[].session_evidence_ref
+
+    Required machine-readable line in that file:
+      implementing_ai_session: <exact session ID>
+
+    No other file, PR body, work item, or free-text occurrence is
+    accepted as proof of identity.
+    """
+    if not isinstance(entry, dict):
+        return []
+
+    status = entry.get("session_reference_status")
+    raw_session = entry.get("implementing_ai_session")
+
+    if (
+        not isinstance(status, str)
+        or status.strip().upper() != "RECORDED"
+    ):
+        return []
+
+    if not is_parseable_session(raw_session):
+        return []
+
+    session = raw_session.strip()
+    reference = entry.get("session_evidence_ref")
+    manifest_path = (
+        f"{WORK_ITEMS}/{work_item}/manifest.yaml"
+    )
+
+    if not isinstance(reference, str) or not reference.strip():
+        return [
+            Violation(
+                "SESSION_EVIDENCE_REF_MISSING",
+                manifest_path,
+                "1",
+                "RECORDED identity requires session_evidence_ref",
+            )
+        ]
+
+    reference = reference.strip()
+    relative = PurePosixPath(reference)
+
+    if (
+        relative.is_absolute()
+        or ".." in relative.parts
+        or len(relative.parts) < 4
+        or relative.parts[:2] != (
+            "14-ai-development",
+            "work-items",
+        )
+        or relative.parts[2] != work_item
+    ):
+        return [
+            Violation(
+                "SESSION_EVIDENCE_REF_INVALID",
+                manifest_path,
+                "1",
+                f"session evidence reference must remain inside "
+                f"its work-item directory: {reference!r}",
+            )
+        ]
+
+    evidence_path = root.joinpath(*relative.parts)
+
+    try:
+        resolved_root = root.resolve()
+        resolved_evidence = evidence_path.resolve(strict=True)
+        resolved_evidence.relative_to(resolved_root)
+
+        if not resolved_evidence.is_file():
+            raise OSError("evidence reference is not a regular file")
+
+        evidence_text = resolved_evidence.read_text(
+            encoding="utf-8"
+        )
+    except (OSError, UnicodeError, ValueError) as exc:
+        return [
+            Violation(
+                "SESSION_EVIDENCE_REF_INVALID",
+                manifest_path,
+                "1",
+                f"cannot read declared session evidence "
+                f"{reference!r}: {exc}",
+            )
+        ]
+
+    expected = f"implementing_ai_session: {session}"
+
+    if expected not in evidence_text.splitlines():
+        return [
+            Violation(
+                "SESSION_EVIDENCE_ID_MISSING",
+                manifest_path,
+                "1",
+                f"declared evidence {reference!r} does not contain "
+                f"the exact identity declaration {expected!r}",
+            )
+        ]
+
+    return []
+
+
+def preflight_session_identity(
+    root: Path,
+    base_ref: str,
+) -> tuple[list[Violation], int]:
+    """
+    Check only newly added or identity-modified session_evidence entries.
+
+    Exit-code mapping is performed by main():
+      0 = no violations
+      1 = changed entries contain violations
+      2 = base/head comparison cannot be established
+    """
+    if not base_ref or not base_ref.strip():
+        raise RuntimeError("--preflight requires --base-ref")
+
+    shallow = _git_text(
+        root,
+        "rev-parse",
+        "--is-shallow-repository",
+    )
+    if shallow == "true":
+        raise RuntimeError(
+            "preflight requires complete Git history"
+        )
+
+    resolved_base = _git_text(
+        root,
+        "rev-parse",
+        "--verify",
+        f"{base_ref}^{{commit}}",
+    )
+
+    # Require a common ancestor. A disconnected or unrelated base
+    # must not silently produce a misleading empty comparison.
+    _git_text(
+        root,
+        "merge-base",
+        "HEAD",
+        resolved_base,
+    )
+
+    base_root = _extract_work_items_archive(
+        root,
+        resolved_base,
+    )
+
+    try:
+        base_snapshot = _session_identity_snapshot(base_root)
+    finally:
+        shutil.rmtree(base_root, ignore_errors=True)
+
+    head_snapshot = _session_identity_snapshot(root)
+
+    changed = []
+
+    for key in sorted(
+        head_snapshot,
+        key=lambda item: (item[0], item[1]),
+    ):
+        head_entry = head_snapshot[key]
+        base_entry = base_snapshot.get(key)
+
+        if key not in base_snapshot:
+            changed.append((key, head_entry))
+            continue
+
+        if _identity_pair(base_entry) != _identity_pair(head_entry):
+            changed.append((key, head_entry))
+
+    violations = []
+
+    for (work_item, index), entry in changed:
+        manifest_path = (
+            f"{WORK_ITEMS}/{work_item}/manifest.yaml"
+        )
+
+        violations.extend(
+            _entry_violations(
+                manifest_path,
+                index,
+                entry,
+            )
+        )
+
+        # Authenticity is an additional preflight invariant.
+        # The existing ratchet remains unchanged.
+        if (
+            isinstance(entry, dict)
+            and isinstance(
+                entry.get("session_reference_status"),
+                str,
+            )
+            and entry["session_reference_status"].strip().upper()
+                == "RECORDED"
+            and is_parseable_session(
+                entry.get("implementing_ai_session")
+            )
+        ):
+            evidence_violations = (
+                _validate_session_identity_evidence(
+                    root,
+                    work_item,
+                    entry,
+                )
+            )
+
+            # Preserve the actual entry index in diagnostics.
+            for violation in evidence_violations:
+                violations.append(
+                    Violation(
+                        violation.code,
+                        manifest_path,
+                        str(index),
+                        violation.detail,
+                    )
+                )
+
+    return violations, len(changed)
+
+
+def _print_preflight_result(
+    violations: list[Violation],
+    changed_count: int,
+) -> int:
+    for violation in violations:
+        print(violation.render())
+
+    print(
+        "SESSION IDENTITY PREFLIGHT: "
+        f"{changed_count} changed entries, "
+        f"{len(violations)} violations"
+    )
+
+    if violations:
+        print("SESSION IDENTITY PREFLIGHT RESULT: FAIL")
+        return 1
+
+    print("SESSION IDENTITY PREFLIGHT RESULT: PASS")
+    return 0
+
+
 def _bootstrap_baseline(
     root: Path,
     baseline_path: Path,
@@ -571,6 +879,11 @@ def main(argv: list[str] | None = None) -> int:
         help="explicitly create the initial baseline from --base-ref",
     )
     parser.add_argument(
+        "--preflight",
+        action="store_true",
+        help="validate only newly added or identity-modified session entries",
+    )
+    parser.add_argument(
         "--base-ref",
         help="target-branch commit/ref required by --bootstrap-baseline",
     )
@@ -582,10 +895,25 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    if args.write_baseline and args.bootstrap_baseline:
-        parser.error("--write-baseline and --bootstrap-baseline are mutually exclusive")
-    if args.base_ref and not args.bootstrap_baseline:
-        parser.error("--base-ref requires --bootstrap-baseline")
+    if sum([
+        bool(args.write_baseline),
+        bool(args.bootstrap_baseline),
+        bool(args.preflight),
+    ]) > 1:
+        parser.error(
+            "--write-baseline, --bootstrap-baseline and "
+            "--preflight are mutually exclusive"
+        )
+
+    if args.preflight and not args.base_ref:
+        parser.error("--preflight requires --base-ref")
+
+    if args.base_ref and not (
+        args.bootstrap_baseline or args.preflight
+    ):
+        parser.error(
+            "--base-ref requires --bootstrap-baseline or --preflight"
+        )
 
     root = args.root.resolve()
     baseline_path = (
@@ -597,6 +925,28 @@ def main(argv: list[str] | None = None) -> int:
     if not root.is_dir():
         print(f"ERROR: repository root does not exist: {root}", file=sys.stderr)
         return 2
+
+    if args.preflight:
+        try:
+            violations, changed_count = preflight_session_identity(
+                root,
+                args.base_ref,
+            )
+        except Exception as exc:
+            print(
+                "ERROR: session identity preflight cannot determine "
+                f"result: {type(exc).__name__}: {exc}",
+                file=sys.stderr,
+            )
+            print(
+                "SESSION IDENTITY PREFLIGHT RESULT: INCOMPLETE",
+            )
+            return 2
+
+        return _print_preflight_result(
+            violations,
+            changed_count,
+        )
 
     try:
         violations, no_evidence_section = scan_tree(root)
