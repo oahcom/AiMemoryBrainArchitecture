@@ -269,7 +269,7 @@ impl ContextSnapshot {
             .ok_or(ContextError::EntryNotFound)?;
         let next_version = next_context_version(self.context_version)?;
         let rendered_bytes = rendered_content.len();
-        let content_hash = format!("sha256:{}", sha256_hex(rendered_content.as_bytes()));
+        let content_hash = content_hash_for(&rendered_content);
         let mut next = self.clone();
         let entry = &mut next.entries[index];
         entry.rendered_content = rendered_content;
@@ -487,6 +487,12 @@ fn sha256_hex(input: &[u8]) -> String {
         out.push_str(&format!("{word:08x}"));
     }
     out
+}
+
+/// Returns the canonical content digest: exact UTF-8 bytes, without normalization,
+/// using SHA-256 and the `sha256:` algorithm identifier prefix.
+pub fn content_hash_for(rendered_content: &str) -> String {
+    format!("sha256:{}", sha256_hex(rendered_content.as_bytes()))
 }
 
 /// A task-specific information dimension whose evidence may be assessed from a ContextSnapshot.
@@ -824,6 +830,14 @@ fn validate_edit_entry(entry: &ContextEntry) -> Result<(), ContextError> {
         return Err(ContextError::EntryByteCountMismatch {
             actual: entry.rendered_content.len(),
             recorded: entry.rendered_bytes,
+        });
+    }
+    let actual = content_hash_for(&entry.rendered_content);
+    if entry.content_hash != actual {
+        return Err(ContextError::ContentHashMismatch {
+            entry_id: entry.entry_id.clone(),
+            declared: entry.content_hash.clone(),
+            actual,
         });
     }
     Ok(())
@@ -1684,6 +1698,11 @@ pub enum ContextError {
         actual: usize,
         recorded: usize,
     },
+    ContentHashMismatch {
+        entry_id: OpaqueId,
+        declared: String,
+        actual: String,
+    },
     PayloadHashMismatch {
         declared: String,
         actual: String,
@@ -1820,6 +1839,14 @@ impl ContextEntryVersion {
             return Err(ContextError::EntryByteCountMismatch {
                 actual: self.rendered_content.len(),
                 recorded: self.rendered_bytes,
+            });
+        }
+        let actual = content_hash_for(&self.rendered_content);
+        if self.content_hash != actual {
+            return Err(ContextError::ContentHashMismatch {
+                entry_id: self.entry_id.clone(),
+                declared: self.content_hash.clone(),
+                actual,
             });
         }
         Ok(())
@@ -2259,6 +2286,8 @@ fn apply_operations(
     Ok(())
 }
 
+/// Computes the snapshot digest over the entry collection, whose content hashes
+/// must already have been validated against their exact rendered UTF-8 bytes.
 pub fn snapshot_hash(entries: &[ContextEntryVersion]) -> Result<String, ContextError> {
     let mut canonical = entries.to_vec();
     canonical.sort_by(|left, right| left.entry_id.cmp(&right.entry_id));
@@ -2474,7 +2503,7 @@ mod tests {
             source_refs: vec![id(&format!("source-{entry}"))],
             evidence_refs: vec![],
             epistemic_qualifiers: vec!["reported".into()],
-            content_hash: format!("sha256:{entry}"),
+            content_hash: content_hash_for(content),
         }
     }
 
@@ -2983,7 +3012,7 @@ mod version_tests {
             source_refs: vec![oid("source")],
             evidence_refs: vec![],
             epistemic_qualifiers: vec![],
-            content_hash: format!("hash-{value}-{revision}"),
+            content_hash: content_hash_for(content),
             rendered_bytes: content.len(),
             valid_time: Some(TimeValue::Unknown),
             temporal_ref: None,
@@ -3590,7 +3619,7 @@ mod changeset_tests {
                 source_refs: vec![id("source")],
                 evidence_refs: vec![],
                 epistemic_qualifiers: vec![],
-                content_hash: format!("hash-{entry}"),
+                content_hash: content_hash_for(content),
             })
             .collect();
         build_context(
@@ -3623,7 +3652,7 @@ mod changeset_tests {
         let mut value = entry.clone();
         value.rendered_content = content.into();
         value.rendered_bytes = content.len();
-        value.content_hash = format!("updated:{content}");
+        value.content_hash = content_hash_for(content);
         value
     }
 
@@ -3958,7 +3987,7 @@ mod sufficiency_tests {
             source_refs: vec![id("source")],
             evidence_refs,
             epistemic_qualifiers: vec![],
-            content_hash: "content-hash".into(),
+            content_hash: content_hash_for("grounded content"),
             rendered_bytes: "grounded content".len(),
         };
         ContextSnapshot {
@@ -4227,7 +4256,7 @@ mod pr433_tests {
             source_refs: vec![id(&format!("source-{entry}"))],
             evidence_refs: vec![],
             epistemic_qualifiers: vec!["reported".into()],
-            content_hash: format!("sha256:{entry}"),
+            content_hash: content_hash_for(content),
         }
     }
 

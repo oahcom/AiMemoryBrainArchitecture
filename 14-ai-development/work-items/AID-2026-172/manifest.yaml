@@ -40,6 +40,8 @@ carrier:
   branch: docs/2026-11-26-aid-172-bilingual-baseline-consistency
   pull_request: 1327
   draft: false
+  merge_commit_sha: 1e9341da603dec78377fed240f4d6dbabaa8838e
+  merged_at: "2026-11-26T14:32:28Z"
   merge_authorization: >-
     Only after all 16 required contexts succeed on the exact final PR head,
     branch freshness is rechecked, and any conflicts are resolved.
@@ -63,3 +65,11 @@ session_evidence:
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-172/session-evidence.md"
+
+post_merge_correction:
+  date: "2026-11-27"
+  basis: "GitHub API GET /pulls/1327 returned merged=true; the merge commit is reachable from origin/main. This block records the correction so the original value stays auditable."
+  original_values:
+    - "carrier.merge_commit_sha: ABSENT"
+  corrected_values:
+    - "PR #1327 merged; see implementation/carrier above"

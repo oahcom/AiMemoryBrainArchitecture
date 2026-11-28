@@ -2,6 +2,7 @@
 document_metadata:
   domain: security-governance
   role: design-specification
+  steward: "user-authorized operator (delegated by account owner)"
   lifecycle:
     approval:
       decision_status: Draft
@@ -175,7 +176,7 @@ Current I-owned outcomes:
 
 ## Phase 3.5 governance alignment
 
-The authoritative Phase 3.5 I-owned mapping is recorded in `phase-3.5-global-identity-forget-governance.md`; decision approval status is tracked in `governance-decision-register.md`.
+The authoritative Phase 3.5 I-owned mapping and its decision approval status have not been restored as submitted normative documents. Their historical references are `phase-3.5-global-identity-forget-governance.md` and `governance-decision-register.md`; both are unsubmitted and not restored. See [documentation gaps](../../governance/documentation-gaps.md) and [AID-2026-107 evidence](../../14-ai-development/work-items/AID-2026-107/evidence.md).
 
 - Principal/Issuer/ProducerIdentity/AdapterIdentity are authenticated and issuer-bound; ActorRef/ScopeRef remain B-owned typed references.
 - Every protected operation revalidates current authorization at its boundary; old Context, cached ALLOW, lease or session is not a perpetual grant.

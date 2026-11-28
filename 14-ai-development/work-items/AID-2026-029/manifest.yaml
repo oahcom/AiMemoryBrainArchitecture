@@ -177,3 +177,7 @@ production_scope:
     Production activation, physical Storage/COC proof, global Forget completion,
     architecture acceptance and domain Owner approval are not claimed by this
     provenance-only remediation.
+
+documentation:
+  - path: "docs/governance/translation-status.md"
+    relationship: reference

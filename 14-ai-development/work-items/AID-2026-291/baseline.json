@@ -1,0 +1,1032 @@
+{
+  "commit": "cd1722e753a429247d91f990caa2defac565e308",
+  "manifests": {
+    "AID-2026-001": {
+      "findings": [
+        "digest_unpinned",
+        "digest_head_mismatch",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-002": {
+      "findings": [
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-003": {
+      "findings": [
+        "digest_not_verified",
+        "digest_pinned_mismatch",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-004": {
+      "findings": [
+        "digest_not_verified",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-005": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-006": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-008": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-009": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-011": {
+      "findings": [
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-014": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-023": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-024": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-025": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-026": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-029": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-030": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-040": {
+      "findings": [
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-041": {
+      "findings": [
+        "digest_pinned_mismatch",
+        "commit_unreachable"
+      ],
+      "primary_status": "DIGEST_MISMATCH"
+    },
+    "AID-2026-042": {
+      "findings": [
+        "commit_unreachable"
+      ],
+      "primary_status": "COMMIT_UNREACHABLE"
+    },
+    "AID-2026-043": {
+      "findings": [
+        "commit_unreachable"
+      ],
+      "primary_status": "COMMIT_UNREACHABLE"
+    },
+    "AID-2026-044": {
+      "findings": [
+        "commit_pending"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-045": {
+      "findings": [
+        "commit_pending"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-046": {
+      "findings": [
+        "commit_pending"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-047": {
+      "findings": [
+        "digest_unpinned"
+      ],
+      "primary_status": "DIGEST_UNPINNED"
+    },
+    "AID-2026-048": {
+      "findings": [
+        "digest_unpinned",
+        "commit_unreachable"
+      ],
+      "primary_status": "DIGEST_UNPINNED"
+    },
+    "AID-2026-049": {
+      "findings": [
+        "digest_unpinned",
+        "commit_unreachable"
+      ],
+      "primary_status": "DIGEST_UNPINNED"
+    },
+    "AID-2026-050": {
+      "findings": [
+        "digest_unpinned",
+        "commit_pending"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-051": {
+      "findings": [
+        "digest_unpinned",
+        "commit_pending"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-052": {
+      "findings": [
+        "digest_unpinned",
+        "commit_pending"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-053": {
+      "findings": [
+        "digest_unpinned",
+        "commit_pending"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-054": {
+      "findings": [
+        "digest_unpinned",
+        "commit_pending"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-055": {
+      "findings": [
+        "digest_unpinned",
+        "commit_pending"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-056": {
+      "findings": [
+        "digest_unpinned",
+        "commit_pending"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-057": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-058": {
+      "findings": [
+        "digest_unpinned",
+        "commit_pending"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-059": {
+      "findings": [
+        "digest_unpinned"
+      ],
+      "primary_status": "DIGEST_UNPINNED"
+    },
+    "AID-2026-060": {
+      "findings": [
+        "digest_unpinned",
+        "commit_pending"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-061": {
+      "findings": [
+        "digest_unpinned"
+      ],
+      "primary_status": "DIGEST_UNPINNED"
+    },
+    "AID-2026-062": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-063": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-064": {
+      "findings": [
+        "digest_not_verified"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-066": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-067": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-068": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-069": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-070": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-071": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-072": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-073": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-074": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-075": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-076": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-077": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-078": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-079": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-080": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-081": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-082": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-084": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-085": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-089": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-090": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-091": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-092": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-093": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-094": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-095": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-096": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-097": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-098": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-099": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-100": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-101": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-102": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-103": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-104": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-105": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-106": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-107": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-108": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-109": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-110": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-111": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-112": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-113": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-114": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-115": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-116": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-140": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-150": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-170": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-172": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-173": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-174": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-183": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-186": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-188": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-189": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-190": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-191": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-192": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-193": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-197": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-198": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-199": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-200": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-204": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-210": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-211": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-212": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-240": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-241": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-242": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-250": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-251": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-252": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-253": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-254": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-255": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-256": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-260": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-261": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-264": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-265": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-267": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-268": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-269": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-279": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-280": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-281": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-284": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-285": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-286": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-290": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-291": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-302": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-311": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-321": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-323": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-324": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-325": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "AID-2026-326": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
+    "FIX-2026-P1-T1": {
+      "findings": [
+        "digest_absent",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    }
+  },
+  "schema_version": 1,
+  "seeded_work_items": {
+    "AID-2026-212": {
+      "observed_in_pr_head": "38edfdf2b2f48e246e3e7cf7f147db41d1036e4a",
+      "reason": "Initial ratchet seed for the newly registered work item; this records its current NO_TRACE state without claiming traceability."
+    },
+    "AID-2026-265": {
+      "observed_in_pr_head": "38edfdf2b2f48e246e3e7cf7f147db41d1036e4a",
+      "reason": "Initial ratchet seed for the newly registered work item; this records its current NO_TRACE state without claiming traceability."
+    },
+    "AID-2026-269": {
+      "observed_in_pr_head": "38edfdf2b2f48e246e3e7cf7f147db41d1036e4a",
+      "reason": "Initial ratchet seed for the newly registered work item; this records its current NO_TRACE state without claiming traceability."
+    },
+    "AID-2026-286": {
+      "observed_in_pr_head": "38edfdf2b2f48e246e3e7cf7f147db41d1036e4a",
+      "reason": "Initial ratchet seed for the newly registered work item; this records its current NO_TRACE state without claiming traceability."
+    },
+    "AID-2026-302": {
+      "observed_in_pr_head": "38edfdf2b2f48e246e3e7cf7f147db41d1036e4a",
+      "reason": "Initial ratchet seed for the newly registered work item; this records its current NO_TRACE state without claiming traceability."
+    },
+    "AID-2026-311": {
+      "observed_in_pr_head": "38edfdf2b2f48e246e3e7cf7f147db41d1036e4a",
+      "reason": "Initial ratchet seed for the newly registered work item; this records its current NO_TRACE state without claiming traceability."
+    },
+    "AID-2026-324": {
+      "observed_in_pr_head": "38edfdf2b2f48e246e3e7cf7f147db41d1036e4a",
+      "reason": "Initial ratchet seed for the newly registered work item; this records its current NO_TRACE state without claiming traceability."
+    },
+    "AID-2026-326": {
+      "observed_in_pr_head": "38edfdf2b2f48e246e3e7cf7f147db41d1036e4a",
+      "reason": "Initial ratchet seed for the newly registered work item; this records its current NO_TRACE state without claiming traceability."
+    }
+  },
+  "source_commit": "cd1722e753a429247d91f990caa2defac565e308"
+}

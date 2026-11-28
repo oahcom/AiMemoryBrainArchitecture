@@ -190,3 +190,15 @@ findings:
     statement: "This work item was first written as AID-2026-057 and renumbered after a concurrent session claimed that ID for an unrelated work item. The number was taken within minutes of this session choosing it. Two manifests under one ID is the hazard; renumbering is the fix."
     measured_at: "b3a65e54"
     severity: informational
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-058/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/GAP-25-DEGRADED-CHECK-LOOKS-LIKE-A-PASS.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-058/REVIEW-05-INDEPENDENT.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-058/REVIEW-04-INDEPENDENT.md"
+    relationship: reference

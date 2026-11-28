@@ -17,6 +17,10 @@ concurrency:
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+  # The queue only reports checks produced by `merge_group`; without this the
+  # required `Branch freshness vs base` context never appears in the queue.
+  merge_group:
+    types: [checks_requested]
 
 permissions:
   contents: read
@@ -37,6 +41,8 @@ jobs:
 
       - name: Check the branch contains its base
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          # A queue candidate is fresh against the queue's base, never against
+          # the PR's recorded base, so merge_group must use base_sha.
+          BASE_SHA: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_sha || github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event_name == 'merge_group' && github.event.merge_group.head_sha || github.event.pull_request.head.sha }}
         run: python3 scripts/ci/check_branch_freshness.py

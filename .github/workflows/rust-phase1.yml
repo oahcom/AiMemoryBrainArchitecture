@@ -7,6 +7,10 @@ concurrency:
 on:
   pull_request:
     branches: [main]
+  # `rust-workspace-test` is required; the queue only reports checks produced
+  # by `merge_group`.
+  merge_group:
+    types: [checks_requested]
   push:
     branches: [main]
     paths:

@@ -137,3 +137,15 @@ findings: >-
   "no new findings in this batch" statement above is the 2026-11-18 session's, and it
   was true for that session; it is superseded by this finding. Details and the repair
   boundary are in 14-ai-development/work-items/AID-2026-064/session-evidence-955.md.
+
+documentation:
+  - path: "14-ai-development/AI-EXEC-001.md"
+    relationship: reference
+  - path: "docs/en/14-ai-development/AI-EXEC-001.md"
+    relationship: reference
+  - path: "14-ai-development/AI-EXEC-002.md"
+    relationship: reference
+  - path: "docs/en/14-ai-development/AI-EXEC-002.md"
+    relationship: reference
+  - path: "14-ai-development/AI-EXEC-ROLLOUT-001.md"
+    relationship: reference

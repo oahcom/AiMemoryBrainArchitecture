@@ -105,3 +105,9 @@ findings:
   - id: F-GATE-SYS-ARGV-001
     severity: P2
     feedback_destination: "Delivery PR conversation; record finding and close when the 52-test suite and gate exit code 0 are verified on the PR head"
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-042/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
