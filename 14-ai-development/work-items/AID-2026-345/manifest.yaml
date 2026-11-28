@@ -30,25 +30,32 @@ scope:
     Preserve the five existing GOV-DOC-002 probe changes, add complete
     English and Simplified Chinese mirrors for Context Versioning, remove
     the resolved bilingual-gap entry from both synchronized baselines,
-    and register the work under AID-2026-345 with complete evidence.
+    update the two descriptive GOV-DOC-001 count comments to match the
+    resulting baseline count, and register the work under AID-2026-345
+    with complete evidence.
   in_scope:
     - "Preserve the five existing probe changes in Commit 1: 06-memory-context/context-versioning.md; 14-ai-development/adr/OWNER-DECISION-AUTHORIZATION-TYPE-STATE-001.md; 14-ai-development/ci-gates-and-ratchets.en.md; 14-ai-development/ci-gates-and-ratchets.zh-CN.md; and 14-ai-development/reports/steward-adoption-baseline.json."
     - "Add the complete English mirror at docs/en/06-memory-context/context-versioning.md and the complete Simplified Chinese mirror at docs/zh-CN/06-memory-context/context-versioning.md, both corresponding to the exact source committed in Commit 1."
     - "Remove the resolved bilingual-gap baseline entry for 06-memory-context/context-versioning.md from scripts/bilingual-baseline.txt and scripts/ci/baselines/bilingual-docs.txt; keep both baseline files consistent."
+    - "Update only the two descriptive GOV-DOC-001 count comments in .github/workflows/gates.yml from 77 to 76 to match the synchronized bilingual baseline entry count; do not change executable workflow content."
     - "Add the AID-2026-345 manifest, evidence.md, prompt-v1.md, prompt-v1-executed.md, and session-evidence.md, and register AID-2026-345 with one row in 14-ai-development/work-items/INDEX.md."
-    - "Do not modify checker implementation, bilingual gate logic, workflows, branch protection, required contexts, or gate semantics."
+    - "Do not modify checker implementation, bilingual gate logic, executable workflow behavior, branch protection, required contexts, or gate semantics."
   files_out_of_scope:
     - "scripts/check_bilingual_docs.py"
     - "scripts/check_document_management.py"
-    - ".github/workflows/"
+    - "All workflow files and executable workflow content, except the two explicitly authorized descriptive count-comment lines in .github/workflows/gates.yml"
     - "Branch protection configuration"
     - "Required status-check configuration"
   change_boundary: >-
     This work is documentation and governance-record maintenance only.
     It preserves the existing source document and its normative meaning.
-    It does not alter checker implementation, workflow behavior, branch
-    protection, required contexts, or gate semantics, and it does not
-    introduce a bilingual catch-up exception.
+    It permits exactly two descriptive count-comment updates in
+    .github/workflows/gates.yml: the GOV-DOC-001 full-scan count and its
+    baseline-count explanation, both changing from 77 to 76.
+    It does not alter checker implementation, executable workflow behavior,
+    workflow triggers, jobs, steps, commands, permissions, branch protection,
+    required contexts, or gate semantics, and it does not introduce a
+    bilingual catch-up exception.
 
 evidence:
   - "Issue #1507: Complete GOV-DOC-002 steward metadata and Context Versioning bilingual mirrors"
@@ -118,5 +125,5 @@ session_evidence:
     executed_prompt_sha256: 5f93713c13aea5b46002d2b5d463d0c2c24873ecefbee0097c1a8735f19aa4b7
     executed_prompt_bytes: 12046
     executed_prompt_provenance: NOT_VERIFIED
-    session_reference_status: RECORDED
+    session_reference_status: NOT_RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-345/session-evidence.md
