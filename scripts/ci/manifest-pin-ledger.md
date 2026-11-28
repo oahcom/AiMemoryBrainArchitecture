@@ -12,5 +12,7 @@ Each record must satisfy all of the following validity rules:
 
 | manifest | field | path | previous_pin | new_pin | repin_commit |
 |---|---|---|---|---|---|
-|14-ai-development/work-items/AID-2026-101/manifest.yaml|session_evidence[0].executed_prompt_snapshot_file|14-ai-development/work-items/AID-2026-101/prompt-v1.md|4470|4412|6045af65fcc2e89d1895e09ed666af4d737203bf|
-|14-ai-development/work-items/AID-2026-102/manifest.yaml|session_evidence[0].executed_prompt_snapshot_file|14-ai-development/work-items/AID-2026-102/prompt-v1.md|4470|4412|6045af65fcc2e89d1895e09ed666af4d737203bf|
+|14-ai-development/work-items/AID-2026-101/manifest.yaml|session_evidence[0].executed_prompt_snapshot_file|14-ai-development/work-items/AID-2026-101/prompt-v1.md|4470|4412|2ab66153dbcdd8a8f2d68d234914751a748a8f74|
+|14-ai-development/work-items/AID-2026-102/manifest.yaml|session_evidence[0].executed_prompt_snapshot_file|14-ai-development/work-items/AID-2026-102/prompt-v1.md|4470|4412|2ab66153dbcdd8a8f2d68d234914751a748a8f74|
+
+Replacement basis: the original repin's two 4470 -> 4412 byte transitions are present in squash-merge commit `2ab66153dbcdd8a8f2d68d234914751a748a8f74`; GET /repos/oahcom/AiMemoryBrainArchitecture/compare/2ab66153dbcdd8a8f2d68d234914751a748a8f74...main returned `status=ahead` (candidate is an ancestor of main), and the commit diff covers both manifest paths above.
