@@ -1,0 +1,75 @@
+work_item_id: AID-2026-361
+title: Preserve manifest blob-pin ledger verification across squash merges
+class: GATE/CI/TEST
+risk: R2
+risk_rationale: >-
+  Corrects manifest blob-pin ledger verification when a recorded repin commit
+  has been squash-merged and is therefore not an ancestor of the target.
+  The checker retains proof against the original repin commit and requires a
+  unique equivalent transition in target first-parent history, including
+  matching previous and new pin values and an identical manifest Git blob.
+  Adds isolated regression tests for accepted squash equivalence, rejected
+  manifest-blob divergence, and forged new-pin declarations. No workflow,
+  branch-protection, baseline, or unrelated manifest changes are in scope.
+status: IMPLEMENTATION_IN_PROGRESS
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-28
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 73b3ebbee1a77b05e361990e0fd9f0911e00f097
+approval_scope:
+  type: Full-document
+evidence_reference:
+  record: 14-ai-development/work-items/AID-2026-361/evidence.md
+  session: 14-ai-development/work-items/AID-2026-361/session-evidence.md
+supersession:
+  status: NONE
+archival:
+  status: ACTIVE
+canonical_scope_keywords:
+  - manifest
+  - blob pin
+  - ledger
+  - squash merge
+  - first-parent history
+scope:
+  files_to_change:
+    - scripts/ci/check_manifest_blob_pins.py
+    - tests/test_manifest_pin_ledger.py
+session_evidence:
+  - role: implementation
+    issue_refs:
+      - "#1350"
+      - "#1349"
+    implementing_ai_session: 6b0a1b3c-4eb8-83ec-b8db-3edd54c94988
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-361/prompt-snapshot.md
+    executed_prompt_sha256: null
+    executed_prompt_bytes: null
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-361/session-evidence.md
+acceptance:
+  required:
+    - The original ledger repin commit is independently resolved and its first-parent and tree pin values are verified.
+    - A non-ancestor repin is accepted only when a unique target first-parent squash transition proves the same previous pin and new pin.
+    - The squash transition manifest Git blob exactly matches the manifest Git blob in the original repin commit tree.
+    - A squash transition with a different manifest Git blob is rejected.
+    - A forged ledger new_pin that differs from the original repin commit tree is rejected.
+    - Unledgered-history verification uses the resolved actual transition location.
+    - Existing manifest blob-pin checker tests pass.
+    - Manifest pin ledger regression tests pass.
+    - Immutable negative-gate tests pass.
+    - The existing ratchet reports no added or removed baseline failures.
+  status: PENDING_CI
+review:
+  independent_reviewer: NOT_ASSIGNED
+  status: NOT_RECORDED
+carrier:
+  branch: fix/2026-11-28-aid361-pin-ledger-squash
+  pull_request: PENDING
+  merge_method: squash
+  merge_sha: PENDING
