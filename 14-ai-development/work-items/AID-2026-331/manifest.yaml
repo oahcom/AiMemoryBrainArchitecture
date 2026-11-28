@@ -1,0 +1,20 @@
+work_item_id: AID-2026-331
+title: "P0 authorization invariants: decide access by an I-issued authorization decision, not a caller-supplied Scope"
+class: SECURITY/IMPLEMENTATION
+risk: R2
+risk_rationale: "Changes the authorization boundary of the memory and event storage ports. The change surface is the domain authorization vocabulary, the storage and event-store ports, their SQLite adapters, the memory-store facade, brain-cli call sites and the negative tests that bind each invariant."
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner acceptance not recorded"
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "4a6cdd0e7c5dc0db53be37a2f945e02c59d5abf9"
+
+# Skeleton commit only: this file claims AID-2026-331 in the tree before any
+# other artifact lands (numbering discipline). The full manifest -- scope,
+# evidence, documentation references, session evidence and implementation
+# block -- is written in a later commit on the implementation branch.
