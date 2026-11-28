@@ -1,0 +1,228 @@
+work_item_id: AID-2026-032
+title: "Replace the session identity snapshot ratchet with a base-tree differential gate"
+class: GATE/CI/TEST
+risk: R1
+risk_rationale: >-
+  Replaces the session-identity PR admission comparison with a read-only
+  comparison against the PR base tree and attaches it to an existing required
+  job. It does not change branch protection, required-context names, or
+  Session Evidence validation. Existing snapshot CLI modes remain available
+  for historical/manual use but are no longer invoked by CI.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: f0843a8f38a420883921cfda96b515204967f885
+tracking_issue: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1548"
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: NOT_VERIFIED
+prompt_file: "14-ai-development/work-items/AID-2026-032/prompt-v1.md"
+prompt_sha256: "__EXECUTED_PROMPT_SHA256__"
+prompt_file_blob_sha: "__PROMPT_FILE_BLOB_SHA__"
+prompt_commit_trace_initial_registration: true
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: f0843a8f38a420883921cfda96b515204967f885
+  assigned_id: AID-2026-032
+  scanned_refs:
+    - "refs/heads/main at f0843a8f38a420883921cfda96b515204967f885"
+    - "all-state pull-request titles and bodies, 14 open PRs sampled"
+    - "remote branch refs matching *032* (pull/1032 is a GitHub PR ref, not an AID)"
+  scanned_identity_sources:
+    - "14-ai-development/work-items/*/manifest.yaml work_item_id fields"
+    - "14-ai-development/work-items/*/manifest.yaml legacy aid fields"
+    - "14-ai-development/work-items/*/manifest.yaml legacy work_item.proposed_id fields"
+    - "all-state pull-request titles and bodies"
+    - "main-tree AID references and ghost-number inventory"
+  observed_main_mentions: 11918
+  observed_distinct_numbers: 100
+  observed_ghost_numbers:
+    - "000"
+    - "015"
+    - "017"
+    - "018"
+    - "019"
+    - "020"
+    - "021"
+    - "022"
+    - "027"
+    - "028"
+    - "149"
+    - "159"
+    - "283"
+    - "288"
+    - "301"
+    - "313"
+    - "318"
+    - "333"
+    - "336"
+    - "339"
+    - "900"
+    - "901"
+    - "902"
+    - "903"
+    - "913"
+    - "998"
+    - "999"
+  conflict_result: >-
+    No AID-2026-032 occurrence was found by git log -S on all refs, no matching
+    remote branch was found (the pull/1032 ref is unrelated), no main-tree
+    occurrence was found, and the 14 sampled open PR titles and bodies had
+    zero matches. AID-2026-031 was left available for the other allocation
+    path; AID-2026-032 is a non-atomic provisional allocation only.
+  allocation_method: NON_ATOMIC_SCAN
+  reservation_status: NOT_RESERVED
+  shared_allocator: NOT_PRESENT
+  allocation_rule: >-
+    The repository has no shared allocation ledger or atomic allocator.
+    This number was selected by scanning the supplied main tree, refs and
+    pull-request ranges. The scan proves only absence in those observed
+    ranges; it is not an atomic reservation and does not prove concurrent
+    allocation safety.
+  recheck_rule: >-
+    Re-scan the work-items tree, all-state pull-request titles and bodies, and
+    remote refs immediately before opening or updating the pull request.
+scope:
+  objective: >-
+    Replace snapshot-baseline attribution in the CI admission path with a
+    Git-verified comparison of session-identity violations in the current
+    checkout against the specified target-base tree. Existing base debt is
+    absorbed; only findings introduced by the candidate block.
+  changes:
+    - path: "scripts/ci/check_session_identity.py"
+      detail: >-
+        Add --diff-base REF. Resolve and verify REF as a commit in a non-shallow
+        Git worktree, require its tree and merge base, archive only the
+        work-items subtree, and compare current violation identities against
+        base violation identities. The mode never reads, writes, or requires
+        the snapshot baseline. New findings print one NEW: line each and exit
+        1; empty increment exits 0; unverifiable refs and Git state exit 2.
+        Current SESSION_YAML_INVALID always fails; base YAML errors are
+        disclosed as existing debt and are not counted as increments.
+        --diff-base is mutually exclusive with baseline mutation modes.
+    - path: "scripts/ci/test_check_session_identity.py"
+      detail: >-
+        Add 13 test_diff_* cases for empty and nonempty increments, invalid
+        refs, shallow and non-Git roots, base-only debt, repairs, current and
+        base YAML errors, missing baseline independence, argument exclusion,
+        and M1/M2 mutation detection. Preserve existing snapshot-mode tests.
+    - path: ".github/workflows/repository-hygiene.yml"
+      detail: >-
+        Add diff-mode self-tests and a pull_request-only session identity step
+        inside the existing Repository hygiene (hard gate) job. Keep the
+        required job id and name unchanged; do not declare a new required
+        context. The step uses github.event.pull_request.base.sha.
+    - path: ".github/workflows/session-identity-ratchet.yml"
+      detail: >-
+        Delete the independent non-required workflow. Its checker execution is
+        replaced by a step inside the existing required job, not by a new
+        required context.
+    - path: "14-ai-development/design/session-identity-ratchet.md"
+      detail: "Append the Chinese decision and migration rationale as §12."
+    - path: "14-ai-development/design/session-identity-ratchet.en.md"
+      detail: "Append the English decision and migration rationale as §12."
+    - path: "14-ai-development/design/session-identity-ratchet.zh-CN.md"
+      detail: "Append the Chinese counterpart of §12."
+    - path: "14-ai-development/PR-GOVERNANCE-001.md"
+      detail: >-
+        Clarify below the unchanged required-context declaration that Session
+        identity ratchet is not required and enforcement is a step inside
+        Repository hygiene (hard gate).
+    - path: "14-ai-development/work-items/AID-2026-032/"
+      detail: "Register this decision, implementation, evidence and session provenance."
+    - path: "14-ai-development/work-items/INDEX.md"
+      detail: "Append the AID-2026-032 registration row."
+  untouched:
+    - "all existing work-item manifests and evidence except the new AID-2026-032 record"
+    - "scripts/ci/baselines/session-identity.txt; retained as historical/manual snapshot data and not consumed by diff mode"
+    - "Session Evidence validator and its required contexts"
+    - "the 16 required-context names and branch-protection configuration"
+    - "Issue #1548 body and AID-2026-297"
+    - "all other work-item records"
+    - "merge queue settings and unrelated workflows"
+  non_goals:
+    - "Adding a new required context named Session identity ratchet"
+    - "Changing branch protection, rulesets, or merge queue settings"
+    - "Automatically repairing the 91 existing baseline findings"
+    - "Claiming that PR diff mode detects violations introduced by direct pushes to main"
+    - "Implementing a periodic full-tree debt audit in this PR"
+    - "Changing or replacing Session Evidence validation"
+    - "Implementing the --freeze-from proposal in Issue #1548; this work item selects the differential alternative"
+evidence:
+  record: "14-ai-development/work-items/AID-2026-032/evidence.md"
+  prompt: "14-ai-development/work-items/AID-2026-032/prompt-v1.md"
+  session: "14-ai-development/work-items/AID-2026-032/session-evidence.md"
+documentation:
+  - path: "scripts/ci/check_session_identity.py"
+    relationship: implementation
+  - path: "scripts/ci/test_check_session_identity.py"
+    relationship: implementation
+  - path: ".github/workflows/repository-hygiene.yml"
+    relationship: implementation
+  - path: ".github/workflows/session-identity-ratchet.yml"
+    relationship: implementation
+  - path: "14-ai-development/design/session-identity-ratchet.md"
+    relationship: normative-design
+  - path: "14-ai-development/design/session-identity-ratchet.en.md"
+    relationship: normative-design
+  - path: "14-ai-development/design/session-identity-ratchet.zh-CN.md"
+    relationship: normative-design
+  - path: "14-ai-development/PR-GOVERNANCE-001.md"
+    relationship: governance
+  - path: "14-ai-development/work-items/AID-2026-032/evidence.md"
+    relationship: evidence
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1548"
+    implementing_ai_session: "__CONV_ID__"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-032/prompt-v1.md"
+    executed_prompt_sha256: "__EXECUTED_PROMPT_SHA256__"
+    executed_prompt_bytes: __EXECUTED_PROMPT_BYTES__
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: RECORDED
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-032/session-evidence.md"
+implementation:
+  status: IN_PROGRESS
+  summary: >-
+    Differential mode and its regression tests have been added, the check has
+    been attached to the existing Repository hygiene required job for
+    pull_request events, the standalone non-required workflow has been
+    removed, and the three design counterparts plus governance clarification
+    have been updated. Coordinator replacement of session/prompt placeholders,
+    local test execution, exact-Head CI, and independent review remain pending.
+  files_changed:
+    - "scripts/ci/check_session_identity.py"
+    - "scripts/ci/test_check_session_identity.py"
+    - ".github/workflows/repository-hygiene.yml"
+    - ".github/workflows/session-identity-ratchet.yml"
+    - "14-ai-development/design/session-identity-ratchet.md"
+    - "14-ai-development/design/session-identity-ratchet.en.md"
+    - "14-ai-development/design/session-identity-ratchet.zh-CN.md"
+    - "14-ai-development/PR-GOVERNANCE-001.md"
+    - "14-ai-development/work-items/AID-2026-032/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-032/evidence.md"
+    - "14-ai-development/work-items/AID-2026-032/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-032/prompt-v1.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "Diff: no introduced violations (including existing base debt) exits 0."
+    - "Diff: a newly introduced violation exits 1 and prints NEW: with the full finding."
+    - "Diff: an unresolvable ref exits 2 without writing files."
+    - "Diff: a shallow repository exits 2 without writing files."
+    - "Diff: a non-Git root exits 2 without writing files."
+    - "Diff: a base-only violation does not count as a new violation."
+    - "Diff: fixing a base violation exits 0."
+    - "Diff: current-tree SESSION_YAML_INVALID always exits 1."
+    - "Diff: base-tree SESSION_YAML_INVALID is disclosed and does not become new after repair."
+    - "Diff: deleting the baseline file does not affect diff mode."
+    - "Diff: diff mode and baseline mutation modes are mutually exclusive (argparse exit 2)."
+    - "Mutation M1: treating base violations as increments must fail the base-only/repair assertion."
+    - "Mutation M2: suppressing introduced HEAD violations must fail the new-finding assertion."
+    - "Legacy: existing snapshot-mode tests remain unchanged."
