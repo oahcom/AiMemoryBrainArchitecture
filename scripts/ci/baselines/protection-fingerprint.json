@@ -1,0 +1,62 @@
+{
+  "experiment": {
+    "date": "2026-11-25",
+    "head": "b5cf4f2578de0e9aa2ba3e7e86a110ce1d8f69d9",
+    "pr": "#1038",
+    "run": "138943464904"
+  },
+  "fingerprint": {
+    "allow_deletions": false,
+    "allow_fork_syncing": false,
+    "allow_force_pushes": false,
+    "block_creations": false,
+    "contexts": [
+      "BMCP conformance suite (hard gate)",
+      "BMCP protocol index (hard gate)",
+      "Bilingual docs coverage (ratchet)",
+      "Branch freshness vs base",
+      "GOV-DOC-001 structural checks",
+      "GOV-DOC-002 metadata checks",
+      "Repository hygiene (hard gate)",
+      "Rust clippy (hard gate)",
+      "Rust doctests (hard gate)",
+      "Rust format (hard gate)",
+      "Schema non-empty audit (hard gate)",
+      "Session Evidence",
+      "Session Evidence self-test (base)",
+      "Session Evidence self-test (head)",
+      "audit",
+      "rust-workspace-test"
+    ],
+    "enforce_admins": true,
+    "lock_branch": false,
+    "required_conversation_resolution": false,
+    "required_linear_history": false,
+    "required_pull_request_reviews": null,
+    "required_signatures": false,
+    "strict": true
+  },
+  "schema_version": 4,
+  "summary_fingerprint": {
+    "contexts": [
+      "BMCP conformance suite (hard gate)",
+      "BMCP protocol index (hard gate)",
+      "Bilingual docs coverage (ratchet)",
+      "Branch freshness vs base",
+      "GOV-DOC-001 structural checks",
+      "GOV-DOC-002 metadata checks",
+      "Repository hygiene (hard gate)",
+      "Rust clippy (hard gate)",
+      "Rust doctests (hard gate)",
+      "Rust format (hard gate)",
+      "Schema non-empty audit (hard gate)",
+      "Session Evidence",
+      "Session Evidence self-test (base)",
+      "Session Evidence self-test (head)",
+      "audit",
+      "rust-workspace-test"
+    ],
+    "enabled": true,
+    "enforcement_level": "everyone"
+  }
+}
