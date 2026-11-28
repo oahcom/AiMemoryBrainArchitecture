@@ -1,9 +1,42 @@
+---
+document_metadata:
+  domain: architecture
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      evidence_reference: []
+    evidence_verification:
+      verification_status: Unverified
+      last_verification_note: "Front matter added when the section 4.1 body was re-derived for AID-2026-303; not a formal approval record."
+    usage_status: Active
+    modification_status: Modified
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "System architecture specification"
+    canonical_scope_id: architecture/system-architecture-specification
+    canonical_scope_keywords:
+      - architecture
+      - specification
+      - forget
+      - completion
+    canonical_conflict_status: None
+    normative_status: Normative
+  bilingual_counterpart:
+    source: "01-system-architecture/system-architecture-specification.md"
+    en: null
+    zh-CN: "docs/zh-CN/01-system-architecture/system-architecture-specification.md"
+  steward: "user-authorized operator (delegated by account owner)"
+---
+
 # System Architecture Specification
 
 - Document ID: SYS-ARCH-001
 - Version: 1.0
 - Source: [Normative source specification](../../../01-system-architecture/system-overview.md)
-- Source revision: 995a1c5a3815d7e7b81b8d7f2ccc546c91d4c256
+- Source revision: c3707831777feb14aedd7aea0eca1c162bf59fc6
 - Chinese counterpart: [系统架构规范](../../zh-CN/01-system-architecture/system-architecture-specification.md)
 - Status: DECIDED baseline with explicitly marked candidates and validation items
 
@@ -47,7 +80,9 @@ Owns canonical memory identity and lifecycle:
 - Entity and relationship management.
 - Epistemic and temporal qualification.
 - Provenance and evidence references.
-- Retention and forgetting governance.
+- Canonical Forget identity/lifecycle/Fence mechanics (Owner D); global authorization, retention/legal-hold, external-copy policy, global target inventory and global completion criteria (Owner I).
+
+Global Forget Completion must be jointly determined by Owner D and every relevant execution Owner under a completion-evidence contract accepted by those Owners. Neither D nor I may declare global completion unilaterally. The contract remains pending the relevant Owners' acceptance; this direction is not evidence of that acceptance.
 
 ### 4.2 Memory Compiler
 

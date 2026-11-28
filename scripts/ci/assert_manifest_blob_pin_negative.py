@@ -10,9 +10,12 @@ from pathlib import Path
 EXPECTED_COMMIT = "9a2063ae1fa5d905b3817cd4eddba065a06daa73"
 EXPECTED_SUMMARY = (
     "main=9a2063ae1fa5d905b3817cd4eddba065a06daa73 "
-    "manifests=108 pins=168 ok=82 mismatch=86 "
-    "path_missing=0 incomplete=0"
+    "manifests=108 pins=172 ok=82 mismatch=86 "
+    "path_missing=0 incomplete=0 unbound=4"
 )
+# The sample also carries four unbound blob_sha256 declarations. They are
+# counted exactly, not tolerated: an extra or missing one is a changed sample.
+EXPECTED_UNBOUND = 4
 
 
 def main():
@@ -67,12 +70,14 @@ def main():
     mismatches = [line for line in lines if line.startswith("MISMATCH ")]
     missing = [line for line in lines if line.startswith("PATH_MISSING ")]
     incomplete = [line for line in lines if line.startswith("INCOMPLETE ")]
+    unbound = [line for line in lines if line.startswith("UNBOUND_BLOB_SHA256 ")]
 
     evidence_matches = (
         summaries == [EXPECTED_SUMMARY]
         and len(mismatches) == 86
         and len(missing) == 0
         and len(incomplete) == 0
+        and len(unbound) == EXPECTED_UNBOUND
     )
 
     if result.returncode != 1:
@@ -94,8 +99,8 @@ def main():
     print(
         "NEGATIVE_ASSERTION_PASS: "
         "immutable sample rejected; "
-        "manifests=108 pins=168 ok=82 mismatch=86 "
-        "path_missing=0 incomplete=0"
+        "manifests=108 pins=172 ok=82 mismatch=86 "
+        "path_missing=0 incomplete=0 unbound=4"
     )
     return 0
 

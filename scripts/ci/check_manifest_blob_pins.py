@@ -17,6 +17,12 @@ import yaml
 MANIFEST_ROOT = "14-ai-development/work-items"
 HEX40 = re.compile(r"^[0-9a-f]{40}$")
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
+# A blob_sha256 declaration is a claim about committed file bytes. The name
+# token may carry a qualifier suffix (model_blob_sha256_lf); the declaration is
+# still a blob digest and still needs a path. An unbound one is a violation,
+# never an out-of-scope field: PR #1417 comment 7212343821 rejected exactly
+# that exclusion.
+BLOB_SHA256_KEY = re.compile(r"^(?P<base>(?:.*_)?)blob_sha256(?:_[a-z0-9]+)*$")
 
 
 class Incomplete(Exception):
@@ -74,6 +80,42 @@ def nonempty(value):
     return isinstance(value, str) and bool(value.strip())
 
 
+def pointer_token(key):
+    return str(key).replace("~", "~0").replace("/", "~1")
+
+
+def walk_declarations(node, pointer=""):
+    """Yield (pointer, field, value, containing mapping) for every blob_sha256 key."""
+    stack = [(pointer, node)]
+    while stack:
+        ptr, current = stack.pop()
+        if isinstance(current, dict):
+            for key, value in current.items():
+                child = f"{ptr}/{pointer_token(key)}"
+                if isinstance(key, str) and BLOB_SHA256_KEY.match(key):
+                    yield child, key, value, current
+                stack.append((child, value))
+        elif isinstance(current, list):
+            for index, value in enumerate(current):
+                stack.append((f"{ptr}/{index}", value))
+
+
+def bind_path(container, field):
+    """Find the path a blob_sha256 declaration binds to, in its own mapping only."""
+    base = BLOB_SHA256_KEY.match(field).group("base").rstrip("_")
+    names = [f"{base}_path", f"{base}_file"] if base else []
+    for name in names + ["path", "file"]:
+        value = container.get(name)
+        if nonempty(value):
+            return name, value.strip()
+    # A bare base key ("root" for "root_blob_sha256") counts only when the
+    # value reads as a path, so a description string cannot be mistaken for one.
+    value = container.get(base) if base else None
+    if nonempty(value) and ("/" in value or re.search(r"\.[A-Za-z0-9]{1,8}$", value)):
+        return base, value.strip()
+    return None, None
+
+
 def discover_manifests(git: Git, commit: str):
     names = git.run("ls-tree", "-r", "--name-only", commit).decode("utf-8").splitlines()
     return sorted(p for p in names
@@ -85,7 +127,7 @@ def verify(root: Path, commit: str, verbose: bool = True):
     manifests = discover_manifests(git, commit)
     if not manifests:
         raise Incomplete(f"no manifests found in commit {commit}")
-    ok = mismatch = missing = incomplete = pins = 0
+    ok = mismatch = missing = incomplete = pins = unbound = 0
     problems = []
 
     def check(path, declared, source_commit, kind, algorithm="git"):
@@ -247,12 +289,53 @@ def verify(root: Path, commit: str, verbose: bool = True):
                 check(item.get(path_key), item.get(bytes_key), commit,
                       f"session_evidence[{i}].{path_key}", "bytes")
 
+        # G. Any blob_sha256 / *_blob_sha256 declaration, wherever it sits.
+        # A digest with no bindable path is UNBOUND_BLOB_SHA256 and fails: it
+        # cannot be verified, so it is not in scope to skip.
+        for pointer, field, declared, container in walk_declarations(doc):
+            if declared is None or (isinstance(declared, str) and not declared.strip()):
+                continue
+            pins += 1
+            if isinstance(declared, bool) or not isinstance(declared, str):
+                incomplete += 1
+                problems.append(f"INCOMPLETE blob_sha256 manifest={manifest_path} "
+                                f"pointer={pointer}: invalid digest declaration {declared!r}")
+                continue
+            declared = declared.strip()
+            _, path = bind_path(container, field)
+            if not path:
+                unbound += 1
+                problems.append(f"UNBOUND_BLOB_SHA256 manifest={manifest_path} "
+                                f"pointer={pointer} field={field} declared={declared}")
+                continue
+            try:
+                data = git.object_bytes(commit, path)
+            except Violation:
+                missing += 1
+                problems.append(f"PATH_MISSING blob_sha256 manifest={manifest_path} "
+                                f"pointer={pointer} path={path} declared={declared}")
+                continue
+            except Incomplete as exc:
+                incomplete += 1
+                problems.append(f"INCOMPLETE blob_sha256 manifest={manifest_path} "
+                                f"pointer={pointer} path={path}: {exc}")
+                continue
+            actual = hashlib.sha256(data).hexdigest()
+            if actual != declared.lower():
+                mismatch += 1
+                problems.append(f"MISMATCH blob_sha256 manifest={manifest_path} "
+                                f"pointer={pointer} path={path} declared={declared} "
+                                f"actual={actual}")
+            else:
+                ok += 1
+
     if verbose:
         print(f"main={commit} manifests={len(manifests)} pins={pins} ok={ok} "
-              f"mismatch={mismatch} path_missing={missing} incomplete={incomplete}")
+              f"mismatch={mismatch} path_missing={missing} incomplete={incomplete} "
+              f"unbound={unbound}")
         for problem in problems:
             print(problem)
-    return 2 if incomplete else (1 if mismatch or missing else 0)
+    return 2 if incomplete else (1 if mismatch or missing or unbound else 0)
 
 
 def main(argv=None):
