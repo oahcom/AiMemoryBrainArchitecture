@@ -46,6 +46,8 @@ scope:
   files_to_modify:
     - .github/workflows/repository-hygiene.yml
     - 14-ai-development/work-items/INDEX.md
+    - scripts/ci/assert_manifest_blob_pin_negative.py
+    - scripts/ci/test_assert_manifest_blob_pin_negative.py
   files_out_of_scope:
     - scripts/ci/check_work_item_uniqueness.py
     - .github/workflows/document-management.yml

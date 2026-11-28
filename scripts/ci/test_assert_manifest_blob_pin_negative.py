@@ -60,7 +60,7 @@ class NegativeAssertionTests(unittest.TestCase):
             for i in range(86)
         )
         lines.extend(
-            f"print('UNBOUND_BLOB_SHA256 manifest=m{i} pointer=/p/f field=f declared=d')"
+            f"print('INCOMPLETE UNRESOLVED(UNBOUND): manifest=m{i} pointer=/p/f field=f declared=d')"
             for i in range(4)
         )
         lines.append("sys.exit(1)")

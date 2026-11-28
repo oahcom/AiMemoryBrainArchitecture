@@ -69,14 +69,28 @@ def main():
     summaries = [line for line in lines if line.startswith("main=")]
     mismatches = [line for line in lines if line.startswith("MISMATCH ")]
     missing = [line for line in lines if line.startswith("PATH_MISSING ")]
-    incomplete = [line for line in lines if line.startswith("INCOMPLETE ")]
-    unbound = [line for line in lines if line.startswith("UNBOUND_BLOB_SHA256 ")]
+    unresolved = [
+        line for line in lines if line.startswith("INCOMPLETE UNRESOLVED(")
+    ]
+    # An explicit blob_sha256 declaration with no bindable path is now
+    # INCOMPLETE UNRESOLVED(UNBOUND); it is an unresolved finding, not a
+    # scan-level INCOMPLETE.
+    unbound = [
+        line for line in unresolved
+        if line.startswith("INCOMPLETE UNRESOLVED(UNBOUND)")
+    ]
+    incomplete = [
+        line for line in lines
+        if line.startswith("INCOMPLETE ")
+        and not line.startswith("INCOMPLETE UNRESOLVED(")
+    ]
 
     evidence_matches = (
         summaries == [EXPECTED_SUMMARY]
         and len(mismatches) == 86
         and len(missing) == 0
         and len(incomplete) == 0
+        and len(unresolved) == EXPECTED_UNBOUND
         and len(unbound) == EXPECTED_UNBOUND
     )
 
