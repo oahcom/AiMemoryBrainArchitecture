@@ -80,7 +80,7 @@ session_evidence:
   - role: authoring
     issue_refs:
       - "#265"
-    implementing_ai_session: "CHATGPT-AUTHORING-SESSION-6B0A1C29"
+    implementing_ai_session: "6b0a1c29-556c-83ec-899c-b0f6cbbefa0a"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-344/prompt-v1.md"
     executed_prompt_sha256: "30996c1bf0bb0cd7a572e8e2fa31fe98bb65bd91a4cb26730928cecb355015ff"
     executed_prompt_bytes: 6867
