@@ -69,9 +69,9 @@ The canonical System Boundaries section 15 records:
 ## Branch result
 
 - Branch: docs/aid-2026-327-d10-cursor-authority
-- Canonical source blob after section 15: fd05a4d559a852fd24370297c7cd290384d9414a
+- Canonical source blob after section 15: 8934b92bdaa89cf9697c7c4b14d15ca6dfca7328
 - English and Chinese mirrors are pinned to that canonical blob.
-- The canonical source remains Draft / Unverified. No formal approval is claimed.
+- The canonical source remains Draft / Unverified. Steward metadata is set to Architecture Governance; no formal approval is claimed.
 - No code, runtime, API, schema, DDL, tests, workflows, branch-protection, or Issue-body changes are included.
 - Detailed D/F/G consumer specifications, multi-shard transaction representation, and F/G consistent-snapshot/cut protocol remain follow-up work.
 
