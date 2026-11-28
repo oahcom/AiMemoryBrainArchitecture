@@ -83,10 +83,8 @@ session_evidence:
     issue_refs:
       - "#1268"
     implementing_ai_session: "6b0a1a5f-5ff4-83ec-a5d9-347c06a48cdd"
-    session_evidence_ref: >-
-      14-ai-development/work-items/AID-2026-292/session-evidence.md
-    executed_prompt_snapshot_file: >-
-      14-ai-development/work-items/AID-2026-292/prompt-v1.md
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-292/session-evidence.md
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-292/prompt-v1.md
     executed_prompt_sha256: "708f1cc355b95d9fb0b0ca5a06045e5daac69ec52396970a8df475b61af5b9aa"
     executed_prompt_bytes: 4993
     executed_prompt_provenance: NOT_VERIFIED
