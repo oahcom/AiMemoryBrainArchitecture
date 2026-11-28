@@ -269,6 +269,11 @@ session_evidence:
 
     def test_bootstrap_freezes_debt_from_target_base_tree(self):
         self.write_session("AID-101", "ChatGPT-GPT-6")
+        self.write_session(
+            "AID-PF-000",
+            "NOT_RECORDED",
+            status="NOT_RECORDED",
+        )
         base_ref = self.commit_base_tree()
 
         result = self.run_checker(
@@ -287,6 +292,11 @@ session_evidence:
 
     def test_bootstrap_rejects_violation_added_after_target_base(self):
         self.write_session("AID-102", "ChatGPT-GPT-6")
+        self.write_session(
+            "AID-PF-000",
+            "NOT_RECORDED",
+            status="NOT_RECORDED",
+        )
         base_ref = self.commit_base_tree()
         self.write_session("AID-103", "ChatGPT-GPT-6")
 
@@ -317,6 +327,11 @@ session_evidence:
 
     def test_bootstrap_is_idempotent_for_same_base_and_worktree(self):
         self.write_session("AID-105", "ChatGPT-GPT-6")
+        self.write_session(
+            "AID-PF-000",
+            "NOT_RECORDED",
+            status="NOT_RECORDED",
+        )
         base_ref = self.commit_base_tree()
 
         first = self.run_checker("--bootstrap-baseline", "--base-ref", base_ref)
@@ -365,6 +380,382 @@ session_evidence:
         result = self.run_checker("--bootstrap-baseline", "--base-ref", base_ref)
         self.assertEqual(result.returncode, 2)
         self.assertIn("already contains", result.stderr)
+
+    def write_recorded_session(
+        self,
+        name,
+        value,
+        evidence_text="",
+    ):
+        evidence_ref = (
+            f"14-ai-development/work-items/{name}/session-evidence.md"
+        )
+        directory = self.work_items / name
+        directory.mkdir(parents=True, exist_ok=True)
+
+        evidence_path = self.root / evidence_ref
+        evidence_path.parent.mkdir(parents=True, exist_ok=True)
+        evidence_path.write_text(
+            evidence_text,
+            encoding="utf-8",
+        )
+
+        manifest = self.write_manifest(
+            name,
+            f"""
+session_evidence:
+  - implementing_ai_session: "{value}"
+    session_reference_status: RECORDED
+    session_evidence_ref: "{evidence_ref}"
+""",
+        )
+        return manifest
+
+    def run_preflight(self, base_ref):
+        return self.run_checker(
+            "--preflight",
+            "--base-ref",
+            base_ref,
+        )
+
+    # ---------------------------------------------------------------
+    # Session identity preflight
+    # ---------------------------------------------------------------
+
+    def test_preflight_rejects_new_human_readable_label(self):
+        self.write_session(
+            "AID-PF-000",
+            "NOT_RECORDED",
+            status="NOT_RECORDED",
+        )
+        base_ref = self.commit_base_tree()
+        self.write_session("AID-PF-001", "ChatGPT")
+
+        result = self.run_preflight(base_ref)
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("SESSION_UNPARSEABLE", result.stdout)
+        self.assertIn(
+            "SESSION IDENTITY PREFLIGHT RESULT: FAIL",
+            result.stdout,
+        )
+
+    def test_preflight_rejects_new_identity_containing_spaces(self):
+        self.write_session(
+            "AID-PF-000",
+            "NOT_RECORDED",
+            status="NOT_RECORDED",
+        )
+        base_ref = self.commit_base_tree()
+        self.write_session("AID-PF-002", "Session 6")
+
+        result = self.run_preflight(base_ref)
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("SESSION_UNPARSEABLE", result.stdout)
+
+    def test_preflight_rejects_new_not_available_sentinel(self):
+        self.write_session(
+            "AID-PF-000",
+            "NOT_RECORDED",
+            status="NOT_RECORDED",
+        )
+        base_ref = self.commit_base_tree()
+        self.write_session(
+            "AID-PF-003",
+            "NOT_AVAILABLE",
+            status="RECORDED",
+        )
+
+        result = self.run_preflight(base_ref)
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn(
+            "SESSION_RECORDED_SENTINEL",
+            result.stdout,
+        )
+
+    def test_preflight_rejects_new_not_exposed_sentinel(self):
+        self.write_session(
+            "AID-PF-000",
+            "NOT_RECORDED",
+            status="NOT_RECORDED",
+        )
+        base_ref = self.commit_base_tree()
+        self.write_session(
+            "AID-PF-004",
+            "NOT_EXPOSED_BY_PLATFORM",
+            status="RECORDED",
+        )
+
+        result = self.run_preflight(base_ref)
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn(
+            "SESSION_RECORDED_SENTINEL",
+            result.stdout,
+        )
+
+    def test_preflight_rejects_fabricated_uuid_without_evidence(self):
+        self.write_session(
+            "AID-PF-000",
+            "NOT_RECORDED",
+            status="NOT_RECORDED",
+        )
+        base_ref = self.commit_base_tree()
+
+        self.write_recorded_session(
+            "AID-PF-005",
+            UUID_V4,
+            evidence_text=(
+                "This is an implementation session.\n"
+                "No session identifier was recorded.\n"
+            ),
+        )
+
+        result = self.run_preflight(base_ref)
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn(
+            "SESSION_EVIDENCE_ID_MISSING",
+            result.stdout,
+        )
+        self.assertIn(
+            "SESSION IDENTITY PREFLIGHT RESULT: FAIL",
+            result.stdout,
+        )
+
+    def test_preflight_accepts_new_uuid_v4_with_matching_evidence(self):
+        self.write_session(
+            "AID-PF-000",
+            "NOT_RECORDED",
+            status="NOT_RECORDED",
+        )
+        base_ref = self.commit_base_tree()
+
+        self.write_recorded_session(
+            "AID-PF-006",
+            UUID_V4,
+            evidence_text=(
+                f"implementing_ai_session: {UUID_V4}\n"
+            ),
+        )
+
+        result = self.run_preflight(base_ref)
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn(
+            "SESSION IDENTITY PREFLIGHT RESULT: PASS",
+            result.stdout,
+        )
+
+    def test_preflight_accepts_new_uuid_v8_with_matching_evidence(self):
+        self.write_session(
+            "AID-PF-000",
+            "NOT_RECORDED",
+            status="NOT_RECORDED",
+        )
+        base_ref = self.commit_base_tree()
+
+        self.write_recorded_session(
+            "AID-PF-007",
+            UUID_V8_REAL,
+            evidence_text=(
+                f"implementing_ai_session: {UUID_V8_REAL}\n"
+            ),
+        )
+
+        result = self.run_preflight(base_ref)
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_preflight_accepts_new_conv_id_with_matching_evidence(self):
+        self.write_session(
+            "AID-PF-000",
+            "NOT_RECORDED",
+            status="NOT_RECORDED",
+        )
+        base_ref = self.commit_base_tree()
+
+        self.write_recorded_session(
+            "AID-PF-008",
+            CONV_ID,
+            evidence_text=(
+                f"implementing_ai_session: {CONV_ID}\n"
+            ),
+        )
+
+        result = self.run_preflight(base_ref)
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_preflight_accepts_new_not_recorded(self):
+        self.write_session(
+            "AID-PF-000",
+            "NOT_RECORDED",
+            status="NOT_RECORDED",
+        )
+        base_ref = self.commit_base_tree()
+
+        self.write_session(
+            "AID-PF-009",
+            "NOT_RECORDED",
+            status="NOT_RECORDED",
+        )
+
+        result = self.run_preflight(base_ref)
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn(
+            "1 changed entries, 0 violations",
+            result.stdout,
+        )
+
+    def test_preflight_ignores_unchanged_historical_debt(self):
+        # Simulate the 89 existing historical violations on the trusted
+        # base tree. They must not be reclassified as newly introduced.
+        for index in range(89):
+            self.write_session(
+                f"AID-HIST-{index:03d}",
+                f"Legacy Label {index}",
+            )
+
+        self.write_baseline()
+        original_baseline = self.baseline.read_bytes()
+
+        self.write_session(
+            "AID-PF-000",
+            "NOT_RECORDED",
+            status="NOT_RECORDED",
+        )
+        base_ref = self.commit_base_tree()
+
+        result = self.run_preflight(base_ref)
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn(
+            "0 changed entries, 0 violations",
+            result.stdout,
+        )
+        self.assertIn(
+            "SESSION IDENTITY PREFLIGHT RESULT: PASS",
+            result.stdout,
+        )
+
+        # Preflight must not write or expand the baseline.
+        self.assertEqual(
+            original_baseline,
+            self.baseline.read_bytes(),
+        )
+
+    def test_preflight_detects_modified_existing_identity(self):
+        self.write_session(
+            "AID-PF-010",
+            "NOT_RECORDED",
+            status="NOT_RECORDED",
+        )
+
+        self.write_session(
+            "AID-PF-000",
+            "NOT_RECORDED",
+            status="NOT_RECORDED",
+        )
+        base_ref = self.commit_base_tree()
+
+        # Same directory and same entry index, but identity changes.
+        self.write_session(
+            "AID-PF-010",
+            "ChatGPT",
+            status="RECORDED",
+        )
+
+        result = self.run_preflight(base_ref)
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("SESSION_UNPARSEABLE", result.stdout)
+        self.assertIn(
+            "1 changed entries, 1 violations",
+            result.stdout,
+        )
+
+    def test_preflight_ignores_non_identity_field_modification(self):
+        self.write_manifest(
+            "AID-PF-011",
+            f"""
+session_evidence:
+  - implementing_ai_session: "{UUID_V4}"
+    session_reference_status: RECORDED
+    note: original
+""",
+        )
+
+        self.write_session(
+            "AID-PF-000",
+            "NOT_RECORDED",
+            status="NOT_RECORDED",
+        )
+        base_ref = self.commit_base_tree()
+
+        self.write_manifest(
+            "AID-PF-011",
+            f"""
+session_evidence:
+  - implementing_ai_session: "{UUID_V4}"
+    session_reference_status: RECORDED
+    note: changed
+""",
+        )
+
+        result = self.run_preflight(base_ref)
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn(
+            "0 changed entries, 0 violations",
+            result.stdout,
+        )
+
+    def test_preflight_refuses_unverifiable_base(self):
+        self.write_baseline()
+        self.write_session(
+            "AID-PF-000",
+            "NOT_RECORDED",
+            status="NOT_RECORDED",
+        )
+        self.commit_base_tree()
+
+        result = self.run_preflight(
+            "refs/heads/does-not-exist"
+        )
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn(
+            "SESSION IDENTITY PREFLIGHT RESULT: INCOMPLETE",
+            result.stdout,
+        )
+
+    def test_preflight_does_not_expand_baseline(self):
+        self.write_baseline()
+
+        original = self.baseline.read_bytes()
+        self.write_session(
+            "AID-PF-000",
+            "NOT_RECORDED",
+            status="NOT_RECORDED",
+        )
+        base_ref = self.commit_base_tree()
+
+        self.write_session(
+            "AID-PF-012",
+            "ChatGPT",
+        )
+
+        result = self.run_preflight(base_ref)
+
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(
+            original,
+            self.baseline.read_bytes(),
+        )
 
 
 if __name__ == "__main__":
