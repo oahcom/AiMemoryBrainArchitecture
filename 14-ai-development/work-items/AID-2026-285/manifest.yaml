@@ -76,6 +76,8 @@ documentation:
     relationship: reference
   - path: 14-ai-development/work-items/AID-2026-285/session-evidence.md
     relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-285/review-independent-2026-11-27.md
+    relationship: evidence
 
 session_evidence:
   - role: IMPLEMENTATION_SESSION
