@@ -5329,6 +5329,92 @@ def run_security_readme_canonical_status() -> None:
     )
 
 
+def run_symlink_unavailable_self_check() -> None:
+    """T129: unavailable symlink creation skips only dependent cases.
+
+    The sixteen cases that need a symlink are expected to land in SKIPPED and
+    in no other record. The cases that share those functions but do not need a
+    symlink must still execute: a skip that aborts its function erases them,
+    and that erasure is what an exit code cannot show.
+    """
+    from unittest.mock import patch
+
+    print("symlink-unavailable self-check")
+
+    expected_skips = [
+        "T36 directory symlink is rejected as a governed root",
+        "T37 governed_files does not descend into a symlinked root",
+        "T41 symlinked governed file is rejected",
+        "T42 governed file reached through a symlinked parent is rejected",
+        "T49 symlinked backlog root is named in the diagnostic",
+        "T50 symlinked directory inside a backlog root is reported",
+        "T51 symlinked markdown file inside a backlog root is reported",
+        "T51b symlinked bilingual mirror directory is refused by name",
+        "T58 symlinked subdirectory in a normative root is reported",
+        "T59 top-level symlink is reported and does not satisfy the registry",
+        "T60 declared directory that is only a symlink is reported",
+        "T128 DM-14 a symlinked mirror directory is named",
+    ]
+    independent = [
+        "T43 hidden top-level directory must be accounted for",
+        "T44 .git is structurally exempt from the registry",
+        "T45 backlog count disagreeing with the disk is an error",
+        "T46 backlog count that is not an integer is an error",
+        "T47 backlog documents are actually scanned",
+        "T52 backlog count equals the number of files the scan returns",
+        "T61 a same-named key elsewhere is not reported as the forbidden path",
+    ]
+
+    result_start = len(RESULTS)
+    skipped_start = len(SKIPPED)
+    unexpected_start = len(UNEXPECTED_SKIPS)
+    names_before = dict(RESULTS_BY_NAME)
+
+    ok = False
+    try:
+        with redirect_stdout(io.StringIO()):
+            with patch.object(
+                Path, "symlink_to",
+                side_effect=OSError(1314, "symlink creation unavailable"),
+            ):
+                run_symlink_boundary()
+                run_scan_boundary()
+                run_unified_scan()
+                run_unbound_emissions()
+
+        new_results = RESULTS[result_start:]
+        new_skips = SKIPPED[skipped_start:]
+        new_unexpected = UNEXPECTED_SKIPS[unexpected_start:]
+        result_names = set(RESULTS_BY_NAME) - set(names_before)
+        ok = (
+            new_skips == expected_skips
+            and len(new_results) > 0
+            and not new_unexpected
+            and not (set(expected_skips) & result_names)
+            and all(RESULTS_BY_NAME.get(name) is True for name in independent)
+        )
+        detail = (
+            f"  skips={new_skips}; unexpected={new_unexpected}; "
+            f"dependent_results={sorted(set(expected_skips) & result_names)}; "
+            f"missing_dependent={sorted(set(expected_skips) - set(new_skips))}; "
+            f"independent={[RESULTS_BY_NAME.get(name) for name in independent]}"
+        )
+    except Exception as exc:  # noqa: BLE001 - a raised check is a failed check
+        detail = f"  self-check raised {type(exc).__name__}: {exc}"
+    finally:
+        del RESULTS[result_start:]
+        del SKIPPED[skipped_start:]
+        del UNEXPECTED_SKIPS[unexpected_start:]
+        RESULTS_BY_NAME.clear()
+        RESULTS_BY_NAME.update(names_before)
+
+    record(
+        "T129 symlink-unavailable cases skip without erasing independent cases",
+        ok,
+        detail,
+    )
+
+
 def main() -> int:
     print("check_document_management self-check")
     runners = (
@@ -5372,6 +5458,7 @@ def main() -> int:
         run_single_entry_callers,
         run_fault_injection,
         run_unbound_emissions,
+        run_symlink_unavailable_self_check,
         run_schema_agreement,
     )
     for runner in runners:

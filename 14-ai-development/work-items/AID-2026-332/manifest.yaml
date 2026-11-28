@@ -1,0 +1,81 @@
+work_item_id: AID-2026-332
+title: "Split GOV-DOC-001 owner-namespace and governance-operation checker steps"
+class: GATE/TEST
+risk: R2
+risk_rationale: >-
+  The change modifies CI workflow orchestration for two existing governance
+  checks. The intended scope is limited to separating their reporting and
+  failure boundaries; it does not change either checker implementation,
+  required context configuration, or the underlying governance policy.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner acceptance not recorded"
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "b333ad1cf0e86992621d41cc1dac87eb3141353c"
+
+# Prompt-to-commit trace pins, measured from the committed prompt snapshot.
+prompt_sha256: "25781bde559dafb939516aec3f09ca5f9ac1a0739b354d0d6d74c585fe9830c0"
+prompt_file: "14-ai-development/work-items/AID-2026-332/prompt-v1.md"
+prompt_file_blob_sha: "b6cecc40033670ee6b0a8d9a8cbff6b1a6b21588"
+prompt_file_commit_sha: "13fffcd9f9fb6ddfd160eb4d1a256f2ffad15940"
+
+scope:
+  objective: >-
+    Split the combined GOV-DOC-001 workflow step in
+    .github/workflows/bilingual-docs.yml into two independently named steps:
+    one for #1196 owner-namespace references and one for #1208
+    governance-operation traceability, so CI reports distinct named results
+    for the two checks. Do not change either checker implementation, the
+    required context names, or branch protection.
+  files_changed:
+    - .github/workflows/bilingual-docs.yml
+
+evidence: 14-ai-development/work-items/AID-2026-332/evidence.md
+
+documentation:
+  - path: .github/workflows/bilingual-docs.yml
+    relationship: code
+  - path: 14-ai-development/work-items/AID-2026-332/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-332/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-332/session-evidence.md
+    relationship: evidence
+
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1237"
+    implementing_ai_session: "6b08ffa5-bccc-83ec-ae24-ea58c1d913b9"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-332/session-evidence.md
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-332/prompt-v1.md
+    executed_prompt_sha256: "25781bde559dafb939516aec3f09ca5f9ac1a0739b354d0d6d74c585fe9830c0"
+    executed_prompt_bytes: 4761
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: "RECORDED"
+
+implementation:
+  status: IN_PROGRESS
+  implementation_commit_sha: "5be272451b7d90077f8f78befee26033bf35cc36"
+  summary: >-
+    Split the combined GOV-DOC-001 workflow step into two independently named
+    steps. The #1196 step runs its owner-namespace unit test and checker; the
+    #1208 step runs its governance-operation unit test and checker. Each step
+    fails if either its test command or checker command fails. Local workflow
+    execution is unavailable in the Windows PowerShell environment, and no
+    CI success is claimed.
+  files_changed:
+    - .github/workflows/bilingual-docs.yml
+  tests:
+    - "python3 -m unittest -v test_check_owner_namespace_references.py (from tests/) — expected exit 0; not run locally."
+    - "python3 scripts/check_owner_namespace_references.py --check — expected exit 0; not run locally."
+    - "python3 -m unittest -v test_check_governance_operation_traceability.py (from tests/) — expected exit 0; not run locally."
+    - "python3 scripts/check_governance_operation_traceability.py --check — expected exit 0; not run locally."
+
+pull_request: 1504
+pull_request_url: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1504"
