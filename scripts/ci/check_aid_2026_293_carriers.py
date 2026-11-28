@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-"""Structural carrier validator for AID-2026-293.
+"""Structural and source-evidence validator for AID-2026-293.
 
 Exit codes:
-  0: all structural rules pass
+  0: all carrier rules pass
   1: one or more carrier rules fail
-  2: invalid CLI arguments or unreadable input
+  2: invalid CLI arguments or unreadable YAML input
 """
 from __future__ import annotations
 
 import argparse
 import re
 import sys
+import unicodedata
 from pathlib import Path
 from typing import Any
 
@@ -25,6 +26,22 @@ MODULE_IDS = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "Storage"}
 DIMENSIONS = {"change_surface", "coupling", "irreversibility", "concurrency_state"}
 VALID_EVIDENCE_STATES = {"PATH_LINE", "NO_EVIDENCE_FOUND", "PENDING_SEARCH_EXECUTION"}
 
+_TYPO = {
+    ord(c): r
+    for c, r in zip(
+        "\u2018\u2019\u201a\u201b\u201c\u201d\u201e\u201f\u2013\u2014\u2015\u2212\u00a0",
+        "'" * 4 + '"' * 4 + "-" * 4 + " ",
+    )
+}
+_ZW = dict.fromkeys(map(ord, "\u200b\u200c\u200d\u200e\u200f\u2060\ufeff"))
+
+
+def norm(s: str) -> str:
+    """Normalize a source quote for whole-line comparison."""
+    s = unicodedata.normalize("NFKC", s or "")
+    s = s.translate(_TYPO).translate(_ZW)
+    return re.sub(r"\s+", " ", s).strip()
+
 
 def issue(rule: str, object_id: str, reason: str) -> str:
     return f"{rule} {object_id} {reason}"
@@ -36,7 +53,131 @@ def is_path_line(value: Any) -> bool:
     return re.fullmatch(r".+:\d+", value.strip()) is not None
 
 
-def validate(data: Any) -> list[str]:
+def validate_source_evidence(
+    evidence: Any,
+    object_id: str,
+    root: Path | None,
+) -> list[str]:
+    """Fail closed when a path, line number, or whole-line quote is invalid."""
+    errors: list[str] = []
+
+    if not isinstance(evidence, dict):
+        return [
+            issue("R8_PATH_EXISTS", object_id, "evidence entry must be a mapping"),
+            issue("R9_LINE_IN_RANGE", object_id, "evidence entry must be a mapping"),
+            issue("R10_QUOTE_MATCHES_LINE", object_id, "evidence entry must be a mapping"),
+        ]
+
+    path_line = evidence.get("path_line")
+    quote = evidence.get("quote")
+
+    parsed = False
+    source_path: Path | None = None
+    line_number: int | None = None
+
+    if isinstance(path_line, str):
+        match = re.fullmatch(r"(.+):(\d+)", path_line.strip())
+        if match:
+            raw_path, raw_line = match.groups()
+            try:
+                line_number = int(raw_line)
+                candidate = Path(raw_path)
+                if root is not None:
+                    source_path = (root / candidate).resolve()
+                    source_path.relative_to(root)
+                    parsed = True
+            except (ValueError, OSError, RuntimeError):
+                parsed = False
+
+    if not parsed or source_path is None:
+        errors.append(
+            issue(
+                "R8_PATH_EXISTS",
+                object_id,
+                "path_line must resolve to a path inside --root",
+            )
+        )
+        errors.append(
+            issue(
+                "R9_LINE_IN_RANGE",
+                object_id,
+                "path_line cannot be resolved beneath --root",
+            )
+        )
+        errors.append(
+            issue(
+                "R10_QUOTE_MATCHES_LINE",
+                object_id,
+                "source line cannot be read for quote comparison",
+            )
+        )
+        return errors
+
+    if not source_path.is_file():
+        errors.append(
+            issue("R8_PATH_EXISTS", object_id, f"file does not exist: {path_line}")
+        )
+        errors.append(
+            issue("R9_LINE_IN_RANGE", object_id, f"source file is unavailable: {path_line}")
+        )
+        errors.append(
+            issue(
+                "R10_QUOTE_MATCHES_LINE",
+                object_id,
+                f"source file is unavailable: {path_line}",
+            )
+        )
+        return errors
+
+    try:
+        source_text = source_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as exc:
+        reason = f"cannot read UTF-8 source file: {exc}"
+        errors.append(issue("R9_LINE_IN_RANGE", object_id, reason))
+        errors.append(issue("R10_QUOTE_MATCHES_LINE", object_id, reason))
+        return errors
+
+    lines = source_text.splitlines()
+
+    if line_number is None or line_number < 1 or line_number > len(lines):
+        errors.append(
+            issue(
+                "R9_LINE_IN_RANGE",
+                object_id,
+                f"line number is outside 1..{len(lines)}: {path_line}",
+            )
+        )
+        errors.append(
+            issue(
+                "R10_QUOTE_MATCHES_LINE",
+                object_id,
+                f"cannot compare quote because line is out of range: {path_line}",
+            )
+        )
+        return errors
+
+    if not isinstance(quote, str) or not quote.strip():
+        errors.append(
+            issue("R10_QUOTE_MATCHES_LINE", object_id, "quote must be a non-empty string")
+        )
+        return errors
+
+    expected = norm(quote.replace(r"\|", "|"))
+    actual = norm(lines[line_number - 1])
+
+    if expected != actual:
+        errors.append(
+            issue(
+                "R10_QUOTE_MATCHES_LINE",
+                object_id,
+                f"quote does not equal the complete source line: {path_line}",
+            )
+        )
+
+    return errors
+
+
+def validate(data: Any, root: Path | None = None) -> list[str]:
     errors: list[str] = []
 
     if not isinstance(data, dict):
@@ -71,6 +212,7 @@ def validate(data: Any) -> list[str]:
             if not isinstance(risk.get("quote"), str) or not risk["quote"].strip():
                 errors.append(issue("R3_RISK_EVIDENCE_STATE", rid,
                                     "PATH_LINE requires a non-empty verbatim quote"))
+            errors.extend(validate_source_evidence(risk, rid, root))
         elif state == "NO_EVIDENCE_FOUND":
             if not isinstance(risk.get("search_command"), str) or not risk["search_command"].strip():
                 errors.append(issue("R3_RISK_EVIDENCE_STATE", rid,
@@ -85,6 +227,21 @@ def validate(data: Any) -> list[str]:
             if not isinstance(risk.get("planned_search_command"), str) or not risk["planned_search_command"].strip():
                 errors.append(issue("R3_RISK_EVIDENCE_STATE", rid,
                                     "pending state requires planned_search_command"))
+
+        if "additional_evidence" in risk:
+            additional = risk["additional_evidence"]
+            if not isinstance(additional, list):
+                errors.append(
+                    issue(
+                        "R8_PATH_EXISTS",
+                        rid,
+                        "additional_evidence must be a list",
+                    )
+                )
+            else:
+                for index, evidence in enumerate(additional):
+                    evidence_id = f"{rid}.additional_evidence[{index}]"
+                    errors.extend(validate_source_evidence(evidence, evidence_id, root))
 
     modules = data.get("modules")
     if not isinstance(modules, list):
@@ -144,20 +301,21 @@ def main(argv: list[str] | None = None) -> int:
     data_path = Path(args.data)
     if not data_path.is_absolute():
         data_path = root / data_path
+
     try:
         raw = yaml.safe_load(data_path.read_text(encoding="utf-8"))
-    except (OSError, yaml.YAMLError) as exc:
+    except (OSError, UnicodeError, yaml.YAMLError) as exc:
         print(f"ERROR: cannot read YAML data: {exc}", file=sys.stderr)
         return 2
 
-    errors = validate(raw)
+    errors = validate(raw, root=root)
     if errors:
         for item in errors:
             print(item)
         return 1
 
     print("AID-2026-293 CARRIER CHECK PASS")
-    print("R1-R7: 7/7 structural rules satisfied")
+    print("R1-R10: 10/10 structural and source-evidence rules satisfied")
     return 0
 
 

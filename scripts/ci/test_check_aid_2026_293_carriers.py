@@ -1,10 +1,12 @@
+import copy
 import sys
+import tempfile
+import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+import yaml
 
-import copy
-import unittest
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from check_aid_2026_293_carriers import validate
 
@@ -43,12 +45,34 @@ def valid_data():
 
 
 class CarrierRulesTest(unittest.TestCase):
-    def assert_rule(self, data, rule):
-        errors = validate(data)
+    def assert_rule(self, data, rule, root=None):
+        errors = validate(data, root=root)
         self.assertTrue(any(item.startswith(rule + " ") for item in errors), errors)
+
+    def path_line_fixture(self, temp_root, path_line, quote):
+        data = valid_data()
+        data["risks"][0] = {
+            "id": "R-01",
+            "evidence_state": "PATH_LINE",
+            "path_line": path_line,
+            "quote": quote,
+        }
+        return data
 
     def test_positive(self):
         self.assertEqual(validate(valid_data()), [])
+
+        repo_root = Path(__file__).resolve().parents[2]
+        carrier_path = (
+            repo_root
+            / "14-ai-development"
+            / "work-items"
+            / "AID-2026-293"
+            / "carrier-data.yaml"
+        )
+        self.assertTrue(carrier_path.is_file(), f"missing real carrier file: {carrier_path}")
+        carrier_data = yaml.safe_load(carrier_path.read_text(encoding="utf-8"))
+        self.assertEqual(validate(carrier_data, root=repo_root), [])
 
     def test_negative_r1_wrong_work_item(self):
         data = valid_data()
@@ -90,6 +114,40 @@ class CarrierRulesTest(unittest.TestCase):
         data = valid_data()
         data["statuses"]["ac8_independent_review"] = "APPROVED"
         self.assert_rule(data, "R7_AC6_AC8_PENDING")
+
+    def test_negative_r8_source_file_missing(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            data = self.path_line_fixture(
+                root,
+                "missing/source.md:1",
+                "A source line that does not exist.",
+            )
+            self.assert_rule(data, "R8_PATH_EXISTS", root=root)
+
+    def test_negative_r9_line_out_of_range(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "source.md"
+            source.write_text("The only source line.\n", encoding="utf-8")
+            data = self.path_line_fixture(
+                root,
+                "source.md:2",
+                "The only source line.",
+            )
+            self.assert_rule(data, "R9_LINE_IN_RANGE", root=root)
+
+    def test_negative_r10_quote_not_equal_to_whole_line(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "source.md"
+            source.write_text("The complete source line has extra words.\n", encoding="utf-8")
+            data = self.path_line_fixture(
+                root,
+                "source.md:1",
+                "The complete source line",
+            )
+            self.assert_rule(data, "R10_QUOTE_MATCHES_LINE", root=root)
 
 
 if __name__ == "__main__":
