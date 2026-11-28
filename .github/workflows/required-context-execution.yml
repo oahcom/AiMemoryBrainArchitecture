@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Self-check the audit
+        run: python3 scripts/ci/test_check_required_context_execution.py
       - name: Audit required context execution
         env:
           GH_TOKEN: ${{ github.token }}
