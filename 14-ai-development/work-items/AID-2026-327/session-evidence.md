@@ -19,7 +19,7 @@ document_metadata:
       last_verified_date: "2026-11-28"
       last_verification_note: "Local suite passes; independent review is pending."
     usage_status: Active
-    modification_status: New
+    modification_status: Modified
     supersession:
       supersedes: []
       supersession_reason: null
