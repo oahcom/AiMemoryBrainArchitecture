@@ -1,3 +1,6 @@
+# Issue #1462: this file is anchored to the PR base commit by gate_ratchet.py.
+# Candidate changes may remove existing entries but may not add entries.
+# A baseline addition is a failure, even when the underlying checker reports it.
 # AID-2026-268 manifest blob-pin baseline
 # Current baseline contains exactly 4 observed failures.
 # The other 11 previously recorded entries have been fixed and removed.

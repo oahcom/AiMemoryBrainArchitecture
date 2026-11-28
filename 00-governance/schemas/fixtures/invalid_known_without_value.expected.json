@@ -1,0 +1,4 @@
+{
+  "valid": false,
+  "reason": "KNOWN requires a value; a KNOWN field with no value is an unbacked claim"
+}
