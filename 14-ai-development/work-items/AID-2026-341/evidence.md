@@ -168,6 +168,25 @@ Expected strict `TRACEABLE` count: 0, based on the supplied absence of immutable
 
 `verification_status` is `Unverified`.
 
-Coordinator-local execution (not CI) is recorded above. PR #1494 has been opened. No merge or Owner acceptance is claimed by this record.
+Coordinator-local execution (not CI) is recorded above. PR #1520 is the open rebuild of the closed PR #1494. No merge or Owner acceptance is claimed by this record.
 
 The coordinator must supply the actual exit codes and output from the revised commands before any verification status is changed.
+
+## 8. Rebuild under AID-2026-341
+
+The closed PR #1494 is rebuilt as PR #1520 under AID-2026-341, because AID-2026-327 is occupied on `main` by #1495, which shares only the directory name and no file content. The rename is mechanical: 26 identifier and path replacements across these four files.
+
+Two defects made #1494 red; both are fixed in this rebuild:
+
+- `Prompt-to-commit trace (ratchet)` failed with `check_prompt_commit_trace.py: error: unrecognized arguments: --emit-baseline` (exit 2). The rewrite had dropped the snapshot CLI contract that `.github/workflows/gates.yml` uses; `--emit-baseline` is restored with the snapshot shape the ratchet consumes.
+- `Session Evidence` failed with `MISSING: PR description: missing Related issue(s)` (exit 1). PR #1520 declares governing Issue #1427, the AI-assisted status, and this session evidence file.
+
+Coordinator-local execution (EXECUTED_BY_COORDINATOR_NOT_IN_CI) at code commit `5a4bb16eb6ccb97d1ef506f6669156139dc1270a`, this branch's last commit that changes the checker or its tests; later commits in this branch only edit these records:
+
+| Command | Result |
+|---|---|
+| `python -m unittest scripts.ci.test_check_prompt_commit_trace -v` | 14 tests, OK, exit 0 |
+| `python scripts/ci/check_prompt_commit_trace.py --root . --commit 5a4bb16eb6ccb97d1ef506f6669156139dc1270a --base 5a4bb16eb6ccb97d1ef506f6669156139dc1270a --audit-only` | `manifests=160`, `PRIMARY TRACEABLE=3`, exit 0 |
+| `python scripts/ci/check_work_item_manifest_schema.py --tree HEAD --baseline 14-ai-development/reports/work-item-manifest-ac4-baseline.json` | 0 new regressions, exit 0 |
+
+`AID-2026-341` itself audits as `PINNED_OK x ABSENT`, `NO_TRACE`, `initial_registration_eligible: true`. Its recorded prompt snapshot is pinned (6867 bytes, SHA-256 `abb006235afa894a590677910daa6ed36218a4432eff735e21614e0f0541180d`, blob `e354421418bbacf46d643042994d801fe9a98b82`), and no implementation or merge pin is declared, as the initial-registration exception requires. The pin covers the recorded snapshot only; the original dispatch payload remains `NOT_VERIFIED`.
