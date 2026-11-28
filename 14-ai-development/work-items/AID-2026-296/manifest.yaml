@@ -1,0 +1,123 @@
+work_item_id: AID-2026-296
+title: "Treat unbound blob_sha256 declarations as violations in the manifest blob-pin gate"
+class: GATE/CI/TEST
+risk: R1
+risk_rationale: >-
+  Strengthens only the existing manifest blob-pin checker, its unit suite and the
+  sed filter of the ratchet step that already runs inside the existing
+  "Repository hygiene (hard gate)" job. No new job, no new required context, no
+  branch-protection change and no dependency is added. The four records the new
+  rule flags are pre-existing on main; they are reported, not baselined away.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: a0500d5196dc990d899d8ccaca2e270faaf29efc
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: USER_AUTHORIZED_DELEGATED_REQUEST
+identifier_allocation:
+  id_status: PROVISIONAL
+  observed_main: a0500d5196dc990d899d8ccaca2e270faaf29efc
+  assigned_id: AID-2026-296
+  allocation_rule: >-
+    Enumerated every directory under 14-ai-development/work-items on
+    origin/main a0500d519 and grepped the whole tree for "AID-2026-296": no
+    directory and no occurrence, in INDEX.md or anywhere else. The ID is
+    therefore unoccupied at allocation time.
+  recheck_rule: >-
+    Recheck the directory and the all-state PR listing immediately before
+    opening or updating the PR; if the ID has been claimed in the meantime,
+    take the first free identifier above 296 and record the reassignment.
+scope:
+  objective: >-
+    Stop treating a blob_sha256 declaration with no bindable path as an
+    out-of-scope field. Emit one UNBOUND_BLOB_SHA256 finding per such
+    declaration, classify it as a violation, and return a non-zero violation
+    exit code, per PR #1417 comment 7212343821.
+  changes:
+    - path: "scripts/ci/check_manifest_blob_pins.py"
+      detail: >-
+        Walk every mapping for a blob_sha256 / *_blob_sha256 key. Bind a path
+        from the same mapping (base_path, base_file, a bare base value that
+        reads as a path, then path/file). Bound digests are verified as SHA-256
+        over committed bytes and report MISMATCH or PATH_MISSING; an unbound
+        digest reports UNBOUND_BLOB_SHA256 with the manifest path, JSON pointer,
+        field name and digest value, and forces exit 1. The summary line gains
+        unbound=N.
+    - path: "scripts/ci/test_check_manifest_blob_pins.py"
+      detail: >-
+        Keep every existing test and add the four required cases: bound and
+        matching, bound and mismatched (MISMATCH), bound with an absent target
+        (PATH_MISSING), and a digest with no path (UNBOUND_BLOB_SHA256, exit 1).
+    - path: ".github/workflows/repository-hygiene.yml"
+      detail: >-
+        Add /^UNBOUND_BLOB_SHA256 /p to the sed filter of the existing ratchet
+        step, so the new finding class reaches the ratchet instead of bypassing
+        it. No step is added, renamed or re-required.
+    - path: "14-ai-development/work-items/AID-2026-296/"
+      detail: "Record manifest, evidence, prompt snapshot and session evidence."
+    - path: "14-ai-development/work-items/INDEX.md"
+      detail: "Register AID-2026-296."
+  untouched:
+    - "scripts/ci/baselines/manifest-blob-pins.txt"
+    - "all other .github/workflows files"
+    - "GitHub branch protection, rulesets and required contexts"
+    - "PR #1426 and its branch"
+    - "all existing work-item records"
+non_goals:
+  - "Baselining the newly found unbound declarations to keep the gate green"
+  - "Changing the malformed-array handling that #1426 carries"
+  - "Rebinding or rewriting AID-2026-001's measurement_basis records"
+  - "Adding a new required check context or a new workflow job"
+evidence:
+  record: "14-ai-development/work-items/AID-2026-296/evidence.md"
+  prompt: "14-ai-development/work-items/AID-2026-296/prompt-v1.md"
+  session: "14-ai-development/work-items/AID-2026-296/session-evidence.md"
+documentation:
+  - path: "scripts/ci/check_manifest_blob_pins.py"
+    relationship: implementation
+  - path: "scripts/ci/test_check_manifest_blob_pins.py"
+    relationship: implementation
+  - path: "14-ai-development/work-items/AID-2026-296/evidence.md"
+    relationship: evidence
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1350"
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-296/prompt-v1.md"
+    executed_prompt_sha256: "afa738adea5614df85ef5b14133373468a116a487a05b600472f70dd0058269a"
+    executed_prompt_bytes: 4399
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-296/session-evidence.md"
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    The checker now emits one UNBOUND_BLOB_SHA256 finding per blob_sha256
+    declaration that has no bindable path and exits 1, instead of skipping the
+    field. On main a0500d519 this adds four findings, all in
+    AID-2026-001.measurement_basis, and the ratchet reports 15 baseline items
+    against 19 current, so the existing hard gate turns red on a real,
+    previously excluded violation. The baseline was not touched.
+  files_changed:
+    - "scripts/ci/check_manifest_blob_pins.py"
+    - "scripts/ci/test_check_manifest_blob_pins.py"
+    - ".github/workflows/repository-hygiene.yml"
+    - "14-ai-development/work-items/AID-2026-296/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-296/evidence.md"
+    - "14-ai-development/work-items/AID-2026-296/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-296/session-evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "Bound blob_sha256 with a matching digest: PASS, exit 0."
+    - "Bound blob_sha256 with a wrong digest: MISMATCH, exit 1."
+    - "Bound blob_sha256 whose target is absent: PATH_MISSING, exit 1."
+    - "Digest with no path: UNBOUND_BLOB_SHA256, exit 1."
+    - "All 13 pre-existing blob-pin tests still pass (17 total)."

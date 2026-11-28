@@ -383,5 +383,95 @@ class BlobPinsTest(unittest.TestCase):
         self.assertNotIn("MISMATCH related_evidence[0].en_mirror path=related-zh.md", out)
 
 
+class UnboundBlobSha256Test(unittest.TestCase):
+    """PR #1417 comment 7212343821: an unbound blob_sha256 is a violation."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        git(self.root, "init", "-q")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def run_gate(self):
+        p = subprocess.run([sys.executable, str(GATE), "--root", str(self.root),
+                            "--commit", "HEAD"], text=True, capture_output=True)
+        return p.returncode, p.stdout, p.stderr
+
+    def commit_manifest(self, manifest, extra=None):
+        files = {"14-ai-development/work-items/AID-2026-900/manifest.yaml": manifest}
+        files.update(extra or {})
+        return commit_tree(self.root, files)
+
+    def test_bound_blob_sha256_with_matching_digest_passes(self):
+        data = b"bound artifact bytes\n"
+        manifest = ("work_item_id: AID-2026-900\n"
+                    "artifact_pins:\n"
+                    "  model_path: model.md\n"
+                    f"  model_blob_sha256: \"{hashlib.sha256(data).hexdigest()}\"\n")
+        self.commit_manifest(manifest, {"model.md": data})
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 0, out + err)
+        self.assertIn("pins=1 ok=1 mismatch=0 path_missing=0 incomplete=0 unbound=0", out)
+        self.assertNotIn("UNBOUND_BLOB_SHA256", out)
+
+    def test_bound_blob_sha256_with_wrong_digest_is_mismatch(self):
+        data = b"bound artifact bytes\n"
+        wrong = "0" * 64
+        manifest = ("work_item_id: AID-2026-900\n"
+                    "artifact_pins:\n"
+                    "  model_path: model.md\n"
+                    f"  model_blob_sha256: \"{wrong}\"\n")
+        self.commit_manifest(manifest, {"model.md": data})
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 1, out + err)
+        self.assertIn(
+            f"MISMATCH blob_sha256 manifest=14-ai-development/work-items/AID-2026-900/"
+            f"manifest.yaml pointer=/artifact_pins/model_blob_sha256 path=model.md "
+            f"declared={wrong} actual={hashlib.sha256(data).hexdigest()}",
+            out,
+        )
+        self.assertNotIn("UNBOUND_BLOB_SHA256", out)
+
+    def test_bound_blob_sha256_with_missing_target_is_path_missing(self):
+        digest = "1" * 64
+        manifest = ("work_item_id: AID-2026-900\n"
+                    "artifact_pins:\n"
+                    "  model_path: absent.md\n"
+                    f"  model_blob_sha256: \"{digest}\"\n")
+        self.commit_manifest(manifest)
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 1, out + err)
+        self.assertIn(
+            "PATH_MISSING blob_sha256 manifest=14-ai-development/work-items/AID-2026-900/"
+            f"manifest.yaml pointer=/artifact_pins/model_blob_sha256 path=absent.md "
+            f"declared={digest}",
+            out,
+        )
+        self.assertNotIn("UNBOUND_BLOB_SHA256", out)
+
+    def test_digest_without_path_is_unbound_and_fails(self):
+        digest = "8324ec551749c2d50067967e4a445b26a6683008a4fa52e02da02a9976417a15"
+        manifest = ("work_item_id: AID-2026-900\n"
+                    "measurement_basis:\n"
+                    f"  model_blob_sha256_lf: \"{digest}\"\n")
+        self.commit_manifest(manifest)
+
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 1, out + err)
+        self.assertIn(
+            "UNBOUND_BLOB_SHA256 manifest=14-ai-development/work-items/AID-2026-900/"
+            "manifest.yaml pointer=/measurement_basis/model_blob_sha256_lf "
+            f"field=model_blob_sha256_lf declared={digest}",
+            out,
+        )
+        self.assertIn("unbound=1", out)
+        self.assertNotIn("PATH_MISSING", out)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
