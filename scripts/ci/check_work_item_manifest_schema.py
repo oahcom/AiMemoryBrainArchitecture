@@ -1216,6 +1216,15 @@ def run_legacy_governance(args: argparse.Namespace) -> int:
         round(100.0 * migrated_or_accepted / len(baseline_keys), 2)
         if baseline_keys else 100.0
     )
+
+    ledger_covered = sum(
+        1 for key in baseline_keys
+        if key in ledger_entries
+    )
+    ledger_coverage_pct = (
+        round(100.0 * ledger_covered / len(baseline_keys), 2)
+        if baseline_keys else 100.0
+    )
     no_new = not new_keys
 
     report = {
@@ -1232,6 +1241,7 @@ def run_legacy_governance(args: argparse.Namespace) -> int:
         "legacy_regressions": len(regressions),
         "legacy_ledger_entries": len(ledger_entries),
         "legacy_disposition": disposition_pct,
+        "legacy_ledger_coverage": ledger_coverage_pct,
         "no_new_legacy_violations": no_new,
         "ledger_errors": ledger_errors,
     }
