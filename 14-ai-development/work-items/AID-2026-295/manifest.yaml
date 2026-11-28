@@ -59,11 +59,11 @@ implementation:
   pull_request: 1503
   summary: >-
     Adds the registry record schema, a JSONL-emitting validator with the
-    specification's exit-code contract, 41 regression cases over throwaway Git
+    specification's exit-code contract, 64 regression cases over throwaway Git
     repositories, one workflow job that runs the suite, the self-test and the
     validator, and one exact-path admission rule so the schema can land. INDEX
-    projection is deferred to phase D, so this change writes no INDEX row and
-    reports the deferral explicitly.
+    projection is deferred to phase D; this change writes only the single
+    INDEX.md registration row for the work item itself.
   files_changed:
     - 00-governance/schemas/work-item-registry.schema.json
     - scripts/ci/check_work_item_registry.py
@@ -71,6 +71,7 @@ implementation:
     - scripts/ci/check_repository_hygiene.py
     - scripts/test_check_repository_hygiene.py
     - .github/workflows/gates.yml
+    - 14-ai-development/work-items/INDEX.md
     - 14-ai-development/work-items/AID-2026-295/manifest.yaml
     - 14-ai-development/work-items/AID-2026-295/session-evidence.md
     - 14-ai-development/work-items/AID-2026-295/prompt-v1.md
