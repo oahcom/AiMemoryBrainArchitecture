@@ -194,7 +194,7 @@ session_evidence:
     implementing_ai_session: owner-proxy-2026-11-26
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-102/prompt-v1.md
     executed_prompt_sha256: 468a1d4fd8f43d81c8ffba081afd46497b54a2b427849838946163785716072d
-    executed_prompt_bytes: 4470
+    executed_prompt_bytes: 4412
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-102/session-evidence-1278.md

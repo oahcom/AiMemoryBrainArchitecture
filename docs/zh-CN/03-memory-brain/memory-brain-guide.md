@@ -1,9 +1,43 @@
+---
+document_metadata:
+  domain: architecture
+  role: guide
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      evidence_reference: []
+    evidence_verification:
+      verification_status: Unverified
+      last_verification_note: "Front matter added under AID-2026-342 so the mirror names a classified canonical source; the source-revision pointer now names the adjudicated canonical document instead of a movable branch name."
+    usage_status: Active
+    modification_status: Modified
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "Memory Brain architecture guide"
+    canonical_scope_id: architecture/memory-brain-guide
+    canonical_scope_keywords:
+      - memory-brain
+      - guide
+      - forget-fence
+      - cursor
+    canonical_conflict_status: None
+    normative_status: Informative
+  bilingual_counterpart:
+    source: "03-memory-brain/memory-brain-guide.md"
+    en: "docs/en/03-memory-brain/memory-brain-guide.md"
+    zh-CN: null
+  steward: "user-authorized operator (delegated by account owner)"
+---
+
 # 权威记忆大脑架构指南
 
 - 文档 ID：DOC-BRAIN-001
 - 版本：1.0
 - Owner：D — Memory Brain
-- 源版本：D 分支 session-d-memory-brain-2026-11-16，包含 Forget Fence 和 Cursor 契约
+- 源规范：[规范源规范](../../../03-memory-brain/memory-brain-overview.md)
+- 源版本：b991f61e412d5cf21824e3ca43b315c3af5f0b4b
 - 对应英文：[Canonical Memory Brain Architecture Guide](../../en/03-memory-brain/memory-brain-guide.md)
 - 状态：解释性指南；跨模块执行和实现证据仍受集成门禁约束
 
