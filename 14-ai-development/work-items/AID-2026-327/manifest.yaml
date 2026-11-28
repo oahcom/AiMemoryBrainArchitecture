@@ -66,7 +66,7 @@ scope:
     - "Claiming formal approval, independent review, CI acceptance, or downstream consumer acceptance."
 carrier:
   branch: "docs/aid-2026-327-d10-cursor-authority"
-  pull_request: PENDING
+  pull_request: "#1495"
   merge_sha: PENDING
   merge_method: merge
   required_contexts: PENDING
