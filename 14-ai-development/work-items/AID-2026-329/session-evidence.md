@@ -219,3 +219,17 @@ scope.
 The two negative-test outcomes, final diff hygiene, final commit identity,
 independent review, and Owner acceptance require their own recorded
 evidence. This document does not claim those outcomes in advance.
+
+## Session role / use case
+
+This was the implementation session for Work Item AID-2026-329, carrying out the #1268 document-management test count-contract change. The recorded role is IMPLEMENTATION_SESSION. The work was limited to the test-count accounting contract in `scripts/test_check_document_management.py`; the #1438 symlink-unavailability regression remained out of scope.
+
+## Actual AI input
+
+The exact implementation prompt snapshot supplied for this session is preserved verbatim in `14-ai-development/work-items/AID-2026-329/prompt-v1.md`. That file is the prompt input artifact referenced by this Work Item's manifest; this section points to the retained source rather than paraphrasing it.
+
+## AI-visible output
+
+NOT_RECORDED
+
+The verbatim AI-visible response/output transcript was not captured in the supplied session record. This status records that absence explicitly. The resulting implementation scope and operator-measured test outputs are documented separately in `14-ai-development/work-items/AID-2026-329/evidence.md`; they are not represented here as a verbatim model response.
