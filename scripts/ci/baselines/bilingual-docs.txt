@@ -1,3 +1,5 @@
+# Issue #1462: this baseline is anchored to the PR base commit.
+# Candidate changes may remove existing entries but may not add entries.
 00-governance/reports/gov-doc-001-full-scan-2026-11-20.md
 06-memory-context/context-architecture.md
 06-memory-context/context-budget-and-sufficiency.md
