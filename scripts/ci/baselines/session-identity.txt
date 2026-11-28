@@ -13,6 +13,7 @@ SESSION_RECORDED_SENTINEL 14-ai-development/work-items/AID-2026-260/manifest.yam
 SESSION_RECORDED_SENTINEL 14-ai-development/work-items/AID-2026-267/manifest.yaml#1
 SESSION_RECORDED_SENTINEL 14-ai-development/work-items/AID-2026-281/manifest.yaml#1
 SESSION_RECORDED_SENTINEL 14-ai-development/work-items/AID-2026-284/manifest.yaml#1
+SESSION_RECORDED_SENTINEL 14-ai-development/work-items/AID-2026-302/manifest.yaml#1
 SESSION_SENTINEL_MISMATCH 14-ai-development/work-items/AID-2026-055/manifest.yaml#1
 SESSION_SENTINEL_MISMATCH 14-ai-development/work-items/AID-2026-055/manifest.yaml#2
 SESSION_SENTINEL_MISMATCH 14-ai-development/work-items/AID-2026-055/manifest.yaml#3
@@ -23,9 +24,11 @@ SESSION_SENTINEL_MISMATCH 14-ai-development/work-items/AID-2026-193/manifest.yam
 SESSION_SENTINEL_MISMATCH 14-ai-development/work-items/AID-2026-199/manifest.yaml#1
 SESSION_SENTINEL_MISMATCH 14-ai-development/work-items/AID-2026-240/manifest.yaml#1
 SESSION_SENTINEL_MISMATCH 14-ai-development/work-items/AID-2026-251/manifest.yaml#1
+SESSION_SENTINEL_MISMATCH 14-ai-development/work-items/AID-2026-255/manifest.yaml#1
 SESSION_SENTINEL_MISMATCH 14-ai-development/work-items/AID-2026-261/manifest.yaml#1
 SESSION_SENTINEL_MISMATCH 14-ai-development/work-items/AID-2026-268/manifest.yaml#1
 SESSION_STATUS_INVALID 14-ai-development/work-items/AID-2026-100/manifest.yaml#1
+SESSION_STATUS_INVALID 14-ai-development/work-items/AID-2026-269/manifest.yaml#1
 SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-056/manifest.yaml#1
 SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-056/manifest.yaml#2
 SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-056/manifest.yaml#3
@@ -75,4 +78,6 @@ SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-264/manifest.yaml#1
 SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-265/manifest.yaml#1
 SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-279/manifest.yaml#1
 SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-280/manifest.yaml#1
+SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-286/manifest.yaml#1
 SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-291/manifest.yaml#1
+SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-311/manifest.yaml#1
