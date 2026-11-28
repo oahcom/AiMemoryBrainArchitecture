@@ -1,50 +1,50 @@
-<escape>---</escape>
-<escape>document_metadata:</escape>
-<escape>  steward: "Architecture Governance"</escape>
-<escape>  domain: architecture</escape>
-<escape>  role: design-specification</escape>
-<escape></escape>
-<escape>  lifecycle:</escape>
-<escape>    approval:</escape>
-<escape>      decision_status: Draft</escape>
-<escape>      approver: null</escape>
-<escape>      decision_date: null</escape>
-<escape>      approved_version:</escape>
-<escape>        scheme: git</escape>
-<escape>        value: null</escape>
-<escape>      approval_scope:</escape>
-<escape>        type: Full-document</escape>
-<escape>      approval_applicability: Applicable-To-Current-Version</escape>
-<escape>      evidence_reference: []</escape>
-<escape>      revocation: null</escape>
-<escape></escape>
-<escape>    evidence_verification:</escape>
-<escape>      verification_status: Unverified</escape>
-<escape>      last_verified_date: null</escape>
-<escape>      last_verification_note: null</escape>
-<escape></escape>
-<escape>    usage_status: Active</escape>
-<escape>    modification_status: Unchanged</escape>
-<escape></escape>
-<escape>    supersession:</escape>
-<escape>      supersedes: []</escape>
-<escape>      supersession_reason: null</escape>
-<escape>      effective_date: null</escape>
-<escape></escape>
-<escape>    archival:</escape>
-<escape>      archived_date: null</escape>
-<escape>      archival_reason: null</escape>
-<escape>      archival_reference: null</escape>
-<escape></escape>
-<escape>  authority:</escape>
-<escape>    canonical_status: Non-Canonical</escape>
-<escape>    canonical_scope: null</escape>
-<escape>    canonical_scope_id: null</escape>
-<escape>    canonical_scope_keywords: []</escape>
-<escape>    canonical_conflict_status: None</escape>
-<escape>    canonical_conflict_resolution: null</escape>
-<escape>    normative_status: Normative</escape>
-<escape>---</escape>
+---
+document_metadata:
+  steward: "Architecture Governance"
+  domain: architecture
+  role: design-specification
+
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version:
+        scheme: git
+        value: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Applicable-To-Current-Version
+      evidence_reference: []
+      revocation: null
+
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: null
+
+    usage_status: Active
+    modification_status: Unchanged
+
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Normative
+---
 
 # 工作项注册表迁移政策
 
