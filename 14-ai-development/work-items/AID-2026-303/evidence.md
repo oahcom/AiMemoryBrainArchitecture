@@ -219,3 +219,64 @@ Repository hygiene job executes the self-check and ratchet.
 It does not resolve the canonical-source ownership of `memory-brain-guide.md`,
 approve either mirror, close Issue #1267, or assert natural-person Owner
 acceptance.
+
+## Takeover, mirror re-derivation, and ratchet evidence
+
+### 1. Takeover and branch provenance
+
+The original implementation lane, `origin/fix/2026-11-27-aid303-source-revision-pointers`, remained at `69500815` after 15:16:44 on 2026-11-27. It made no further progress for 60 minutes, had no PR, and received no comment response during that interval. The lane was therefore treated as stalled and this work was taken over.
+
+The replacement branch was initially created from `origin/main` at `460f437e` and was subsequently rebased cleanly onto `origin/main` at `31c1e5d83e7dad326dbd4b69d4a8e19534718ff1`, with no conflicts. The two cherry-picked commits were rewritten by the rebase: the implementation commit is now `1ddea93e9` (originally `fce62cad`, derived from `4211b28a`), and the work-item schema-alignment commit is now `b076af5cc` (originally `96cf0ba2`, derived from `69500815`). After the rebase, the source-revision scanner was rerun with `PYTHONUTF8=1` and produced the same counts: `POINTERS=52`, `ACCURATE=28`, `STALE=0`, `UNRESOLVED=0`, `DEREFERENCED=24`, `BAD_DEREFERENCE=0`, `NON_BLOB_REFERENCE=2`, `BAD=2`, exit 1. The two remaining `BAD` lines remain byte-for-byte identical to the two entries in `scripts/ci/baselines/source-revision-pointers.txt`, as verified by reproducing the workflow output filter in Python. This is ratchet-baseline equivalence evidence only; it is not evidence that the ratchet itself has passed in CI.
+
+After the cherry-picks, the two mirror §4.1 replacement blocks from `reply-6b08ffa5-152431.md` (parts B and C) were applied to the English and Chinese mirror documents. This is a re-derivation of the mirror text on the takeover branch, not merely a source-revision pointer update.
+
+### 2. Source-revision scanner and ratchet-equivalence evidence
+
+With `PYTHONUTF8=1`, the scanner was run on the takeover branch:
+
+```text
+python scripts/check_source_revision_pointers.py
+exit 1
+
+POINTERS=52  ACCURATE=28  STALE=0  UNRESOLVED=0
+DEREFERENCED=24  BAD_DEREFERENCE=0  NON_BLOB_REFERENCE=2  BAD=2
+```
+
+The two remaining failures are the two `memory-brain-guide` non-blob references recorded in `scripts/ci/baselines/source-revision-pointers.txt`. Their scanner output lines were compared byte-for-byte with the two baseline entries. The comparison used Python to simulate the workflow's `sed -n` filtering and reported:
+
+```text
+identical True
+```
+
+This establishes equivalence between the scanner's two remaining failure lines and the checked-in ratchet baseline entries. It does not establish that `gate_ratchet.py` itself has run or passed.
+
+The local ratchet command was not run because the workflow invokes it through `bash -o pipefail -c ...`, while the local Windows PowerShell environment resolves `bash` to a WSL launcher. WSL use is prohibited for this task. The baseline-line equivalence check was therefore performed with Python instead. The actual ratchet implementation remains to be executed by CI on Ubuntu.
+
+### 3. Bilingual mirror §4.1 re-derivation
+
+Both mirror documents received the same structural correction in their §4.1 sections:
+
+- The sixth bullet was replaced to distinguish canonical Forget identity/lifecycle/Fence mechanics (Owner D) from global authorization, retention/legal-hold, external-copy policy, global target inventory, and global completion criteria (Owner I).
+- A new Global Forget Completion paragraph was added after that bullet.
+- The English and Chinese text were updated in parallel. The changes preserve the existing `Version: 1.0` and `Status:` lines; neither line was changed.
+
+The re-derived wording follows the source-revision context identified by commit `c3707831777feb14aedd7aea0eca1c162bf59fc6`.
+
+### 4. Workflow and baseline changes
+
+The workflow change adds two steps—scanner self-check and ratchet—to the existing required job `Repository hygiene`. It does not add a required context and does not modify branch protection.
+
+The old `scripts/ci/baselines/gate-wiring.txt` entry for `scripts/check_source_revision_pointers.py`, including its eight-line comment block, was removed. The new `scripts/ci/baselines/source-revision-pointers.txt` contains seven comment lines and two baseline entries for the English and Chinese `memory-brain-guide` references.
+
+The two non-blob references are temporary ratchet exceptions, not resolved references. They remain separately tracked for follow-up work to establish the appropriate canonical blob-backed source references and remove the exceptions. This work item does not claim those two references have been repaired.
+
+### 5. Explicit limits of this evidence
+
+This evidence does not claim:
+
+- that the remaining two `memory-brain-guide` non-blob references are resolved;
+- that this work implements or validates the separate #1438 or #1439 concerns;
+- that the bilingual gate has passed. The available checkout is shallow, so the required full-history bilingual-gate verification has not been established;
+- that `gate_ratchet.py` has passed in CI. The local check established only byte-for-byte equivalence between the two scanner output lines and the two baseline entries; the ratchet itself has not yet run in CI.
+
+The PR's `BILINGUAL-MANIFEST: COMPLETE` declaration is retained because this change does modify both bilingual mirror document bodies, and the English and Chinese §4.1 changes have corresponding substantive content. That declaration is not evidence that the separate full-history bilingual gate has passed.
