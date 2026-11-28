@@ -76,11 +76,12 @@ jobs:
 
           set +e
 
-          # Historical base may predate the ledger. This exception is
-          # deliberately scoped to this base-only measurement.
+          # Historical base may predate the ledger and explicit reference modes.
+          # These exceptions are deliberately scoped to base-only measurement.
           python3 scripts/ci/check_manifest_blob_pins.py \
             --commit "$BASE_SHA" \
-            --allow-missing-ledger
+            --allow-missing-ledger \
+            --allow-missing-reference-mode
           base_status=$?
 
           # The immutable negative sample remains under the strict default.

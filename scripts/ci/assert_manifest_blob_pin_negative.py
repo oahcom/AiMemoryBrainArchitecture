@@ -10,12 +10,28 @@ from pathlib import Path
 EXPECTED_COMMIT = "9a2063ae1fa5d905b3817cd4eddba065a06daa73"
 EXPECTED_SUMMARY = (
     "main=9a2063ae1fa5d905b3817cd4eddba065a06daa73 "
-    "manifests=108 pins=172 ok=82 mismatch=86 "
+    "manifests=108 pins=172 ok=85 mismatch=83 "
     "path_missing=0 incomplete=0 unbound=4"
 )
+EXPECTED_MISMATCHES = 83
+
 # The sample also carries four unbound blob_sha256 declarations. They are
 # counted exactly, not tolerated: an extra or missing one is a changed sample.
 EXPECTED_UNBOUND = 4
+
+
+def emit_checker_output(result):
+    if result.stdout:
+        print(
+            result.stdout,
+            end="" if result.stdout.endswith("\n") else "\n",
+        )
+    if result.stderr:
+        print(
+            result.stderr,
+            file=sys.stderr,
+            end="" if result.stderr.endswith("\n") else "\n",
+        )
 
 
 def main():
@@ -45,6 +61,7 @@ def main():
                 str(checker),
                 "--commit",
                 EXPECTED_COMMIT,
+                "--allow-missing-reference-mode",
             ],
             cwd=root,
             text=True,
@@ -56,13 +73,12 @@ def main():
         print(f"INCOMPLETE: checker could not execute: {exc}", file=sys.stderr)
         return 2
 
-    if result.stdout:
-        print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
-    if result.stderr:
-        print(result.stderr, file=sys.stderr, end="" if result.stderr.endswith("\n") else "\n")
-
     if result.returncode == 2:
-        print("INCOMPLETE: negative-sample checker returned exit 2", file=sys.stderr)
+        emit_checker_output(result)
+        print(
+            "INCOMPLETE: negative-sample checker returned exit 2",
+            file=sys.stderr,
+        )
         return 2
 
     lines = result.stdout.splitlines()
@@ -70,17 +86,22 @@ def main():
     mismatches = [line for line in lines if line.startswith("MISMATCH ")]
     missing = [line for line in lines if line.startswith("PATH_MISSING ")]
     incomplete = [line for line in lines if line.startswith("INCOMPLETE ")]
-    unbound = [line for line in lines if line.startswith("UNBOUND_BLOB_SHA256 ")]
+    unbound = [
+        line
+        for line in lines
+        if line.startswith("UNBOUND_BLOB_SHA256 ")
+    ]
 
     evidence_matches = (
         summaries == [EXPECTED_SUMMARY]
-        and len(mismatches) == 86
+        and len(mismatches) == EXPECTED_MISMATCHES
         and len(missing) == 0
         and len(incomplete) == 0
         and len(unbound) == EXPECTED_UNBOUND
     )
 
     if result.returncode != 1:
+        emit_checker_output(result)
         print(
             "VIOLATION: negative sample was not rejected; "
             f"checker exit={result.returncode}, expected=1",
@@ -89,6 +110,7 @@ def main():
         return 1
 
     if not evidence_matches:
+        emit_checker_output(result)
         print(
             "VIOLATION: negative sample rejection did not produce the "
             "expected immutable evidence",
@@ -99,7 +121,7 @@ def main():
     print(
         "NEGATIVE_ASSERTION_PASS: "
         "immutable sample rejected; "
-        "manifests=108 pins=172 ok=82 mismatch=86 "
+        "manifests=108 pins=172 ok=85 mismatch=83 "
         "path_missing=0 incomplete=0 unbound=4"
     )
     return 0

@@ -80,6 +80,7 @@ class Pin:
     declared: str
     algorithm: str
     node: yaml.ScalarNode
+    reference_mode: str = "current"
 
     @property
     def identity(self) -> tuple[str, str, str]:
@@ -984,7 +985,8 @@ def emit_ledger(
     ):
         print(
             f"|{item.pin.manifest}|{item.pin.field}|{item.pin.path}|"
-            f"{item.pin.declared}|{item.actual}|{repin_commit}|"
+            f"{item.pin.reference_mode}|{item.pin.declared}|"
+            f"{item.actual}|{repin_commit}|"
         )
 
 
