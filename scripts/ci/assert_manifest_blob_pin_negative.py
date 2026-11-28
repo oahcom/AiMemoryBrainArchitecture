@@ -10,12 +10,16 @@ from pathlib import Path
 EXPECTED_COMMIT = "9a2063ae1fa5d905b3817cd4eddba065a06daa73"
 EXPECTED_SUMMARY = (
     "main=9a2063ae1fa5d905b3817cd4eddba065a06daa73 "
-    "manifests=108 pins=172 ok=82 mismatch=86 "
-    "path_missing=0 incomplete=0 unbound=4"
+    "manifests=108 pins=169 ok=85 mismatch=80 "
+    "path_missing=0 incomplete=1 unbound=4"
 )
-# The sample also carries four unbound blob_sha256 declarations. They are
-# counted exactly, not tolerated: an extra or missing one is a changed sample.
+EXPECTED_MISMATCH = 80
+EXPECTED_PATH_MISSING = 0
 EXPECTED_UNBOUND = 4
+EXPECTED_INCOMPLETE = (
+    "INCOMPLETE related_evidence[0]: missing or invalid "
+    "reference_mode=None; expected 'historical' or 'current'"
+)
 
 
 def main():
@@ -59,31 +63,43 @@ def main():
     if result.stdout:
         print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
     if result.stderr:
-        print(result.stderr, file=sys.stderr, end="" if result.stderr.endswith("\n") else "\n")
-
-    if result.returncode == 2:
-        print("INCOMPLETE: negative-sample checker returned exit 2", file=sys.stderr)
-        return 2
+        print(
+            result.stderr,
+            file=sys.stderr,
+            end="" if result.stderr.endswith("\n") else "\n",
+        )
 
     lines = result.stdout.splitlines()
     summaries = [line for line in lines if line.startswith("main=")]
     mismatches = [line for line in lines if line.startswith("MISMATCH ")]
     missing = [line for line in lines if line.startswith("PATH_MISSING ")]
     incomplete = [line for line in lines if line.startswith("INCOMPLETE ")]
-    unbound = [line for line in lines if line.startswith("UNBOUND_BLOB_SHA256 ")]
+    unbound = [
+        line for line in lines
+        if line.startswith("UNBOUND_BLOB_SHA256 ")
+    ]
 
     evidence_matches = (
         summaries == [EXPECTED_SUMMARY]
-        and len(mismatches) == 86
-        and len(missing) == 0
-        and len(incomplete) == 0
+        and len(mismatches) == EXPECTED_MISMATCH
+        and len(missing) == EXPECTED_PATH_MISSING
+        and incomplete == [EXPECTED_INCOMPLETE]
         and len(unbound) == EXPECTED_UNBOUND
     )
 
-    if result.returncode != 1:
+    if result.returncode == 1:
         print(
-            "VIOLATION: negative sample was not rejected; "
-            f"checker exit={result.returncode}, expected=1",
+            "VIOLATION: 负样本未被正确拒绝；"
+            "checker returned exit 1, expected exit 2",
+            file=sys.stderr,
+        )
+        return 1
+
+    if result.returncode != 2:
+        print(
+            "VIOLATION: negative sample was not rejected with the "
+            f"expected classification; checker exit={result.returncode}, "
+            "expected=2",
             file=sys.stderr,
         )
         return 1
@@ -98,9 +114,9 @@ def main():
 
     print(
         "NEGATIVE_ASSERTION_PASS: "
-        "immutable sample rejected; "
-        "manifests=108 pins=172 ok=82 mismatch=86 "
-        "path_missing=0 incomplete=0 unbound=4"
+        "immutable sample rejected with the expected INCOMPLETE classification; "
+        "manifests=108 pins=169 ok=85 mismatch=80 "
+        "path_missing=0 incomplete=1 unbound=4"
     )
     return 0
 
