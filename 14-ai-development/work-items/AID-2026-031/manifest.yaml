@@ -1,0 +1,103 @@
+work_item_id: AID-2026-031
+title: "Correct the unverifiable session identity declaration and register the repair"
+class: GATE/TEST
+risk: R1
+risk_rationale: "A narrowly scoped governance correction and work-item registration. The change replaces an unverifiable human label with the required NOT_RECORDED sentinel pair and records the ratchet failure and repair scope without inventing session identity evidence."
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-28
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: f0843a8f38a420883921cfda96b515204967f885
+prompt_file: "14-ai-development/work-items/AID-2026-031/prompt-v1.md"
+prompt_sha256: "12d0d84d02ba91400b9a6b64c8ccc687a9714d28ec1030c751c64072d941eb0f"
+prompt_file_blob_sha: null
+prompt_commit_trace_initial_registration: true
+
+scope:
+  in_scope:
+    - "14-ai-development/work-items/AID-2026-297/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-031/"
+    - "14-ai-development/work-items/INDEX.md"
+  out_of_scope:
+    - "Changing AID-2026-297 implementation claims, evidence, tests, or lifecycle state"
+    - "Changing AID-2026-297/session-evidence.md historical evidence"
+    - "Inventing or substituting a UUID or conv_ session identifier"
+    - "Changing AID-2026-341 or unrelated work items"
+    - "Changing the session-identity ratchet implementation or its baseline"
+    - "Claiming CI success, merge, independent review, or Owner acceptance"
+  contract:
+    - "AID-2026-297 must use implementing_ai_session: NOT_RECORDED together with session_reference_status: NOT_RECORDED."
+    - "The human label MIGRATION-POLICY must not be represented as a verifiable session identifier."
+    - "No UUID or conv_ identifier may be invented to replace the unverifiable declaration."
+    - "The AID-2026-297 correction must preserve its prompt snapshot digest, byte count, provenance, and historical evidence."
+    - "AID-2026-031 must be registered with the supplied base commit, prompt snapshot, session evidence, and INDEX row."
+    - "The session-identity ratchet must return 91 violations, 91 baselined, and 0 new after the correction."
+    - "Registration remains provisional and dispatched until subsequent governance decisions and verification."
+
+evidence:
+  verification_status: Unverified
+  coordinator_execution:
+    status: PENDING
+    environment: NOT_RECORDED
+    supplied_worktree_head: NOT_RECORDED
+    prior_checker_result:
+      manifest_count: NOT_RECORDED
+      traceable: NOT_RECORDED
+      findings: NOT_RECORDED
+      note: "No coordinator execution results have been supplied at authoring time."
+  ratchet:
+    prior_result: "SESSION IDENTITY: 92 violations, 91 baselined, 1 new"
+    expected_result: "SESSION IDENTITY: 91 violations, 91 baselined, 0 new"
+    violation: "SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-297/manifest.yaml#1 RECORDED value 'MIGRATION-POLICY' is not a supported session identifier"
+    first_red_run: "46109393978"
+    current_red_run: "46109588406"
+    last_green_run: "46109215468"
+  tests:
+    status: PENDING_COORDINATOR_EXECUTION
+    commands:
+      - "python scripts/ci/check_session_identity.py"
+      - "python scripts/check_document_management.py --require-changed origin/main"
+      - "python scripts/check_traceability.py --index-only"
+    note: "Execution results must be supplied by the coordinator after the files land. No passing result is asserted here."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-031/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-031/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-031/prompt-v1.md"
+    relationship: reference
+
+session_evidence:
+  - role: authoring
+    issue_refs:
+      - "#1534"
+    implementing_ai_session: "6b0a6029-d8e0-83ec-ba9b-99e6f9eb286d"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-031/prompt-v1.md"
+    executed_prompt_sha256: "12d0d84d02ba91400b9a6b64c8ccc687a9714d28ec1030c751c64072d941eb0f"
+    executed_prompt_bytes: 6812
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-031/session-evidence.md"
+
+implementation:
+  status: NOT_STARTED
+  summary: "Initial registration and correction specification. Mechanical file writing, gate execution, commit, push, and PR creation are delegated to the coordinator."
+  files_changed:
+    - "14-ai-development/work-items/AID-2026-297/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-031/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-031/evidence.md"
+    - "14-ai-development/work-items/AID-2026-031/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-031/prompt-v1.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "Pending coordinator execution of the repository governance and ratchet gates."
+  pull_request: "Pending coordinator creation; NOT MERGED."
+# Initial registration only: no implementation or merge pin may appear here,
+# because the exception rejects those pins.
+# merge_commit_sha is deliberately absent: this pull request is not merged.
