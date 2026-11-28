@@ -92,6 +92,10 @@ The canonical System Boundaries section 15 records:
 - The resulting PR diff is based on that main commit and reports zero commits behind; only the three System Boundaries files, four AID-2026-327 records, and INDEX are changed.
 - Earlier stale branch runs are historical and do not establish current-head acceptance. New exact-head CI remains pending.
 
+## Issue-level session-evidence declaration
+
+Issue #1210 predates the repository's AI Session Evidence effective date (2026-12-01). Its historical issue-level declaration is therefore mapped as `LEGACY_UNDECLARED` with `N/A` issue-scoped evidence references in the PR table. The PR-level session evidence still records this current documentation session.
+
 ## Provenance and validation limits
 
 - The prompt snapshot is operator-authored and not a verbatim platform prompt; executed prompt provenance is NOT_VERIFIED.
