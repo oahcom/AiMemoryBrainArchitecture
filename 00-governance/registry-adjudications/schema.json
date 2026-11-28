@@ -1,0 +1,242 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "00-governance/registry-adjudications/schema.json",
+  "title": "Work-item Registry Field Adjudication",
+  "description": "Field-level adjudication record for one AID or FIX work item at a fixed Git source tree.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "work_item_id",
+    "source_tree",
+    "decisions"
+  ],
+  "properties": {
+    "work_item_id": {
+      "type": "string",
+      "pattern": "^(?:AID-[0-9]{4}-[0-9]{3}|FIX-[0-9]{4}-[A-Z0-9]+(?:-[A-Z0-9]+)*)$"
+    },
+    "source_tree": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{7,40}$"
+    },
+    "decisions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "work_item_id",
+        "title",
+        "owner",
+        "class",
+        "risk",
+        "status",
+        "prompt_id",
+        "prompt_sha256",
+        "prompt_status",
+        "implementation",
+        "review",
+        "acceptance"
+      ],
+      "properties": {
+        "work_item_id": {
+          "$ref": "#/$defs/fieldDecision"
+        },
+        "title": {
+          "$ref": "#/$defs/fieldDecision"
+        },
+        "owner": {
+          "$ref": "#/$defs/fieldDecision"
+        },
+        "class": {
+          "$ref": "#/$defs/fieldDecision"
+        },
+        "risk": {
+          "$ref": "#/$defs/fieldDecision"
+        },
+        "status": {
+          "$ref": "#/$defs/fieldDecision"
+        },
+        "prompt_id": {
+          "$ref": "#/$defs/fieldDecision"
+        },
+        "prompt_sha256": {
+          "$ref": "#/$defs/fieldDecision"
+        },
+        "prompt_status": {
+          "$ref": "#/$defs/fieldDecision"
+        },
+        "implementation": {
+          "$ref": "#/$defs/fieldDecision"
+        },
+        "review": {
+          "$ref": "#/$defs/fieldDecision"
+        },
+        "acceptance": {
+          "$ref": "#/$defs/fieldDecision"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "fieldDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "candidates",
+        "decision",
+        "rationale",
+        "decided_by",
+        "decided_at"
+      ],
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "KNOWN",
+            "KNOWN_EMPTY",
+            "UNKNOWN",
+            "UNDECIDED",
+            "UNCONFIRMED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/candidate"
+          }
+        },
+        "decision": {
+          "type": [
+            "string",
+            "number",
+            "integer",
+            "boolean",
+            "object",
+            "array",
+            "null"
+          ]
+        },
+        "rationale": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "decided_by": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "decided_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "UNCONFIRMED"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "decision": {
+                "type": "null"
+              },
+              "rationale": {
+                "type": "null"
+              },
+              "decided_by": {
+                "type": "null"
+              },
+              "decided_at": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "enum": [
+                  "KNOWN",
+                  "KNOWN_EMPTY",
+                  "UNKNOWN",
+                  "UNDECIDED",
+                  "NOT_APPLICABLE"
+                ]
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "decision": {
+                "not": {
+                  "type": "null"
+                }
+              },
+              "rationale": {
+                "type": "string",
+                "minLength": 1
+              },
+              "decided_by": {
+                "type": "string",
+                "minLength": 1
+              },
+              "decided_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "value",
+        "source_blob_sha256"
+      ],
+      "properties": {
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {},
+        "source_blob_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-fA-F]{64}$"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}
