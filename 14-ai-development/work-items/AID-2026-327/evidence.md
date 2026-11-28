@@ -83,6 +83,13 @@ The canonical System Boundaries section 15 records:
 - Pre-merge ancestry target: `2878317ed1c9acbdd6cdf4c77654ed62aa416e48`, explicitly not an actual merge commit. It is recorded in the manifest as `PR_HEAD_TRACE_TARGET_NOT_MERGED`.
 - PR #1495 is draft and unmerged. The trace pins are not a claim of merge or formal acceptance.
 
+## Rebase and carrier
+
+- PR: #1495 (draft, open, unmerged).
+- The branch was merged with current main at `9c25f56fa82d579877a5a24cd1c5d08f37a207ab` using a two-parent merge commit `caaf86515a259ca66b84e4e746416c669b8d0eb4`.
+- The resulting PR diff is based on that main commit and reports zero commits behind; only the three System Boundaries files, four AID-2026-327 records, and INDEX are changed.
+- Earlier stale branch runs are historical and do not establish current-head acceptance. New exact-head CI remains pending.
+
 ## Provenance and validation limits
 
 - The prompt snapshot is operator-authored and not a verbatim platform prompt; executed prompt provenance is NOT_VERIFIED.
