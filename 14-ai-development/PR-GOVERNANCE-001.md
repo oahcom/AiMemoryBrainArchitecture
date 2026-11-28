@@ -1,5 +1,6 @@
 ---
 document_metadata:
+  steward: "Architecture Governance"
   domain: ai-development
   role: normative-standard
   lifecycle:
@@ -260,7 +261,7 @@ If the current GitHub plan/visibility does not support required controls for thi
 
 **Measured platform state, `2026-11-25`, from `GET /repos/oahcom/AiMemoryBrainArchitecture` and `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection` (HTTP 200).** This is a dated measurement, not a standing assertion; re-read it before relying on it. The repository reports `private: false`, `visibility: public`, so the plan/visibility limitation above is moot here and is not available as a ground for BLOCKED.
 
-- **Status checks — enforced.** 16 required contexts, `strict: true`, `enforce_admins: {enabled: true}`, `allow_force_pushes: {enabled: false}`, `allow_deletions: {enabled: false}`. A required check that fails or is absent on the exact Head cannot merge through the normal path. The sixteen names are declared below so that each must still be produced by a workflow in this tree:
+- **Status checks — enforced.** 16 platform-required contexts (the governance declaration lists 17 contexts; Protection fingerprint is not yet platform-required), `strict: true`, `enforce_admins: {enabled: true}`, `allow_force_pushes: {enabled: false}`, `allow_deletions: {enabled: false}`. A required check that fails or is absent on the exact Head cannot merge through the normal path. The 16 platform-required contexts are included in the declaration below, which also contains additional documented contexts. All 17 declared contexts must be produced by a workflow in this tree; only the 16 platform-required contexts are subject to the merge-group wiring requirement:
 
 <!-- declared-check-contexts: read by scripts/check_declared_check_contexts.py -->
 ```text
@@ -280,6 +281,7 @@ Session Evidence
 Session Evidence self-test (base)
 Session Evidence self-test (head)
 rust-workspace-test
+Protection fingerprint
 ```
 
 - **Pull-request reviews — not enforced.** `required_pull_request_reviews` is absent from the protection payload (the key is not present, not `null`). This is not an unset flag waiting to be flipped: the repository has one write identity, so `author == merger == approver` at the account layer, and requiring an approving review would deadlock every PR. `required_conversation_resolution` is also `{enabled: false}`. No PR body, workflow comment, label or AI self-review may be read as a review gate this repository does not have; §6.1 remains a process requirement only.
@@ -289,7 +291,7 @@ The count rose from twelve to sixteen between the `2026-11-24` and `2026-11-25` 
 **`2026-11-25` 实测平台状态**，取自 `GET /repos/oahcom/AiMemoryBrainArchitecture` 与 `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection`（HTTP 200）。这是带日期的实测，不是常驻断言；依赖前须重新读取。仓库报告 `private: false`、`visibility: public`，因此上文的套餐/可见性限制在本仓库不成立，不可作为 BLOCKED 的依据。
 
 
-- **状态检查——已强制。** 16 条必需上下文、`strict: true`、`enforce_admins: {enabled: true}`、`allow_force_pushes: {enabled: false}`、`allow_deletions: {enabled: false}`。在准确 Head 上失败或缺失的必需检查无法经正常路径合并。
+- **状态检查——已强制。** 16 条必需上下文、`strict: true`、`enforce_admins: {enabled: true}`、`allow_force_pushes: {enabled: false}`、`allow_deletions: {enabled: false}`。在准确 Head 上失败或缺失的必需检查无法经正常路径合并。平台实际要求的 16 条 context 均包含在下方声明中，该声明还包含额外登记的 context。全部 17 条声明项均必须由本仓库中的 workflow 产出；只有平台实际要求的 16 条 context 必须满足 merge-group 接入要求。
 - **Pull Request 审查——未强制。** 保护载荷中不存在 `required_pull_request_reviews`（键缺失，不是 `null`）。这不是一个等待开启的开关：本仓库只有一个写入身份，即账号层面的 `作者 == 合并者 == 批准者`，强制批准审查会使每个 PR 死锁。`required_conversation_resolution` 同为 `{enabled: false}`。任何 PR 正文、Workflow 注释、Label 或 AI 自审都不得被读作本仓库并不存在的审查门禁；§6.1 仅为流程要求。
 - **故意失败 Head 实验——已于 `2026-11-25` 通过，且结果必须带日期引用。** Pull Request #1038 在 Head `b5cf4f25` 加入一个恒定失败的 `#[test]`，`cargo fmt --all -- --check` 仍以 0 退出，必需的 `rust-workspace-test` 失败（check run `138943464904`）。合并不是看页面，而是实际经 API 发起：`PUT /repos/oahcom/AiMemoryBrainArchitecture/pulls/1038/merge` 返回 `405 Required status check "rust-workspace-test" is failing`。而在该次尝试之前，同一载荷报告 `mergeable: true`、`mergeable_state: blocked`——那个布尔字段是不含检查结果的缓存，以它作为合并依据会得出「本 Head 可合并」的错误结论。该 PR 已不合并关闭，分支保留以使这次运行仍可追溯。本条证明的是**当日、该载荷、正常路径**下的行为；它**不**证明绕过路径、改名后的 job 或后续载荷行为相同，保护配置或产出这些 context 的工作流发生实质变化后 MUST 重跑。
 条数在 `2026-11-24` 与 `2026-11-25` 两次读取之间由十二升到十六，两次增量性质不同。`Session Evidence`、`Session Evidence self-test (base)`、`Session Evidence self-test (head)` 在本节先前那次实测之前就已由 session-evidence 上线过程设为必需，是本文件此前低报了必需集合。`rust-workspace-test` 最后加入，且只在 #1027 移除其工作流的 `pull_request.paths` 过滤之后加入：一条永不被调度的必需上下文是**永久缺失**而非「等待中」，因此先要求它会使每个不触达 `crates/**` 的 Pull Request 全部卡死。这个顺序是正确性条件，不是偏好。 **授权存在，但没有 Work Item 记录曾执行它。** `AID-2026-055` 带有 `required_check_change: "USER-PRINCIPAL-DELEGATED (limited to adding the session-attestation context to required_status_checks.contexts; removing or weakening an existing context is NOT granted)"`——是单数——且其 `AC1` 要求给出改动前后的原始载荷。该 Work Item 为 `status: DISPATCHED`、`implementation.status: NOT_STARTED`、`pull_request: PENDING`，即它没有执行自己被授权的那次写入；它在自身 `2026-11-25T02:52Z` 的实测里把这三个 context 记为**已经存在**。实现该门禁的 `AID-2026-059` 则写明 `required_context_change: NOT_GRANTED`，标题亦声明不把该检查加入必需上下文。因此：三个 context 已在载荷上，那条唯一能授权加入它们的许可范围尚未被执行，而本树中没有任何记录说明是谁执行的。本段记录的是**存在的状态**，不是**已履行的授权**。 **该授权缺口现由决议关闭，而非由发现关闭。** Issue #1029 的 Owner-proxy 追认裁定（评论 `7153866597`，`2026-11-25T05:32Z`）自其认定的生效窗口起，授权 `Session Evidence`、`Session Evidence self-test (base)`、`Session Evidence self-test (head)` 作为必需上下文，取代 `AID-2026-059` 的 `NOT_GRANTED`，仅限这三条。该裁定声明了它**不**主张什么，本文件照抄而不扩大：它追认的是**状态**而非某个动作，因此既未指明是谁启用的，也不主张该启用者获得过授权；它**不追溯**，故在门禁尚未被要求期间完成的合并保持合并；它**不改变分支保护**。`AID-2026-059` 的 manifest 现记为 `GRANTED`，并在同一字段内保留被取代的 `NOT_GRANTED` 原文——因为该 Work Item 确实没有触碰分支保护，这是两句不同的话。
