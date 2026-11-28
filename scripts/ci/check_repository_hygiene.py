@@ -2,6 +2,8 @@
 """Check committed repository hygiene and PR new-file admission."""
 
 import argparse
+import hashlib
+import json
 import re
 import subprocess
 import sys
@@ -50,7 +52,11 @@ from pathlib import PurePosixPath
 #
 # The same merged .3 also carries the AID-2026-345 rule change: admit only the
 # exact AID-2026-345 carrier-data.yaml path; other YAML files remain denied.
-CHECK_VERSION = "2026-11-28.3"
+# 2026-11-28.4 is a contract change: the `review:` record is validated
+# structurally and a base-to-head finding ratchet reports only newly introduced
+# `(manifest_path, violation_code)` identities (AID-2026-361). The admission
+# rules above are unchanged.
+CHECK_VERSION = "2026-11-28.4"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -1036,6 +1042,568 @@ def check_work_item_manifest_consistency(root, commit, head_paths):
     return violations
 
 
+REVIEW_BASELINE_REPORT = (
+    "14-ai-development/reports/work-item-manifest-ac4-baseline.json"
+)
+REVIEW_CONTRACT_ENFORCED_BY = "Repository hygiene (hard gate)"
+REVIEW_CONTRACT_FIELDS = frozenset({
+    "required",
+    "status",
+    "implementation_identity",
+    "reviewer_identity",
+    "evidence_refs",
+    "blocker_reason",
+    "exception_ref",
+    "reviewed_base_sha",
+    "reviewed_head_sha",
+})
+REVIEW_CONTRACT_STATUSES = frozenset({
+    "NOT_REQUIRED",
+    "PENDING",
+    "BLOCKED",
+    "PASSED",
+})
+REVIEW_SHA_RE = re.compile(r"[0-9a-f]{40}\Z")
+REVIEW_COHORT_RE = re.compile(r"[0-9a-f]{8}\Z")
+REVIEW_INVALID = object()
+
+
+def _review_scalar(raw, *, allow_empty=False):
+    """Parse one deliberately small YAML scalar subset; reject other shapes."""
+    value = raw.strip()
+    if not value:
+        return None if allow_empty else REVIEW_INVALID
+
+    # Recognize comments only outside quotes. In YAML, a plain-scalar '#'
+    # starts a comment only when separated from the preceding text.
+    quote = None
+    index = 0
+    while index < len(value):
+        char = value[index]
+
+        if quote == "'":
+            if char == "'":
+                if index + 1 < len(value) and value[index + 1] == "'":
+                    index += 2
+                    continue
+                quote = None
+            index += 1
+            continue
+
+        if quote == '"':
+            if char == "\\":
+                if index + 1 >= len(value):
+                    return REVIEW_INVALID
+                index += 2
+                continue
+            if char == '"':
+                quote = None
+            index += 1
+            continue
+
+        if index == 0 and char == "'":
+            quote = "'"
+            index += 1
+            continue
+
+        if index == 0 and char == '"':
+            quote = '"'
+            index += 1
+            continue
+
+        if char == "#" and (
+            index == 0 or value[index - 1].isspace()
+        ):
+            value = value[:index].rstrip()
+            break
+
+        index += 1
+
+    if quote is not None:
+        return REVIEW_INVALID
+
+    if not value:
+        return None if allow_empty else REVIEW_INVALID
+
+    if value == "[]":
+        return []
+
+    if value in {"null", "Null", "NULL", "~"}:
+        return None
+    if value in {"true", "True", "TRUE"}:
+        return True
+    if value in {"false", "False", "FALSE"}:
+        return False
+
+    if value.startswith("'"):
+        if len(value) < 2 or not value.endswith("'"):
+            return REVIEW_INVALID
+
+        decoded = []
+        index = 1
+        end = len(value) - 1
+
+        while index < end:
+            char = value[index]
+            if char == "'":
+                if index + 1 >= end or value[index + 1] != "'":
+                    return REVIEW_INVALID
+                decoded.append("'")
+                index += 2
+                continue
+            decoded.append(char)
+            index += 1
+
+        return "".join(decoded)
+
+    if value.startswith('"'):
+        if len(value) < 2 or not value.endswith('"'):
+            return REVIEW_INVALID
+
+        # This contract supports only the two escapes needed to represent
+        # a quote or backslash. Reject other JSON/YAML escape forms rather
+        # than silently broadening the accepted scalar language.
+        index = 1
+        end = len(value) - 1
+        while index < end:
+            char = value[index]
+
+            if char == "\\":
+                if index + 1 >= end or value[index + 1] not in {'"', "\\"}:
+                    return REVIEW_INVALID
+                index += 2
+                continue
+
+            if char == '"':
+                return REVIEW_INVALID
+
+            index += 1
+
+        try:
+            decoded = json.loads(value)
+        except (TypeError, ValueError):
+            return REVIEW_INVALID
+
+        return decoded if isinstance(decoded, str) else REVIEW_INVALID
+
+    if value.startswith(("[", "{", "|", ">", "&", "*", "!")):
+        return REVIEW_INVALID
+
+    if re.fullmatch(r"[-+]?[0-9]+(?:\.[0-9]+)?", value):
+        return REVIEW_INVALID
+
+    return value
+
+def _parse_review_node(text):
+    """Return True only for the adjudicated nine-key review contract."""
+    if text.startswith("\ufeff"):
+        text = text[1:]
+
+    lines = text.splitlines()
+
+    # Find top-level review declarations, including malformed separators such
+    # as "review:PENDING", so malformed declarations cannot be ignored.
+    review_lines = [
+        index for index, line in enumerate(lines)
+        if re.match(r"^review[ \t]*:", line)
+    ]
+    if len(review_lines) != 1:
+        return False
+
+    start = review_lines[0]
+    first = re.fullmatch(r"review:(?: +(.*))?", lines[start])
+    if first is None:
+        return False
+
+    first_raw = first.group(1) or ""
+    first_value = _review_scalar(first_raw, allow_empty=True)
+
+    if first_value is REVIEW_INVALID:
+        return False
+
+    # The only accepted legacy scalar form is the unquoted bare token
+    # `review: PENDING`, optionally followed by a YAML comment. Quoted
+    # strings that decode to the same value are not this migration form.
+    bare_pending = re.fullmatch(
+        r"PENDING(?:[ \t]+#.*)?",
+        first_raw.strip(),
+    ) is not None
+
+    if first_value == "PENDING" and bare_pending:
+        for line in lines[start + 1:]:
+            if "\t" in line:
+                return False
+            if not line.strip() or line.lstrip().startswith("#"):
+                continue
+            if len(line) != len(line.lstrip(" ")):
+                return False
+            break
+        return True
+
+    # A mapping node must have an empty value after comment processing.
+    if first_value is not None:
+        return False
+
+    block = []
+    for line in lines[start + 1:]:
+        if "\t" in line:
+            return False
+
+        if not line.strip() or line.lstrip().startswith("#"):
+            block.append(line)
+            continue
+
+        indent = len(line) - len(line.lstrip(" "))
+        if indent == 0:
+            break
+
+        block.append(line)
+
+    meaningful = [
+        line for line in block
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+    if not meaningful:
+        return False
+
+    values = {}
+    evidence = False
+    evidence_block_sequence = False
+    evidence_item_count = 0
+
+    for line in meaningful:
+        indent = len(line) - len(line.lstrip(" "))
+        stripped = line.lstrip(" ")
+
+        if indent == 2:
+            match = re.fullmatch(
+                r"([A-Za-z_][A-Za-z0-9_]*):(?: +(.*))?",
+                stripped,
+            )
+            if match is None:
+                return False
+
+            key = match.group(1)
+            raw_value = match.group(2) or ""
+
+            if key not in REVIEW_CONTRACT_FIELDS or key in values:
+                return False
+
+            evidence = False
+
+            if key == "evidence_refs":
+                parsed = _review_scalar(raw_value, allow_empty=True)
+                if parsed is REVIEW_INVALID:
+                    return False
+
+                if parsed == []:
+                    values[key] = []
+                elif parsed is None:
+                    # Only an actually empty value (optionally followed by
+                    # a comment) introduces a block sequence. Explicit YAML
+                    # null scalars such as null, ~, and NULL are not sequences.
+                    raw_evidence_value = raw_value.strip()
+                    if raw_evidence_value and not raw_evidence_value.startswith("#"):
+                        return False
+
+                    values[key] = []
+                    evidence = True
+                    evidence_block_sequence = True
+                else:
+                    return False
+            elif key in {
+                "blocker_reason",
+                "exception_ref",
+                "reviewed_base_sha",
+                "reviewed_head_sha",
+            }:
+                parsed = _review_scalar(raw_value, allow_empty=True)
+                if parsed is REVIEW_INVALID:
+                    return False
+                values[key] = parsed
+            else:
+                parsed = _review_scalar(raw_value)
+                if parsed is REVIEW_INVALID:
+                    return False
+                values[key] = parsed
+
+            continue
+
+        if indent == 4 and evidence and stripped.startswith("- "):
+            item = _review_scalar(stripped[2:])
+            if not isinstance(item, str) or not item:
+                return False
+            values["evidence_refs"].append(item)
+            evidence_item_count += 1
+            continue
+
+        # Field keys must be exactly two spaces indented; evidence sequence
+        # items must be exactly four spaces indented. All other shapes fail.
+        return False
+
+    # An empty block-sequence value (including one followed by a comment)
+    # is YAML null unless it has at least one sequence item. The only
+    # accepted representation of an empty evidence sequence is `[]`.
+    if evidence_block_sequence and evidence_item_count == 0:
+        return False
+
+    if set(values) != REVIEW_CONTRACT_FIELDS:
+        return False
+
+    required = values["required"]
+    status = values["status"]
+    implementation = values["implementation_identity"]
+    reviewer = values["reviewer_identity"]
+    evidence_refs = values["evidence_refs"]
+    blocker_reason = values["blocker_reason"]
+    exception_ref = values["exception_ref"]
+    reviewed_base = values["reviewed_base_sha"]
+    reviewed_head = values["reviewed_head_sha"]
+
+    if not isinstance(required, bool):
+        return False
+    if not isinstance(status, str) or status not in REVIEW_CONTRACT_STATUSES:
+        return False
+
+    for identity in (implementation, reviewer):
+        if not isinstance(identity, str) or not identity:
+            return False
+
+    if not isinstance(evidence_refs, list):
+        return False
+    if any(not isinstance(item, str) or not item for item in evidence_refs):
+        return False
+
+    for nullable_string in (blocker_reason, exception_ref):
+        if nullable_string is not None and (
+            not isinstance(nullable_string, str) or not nullable_string
+        ):
+            return False
+
+    for sha in (reviewed_base, reviewed_head):
+        if sha is not None and (
+            not isinstance(sha, str)
+            or REVIEW_SHA_RE.fullmatch(sha) is None
+        ):
+            return False
+
+    if status == "NOT_REQUIRED":
+        return required is False
+
+    if required is not True:
+        return False
+
+    if status == "PENDING":
+        return True
+
+    if status == "BLOCKED":
+        return (
+            isinstance(blocker_reason, str)
+            and bool(blocker_reason)
+            and isinstance(exception_ref, str)
+            and bool(exception_ref)
+        )
+
+    if status == "PASSED":
+        return (
+            implementation != "NOT_AVAILABLE"
+            and reviewer != "NOT_AVAILABLE"
+            and implementation != reviewer
+            and bool(evidence_refs)
+            and isinstance(reviewed_base, str)
+            and REVIEW_SHA_RE.fullmatch(reviewed_base) is not None
+            and isinstance(reviewed_head, str)
+            and REVIEW_SHA_RE.fullmatch(reviewed_head) is not None
+        )
+
+    return False
+
+def _review_findings(root, commit, paths):
+    """Return finding identities, not prose, for one committed tree.
+
+    All manifest blobs are read in one cat-file batch. The input is derived
+    only from committed tree paths; no working-tree content is consulted.
+    """
+    manifest_paths = sorted(
+        path for path in paths
+        if WORK_ITEM_MANIFEST_RE.fullmatch(path)
+    )
+    if not manifest_paths:
+        return set()
+
+    request = "".join(
+        f"{commit}:{path}\n"
+        for path in manifest_paths
+    ).encode("utf-8")
+
+    try:
+        result = subprocess.run(
+            ["git", "-C", root, "cat-file", "--batch"],
+            input=request,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+    except OSError as exc:
+        raise RuntimeError(
+            f"cannot start git cat-file --batch: {exc}"
+        ) from exc
+
+    if result.returncode != 0:
+        detail = result.stderr.decode("utf-8", errors="replace").strip()
+        raise RuntimeError(
+            "git cat-file --batch failed while reading review manifests"
+            + (f": {detail}" if detail else "")
+        )
+
+    output = result.stdout
+    offset = 0
+    findings = set()
+
+    for path in manifest_paths:
+        header_end = output.find(b"\n", offset)
+        if header_end < 0:
+            raise RuntimeError(
+                f"git cat-file --batch returned a truncated header for '{path}'"
+            )
+
+        header = output[offset:header_end].split()
+        offset = header_end + 1
+
+        if len(header) != 3 or header[1] != b"blob":
+            raise RuntimeError(
+                f"git cat-file --batch could not resolve review manifest '{path}'"
+            )
+
+        try:
+            size = int(header[2])
+        except ValueError as exc:
+            raise RuntimeError(
+                f"git cat-file --batch returned an invalid blob size for '{path}'"
+            ) from exc
+
+        if size < 0 or offset + size >= len(output):
+            raise RuntimeError(
+                f"git cat-file --batch returned a truncated blob for '{path}'"
+            )
+
+        raw = output[offset:offset + size]
+        offset += size
+
+        if output[offset:offset + 1] != b"\n":
+            raise RuntimeError(
+                f"git cat-file --batch returned an invalid blob boundary for '{path}'"
+            )
+        offset += 1
+
+        try:
+            text = raw.decode("utf-8", errors="strict")
+        except UnicodeDecodeError as exc:
+            raise RuntimeError(
+                f"'{path}' is not valid UTF-8; review contract cannot be read"
+            ) from exc
+
+        if not _parse_review_node(text):
+            findings.add((path, "REVIEW_CONTRACT_INVALID"))
+
+    if offset != len(output):
+        raise RuntimeError(
+            "git cat-file --batch returned unexpected trailing output"
+        )
+
+    return findings
+
+
+def check_review_contract(root, base_commit, head_commit, head_paths):
+    """Enforce the review contract as a base-to-head finding ratchet."""
+    base_paths = tree_paths(root, base_commit)
+
+    if REVIEW_BASELINE_REPORT in head_paths:
+        try:
+            raw_report = run_git([
+                "-C",
+                root,
+                "show",
+                f"{head_commit}:{REVIEW_BASELINE_REPORT}",
+            ])
+        except RuntimeError as exc:
+            raise RuntimeError(
+                f"cannot read '{REVIEW_BASELINE_REPORT}': {exc}"
+            ) from exc
+
+        try:
+            report = json.loads(raw_report.decode("utf-8", errors="strict"))
+        except (UnicodeDecodeError, ValueError) as exc:
+            raise RuntimeError(
+                f"'{REVIEW_BASELINE_REPORT}' is not valid UTF-8 JSON"
+            ) from exc
+
+        if not isinstance(report, dict) or set(report) != {
+            "baseline_tree",
+            "cohort_tree",
+        }:
+            raise RuntimeError(
+                f"'{REVIEW_BASELINE_REPORT}' must contain exactly "
+                "'baseline_tree' and 'cohort_tree'"
+            )
+
+        if (
+            not isinstance(report["baseline_tree"], str)
+            or re.fullmatch(r"[0-9a-f]{40}", report["baseline_tree"]) is None
+        ):
+            raise RuntimeError(
+                f"'{REVIEW_BASELINE_REPORT}' baseline_tree must be "
+                "a full 40-character lowercase hexadecimal SHA"
+            )
+
+        if (
+            not isinstance(report["cohort_tree"], str)
+            or REVIEW_COHORT_RE.fullmatch(report["cohort_tree"]) is None
+        ):
+            raise RuntimeError(
+                f"'{REVIEW_BASELINE_REPORT}' cohort_tree must be "
+                "8 lowercase hexadecimal characters"
+            )
+
+    baseline_findings = _review_findings(
+        root,
+        base_commit,
+        base_paths,
+    )
+    head_findings = _review_findings(
+        root,
+        head_commit,
+        head_paths,
+    )
+    new_findings = sorted(head_findings - baseline_findings)
+
+    try:
+        with open(__file__, "rb") as checker_file:
+            validator_sha256 = hashlib.sha256(
+                checker_file.read()
+            ).hexdigest()
+    except OSError as exc:
+        raise RuntimeError(
+            f"cannot hash review validator source: {exc}"
+        ) from exc
+
+    print(
+        "Review contract "
+        f"review_contract_enforced_by={REVIEW_CONTRACT_ENFORCED_BY!r} "
+        f"review_contract_head_sha={head_commit} "
+        f"review_validator_sha256={validator_sha256} "
+        f"review_contract_violation_count={len(new_findings)} "
+        "baseline_source=base"
+    )
+
+    for path, code in new_findings:
+        error(
+            "review contract violation: "
+            f"'{path}': {code}"
+        )
+
+    return new_findings
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--base", help="full base commit SHA")
@@ -1099,6 +1667,21 @@ def main():
             else "HEAD"
         )
         head_paths = tree_paths(root, head_for_denylist)
+
+        # The ranged invocation compares the PR head with the exact base
+        # commit supplied by the CI event. Head-tree-only is explicitly a
+        # weaker mode and cannot claim that the review ratchet ran.
+        if args.base and args.head:
+            base_commit = resolve_commit(root, args.base, "base SHA")
+            review_violations = check_review_contract(
+                root,
+                base_commit,
+                head_for_denylist,
+                head_paths,
+            )
+            if review_violations:
+                return 1
+
         prohibited = check_prohibited_head_paths(head_paths)
 
         if prohibited:

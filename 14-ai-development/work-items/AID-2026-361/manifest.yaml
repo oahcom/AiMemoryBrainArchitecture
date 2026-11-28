@@ -1,0 +1,112 @@
+work_item_id: AID-2026-361
+title: "Add the fail-closed review-contract integrity ratchet"
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  Adds a fail-closed review-record parser and base-to-head finding ratchet to
+  the existing repository-hygiene checker, together with regression tests.
+  It does not add a required CI context, alter workflows, change branch
+  protection, authenticate reviewer identities, or claim Owner acceptance.
+status: IN_REVIEW
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner acceptance not recorded"
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "c72ba09685eff8f4e00cbf05182dcfdf5d1815a4"
+
+prompt_id: AID-2026-361-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-361/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: 0a944c01888a658ba25fece2e348a070068fd0f7e3220ea25da8c6766e1e3f7a
+prompt_bytes: 3412
+prompt_file_blob_sha: e208e859720f1a869566b7e2175338c0b614499e
+prompt_commit_trace_initial_registration: true
+
+scope:
+  included:
+    - "Define and enforce the exact nine-key review-record contract for work-item manifests."
+    - "Validate the four legal review states and their state-dependent field constraints."
+    - "Use a deliberately restricted YAML scalar and sequence parser with no third-party dependency."
+    - "Preserve only the explicitly adjudicated bare review: PENDING legacy scalar form."
+    - "Compute review-contract findings independently in the invocation's base and head trees."
+    - "Use (manifest_path, violation_code) as the finding identity and report head findings absent from the base."
+    - "Resolve the ratchet baseline exclusively from the invocation's --base argument."
+    - "Emit runtime evidence identifying the enforcement context, head SHA, validator SHA-256, and new finding count."
+    - "Add regression tests for parser failures, valid migration forms, base-to-head mutations, and merge-history behavior."
+    - "Register this implementation separately from the documentation-only AID-2026-323 decision record."
+
+  excluded:
+    - "Changing the normative PR-GOVERNANCE-001 review or approval requirements."
+    - "Adding a new required CI context or changing workflow definitions."
+    - "Changing branch protection, repository rulesets, or merge policy."
+    - "Authenticating reviewer identity or proving that a human review actually occurred."
+    - "Treating manifest status PASSED as a GitHub approval."
+    - "Migrating all historical review-contract findings in this PR."
+    - "Changing the scope or conclusions of AID-2026-323."
+    - "Claiming Owner acceptance, independent review PASS, or merge before the corresponding evidence exists."
+
+evidence: 14-ai-development/work-items/AID-2026-361/session-evidence.md
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-361/prompt-v1.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-361/session-evidence.md"
+    relationship: evidence
+  - path: "scripts/ci/check_repository_hygiene.py"
+    relationship: implementation
+  - path: "scripts/test_check_repository_hygiene.py"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
+
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1021"
+    implementing_ai_session: "6b093317-85b8-83ec-9aa9-91b47ca5f770"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-361/session-evidence.md"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-361/prompt-v1.md"
+    executed_prompt_sha256: "0a944c01888a658ba25fece2e348a070068fd0f7e3220ea25da8c6766e1e3f7a"
+    executed_prompt_bytes: 3412
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: "RECORDED"
+
+implementation:
+  status: IMPLEMENTED
+  pull_request: 1500
+  summary: >-
+    Adds a nine-key review-record contract parser and semantic validator to
+    scripts/ci/check_repository_hygiene.py, together with a base-to-head
+    finding-identity ratchet. The ratchet uses the commit resolved from the
+    invocation's --base argument and reports only finding identities present
+    in the head but absent from the base. Regression coverage is added to
+    scripts/test_check_repository_hygiene.py. This record does not claim
+    independent review approval, Owner acceptance, or PR merge.
+  files_changed:
+    - scripts/ci/check_repository_hygiene.py
+    - scripts/test_check_repository_hygiene.py
+    - 14-ai-development/work-items/AID-2026-361/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-361/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-361/prompt-v1.md
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - "python scripts/test_check_repository_hygiene.py"
+    - "Run the ranged checker with the exact base and head commit SHAs."
+    - "Run the M1-M6 base-to-head mutation sequence and record each exit code and finding count."
+    - "Run the Work Item manifest consistency and Session Evidence checks on the final PR head."
+
+review:
+  required: true
+  status: PENDING
+  implementation_identity: NOT_AVAILABLE
+  reviewer_identity: NOT_AVAILABLE
+  evidence_refs: []
+  blocker_reason: null
+  exception_ref: null
+  reviewed_base_sha: null
+  reviewed_head_sha: null

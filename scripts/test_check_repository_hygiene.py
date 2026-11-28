@@ -84,7 +84,19 @@ class RepositoryHygieneTests(unittest.TestCase):
         if with_index:
             files.setdefault(
                 "14-ai-development/work-items/AID-2026-001/manifest.yaml",
-                "work_item_id: AID-2026-001\n",
+                (
+                    "work_item_id: AID-2026-001\n"
+                    "review:\n"
+                    "  required: true\n"
+                    "  status: PENDING\n"
+                    "  implementation_identity: NOT_AVAILABLE\n"
+                    "  reviewer_identity: NOT_AVAILABLE\n"
+                    "  evidence_refs: []\n"
+                    "  blocker_reason: null\n"
+                    "  exception_ref: null\n"
+                    "  reviewed_base_sha: null\n"
+                    "  reviewed_head_sha: null\n"
+                ),
             )
             files.setdefault(
                 "14-ai-development/work-items/INDEX.md",
@@ -107,6 +119,37 @@ class RepositoryHygieneTests(unittest.TestCase):
             "README.md": "Base repository content\n",
         })
 
+    def checker_environment(self):
+        """Expose the main checkout's immutable Git objects to fixture repos."""
+        source_root = CHECKER.parents[2]
+        result = subprocess.run(
+            ["git", "rev-parse", "--git-path", "objects"],
+            cwd=source_root,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+            text=True,
+        )
+        if result.returncode != 0:
+            self.fail(
+                "cannot locate source checkout Git object directory: "
+                f"{result.stderr}"
+            )
+
+        objects = Path(result.stdout.strip())
+        if not objects.is_absolute():
+            objects = source_root / objects
+
+        env = os.environ.copy()
+        alternate = str(objects.resolve())
+        existing = env.get("GIT_ALTERNATE_OBJECT_DIRECTORIES")
+        env["GIT_ALTERNATE_OBJECT_DIRECTORIES"] = (
+            alternate
+            if not existing
+            else os.pathsep.join((alternate, existing))
+        )
+        return env
+
     def run_checker(self, base, head):
         return subprocess.run(
             [
@@ -122,6 +165,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             stderr=subprocess.PIPE,
             check=False,
             text=True,
+            env=self.checker_environment(),
         )
 
     def run_checker_args(self, *args):
@@ -132,6 +176,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             stderr=subprocess.PIPE,
             check=False,
             text=True,
+            env=self.checker_environment(),
         )
 
     def run_checker_unqualified(self):
@@ -143,6 +188,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             stderr=subprocess.PIPE,
             check=False,
             text=True,
+            env=self.checker_environment(),
         )
 
     def assert_admission_passes(self, base, head):
@@ -219,6 +265,358 @@ class RepositoryHygieneTests(unittest.TestCase):
         ):
             with self.subTest(path=path):
                 self.assert_admission_fails(base, head, path)
+    def review_fixture_text(self, *, status="PENDING"):
+        return (
+            "work_item_id: AID-2099-999\n"
+            "review:\n"
+            "  required: true\n"
+            f"  status: {status}\n"
+            "  implementation_identity: NOT_AVAILABLE\n"
+            "  reviewer_identity: NOT_AVAILABLE\n"
+            "  evidence_refs: []\n"
+            "  blocker_reason: null\n"
+            "  exception_ref: null\n"
+            "  reviewed_base_sha: null\n"
+            "  reviewed_head_sha: null\n"
+        )
+
+    def test_review_contract_invalid_node_is_rejected(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/work-items/AID-2099-999/manifest.yaml": (
+                "work_item_id: AID-2099-999\n"
+                "review:\n"
+                "  required: true\n"
+                "  status: APPROVED\n"
+                "  implementation_identity: NOT_AVAILABLE\n"
+                "  reviewer_identity: NOT_AVAILABLE\n"
+                "  evidence_refs: []\n"
+                "  blocker_reason: null\n"
+                "  exception_ref: null\n"
+                "  reviewed_base_sha: null\n"
+                "  reviewed_head_sha: null\n"
+            ),
+        })
+
+        result = self.run_checker(base, head)
+        self.assertEqual(
+            result.returncode,
+            1,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn(
+            "review contract violation: "
+            "'14-ai-development/work-items/AID-2099-999/manifest.yaml': "
+            "REVIEW_CONTRACT_INVALID",
+            result.stderr,
+        )
+        self.assertIn("review_contract_violation_count=1", result.stdout)
+        self.assertIn("baseline_source=base", result.stdout)
+
+    def test_new_review_violation_is_counted_against_base(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/work-items/AID-2099-999/manifest.yaml": (
+                self.review_fixture_text(status="APPROVED")
+            ),
+        })
+
+        result = self.run_checker(base, head)
+        self.assertEqual(
+            result.returncode,
+            1,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn(
+            "review_contract_violation_count=1",
+            result.stdout,
+        )
+        self.assertIn("baseline_source=base", result.stdout)
+
+    def test_restored_review_contract_passes_base_ratchet(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/work-items/AID-2099-999/manifest.yaml": (
+                self.review_fixture_text()
+            ),
+        })
+
+        result = self.run_checker(base, head)
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn(
+            "review_contract_violation_count=0",
+            result.stdout,
+        )
+        self.assertIn("baseline_source=base", result.stdout)
+
+    def test_present_review_baseline_report_with_invalid_tree_sha_is_incomplete(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/reports/work-item-manifest-ac4-baseline.json": (
+                '{"baseline_tree":'
+                '"000000000000000000000000000000000000000",'
+                '"cohort_tree":"e47dd6f0"}\n'
+            ),
+        })
+
+        result = self.run_checker(base, head)
+        self.assertEqual(
+            result.returncode,
+            2,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn(
+            "baseline_tree must be a full 40-character lowercase "
+            "hexadecimal SHA",
+            result.stderr,
+        )
+
+    def test_existing_review_contract_finding_is_grandfathered_from_base(self):
+        manifest_path = (
+            "14-ai-development/work-items/AID-2099-999/manifest.yaml"
+        )
+        invalid_manifest = (
+            "work_item_id: AID-2099-999\n"
+            "review:\n"
+            "  required: true\n"
+            "  status: APPROVED\n"
+            "  implementation_identity: NOT_AVAILABLE\n"
+            "  reviewer_identity: NOT_AVAILABLE\n"
+            "  evidence_refs: []\n"
+            "  blocker_reason: null\n"
+            "  exception_ref: null\n"
+            "  reviewed_base_sha: null\n"
+            "  reviewed_head_sha: null\n"
+        )
+
+        base = self.commit({
+            manifest_path: invalid_manifest,
+        })
+
+        head = self.commit({
+            "README.md": "Head repository content\n",
+            "14-ai-development/work-items/INDEX.md": (
+                "| [AID-2026-001](AID-2026-001/manifest.yaml) |\n"
+                "| [AID-2099-999](AID-2099-999/manifest.yaml) |\n"
+            ),
+        })
+
+        result = self.run_checker(base, head)
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn("review_contract_violation_count=0", result.stdout)
+        self.assertIn("baseline_source=base", result.stdout)
+
+    def test_absent_review_baseline_report_uses_base_authority(self):
+        base = self.seed_base()
+        head = self.commit({
+            "scripts/new_gate.py": "print('hello')\n",
+        })
+
+        result = self.run_checker(base, head)
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn("baseline_source=base", result.stdout)
+    def test_review_parser_rejects_zero_space_top_level_separator(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/work-items/AID-2099-999/manifest.yaml": (
+                "work_item_id: AID-2099-999\n"
+                "review:PENDING\n"
+            ),
+        })
+
+        result = self.run_checker(base, head)
+        self.assertEqual(
+            result.returncode,
+            1,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn("review_contract_violation_count=1", result.stdout)
+
+    def test_review_parser_rejects_zero_space_field_separator(self):
+        base = self.seed_base()
+        manifest = self.review_fixture_text().replace(
+            "  required: true\n",
+            "  required:true\n",
+        )
+        head = self.commit({
+            "14-ai-development/work-items/AID-2099-999/manifest.yaml":
+                manifest,
+        })
+
+        result = self.run_checker(base, head)
+        self.assertEqual(
+            result.returncode,
+            1,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn("review_contract_violation_count=1", result.stdout)
+
+    def test_review_parser_rejects_three_space_field_indentation(self):
+        base = self.seed_base()
+        manifest = self.review_fixture_text().replace(
+            "  required: true\n",
+            "   required: true\n",
+        )
+        head = self.commit({
+            "14-ai-development/work-items/AID-2099-999/manifest.yaml":
+                manifest,
+        })
+
+        result = self.run_checker(base, head)
+        self.assertEqual(
+            result.returncode,
+            1,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn("review_contract_violation_count=1", result.stdout)
+
+    def test_review_parser_accepts_hash_inside_quoted_scalar(self):
+        base = self.seed_base()
+        manifest = self.review_fixture_text().replace(
+            "implementation_identity: NOT_AVAILABLE\n",
+            "implementation_identity: 'impl #1'\n",
+        )
+        head = self.commit({
+            "14-ai-development/work-items/AID-2099-999/manifest.yaml":
+                manifest,
+        })
+
+        result = self.run_checker(base, head)
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn("review_contract_violation_count=0", result.stdout)
+
+    def test_review_parser_accepts_evidence_empty_sequence_with_comment(self):
+        base = self.seed_base()
+        manifest = self.review_fixture_text().replace(
+            "evidence_refs: []\n",
+            "evidence_refs: []  # no evidence yet\n",
+        )
+        head = self.commit({
+            "14-ai-development/work-items/AID-2099-999/manifest.yaml":
+                manifest,
+        })
+
+        result = self.run_checker(base, head)
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn("review_contract_violation_count=0", result.stdout)
+
+    def test_review_evidence_refs_explicit_null_is_rejected(self):
+        base = self.seed_base()
+        manifest = self.review_fixture_text().replace(
+            "  evidence_refs: []\n",
+            "  evidence_refs: null\n",
+        )
+        head = self.commit({
+            "14-ai-development/work-items/AID-2099-999/manifest.yaml":
+                manifest,
+        })
+
+        result = self.run_checker(base, head)
+        self.assertEqual(result.returncode, 1, msg=result.stdout + result.stderr)
+        self.assertIn(
+            "review contract violation: "
+            "'14-ai-development/work-items/AID-2099-999/manifest.yaml': "
+            "REVIEW_CONTRACT_INVALID",
+            result.stderr,
+        )
+        self.assertIn("review_contract_violation_count=1", result.stdout)
+
+    def test_review_quoted_pending_scalar_is_rejected(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/work-items/AID-2099-999/manifest.yaml": (
+                "work_item_id: AID-2099-999\n"
+                "review: 'PENDING'\n"
+            ),
+        })
+
+        result = self.run_checker(base, head)
+        self.assertEqual(result.returncode, 1, msg=result.stdout + result.stderr)
+        self.assertIn(
+            "review contract violation: "
+            "'14-ai-development/work-items/AID-2099-999/manifest.yaml': "
+            "REVIEW_CONTRACT_INVALID",
+            result.stderr,
+        )
+        self.assertIn("review_contract_violation_count=1", result.stdout)
+
+    def test_review_evidence_refs_comment_without_items_is_rejected(self):
+        base = self.seed_base()
+        manifest = self.review_fixture_text().replace(
+            "  evidence_refs: []\n",
+            "  evidence_refs: # comment\n",
+        )
+        head = self.commit({
+            "14-ai-development/work-items/AID-2099-999/manifest.yaml":
+                manifest,
+        })
+
+        result = self.run_checker(base, head)
+        self.assertEqual(result.returncode, 1, msg=result.stdout + result.stderr)
+        self.assertIn(
+            "review contract violation: "
+            "'14-ai-development/work-items/AID-2099-999/manifest.yaml': "
+            "REVIEW_CONTRACT_INVALID",
+            result.stderr,
+        )
+        self.assertIn("review_contract_violation_count=1", result.stdout)
+
+    def test_review_evidence_refs_comment_with_item_is_accepted(self):
+        base = self.seed_base()
+        manifest = self.review_fixture_text().replace(
+            "  evidence_refs: []\n",
+            "  evidence_refs: # comment\n"
+            "    - evidence.md\n",
+        )
+        head = self.commit({
+            "14-ai-development/work-items/AID-2099-999/manifest.yaml":
+                manifest,
+        })
+
+        result = self.run_checker(base, head)
+        self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
+        self.assertIn("review_contract_violation_count=0", result.stdout)
+        self.assertNotIn(
+            "14-ai-development/work-items/AID-2099-999/manifest.yaml': "
+            "REVIEW_CONTRACT_INVALID",
+            result.stderr,
+        )
+
+    def test_review_parser_accepts_utf8_bom_before_valid_node(self):
+        base = self.seed_base()
+        manifest = "\ufeff" + self.review_fixture_text()
+        head = self.commit({
+            "14-ai-development/work-items/AID-2099-999/manifest.yaml":
+                manifest,
+        })
+
+        result = self.run_checker(base, head)
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}",
+        )
+        self.assertIn("review_contract_violation_count=0", result.stdout)
 
     def test_new_allowed_source_file_passes(self):
         base = self.seed_base()
@@ -232,7 +630,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         base = self.seed_base()
         head = self.commit({
             "14-ai-development/reports/work-item-manifest-ac4-baseline.json": (
-                '{"baseline_tree":"0000000000000000000000000000000000000000"}\\n'
+                '{"baseline_tree":"5be0d93f305ca0c1790abe41b4eb23cd7c71a6a0","cohort_tree":"e47dd6f0"}\n'
             ),
         })
 
@@ -714,11 +1112,28 @@ class RepositoryHygieneTests(unittest.TestCase):
     # M20: a work-item manifest is the one YAML shape the registry needs.
     # Every other YAML shape stays rejected, so this rule cannot be widened
     # into a general .yaml admission by a later edit that nobody notices.
+    def manifest_with_review(self, manifest_text):
+        """Append the canonical PENDING review contract to a fixture manifest."""
+        return manifest_text.rstrip("\n") + "\n" + (
+            "review:\n"
+            "  required: true\n"
+            "  status: PENDING\n"
+            "  implementation_identity: NOT_AVAILABLE\n"
+            "  reviewer_identity: NOT_AVAILABLE\n"
+            "  evidence_refs: []\n"
+            "  blocker_reason: null\n"
+            "  exception_ref: null\n"
+            "  reviewed_base_sha: null\n"
+            "  reviewed_head_sha: null\n"
+        )
+
     def test_work_item_manifest_is_admitted(self):
         base = self.seed_base()
         head = self.commit({
             "14-ai-development/work-items/AID-2026-055/manifest.yaml":
-                "work_item_id: AID-2026-055\n",
+                self.manifest_with_review(
+                    "work_item_id: AID-2026-055\n"
+                ),
         })
 
         self.assert_admission_passes(base, head)
@@ -1210,8 +1625,19 @@ class RepositoryHygieneTests(unittest.TestCase):
     def test_next_year_work_item_id_is_admitted(self):
         base = self.seed_base()
         head = self.commit({
-            "14-ai-development/work-items/AID-2027-001/manifest.yaml":
-                "work_item_id: AID-2027-001\n",
+            "14-ai-development/work-items/AID-2027-001/manifest.yaml": (
+                "work_item_id: AID-2027-001\n"
+                "review:\n"
+                "  required: true\n"
+                "  status: PENDING\n"
+                "  implementation_identity: NOT_AVAILABLE\n"
+                "  reviewer_identity: NOT_AVAILABLE\n"
+                "  evidence_refs: []\n"
+                "  blocker_reason: null\n"
+                "  exception_ref: null\n"
+                "  reviewed_base_sha: null\n"
+                "  reviewed_head_sha: null\n"
+            ),
         })
 
         self.assert_admission_passes(base, head)
@@ -1438,18 +1864,20 @@ class RepositoryHygieneTests(unittest.TestCase):
     # manifests put it; a top-level pull_request is a different field.
     def test_manifest_pr_open_with_positive_pull_request_passes(self):
         self.manifest_consistency_fixture(
-            "work_item_id: AID-2026-001\n"
-            "status: PR_OPEN\n"
-            "implementation:\n"
-            "  status: PR_OPEN\n"
-            "  pull_request: 567\n"
-            "  merge_commit_sha: NOT_MERGED\n"
+            self.manifest_with_review(
+                "work_item_id: AID-2026-001\n"
+                "status: PR_OPEN\n"
+                "implementation:\n"
+                "  status: PR_OPEN\n"
+                "  pull_request: 567\n"
+                "  merge_commit_sha: NOT_MERGED\n"
+            )
         )
 
         result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-28.3 "
+            "Work-item manifest consistency version=2026-11-28.4 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
@@ -1481,18 +1909,20 @@ class RepositoryHygieneTests(unittest.TestCase):
     # not-yet-implemented work item.
     def test_manifest_not_merged_with_not_started_passes(self):
         self.manifest_consistency_fixture(
-            "work_item_id: AID-2026-001\n"
-            "status: DISPATCHED\n"
-            "implementation:\n"
-            "  status: NOT_STARTED\n"
-            "  pull_request: PENDING\n"
-            "  merge_commit_sha: NOT_MERGED\n"
+            self.manifest_with_review(
+                "work_item_id: AID-2026-001\n"
+                "status: DISPATCHED\n"
+                "implementation:\n"
+                "  status: NOT_STARTED\n"
+                "  pull_request: PENDING\n"
+                "  merge_commit_sha: NOT_MERGED\n"
+            )
         )
 
         result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-28.3 "
+            "Work-item manifest consistency version=2026-11-28.4 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
@@ -1528,18 +1958,20 @@ class RepositoryHygieneTests(unittest.TestCase):
     # R20-03 negative: NOT_STARTED with NOT_MERGED is the dispatched shape.
     def test_manifest_not_started_with_not_merged_passes(self):
         self.manifest_consistency_fixture(
-            "work_item_id: AID-2026-001\n"
-            "status: DISPATCHED\n"
-            "implementation:\n"
-            "  status: NOT_STARTED\n"
-            "  pull_request: PENDING\n"
-            "  merge_commit_sha: NOT_MERGED\n"
+            self.manifest_with_review(
+                "work_item_id: AID-2026-001\n"
+                "status: DISPATCHED\n"
+                "implementation:\n"
+                "  status: NOT_STARTED\n"
+                "  pull_request: PENDING\n"
+                "  merge_commit_sha: NOT_MERGED\n"
+            )
         )
 
         result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-28.3 "
+            "Work-item manifest consistency version=2026-11-28.4 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
