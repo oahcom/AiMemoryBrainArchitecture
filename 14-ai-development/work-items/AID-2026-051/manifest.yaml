@@ -15,7 +15,7 @@ implementing_ai_session: NOT_ASSIGNED
 
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: 063113f0291d7ba26ff8b7fb6c6c9b0dd1a8cf16
+base_commit_sha: 0b166645b2c35873256baec6cf13cbbcab0225c1
 
 tracking_issue: "NONE — tracked by GOV-NC-2026-11-22-ENUM-BOUNDARY-021 §6 and this AID manifest"
 
@@ -30,7 +30,22 @@ prompt_sha256: 00d76f9419fcdc98bdd1f8876663841298b82a4803792f54328ef7b9244945b7
 prompt_bytes: 7042
 
 prompt_provenance_tier: T1
-prompt_provenance_note: "Frozen from the owner-proxy session that re-measured GOV-NC-2026-11-22-ENUM-BOUNDARY-021 at 063113f0 and found both defects fixed with the required tests absent. The SHA-256 identifies the committed prompt-v1.md bytes exactly."
+prompt_provenance_note: >-
+  The originally recorded base_commit_sha
+  063113f0291d7ba26ff8b7fb6c6c9b0dd1a8cf16 was investigated and found
+  never to have existed in the repository. It is not present in local
+  object databases, worktrees, reflogs, refs, or the GitHub remote, and
+  GitHub does not recognize it as a commit. The corrected base_commit_sha
+  identifies the dispatch commit
+  0b166645b2c35873256baec6cf13cbbcab0225c1, which introduced the frozen
+  prompt-v1.md bytes. The prompt blob at that commit is
+  c0be8be0903b89c2c7598830fdbecce353d0171a, containing 7042 bytes.
+  Its SHA-256 is
+  00d76f9419fcdc98bdd1f8876663841298b82a4803792f54328ef7b9244945b7,
+  matching the existing prompt_sha256 and prompt_bytes declarations.
+  The prompt content and its digest were not changed. This correction
+  repairs an invalid commit reference; it does not substitute an
+  unrelated reachable commit for the original provenance.
 
 dependency_refs:
   - 14-ai-development/governance-register/GOV-NC-2026-11-22-ENUM-BOUNDARY-021.md
