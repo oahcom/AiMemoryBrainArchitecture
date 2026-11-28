@@ -35,6 +35,14 @@ Rules:
   4. An id present in both trees is shared, not duplicated: the candidate may
      modify or delete its record as long as it does not add a second path.
 
+Authoritative ledger mode (``--registry-ref``): the ledger is read from that
+ref instead of the base tree, and a newly introduced id must also carry a
+blocking claim. When the pull request identity is supplied, that claim must
+belong to the candidate's own pull request; ``MERGED`` is never exempted, and
+a claim that was released (``ABANDONED``/``EXPIRED``) is reported separately
+from an id that was never registered. Without the flag the base-tree rule
+above is unchanged.
+
 Exit codes: 0 PASS; 1 VIOLATION; 2 INCOMPLETE.
 """
 from __future__ import annotations
@@ -52,7 +60,8 @@ RECORD_RE = re.compile(
     rf"^{ROOT}/(?P<dir>AID-[0-9]{{4}}-[0-9]{{3}}|FIX-[0-9]{{4}}-[A-Z0-9-]+)/manifest\.ya?ml\Z"
 )
 BLOCKING_STATUSES = frozenset({"CLAIMED", "MERGED"})
-KNOWN_STATUSES = frozenset({"CLAIMED", "MERGED", "ABANDONED"})
+RELEASED_STATUSES = frozenset({"ABANDONED", "EXPIRED"})
+KNOWN_STATUSES = frozenset({"CLAIMED", "MERGED", "ABANDONED", "EXPIRED"})
 TIMEOUT = 60
 
 
@@ -299,12 +308,111 @@ def load_claims(base: str, head: str, registry: str) -> tuple[list[dict], str]:
     return parsed, source
 
 
+def load_authoritative_registry(
+    ref: str, registry: str
+) -> tuple[list[dict], str]:
+    """Read the claim ledger from its dedicated ref.
+
+    The ref is the single authoritative source: a candidate pull request cannot
+    supply or edit it. A missing or unreadable ref, a missing file, an
+    unsupported schema, or a claim that is missing required fields is
+    ``Incomplete`` — never a PASS. Two current claims for one id are a data
+    corruption the loader reports as a violation, not as a priority contest.
+    """
+    probe = run_git("rev-parse", "--verify", f"{ref}^{{commit}}")
+    if probe.returncode:
+        raise Incomplete(
+            f"authoritative ledger ref {ref} cannot be resolved: "
+            f"{probe.stderr.decode('utf-8', 'replace').strip()}"
+        )
+    commit = probe.stdout.decode("utf-8", "strict").strip()
+    text = blob_at(commit, registry)
+    if text is None:
+        raise Incomplete(f"registry {registry} is absent from {ref} ({commit})")
+    try:
+        data = load_yaml(text.encode("utf-8"))
+    except Exception as exc:  # noqa: BLE001 - any parse failure is INCOMPLETE
+        raise Incomplete(
+            f"registry {registry} on {ref} is unreadable: {type(exc).__name__}: {exc}"
+        ) from exc
+    if not isinstance(data, dict):
+        raise Incomplete(f"registry {registry} on {ref} is not a mapping")
+    schema_version = data.get("schema_version")
+    if schema_version not in (1, 2):
+        raise Incomplete(
+            f"registry {registry} on {ref} declares unsupported "
+            f"schema_version {schema_version!r}"
+        )
+    claims = data.get("claims")
+    if not isinstance(claims, list):
+        raise Incomplete(f"registry {registry} on {ref} declares no claims list")
+
+    parsed: list[dict] = []
+    seen: dict[str, int] = {}
+    for index, claim in enumerate(claims):
+        if not isinstance(claim, dict):
+            raise Incomplete(f"registry claims[{index}] on {ref} is not a mapping")
+        work_item_id = claim.get("work_item_id")
+        status = claim.get("status")
+        if not valid_work_item_id(work_item_id):
+            raise Incomplete(
+                f"registry claims[{index}] on {ref} has no valid work_item_id"
+            )
+        if status not in KNOWN_STATUSES:
+            raise Incomplete(
+                f"registry claims[{index}] on {ref} has unknown status {status!r}"
+            )
+        if schema_version == 2:
+            missing = [
+                key
+                for key in ("repository", "owner_work_item", "claimed_at", "updated_at")
+                if not claim.get(key)
+            ]
+            if status in BLOCKING_STATUSES and not claim.get("repository"):
+                missing.append("repository")
+            if missing:
+                raise Incomplete(
+                    f"registry claim {work_item_id} on {ref} is missing "
+                    f"{', '.join(sorted(set(missing)))}"
+                )
+        seen[work_item_id] = seen.get(work_item_id, 0) + 1
+        parsed.append(claim)
+    duplicates = sorted(key for key, count in seen.items() if count > 1)
+    if duplicates:
+        raise DuplicateClaims(
+            "registry holds more than one current claim for "
+            + ", ".join(duplicates)
+        )
+    return parsed, f"{ref} ({commit})"
+
+
+class DuplicateClaims(Incomplete):
+    """Two current claims for one id: a violation, not an unreadable input."""
+
+
+def is_own_claim(claim: dict, pull_request: int | None, repository: str | None) -> bool:
+    """Only a CLAIMED record owned by this exact pull request is exempt.
+
+    ``MERGED`` is permanent ownership and is never exempted; a released claim
+    cannot be revived by the identity that released it; and a missing identity
+    never defaults to ownership.
+    """
+    return (
+        claim.get("status") == "CLAIMED"
+        and pull_request is not None
+        and repository is not None
+        and claim.get("pull_request") == pull_request
+        and claim.get("repository") == repository
+    )
+
+
 def check(
     base_ref: str,
     head_ref: str,
     registry: str = DEFAULT_REGISTRY,
     pull_request: int | None = None,
     repository: str | None = None,
+    registry_ref: str | None = None,
 ) -> int:
     try:
         if pull_request is not None and not repository:
@@ -321,7 +429,16 @@ def check(
 
         base_map, base_problems = build_id_map(base)
         head_map, head_problems = build_id_map(head)
-        claims, registry_source = load_claims(base, head, registry)
+        if registry_ref:
+            claims, registry_source = load_authoritative_registry(
+                registry_ref, registry
+            )
+        else:
+            claims, registry_source = load_claims(base, head, registry)
+    except DuplicateClaims as exc:
+        print(f"VIOLATION: DUPLICATE_CURRENT_CLAIM {exc}")
+        print("WORK-ITEM UNIQUENESS: VIOLATION (authoritative ledger)")
+        return 1
     except Incomplete as exc:
         print(f"WORK-ITEM UNIQUENESS: INCOMPLETE ({exc})")
         return 2
@@ -374,12 +491,7 @@ def check(
     for claim in claims:
         if claim["status"] not in BLOCKING_STATUSES:
             continue
-        same_pr = (
-            pull_request is not None
-            and claim.get("pull_request") == pull_request
-            and claim.get("repository") == repository
-        )
-        if same_pr:
+        if is_own_claim(claim, pull_request, repository):
             continue
         blocked.setdefault(claim["work_item_id"], claim)
 
@@ -392,6 +504,23 @@ def check(
                 f"ledger by pull request {claim.get('pull_request')} "
                 f"({claim.get('repository')})"
             )
+
+    if registry_ref:
+        registered = {claim["work_item_id"]: claim for claim in claims}
+        for work_item_id in sorted(introduced):
+            claim = registered.get(work_item_id)
+            if claim is None:
+                violations.append(
+                    f"WORK_ITEM_ID_UNREGISTERED {work_item_id} is introduced by "
+                    f"the candidate but has no claim in {registry_source}; claim "
+                    "the id on the authoritative ledger before adding the record"
+                )
+            elif claim["status"] in RELEASED_STATUSES:
+                violations.append(
+                    f"WORK_ITEM_ID_RELEASED {work_item_id} was released as "
+                    f"{claim['status']} (pull request {claim.get('pull_request')}); "
+                    "claim it again instead of reusing the released record"
+                )
 
     if violations:
         for violation in violations:
@@ -409,6 +538,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--head", help="candidate commit")
     parser.add_argument(
         "--registry", default=DEFAULT_REGISTRY, help="claim ledger path"
+    )
+    parser.add_argument(
+        "--registry-ref",
+        default=None,
+        help=(
+            "authoritative ledger ref (for example origin/work-item-claims); "
+            "when set, the ledger is read from this ref and a newly introduced "
+            "id must carry a blocking claim"
+        ),
     )
     parser.add_argument(
         "--pull-request",
@@ -438,7 +576,14 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 2
 
-    return check(args.base, args.head, args.registry, args.pull_request, args.repository)
+    return check(
+        args.base,
+        args.head,
+        args.registry,
+        args.pull_request,
+        args.repository,
+        args.registry_ref,
+    )
 
 
 if __name__ == "__main__":

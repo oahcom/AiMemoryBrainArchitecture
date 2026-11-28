@@ -20,6 +20,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   document-management:
@@ -40,6 +41,14 @@ jobs:
       - name: Self-test work-item uniqueness gate
         run: python3 scripts/ci/test_work_item_uniqueness.py
 
+      - name: Self-test the claim ledger gate
+        run: python3 scripts/ci/test_work_item_claims.py
+
+      - name: Fetch the authoritative claim ledger
+        run: |
+          git fetch origin "+refs/heads/work-item-claims:refs/remotes/origin/work-item-claims" \
+            || echo "::warning::the authoritative claim ledger ref is absent; the pull-request and merge-group checks will report INCOMPLETE"
+
       # A PR's event base SHA can be stale by the time this job executes.
       # Fetch the target branch itself and evaluate the exact generated merge
       # candidate against that fetched commit. Strict branch protection
@@ -48,25 +57,37 @@ jobs:
       - name: Enforce work-item uniqueness against the current target base
         env:
           EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_BASE: ${{ github.event.pull_request.base.sha }}
           BASE_REF: ${{ github.event.pull_request.base.ref }}
           MG_BASE: ${{ github.event.merge_group.base_sha }}
           MG_HEAD: ${{ github.event.merge_group.head_sha }}
+          MG_HEAD_REF: ${{ github.event.merge_group.head_ref }}
           PUSH_BEFORE: ${{ github.event.before }}
           CANDIDATE_SHA: ${{ github.sha }}
+          REPOSITORY: ${{ github.repository }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
 
+          LEDGER_REF=""
+          if git rev-parse --verify -q "refs/remotes/origin/work-item-claims^{commit}" >/dev/null; then
+            LEDGER_REF="refs/remotes/origin/work-item-claims"
+          fi
+
           if [ "$EVENT_NAME" = "pull_request" ]; then
-            if [ -z "$BASE_REF" ] || [ -z "$CANDIDATE_SHA" ]; then
-              echo "::error::pull_request has no usable base ref or candidate SHA; uniqueness verdict is INCOMPLETE"
+            if [ -z "$BASE_REF" ] || [ -z "$CANDIDATE_SHA" ] || [ -z "$PR_NUMBER" ]; then
+              echo "::error::pull_request has no usable base ref, candidate SHA or pull request number; uniqueness verdict is INCOMPLETE"
               exit 2
             fi
 
             git fetch origin "+refs/heads/${BASE_REF}:refs/remotes/origin/${BASE_REF}"
             python3 scripts/ci/check_work_item_uniqueness.py \
               --base "refs/remotes/origin/$BASE_REF" \
-              --head "$CANDIDATE_SHA"
+              --head "$CANDIDATE_SHA" \
+              ${LEDGER_REF:+--registry-ref "$LEDGER_REF"} \
+              --pull-request "$PR_NUMBER" \
+              --repository "$REPOSITORY"
 
           elif [ "$EVENT_NAME" = "merge_group" ]; then
             if ! [[ "$MG_BASE" =~ ^[0-9a-fA-F]{40}$ ]] || [ "$MG_BASE" = "0000000000000000000000000000000000000000" ]; then
@@ -79,9 +100,30 @@ jobs:
               exit 2
             fi
 
+            # merge_group has no pull_request payload. Resolve the queued pull
+            # request by its head ref and require exactly one open match; a
+            # guessed number would exempt the wrong owner.
+            if [ -z "$MG_HEAD_REF" ]; then
+              echo "::error::merge_group carries no head_ref; the claim owner cannot be resolved"
+              exit 2
+            fi
+            BRANCH="${MG_HEAD_REF#refs/heads/}"
+            OWNER="${REPOSITORY%%/*}"
+            RESOLVED="$(curl -sS -H "Authorization: Bearer $TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${REPOSITORY}/pulls?head=${OWNER}:${BRANCH}&state=open" \
+              | jq -r 'if length == 1 then .[0].number else empty end')"
+            if [ -z "$RESOLVED" ]; then
+              echo "::error::merge_group head_ref ${MG_HEAD_REF} does not resolve to exactly one open pull request; uniqueness verdict is INCOMPLETE"
+              exit 2
+            fi
+
             python3 scripts/ci/check_work_item_uniqueness.py \
               --base "$MG_BASE" \
-              --head "$MG_HEAD"
+              --head "$MG_HEAD" \
+              ${LEDGER_REF:+--registry-ref "$LEDGER_REF"} \
+              --pull-request "$RESOLVED" \
+              --repository "$REPOSITORY"
 
           elif [ "$EVENT_NAME" = "push" ]; then
             if ! [[ "$PUSH_BEFORE" =~ ^[0-9a-fA-F]{40}$ ]] || [ "$PUSH_BEFORE" = "0000000000000000000000000000000000000000" ]; then
@@ -89,6 +131,10 @@ jobs:
               exit 2
             fi
 
+            # A push to main is post-merge: the atomic claim already decided
+            # ownership before the merge. The push run keeps the tree rule and
+            # does not re-evaluate claim ownership against a pull request that
+            # the event does not carry.
             python3 scripts/ci/check_work_item_uniqueness.py \
               --base "$PUSH_BEFORE" \
               --head "$CANDIDATE_SHA"
