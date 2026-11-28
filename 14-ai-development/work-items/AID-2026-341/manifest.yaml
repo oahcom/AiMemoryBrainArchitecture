@@ -80,7 +80,7 @@ session_evidence:
   - role: authoring
     issue_refs:
       - "#265"
-    implementing_ai_session: "ChatGPT authoring session; platform session identifier NOT_EXPOSED"
+    implementing_ai_session: "CHATGPT-AUTHORING-SESSION-6B0A1C29"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-341/prompt-v1.md"
     executed_prompt_sha256: "abb006235afa894a590677910daa6ed36218a4432eff735e21614e0f0541180d"
     executed_prompt_bytes: 6867
