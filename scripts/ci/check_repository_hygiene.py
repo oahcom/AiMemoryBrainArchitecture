@@ -50,7 +50,13 @@ from pathlib import PurePosixPath
 #
 # The same merged .3 also carries the AID-2026-345 rule change: admit only the
 # exact AID-2026-345 carrier-data.yaml path; other YAML files remain denied.
-CHECK_VERSION = "2026-11-28.3"
+#
+# 2026-11-28.4 admits one generated artifact by exact path:
+# `14-ai-development/reports/supersession-index.json` (D22, AID-2026-352). It is
+# the DM-16 reverse index consumed by scripts/check_document_management.py, not
+# a general "JSON under reports/" rule; a second JSON there stays refused
+# because it would be a second, unreviewed source of the same relation.
+CHECK_VERSION = "2026-11-28.4"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -169,6 +175,13 @@ CONFORMANCE_PACKAGE_FILES_RE = re.compile(
 # other work-item ID families are not admitted.
 AID_SOURCE_SNAPSHOT_RE = re.compile(
     r"14-ai-development/work-items/AID-[0-9]{4}-[0-9]{3}/[^/]+\.source\.txt"
+)
+
+# D22: the DM-16 supersession reverse index, at one exact path. The artifact is
+# a contract consumed by scripts/check_document_management.py, so the rule is an
+# exact path and not a directory pattern.
+SUPERSESSION_INDEX_RE = re.compile(
+    r"14-ai-development/reports/supersession-index\.json"
 )
 
 # D20: only the reference-model .gitignore directly under an AID work item
@@ -382,6 +395,9 @@ def is_allowed_new_path(path):
         return True
 
     if AID_SOURCE_SNAPSHOT_RE.fullmatch(path):
+        return True
+
+    if SUPERSESSION_INDEX_RE.fullmatch(path):
         return True
 
     if AID_REFERENCE_MODEL_GITIGNORE_RE.fullmatch(path):
