@@ -44,6 +44,8 @@ document_metadata:
     canonical_conflict_status: None
     canonical_conflict_resolution: null
     normative_status: Informative
+  bilingual_counterpart:
+    source: "00-governance/reports/2026-11-27-wb-line03-closeout.md"
 ---
 
 # WB LINE 03 Closeout（WB LINE 03 收尾）— Validator（验证器）/ Repository Governance（仓库治理）/ MCP（模型上下文协议）/ Local Environment（本地环境）
