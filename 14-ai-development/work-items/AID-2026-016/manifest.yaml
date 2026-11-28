@@ -114,8 +114,10 @@ measurements:
   document_management: "python scripts/check_document_management.py --require-changed origin/main; PASS (incremental); 700 classified / 370 unclassified; exit code 0"
   traceability: "python scripts/check_traceability.py --index-only; PASS; 0 errors / 115 warnings; exit code 0"
   prompt_v1_sha256: "0aeeb697cfd88b1f972724a46c6385c978069ce3e44e37330ed26dc56d5f80dc"
+  prompt_v1_file: "14-ai-development/work-items/AID-2026-016/prompt-v1.md"
   prompt_v1_bytes: 9998
   prompt_v2_sha256: 9394cc50b1053dcee0cdeb177ccd998f4b0e54388020ff8d590fbbf2783da69e
+  prompt_v2_file: "14-ai-development/work-items/AID-2026-016/prompt-v2.md"
   prompt_v2_bytes: 47050
 
 evidence:
