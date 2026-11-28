@@ -53,7 +53,7 @@ concurrency:
 on:
   pull_request:
     branches: [main]
-  # Six required contexts live in this file. The queue only reports checks
+  # Seven required contexts live in this file. The queue only reports checks
   # produced by `merge_group`, so every job here must also run for it.
   merge_group:
     types: [checks_requested]
