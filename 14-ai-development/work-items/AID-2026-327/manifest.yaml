@@ -1,0 +1,76 @@
+work_item_id: AID-2026-327
+title: "Record Owner D-10 CanonicalCommitCursor authority decision in System Boundaries"
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: "Documentation-only recording of a final Owner decision already recorded in Issue #1210. No implementation behavior, consumer contract, or formal document approval is changed."
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "4a6cdd0e7c5dc0db53be37a2f945e02c59d5abf9"
+prompt_status: NOT_RECORDED
+prompt_provenance: NOT_VERIFIED
+evidence: "14-ai-development/work-items/AID-2026-327/evidence.md"
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-327/prompt-v1.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-327/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-327/session-evidence.md"
+    relationship: evidence
+  - path: "01-system-architecture/system-boundaries.md"
+    relationship: normative
+  - path: "docs/en/01-system-architecture/system-boundaries.md"
+    relationship: reference
+  - path: "docs/zh-CN/01-system-architecture/system-boundaries.md"
+    relationship: reference
+session_evidence:
+  - role: DECISION_RECORDING
+    issue_refs:
+      - "#1210"
+    implementing_ai_session: "NOT_RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-327/session-evidence.md"
+implementation:
+  status: IMPLEMENTED
+  summary: "Documentation-only decision recording in the canonical System Boundaries source and EN/ZH-CN mirrors. No executable behavior or downstream D/F/G consumer document was changed."
+  files_changed:
+    - "01-system-architecture/system-boundaries.md"
+    - "docs/en/01-system-architecture/system-boundaries.md"
+    - "docs/zh-CN/01-system-architecture/system-boundaries.md"
+    - "14-ai-development/work-items/AID-2026-327/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-327/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-327/evidence.md"
+    - "14-ai-development/work-items/AID-2026-327/session-evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests: []
+scope:
+  included:
+    - "Record the final Owner D-10 cursor-authority decision in canonical System Boundaries section 15."
+    - "Update the English and Chinese mirrors and pin both to the canonical source blob."
+    - "Create Work Item prompt, evidence, and session-provenance records with explicit provenance limits."
+  excluded:
+    - "Changing code, runtime, APIs, schemas, DDL, tests, workflows, branch protection, or Issue #1210 body."
+    - "Changing detailed D/F/G consumer specifications or defining wire/snapshot-cut protocols."
+    - "Claiming formal approval, independent review, CI acceptance, or downstream consumer acceptance."
+carrier:
+  branch: "docs/aid-2026-327-d10-cursor-authority"
+  pull_request: PENDING
+  merge_sha: PENDING
+  merge_method: merge
+  required_contexts: PENDING
+review:
+  status: NOT_ASSIGNED
+  independent_reviewer: NOT_ASSIGNED
+  natural_person_owner_acceptance: NOT_RECORDED
+acceptance:
+  gate: PENDING_CI
+notes:
+  - "Prompt file is a bounded operator-authored scope snapshot, not a verbatim platform prompt; provenance remains NOT_VERIFIED."
+  - "Prompt digest/byte-count metadata is not asserted."
+  - "The external implementing-session identity is NOT_RECORDED and is not inferred."
+  - "The canonical System Boundaries document remains Draft / Unverified."
