@@ -4,8 +4,8 @@ registry:
   canonical_branch: work-item-claims
   canonical_path: 14-ai-development/work-items/registry/work-item-claims.yaml
   policy: atomic-single-owner
-  created_at: '2026-11-28T04:38:25Z'
-  updated_at: '2026-11-28T04:38:25Z'
+  created_at: '2026-11-28T04:53:18Z'
+  updated_at: '2026-11-28T04:53:18Z'
 claims:
 - work_item_id: AID-2026-001
   status: MERGED
@@ -3198,6 +3198,25 @@ claims:
   - type: pull-request
     reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1506
     description: Merged work item; first adding commit c895d2ee7 on origin/main
+  history: []
+- work_item_id: AID-2026-342
+  status: MERGED
+  repository: oahcom/AiMemoryBrainArchitecture
+  pull_request: 1518
+  owner_work_item: AID-2026-342
+  claimed_at: '2026-11-28T11:41:55+08:00'
+  updated_at: '2026-11-28T11:41:55+08:00'
+  expires_at: null
+  head_sha: null
+  merge_commit_sha: 3b4bc0039da978b9d9398cdc60a342dd851b61a7
+  reservation:
+    method: migration
+    ref: null
+    ref_commit_sha: null
+  evidence:
+  - type: pull-request
+    reference: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1518
+    description: Merged work item; first adding commit ffceb31ee on origin/main
   history: []
 - work_item_id: AID-2026-343
   status: MERGED
