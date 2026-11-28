@@ -357,6 +357,34 @@ jobs:
       - name: Report all four historical cohort migration batches
         run: python scripts/ci/check_work_item_manifest_schema.py --tree HEAD --baseline "14-ai-development/reports/work-item-manifest-ac4-baseline.json" --batch-report
 
+  # AID-2026-293: the canonical work-item registry is the sole authority for
+  # normalized work-item field values. This job is its mandatory validator. It
+  # reads registry blobs from the candidate Git tree rather than the filesystem,
+  # so a sparse checkout, an untracked leftover, or a stale working copy cannot
+  # change the answer. An empty registry is a legal PASS during the migration --
+  # the per-check NOT_APPLICABLE event records which check had nothing to read,
+  # and a record that is present but malformed still fails.
+  work-item-registry:
+    name: Work Item registry validator (hard gate)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # A prompt pin is verified against the commit each record declares, so
+          # the history has to be present, not only the tip.
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install the pinned parsers
+        run: python -m pip install --quiet --disable-pip-version-check PyYAML==6.0.2 "jsonschema>=4.23,<5"
+      - name: Self-check the registry validator
+        run: python -m unittest scripts.ci.test_check_work_item_registry -v
+      - name: Validate the registry in the candidate tree
+        run: python scripts/ci/check_work_item_registry.py --tree HEAD
+
   prompt-commit-trace:
     name: Prompt-to-commit trace (ratchet)
     runs-on: ubuntu-latest
