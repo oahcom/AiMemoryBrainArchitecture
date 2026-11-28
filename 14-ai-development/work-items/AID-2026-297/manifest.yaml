@@ -1,0 +1,190 @@
+work_item_id: AID-2026-297
+title: "Repair the work-item registry migration policy, adjudication schema and inventory rules, and perform a read-only dry run"
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  This work defines migration policy, adjudication structure and inventory
+  coverage rules, and provides a read-only migration dry run. The dry run
+  does not write registry output, rewrite existing manifests, or change
+  repository governance state. The work does not claim that migration has
+  been performed or that any PR has been merged.
+status: IMPLEMENTED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "cc5d22b9126e00e3f93ffe71282554309908bc89"
+tracking_issue: "#1464"
+
+scope:
+  summary: >-
+    Repair and establish the work-item registry migration policy,
+    adjudication schema and inventory rules, then execute a read-only
+    dry run against the specified legacy source tree. Register the work
+    item and its evidence in the work-item manifest population.
+  in_scope:
+    - "Define authoritative work-item identity extraction and conflict handling."
+    - "Define explicit registry field states and field-specific authority rules."
+    - "Define registered prompt digest verification and exclude executed-prompt digests from registered prompt pins."
+    - "Define YAML truncation handling and preservation of raw Git blob evidence."
+    - "Define migration inventory states, coverage invariants and validator behavior."
+    - "Define the dry-run output contract and migration stage boundaries."
+    - "Provide the registry migration policy in English and Chinese."
+    - "Provide the migration inventory rules in English and Chinese."
+    - "Provide the work-item adjudication schema."
+    - "Provide the read-only migration tool and inventory input."
+    - "Execute the specified dry run and repository validation commands."
+    - "Register AID-2026-297 in the work-item INDEX."
+  files_out_of_scope:
+    - "Rewriting or normalizing any pre-existing work-item manifest."
+    - "Writing migrated registry records during the dry run."
+    - "Changing the source-tree legacy manifests."
+    - "Generating or modifying INDEX from the migration script."
+    - "Merging PR #1513."
+    - "Claiming independent review or Owner acceptance."
+  change_boundary: >-
+    This work establishes migration policy, schema and inventory rules,
+    and implements a read-only dry-run path. The dry run is limited to
+    source tree efbdebfa and the supplied inventory. It does not write
+    00-governance/registry/, modify legacy manifests, perform the registry
+    migration, or merge a pull request.
+
+evidence:
+  - "Tracking issue #1464"
+  - "PR #1513"
+  - "Base commit cc5d22b9126e00e3f93ffe71282554309908bc89"
+  - "Source tree efbdebfa"
+  - "00-governance/registry-migration/policy.md"
+  - "00-governance/registry-migration/policy.zh-CN.md"
+  - "00-governance/registry-migration/inventory.rules.md"
+  - "00-governance/registry-migration/inventory.rules.zh-CN.md"
+  - "00-governance/registry-migration/inventory.yaml"
+  - "00-governance/registry-adjudications/schema.json"
+  - "tools/migrate_work_item_registry.py"
+  - "Recorded command results in evidence.md"
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-297/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-297/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-297/session-evidence.md"
+    relationship: evidence
+  - path: "00-governance/registry-migration/policy.md"
+    relationship: normative
+  - path: "00-governance/registry-migration/policy.zh-CN.md"
+    relationship: reference
+  - path: "00-governance/registry-migration/inventory.rules.md"
+    relationship: normative
+  - path: "00-governance/registry-migration/inventory.rules.zh-CN.md"
+    relationship: reference
+  - path: "00-governance/registry-migration/inventory.yaml"
+    relationship: implementation
+  - path: "00-governance/registry-adjudications/schema.json"
+    relationship: schema
+  - path: "tools/migrate_work_item_registry.py"
+    relationship: implementation
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
+
+acceptance_criteria:
+  - id: AC1
+    description: "The migration policy defines explicit identity and field-authority rules."
+    measurement: "Review the policy document against the migration requirements."
+    expected_result: >-
+      Identity declarations, field states, candidate rules, prompt pin
+      verification, raw evidence handling and stage boundaries are
+      explicitly specified.
+  - id: AC2
+    description: "The inventory rules define complete source-to-inventory coverage."
+    measurement: "Review the inventory rules and validator state matrix."
+    expected_result: >-
+      Allowed states, required registry conditions, duplicate handling,
+      incomplete conditions and strict-inventory behavior are explicit.
+  - id: AC3
+    description: "The migration dry run is read-only and completes against the specified source tree."
+    measurement: >-
+      Run tools/migrate_work_item_registry.py with source tree efbdebfa,
+      the supplied inventory, JSON report output and --dry-run.
+    expected_result: >-
+      Exit code 0; 140 items and 1680 field cells are reported; no files
+      are written to 00-governance/registry/.
+  - id: AC4
+    description: "The repository test and document checks pass as recorded."
+    measurement: "Run the commands listed in implementation.tests."
+    expected_result: >-
+      pytest reports 144 passed and 34 subtests passed; bilingual document
+      and document-management checks report PASS.
+  - id: AC5
+    description: "The work item is represented by a manifest and evidence records."
+    measurement: >-
+      Validate the work-item manifest, required session-evidence structure,
+      documentation paths and INDEX registration against the PR head tree.
+    expected_result: >-
+      The manifest and evidence files exist in the PR head tree, session
+      evidence uses a single implementing_ai_session value and an Issue
+      reference, and every documentation path resolves in that tree.
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    Independent review has not been performed or recorded. The
+    implementing session does not review or approve its own output.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: NOT_ASSIGNED
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    The migration policy, bilingual inventory rules, inventory input,
+    adjudication schema and migration tool are included in PR #1513.
+    The specified dry run completed with exit code 0 and reported
+    140 items and 1680 field cells. Prompt digest checks reported
+    8 passes and 69 failures; schema status was NOT_PRESENT/DEFERRED.
+    The repository test suite reported 144 passed and 34 subtests passed.
+    Bilingual document validation and document-management validation
+    passed. The dry run did not write 00-governance/registry/ and did not
+    rewrite existing manifests. PR #1513 has not been merged. Independent
+    review has not been performed.
+  pull_request: 1513
+  merge_commit: ""
+  implementation_commit: ""
+  ci_status: NOT_CLAIMED
+  files_changed:
+    - 00-governance/registry-migration/policy.md
+    - 00-governance/registry-migration/policy.zh-CN.md
+    - 00-governance/registry-migration/inventory.rules.md
+    - 00-governance/registry-migration/inventory.rules.zh-CN.md
+    - 00-governance/registry-migration/inventory.yaml
+    - 00-governance/registry-adjudications/schema.json
+    - tools/migrate_work_item_registry.py
+    - 14-ai-development/work-items/AID-2026-297/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-297/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-297/evidence.md
+    - 14-ai-development/work-items/AID-2026-297/session-evidence.md
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - "python tools/migrate_work_item_registry.py --source-tree efbdebfa --inventory 00-governance/registry-migration/inventory.yaml --output 00-governance/registry --dry-run --report json (exit 0; items=140; field_cells=1680; prompt_sha256 pass=8 / fail=69; schema=NOT_PRESENT/DEFERRED)"
+    - "python -m pytest tests -q (144 passed, 34 subtests passed)"
+    - "python scripts/check_bilingual_docs.py (PASS)"
+    - "python scripts/check_document_management.py --require-changed origin/main (PASS)"
+    - "python scripts/ci/check_work_item_manifest_schema.py --tree HEAD --baseline 14-ai-development/reports/work-item-manifest-ac4-baseline.json"
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1464"
+    implementing_ai_session: NOT_RECORDED
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-297/prompt-v1.md
+    executed_prompt_sha256: bb40415cce14edde08a0753e6c4c3ded9060c67fa7bef0e49bb64fbfa15d52d6
+    executed_prompt_bytes: 7572
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-297/session-evidence.md
