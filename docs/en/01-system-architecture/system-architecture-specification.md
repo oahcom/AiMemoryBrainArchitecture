@@ -26,8 +26,8 @@ document_metadata:
     normative_status: Normative
   bilingual_counterpart:
     source: "01-system-architecture/system-architecture-specification.md"
-    en: "docs/en/01-system-architecture/system-architecture-specification.md"
-    zh-CN: null
+    en: null
+    zh-CN: "docs/zh-CN/01-system-architecture/system-architecture-specification.md"
   steward: "user-authorized operator (delegated by account owner)"
 ---
 
