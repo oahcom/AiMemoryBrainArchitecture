@@ -179,7 +179,9 @@ The closed PR #1494 is rebuilt as PR #1520 under AID-2026-341, because AID-2026-
 Two defects made #1494 red; both are fixed in this rebuild:
 
 - `Prompt-to-commit trace (ratchet)` failed with `check_prompt_commit_trace.py: error: unrecognized arguments: --emit-baseline` (exit 2). The rewrite had dropped the snapshot CLI contract that `.github/workflows/gates.yml` uses; `--emit-baseline` is restored with the snapshot shape the ratchet consumes.
-- `Session Evidence` failed with `MISSING: PR description: missing Related issue(s)` (exit 1). PR #1520 declares governing Issue #1427, the AI-assisted status, and this session evidence file.
+- `Session Evidence` failed with `MISSING: PR description: missing Related issue(s)` (exit 1). PR #1520 declares governing Issue #265 — the Issue the PR that introduced this gate (#1427) links — the AI-assisted status, and this session evidence file.
+
+One further reconciliation was needed. The `Reproduce the historical #1453 false-new-manifest failure` step replays the ratchet at `bdb4b0d4` against `460f437e` with the committed `AID-2026-291/baseline.json`, and it requires exit 0. The rewrite withdrew every implementation SHA under a blocked lifecycle, so a placeholder such as `PENDING` became `commit_absent` instead of `commit_pending`, and twelve base-present rows read as new findings. Only a real SHA is withdrawn now; a placeholder keeps its `commit_pending` classification. That step and the PR ratchet both exit 0 after the change.
 
 Coordinator-local execution (EXECUTED_BY_COORDINATOR_NOT_IN_CI) at code commit `5a4bb16eb6ccb97d1ef506f6669156139dc1270a`, this branch's last commit that changes the checker or its tests; later commits in this branch only edit these records:
 

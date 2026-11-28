@@ -332,10 +332,12 @@ def audit(root: Path, commit_ref: str, base_ref: str) -> list[dict]:
         raw_implementation_sha = implementation_sha
         # A lifecycle that has not begun cannot contribute an implementation
         # commit to reachability, even if a stale SHA is present in the record.
+        # A placeholder is not a commit either, so it keeps its commit_pending
+        # classification: only a real SHA is withdrawn here.
         if lifecycle in {"NOT_STARTED", "DISPATCHED", "NOT_APPLICABLE"}:
             if real(implementation_sha):
                 findings.append("commit_unexpected_for_lifecycle")
-            implementation_sha = None
+                implementation_sha = None
 
         if not real(implementation_sha):
             findings.append(
