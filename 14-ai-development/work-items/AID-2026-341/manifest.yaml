@@ -79,7 +79,7 @@ documentation:
 session_evidence:
   - role: authoring
     issue_refs:
-      - "#1427"
+      - "#265"
     implementing_ai_session: "ChatGPT authoring session; platform session identifier NOT_EXPOSED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-341/session-evidence.md"
 
