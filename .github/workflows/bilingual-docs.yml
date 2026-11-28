@@ -39,10 +39,12 @@ jobs:
         run: |
           set +e
           (cd tests && python3 -m unittest -v test_check_owner_namespace_references.py)
-          test_status=$?
+          owner_test_status=$?
+          (cd tests && python3 -m unittest -v test_ac3_fail_closed_fixtures.py)
+          fixture_test_status=$?
           python3 scripts/check_owner_namespace_references.py --check --require-group-closure
           check_status=$?
-          if [ "$test_status" -ne 0 ] || [ "$check_status" -ne 0 ]; then
+          if [ "$owner_test_status" -ne 0 ] || [ "$fixture_test_status" -ne 0 ] || [ "$check_status" -ne 0 ]; then
             exit 1
           fi
 
