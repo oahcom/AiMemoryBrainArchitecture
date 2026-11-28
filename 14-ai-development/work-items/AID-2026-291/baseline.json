@@ -810,6 +810,13 @@
       ],
       "primary_status": "NO_TRACE"
     },
+    "AID-2026-255": {
+      "findings": [
+        "digest_unpinned",
+        "commit_absent"
+      ],
+      "primary_status": "NO_TRACE"
+    },
     "AID-2026-256": {
       "findings": [
         "digest_absent",

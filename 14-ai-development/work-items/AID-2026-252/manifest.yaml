@@ -78,6 +78,7 @@ implementation:
 session_evidence:
   - role: "IMPLEMENTATION_SESSION"
     issue_refs:
+      - "#266"
     implementing_ai_session: "NOT_RECORDED"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-252/prompt-v1.md"
     executed_prompt_sha256: "4edd5996ba26ed286be04aad2d2bf20a61489a15719b5e954891c53a77859ff2"
