@@ -10,7 +10,7 @@ risk_rationale: >-
   addressed is false assurance: the check reported membership it had not established,
   because a row deleted from the table could still be "linked" by a link in prose or in a
   comment (issue #944).
-status: DISPATCHED
+status: MERGED
 
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -125,12 +125,18 @@ findings:
       cases are constructed in the test fixtures rather than found in the tree.
 
 implementation:
-  status: IMPLEMENTED_IN_BRANCH
-  pull_request: ASSIGNED_AT_OPEN
-  merge_commit_sha: NOT_MERGED
+  status: IMPLEMENTED
+  branch: req05/944-fix
+  pull_request: "#1274"
+  merge_commit_sha: 9bbef167c3fa29b981ab09f2df08db8eac150b39
+  implementation_head: 6348b305e4b894ccec0f4d9ede4f4cac8261ad07
   note: >-
-    The narrowed predicate and the tests land in this branch. The pull request number cannot
-    be written into the commit that opens it.
+    The narrowed predicate, the three tests and the index row are merged: PR #1274, merge
+    commit 9bbef167c3fa29b981ab09f2df08db8eac150b39, implementation head
+    6348b305e4b894ccec0f4d9ede4f4cac8261ad07. `implementation.status` is IMPLEMENTED
+    because MERGED is not in the AID-2026-251 implementation vocabulary; the merge is
+    carried by merge_commit_sha and the top-level status. Exact-Head CI evidence was not
+    recorded here and is not claimed.
 
 review:
   status: NOT_ASSIGNED
@@ -143,6 +149,14 @@ acceptance:
   record_ref: ""
   acceptance_authority: "USER-PRINCIPAL-DELEGATED (no acceptance decision is asserted by this manifest)"
 
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-084/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-084/session-evidence-944.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference
+
 session_evidence:
   - role: IMPLEMENTER
     issue_refs:
@@ -154,11 +168,3 @@ session_evidence:
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-084/session-evidence-944.md
-
-documentation:
-  - path: "14-ai-development/work-items/AID-2026-084/prompt-v1.md"
-    relationship: reference
-  - path: "14-ai-development/work-items/AID-2026-084/session-evidence-944.md"
-    relationship: reference
-  - path: "14-ai-development/work-items/INDEX.md"
-    relationship: reference
