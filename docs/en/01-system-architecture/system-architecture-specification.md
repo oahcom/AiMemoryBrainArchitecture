@@ -1,3 +1,36 @@
+---
+document_metadata:
+  domain: architecture
+  role: design-specification
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      evidence_reference: []
+    evidence_verification:
+      verification_status: Unverified
+      last_verification_note: "Front matter added when the section 4.1 body was re-derived for AID-2026-303; not a formal approval record."
+    usage_status: Active
+    modification_status: Modified
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "System architecture specification"
+    canonical_scope_id: architecture/system-architecture-specification
+    canonical_scope_keywords:
+      - architecture
+      - specification
+      - forget
+      - completion
+    canonical_conflict_status: None
+    normative_status: Normative
+  bilingual_counterpart:
+    source: "01-system-architecture/system-architecture-specification.md"
+    en: "docs/en/01-system-architecture/system-architecture-specification.md"
+    zh-CN: null
+  steward: "user-authorized operator (delegated by account owner)"
+---
+
 # System Architecture Specification
 
 - Document ID: SYS-ARCH-001
