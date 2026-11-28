@@ -29,6 +29,10 @@ scope:
     - "INCOMPLETE (exit 2) and VIOLATION (exit 1) are separate verdicts; an incomplete member prevents a PRESENT total."
     - "Member verdict lines never carry the AI-SESSION-EVIDENCE prefix; only the total verdict line does."
 evidence: 14-ai-development/work-items/AID-2026-344/evidence.md
+prompt_file: 14-ai-development/work-items/AID-2026-344/prompt-v1.md
+prompt_sha256: "54e1b9b8f20b4a7d6d6690ca512dd44026973c4ff91887ce11a2b91610a0295c"
+prompt_file_blob_sha: "2de2ee2cfb9d9f13f65fda5dc1868879d5868816"
+prompt_commit_trace_initial_registration: true
 documentation:
   - path: scripts/governance/merge_group/candidate.py
     relationship: implementation
@@ -54,7 +58,7 @@ session_evidence:
   - role: IMPLEMENTATION_SESSION
     issue_refs:
       - "#1517"
-    implementing_ai_session: "ChatGPT-GPT-6"
+    implementing_ai_session: "6b0a2ee9-fb48-83ec-aa21-92dfde632944"
     session_evidence_ref: 14-ai-development/work-items/AID-2026-344/session-evidence.md
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-344/prompt-v1.md
     executed_prompt_sha256: "54e1b9b8f20b4a7d6d6690ca512dd44026973c4ff91887ce11a2b91610a0295c"
