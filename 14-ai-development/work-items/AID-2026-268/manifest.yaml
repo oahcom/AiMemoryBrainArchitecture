@@ -74,6 +74,17 @@ acceptance:
       GIT_OBJECT_MISSING; locator verification continues and classifies the
       declared path/digest as MISMATCH or PATH_MISSING where applicable.
     - MISMATCH/PATH_MISSING and UNRESOLVED are checked by separate exact ratchets.
+    - Explicit blob_sha256 declarations are discovered recursively; a declaration
+      with no mapping-local path binding is INCOMPLETE UNRESOLVED(UNBOUND),
+      counts as a pin, and appears only in the unresolved ledger.
+    - The checker summary line preserves the existing core field names and their
+      relative order (main, manifests, pins, ok, mismatch, path_missing,
+      incomplete). Additive counters, when present, appear after these core
+      fields in this fixed order (unbound, discovered, sentinels, no_path).
+      unbound is a subset counter for explicit blob_sha256 declarations
+      classified as INCOMPLETE UNRESOLVED(UNBOUND); it is not a separate finding
+      class or ledger. Generic discovery counters do not change the meaning of
+      the core counters.
     - Stage one retains the fixed A-F field enumeration; generic shape discovery
       is deferred to stage two under Issue #1350.
     - Prompt SHA-256 and byte-count pins are both verified.
