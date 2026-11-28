@@ -41,13 +41,14 @@ evidence:
     risk_rows_with_supporting_evidence: 9
     risk_rows_without_supporting_line: 1
     no_supporting_line_row: R-09
-    path_line_verified: 11
+    path_line_verified: 12
     path_line_verification:
       result: PASS
-      total: 11
-      ok: 11
+      total: 12
+      ok: 12
       mismatch: 0
       baseline: 31c1e5d8
+      count_correction: "The previous total counted only two of the three additional_evidence pointers; the corrected total includes all three."
     evidence_selection:
       a_variant_rows:
         - R-01
@@ -84,22 +85,22 @@ evidence:
     historical_eight_number_format_retained: true
     owner_acceptance: PENDING
   ac6:
-    status: CARRIER_CHECK_PASS_PENDING_COORDINATOR_NEGATIVE_CASE_EXECUTION
+    status: EXECUTED_BY_COORDINATOR_NOT_IN_CI
     checker: scripts/ci/check_aid_2026_293_carriers.py
     test_file: scripts/ci/test_check_aid_2026_293_carriers.py
     local_test_result:
       command: python -m unittest scripts.ci.test_check_aid_2026_293_carriers
-      result: "Ran 8 tests; OK"
+      result: "Ran 11 tests; OK"
       exit_code: 0
     local_carrier_check:
       command: >-
         python scripts/ci/check_aid_2026_293_carriers.py --root .
         --data 14-ai-development/work-items/AID-2026-293/carrier-data.yaml
-      result: "AID-2026-293 CARRIER CHECK PASS / R1-R7: 7/7 structural rules satisfied"
+      result: "AID-2026-293 CARRIER CHECK PASS / R1-R10: 10/10 structural and source-evidence rules satisfied"
       exit_code: 0
     execution_context: LOCAL_WORKTREE
     ci_result: NOT_ESTABLISHED
-    coordinator_negative_case_execution: PENDING
+    coordinator_negative_case_execution: EXECUTED_BY_COORDINATOR_NOT_IN_CI
     owner_acceptance: PENDING
   ac8:
     status: REVIEW_TEMPLATE_PRESENT_PENDING_INDEPENDENT_REVIEW
@@ -142,18 +143,25 @@ session_evidence:
     issue_refs:
       - "#262"
     implementing_ai_session: "6b0a1b12-1ddc-83ec-a062-a1ba87fe6020"
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-293/prompt-v1.md
+    executed_prompt_sha256: c1dc5334d5f16b79a84200540657ee6f680f952aae420648d64e96ae7295a626
+    executed_prompt_bytes: 1543
+    executed_prompt_provenance: VERIFIED
+    session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-293/session-evidence.md
-
 implementation:
   status: IN_PROGRESS
   summary: >-
     The AC3/AC4/AC6/AC8 carrier content and associated work-item records have
-    been written to the worktree. AC3 has 11 path:line references mechanically
-    verified with zero mismatches, covering nine evidence-supported rows and
-    one explicit NO_SUPPORTING_LINE search result. The local AC6 unit tests
-    and structural carrier checker pass. These results do not establish
-    coordinator execution of AC6 negative cases, CI success, independent
-    review, or Owner acceptance. AC3, AC4, AC6 and AC8 remain pending acceptance.
+    been written to the worktree. AC3 has 12 path:line pointers mechanically
+    verified with zero mismatches: nine primary risk pointers and three
+    additional_evidence pointers; R-09 has an executed search record with no
+    supporting source line. AC4 retains ten module-specific EVIDENCE_GAP
+    statements, with no source-verified module rows. The local AC6 checker
+    validates R1-R10 and passes the unmutated carrier data; 11 unit tests
+    passed. The coordinator also executed four AC6 mutation cases, all of
+    which failed closed. These are coordinator executions, not CI results.
+    Independent review and Owner acceptance remain pending.
   files_changed:
     - reviews/architecture/SYS-RISK-001.en.md
     - reviews/architecture/SYS-RISK-001.zh-CN.md
@@ -172,25 +180,39 @@ implementation:
   tests:
     - name: "AC6 local unit tests"
       command: python -m unittest scripts.ci.test_check_aid_2026_293_carriers
-      result: "Ran 8 tests; OK"
+      result: "Ran 11 tests; OK"
       exit_code: 0
       context: LOCAL_WORKTREE
-    - name: "AC6 local structural carrier check"
+    - name: "AC6 local carrier checker"
       command: >-
         python scripts/ci/check_aid_2026_293_carriers.py --root .
         --data 14-ai-development/work-items/AID-2026-293/carrier-data.yaml
-      result: "AID-2026-293 CARRIER CHECK PASS / R1-R7: 7/7 structural rules satisfied"
+      result: "AID-2026-293 CARRIER CHECK PASS / R1-R10: 10/10 structural and source-evidence rules satisfied"
       exit_code: 0
       context: LOCAL_WORKTREE
     - name: "AC3 path-line verification"
-      result: "total=11 ok=11 mismatch=0"
+      result: "total=12 ok=12 mismatch=0"
       baseline: 31c1e5d8
       exit_code: 0
-      context: LOCAL_WORKTREE
-    - name: "Coordinator execution of AC6 negative cases"
-      result: PENDING
+      context: COORDINATOR_EXECUTION
+    - name: "AC6 mutation A: nonexistent quote"
+      result: "R10_QUOTE_MATCHES_LINE; exit=1"
+      context: COORDINATOR_EXECUTION
+    - name: "AC6 mutation B: out-of-range line number"
+      result: "R9_LINE_IN_RANGE and R10_QUOTE_MATCHES_LINE; exit=1"
+      context: COORDINATOR_EXECUTION
+    - name: "AC6 mutation C: nonexistent source path"
+      result: "R8_PATH_EXISTS, R9_LINE_IN_RANGE, and R10_QUOTE_MATCHES_LINE; exit=1"
+      context: COORDINATOR_EXECUTION
+    - name: "AC6 mutation D: truncated quote"
+      result: "R10_QUOTE_MATCHES_LINE; exit=1"
+      context: COORDINATOR_EXECUTION
     - name: "CI execution"
       result: NOT_ESTABLISHED
+    - name: "AC8 independent review"
+      result: PENDING
+    - name: "Owner acceptance"
+      result: PENDING
 
 review:
   status: PENDING_INDEPENDENT_REVIEW
