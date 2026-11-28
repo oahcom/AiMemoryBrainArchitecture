@@ -1,0 +1,77 @@
+work_item_id: AID-2026-327
+title: "Issue #1463 — Enforce Top-Level and Nested Prompt SHA-256 Manifest Pins"
+class: GATE/TEST
+risk: R1
+risk_rationale: "CI integrity enforcement change. The existing checker silently ignores top-level prompt_sha256 declarations. The change makes both supported declaration shapes auditable and fails closed on unrecognized digest fields or incomplete comparison coverage. Historical digest mismatches will become visible; no existing digest values are modified."
+status: IN_PROGRESS
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner acceptance pending execution evidence and review"
+attribution: "AI-assisted implementation proposal; execution and verification delegated to repository operator"
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "efbdebfaa9fede98c9f2501e2fb941f344d0ca03"
+
+scope:
+  included:
+    - "Read top-level prompt_sha256 declarations and compare committed prompt bytes using SHA-256."
+    - "Prefer explicit top-level prompt_file and otherwise use the work-item prompt-v1.md convention."
+    - "Preserve nested prompt.prompt_sha256 and prompt.prompt_bytes behavior."
+    - "Report top-level and nested prompt declaration origins separately."
+    - "Enforce prompt declaration versus actual comparison coverage."
+    - "Reject unrecognized prompt digest field spellings."
+    - "Add regression tests for both declaration forms, missing paths, unknown fields, and coverage failures."
+    - "Preserve all existing non-prompt blob pin verification behavior."
+  excluded:
+    - "Changing any existing manifest digest value."
+    - "Modifying scripts/ci/gate_ratchet.py."
+    - "Adding workflows or required status-check contexts."
+    - "Changing historical prompt snapshot contents."
+    - "Resolving historical digest mismatches."
+    - "Claiming successful CI execution or PR merge before operator verification."
+
+  files_to_modify:
+    - "scripts/ci/check_manifest_blob_pins.py"
+    - "scripts/ci/test_check_manifest_blob_pins.py"
+    - "14-ai-development/work-items/AID-2026-327/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-327/session-evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+
+evidence: "14-ai-development/work-items/AID-2026-327/session-evidence.md"
+
+documentation:
+  - path: "14-ai-development/PR-GOVERNANCE-001.md"
+    relationship: normative
+  - path: "14-ai-development/work-items/AID-2026-327/session-evidence.md"
+    relationship: evidence
+
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1463"
+    implementing_ai_session: "NOT_PROVIDED_BY_PLATFORM"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-327/session-evidence.md"
+    session_reference_status: "RECORDED_UNVERIFIED"
+
+implementation:
+  status: IN_PROGRESS
+  summary: "Complete replacement source files and regression tests are proposed. Operator execution, six required test cases, current-main full-tree measurements, and CI integration verification remain pending. No historical digest is modified."
+  files_changed:
+    - "scripts/ci/check_manifest_blob_pins.py"
+    - "scripts/ci/test_check_manifest_blob_pins.py"
+    - "14-ai-development/work-items/AID-2026-327/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-327/session-evidence.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "EXPECTED: T1 top-level correct SHA-256 returns exit 0."
+    - "EXPECTED: T2 top-level wrong SHA-256 returns exit 1."
+    - "EXPECTED: T3 missing explicit prompt file returns exit 1."
+    - "EXPECTED: T4 nested prompt regression returns exit 1 for wrong SHA-256."
+    - "EXPECTED: T5 unknown prompt_digest field returns exit 2."
+    - "EXPECTED: T6 prompt coverage mismatch returns exit 2."
+    - "EXPECTED: conventional prompt-v1.md fallback succeeds when the file exists."
+    - "EXPECTED: missing conventional fallback file fails."
+    - "PENDING: existing full test suite."
+    - "PENDING: current main full-tree verification."
