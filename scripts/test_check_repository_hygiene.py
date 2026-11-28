@@ -170,6 +170,56 @@ class RepositoryHygieneTests(unittest.TestCase):
         )
         self.assertIn(expected, result.stderr)
 
+    def test_new_work_item_registry_schema_assets_are_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "00-governance/schemas/work-item-registry.schema.json": (
+                '{"type":"object"}\n'
+            ),
+            "00-governance/schemas/fixtures/valid.yaml": (
+                "work_item_id: AID-2026-001\n"
+            ),
+            "00-governance/schemas/fixtures/valid.expected.json": (
+                '{"valid":true}\n'
+            ),
+        })
+
+        self.assert_admission_passes(base, head)
+
+    def test_new_unapproved_work_item_registry_schema_suffix_is_rejected(self):
+        base = self.seed_base()
+        head = self.commit({
+            "00-governance/schemas/fixtures/notes.txt": (
+                "not an admitted schema asset\n"
+            ),
+            "00-governance/schemas/fixtures/nested/fixture.yaml": (
+                "status: ACTIVE\n"
+            ),
+            "00-governance/schemas/nested/deeper/fixture.yaml": (
+                "status: ACTIVE\n"
+            ),
+            "00-governance/schemas/fixtures/unexpected.json": (
+                '{"unexpected":true}\n'
+            ),
+            "00-governance/schemas/other.schema.json": (
+                '{"type":"object"}\n'
+            ),
+            "somewhere/else/fixture.yaml": (
+                "status: ACTIVE\n"
+            ),
+        })
+
+        for path in (
+            "00-governance/schemas/fixtures/notes.txt",
+            "00-governance/schemas/fixtures/nested/fixture.yaml",
+            "00-governance/schemas/nested/deeper/fixture.yaml",
+            "00-governance/schemas/fixtures/unexpected.json",
+            "00-governance/schemas/other.schema.json",
+            "somewhere/else/fixture.yaml",
+        ):
+            with self.subTest(path=path):
+                self.assert_admission_fails(base, head, path)
+
     def test_new_allowed_source_file_passes(self):
         base = self.seed_base()
         head = self.commit({
@@ -1375,7 +1425,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-28.2 "
+            "Work-item manifest consistency version=2026-11-28.3 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
@@ -1418,7 +1468,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-28.2 "
+            "Work-item manifest consistency version=2026-11-28.3 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
@@ -1465,7 +1515,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-28.2 "
+            "Work-item manifest consistency version=2026-11-28.3 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,

@@ -1,0 +1,4 @@
+{
+  "valid": false,
+  "reason": "work_item_id must match ^AID-[0-9]{4}-[0-9]{3}$"
+}
