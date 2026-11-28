@@ -1,0 +1,19 @@
+name: Required context execution audit
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Pull request number
+        required: true
+        type: string
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit required context execution
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/ci/check_required_context_execution.py --pr "${{ inputs.pr }}"

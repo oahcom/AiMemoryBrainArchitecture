@@ -1,0 +1,175 @@
+work_item_id: AID-2026-326
+title: "Verify actual execution of required PR check contexts on exact Head"
+class: CODE/CI
+risk: R2
+risk_rationale: >-
+  Adds a read-only GitHub check-run audit and a manually dispatched workflow.
+  Does not modify branch protection or the existing required-context set.
+  The implementation distinguishes absent execution, stale heads, failed
+  runs, pending runs and incomplete API evidence.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "31c1e5d83e7dad326dbd4b69d4a8e19534718ff1"
+tracking_issue: "#1469"
+
+scope:
+  summary: >-
+    Implement an independent execution-evidence audit for the sixteen
+    declared required PR check contexts. The audit must establish actual
+    check-run execution on the exact current PR head rather than relying
+    on static workflow job declarations.
+  in_scope:
+    - "Add scripts/ci/check_required_context_execution.py."
+    - "Parse declared contexts from PR-GOVERNANCE-001.md using the existing fenced declaration."
+    - "Read PR head SHA, mergeable_state and draft through the GitHub REST API."
+    - "Retry mergeable_state=unknown and return INCOMPLETE if unresolved."
+    - "Read check-runs for the exact head SHA."
+    - "Select the latest run per context by maximum started_at."
+    - "Distinguish EXECUTED, ABSENT, STALE, FAILED and INCOMPLETE."
+    - "Support GITHUB_TOKEN and GH_TOKEN."
+    - "Add offline unittest coverage."
+    - "Add a manually dispatched reachability workflow."
+    - "Insert one registration row into the work-item INDEX."
+  files_out_of_scope:
+    - "14-ai-development/PR-GOVERNANCE-001.md"
+    - "scripts/check_declared_check_contexts.py"
+    - "scripts/test_check_document_management.py"
+    - "Branch protection and required_status_checks configuration"
+  change_boundary: >-
+    This work item adds an execution-evidence observer only.
+    It does not change the sixteen required contexts, branch protection,
+    canonical governance text, existing declaration checker or
+    document-management tests. The new workflow is manually dispatched
+    and is not itself a required context.
+
+evidence:
+  - "Issue #1469"
+  - "Supplied bidirectional scheduling probes"
+  - "14-ai-development/PR-GOVERNANCE-001.md: declared-check-contexts"
+  - "scripts/check_declared_check_contexts.py"
+  - "Base commit 31c1e5d83e7dad326dbd4b69d4a8e19534718ff1"
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-326/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-326/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-326/session-evidence.md"
+    relationship: evidence
+
+acceptance_criteria:
+  - id: AC1
+    description: >-
+      All sixteen required contexts are parsed from the canonical
+      fenced declaration without hardcoding the list.
+    measurement: >-
+      Execute the checker against a temporary document containing the
+      declaration and inspect the resulting checks list.
+    expected_result: "Exactly sixteen declared contexts in canonical order."
+
+  - id: AC2
+    description: >-
+      Unknown mergeability is never interpreted as execution evidence.
+    measurement: >-
+      Offline unittest for persistent mergeable_state=unknown.
+    expected_result: >-
+      Five retries after the initial request, six PR reads,
+      INCOMPLETE and exit 2.
+
+  - id: AC3
+    description: >-
+      The latest run is selected by started_at rather than API list order.
+    measurement: >-
+      Offline unittest with an older failure and newer success for
+      the same context, placing the older run last.
+    expected_result: "EXECUTED; selected run is the newer success."
+
+  - id: AC4
+    description: "Missing execution and completed failure remain distinguishable."
+    measurement: "Offline unittest for ABSENT and FAILED."
+    expected_result: >-
+      ABSENT contains the missing context; FAILED contains the failed
+      context; neither is classified as INCOMPLETE.
+
+  - id: AC5
+    description: "Pending and unreadable evidence cannot produce EXECUTED."
+    measurement: "Offline unittest for in_progress and API exceptions."
+    expected_result: "Both return INCOMPLETE and exit 2."
+
+  - id: AC6
+    description: "A dirty head is classified as STALE."
+    measurement: "Offline unittest with all-green fixture runs and dirty state."
+    expected_result: "STALE and exit 1."
+
+  - id: AC7
+    description: "All-green exact-head evidence produces EXECUTED."
+    measurement: "Offline unittest with sixteen completed/success runs."
+    expected_result: "EXECUTED and exit 0."
+
+  - id: AC8
+    description: "The audit workflow is reachable without changing required contexts."
+    measurement: >-
+      Inspect .github/workflows/required-context-execution.yml and
+      the branch-protection required context configuration.
+    expected_result: >-
+      workflow_dispatch only; no addition to required_status_checks.
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    Independent review has not been recorded. The implementing session
+    does not review or approve its own work.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: NOT_ASSIGNED
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    Proposed implementation consists of the execution checker, offline
+    unittest suite, manually dispatched workflow, evidence record,
+    session evidence, prompt reference and INDEX registration.
+    No command execution, test pass, repository write, PR creation,
+    independent review, Owner acceptance or merge is claimed.
+  pull_request: PENDING
+  merge_commit: ""
+  implementation_commit: ""
+  ci_status: NOT_CLAIMED
+  files_changed:
+    - scripts/ci/check_required_context_execution.py
+    - scripts/ci/test_check_required_context_execution.py
+    - .github/workflows/required-context-execution.yml
+    - 14-ai-development/work-items/AID-2026-326/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-326/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-326/evidence.md
+    - 14-ai-development/work-items/AID-2026-326/session-evidence.md
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - "python -m unittest discover -s scripts/ci -p 'test_check_required_context_execution.py' -v"
+    - "python scripts/ci/check_required_context_execution.py --pr 1469"
+    - "python scripts/ci/check_required_context_execution.py --pr 1469 --json"
+    - "python scripts/check_declared_check_contexts.py"
+    - "python scripts/ci/check_work_item_manifest_schema.py"
+    - "python scripts/ci/check_manifest_parse.py"
+    - "python scripts/ci/check_test_reachability.py"
+    - "python scripts/ci/check_repository_hygiene.py --base <base> --head <head>"
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs: ["#1469"]
+    implementing_ai_session: GPT6_SESSION_20261127_AID2026326
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-326/prompt-v1.md
+    executed_prompt_sha256: afc8e732df2de2eb29e22b21b05558c395c1b2ee1ee2c4ddeca5e3744ba39e91
+    executed_prompt_bytes: 4894
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: "RECORDED"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-326/session-evidence.md
