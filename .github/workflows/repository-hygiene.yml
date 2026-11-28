@@ -7,6 +7,10 @@ concurrency:
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+  # `Repository hygiene (hard gate)` is required; the queue only reports checks
+  # produced by `merge_group`.
+  merge_group:
+    types: [checks_requested]
   push:
     branches: [main]
 
@@ -37,8 +41,10 @@ jobs:
       # then run together in this one step.
       - name: Check committed repository hygiene and new-file admission
         env:
-          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
-          HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          # merge_group: the range is the queue candidate against the queue
+          # base; pull_request: the PR head against its base; push: event.before.
+          BASE_SHA: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_sha || github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event_name == 'merge_group' && github.event.merge_group.head_sha || github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
         run: |
           python3 scripts/ci/check_repository_hygiene.py \
             --base "$BASE_SHA" \
@@ -60,7 +66,7 @@ jobs:
 
       - name: Measure manifest blob-pin baseline and negative sample
         env:
-          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          BASE_SHA: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_sha || github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
         run: |
           set -euo pipefail
           git fetch --no-tags origin refs/pull/1220/head:refs/remotes/origin/pr/1220

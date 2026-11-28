@@ -77,6 +77,8 @@ ALLOWED_CONFIG_PATHS = frozenset({
 # The AC4 legacy ratchet is data, but only this exact report path is admitted.
 ALLOWED_DATA_PATHS = frozenset({
     "14-ai-development/reports/work-item-manifest-ac4-baseline.json",
+    "14-ai-development/reports/steward-adoption-baseline.json",
+    "14-ai-development/work-items/AID-2026-291/baseline.json",
 })
 
 REQUIREMENTS_FILE_RE = re.compile(r"requirements(?:-[A-Za-z0-9_.-]+)?\.txt\Z")
