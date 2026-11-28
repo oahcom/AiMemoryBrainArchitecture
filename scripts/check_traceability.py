@@ -57,6 +57,58 @@ MANIFEST_KEYS = {
 }
 
 
+def sanitize_index_text(text: str) -> str:
+    """Remove HTML comments and fenced code while preserving line positions."""
+    lines = text.splitlines(keepends=True)
+    sanitized = []
+    in_html_comment = False
+    in_fence = False
+
+    for line in lines:
+        body = line.rstrip("\r\n")
+        ending = line[len(body):]
+
+        if in_fence:
+            if re.match(r"^[ \t]{0,3}```", body):
+                in_fence = False
+            sanitized.append(" " * len(body) + ending)
+            continue
+
+        if not in_html_comment and re.match(r"^[ \t]{0,3}```", body):
+            in_fence = True
+            sanitized.append(" " * len(body) + ending)
+            continue
+
+        result = []
+        position = 0
+
+        while position < len(body):
+            if in_html_comment:
+                end = body.find("-->", position)
+                if end == -1:
+                    result.extend(" " * (len(body) - position))
+                    position = len(body)
+                else:
+                    result.extend(" " * (end + 3 - position))
+                    position = end + 3
+                    in_html_comment = False
+                continue
+
+            start = body.find("<!--", position)
+            if start == -1:
+                result.append(body[position:])
+                position = len(body)
+            else:
+                result.append(body[position:start])
+                result.append(" " * 4)
+                position = start + 4
+                in_html_comment = True
+
+        sanitized.append("".join(result) + ending)
+
+    return "".join(sanitized)
+
+
 class CheckFailure(Exception):
     """A structural input or parse failure."""
 
@@ -594,7 +646,9 @@ def validate_registry(
 
         if linked:
             try:
-                index_text = index_path.read_text(encoding="utf-8")
+                index_text = sanitize_index_text(
+                    index_path.read_text(encoding="utf-8")
+                )
             except OSError as exc:
                 raise CheckFailure(
                     "cannot read work item INDEX: {}".format(exc)
@@ -730,7 +784,9 @@ def validate_index_and_manifests(
     index_path = root / INDEX_PATH
 
     try:
-        index_text = index_path.read_text(encoding="utf-8")
+        index_text = sanitize_index_text(
+            index_path.read_text(encoding="utf-8")
+        )
     except OSError as exc:
         raise CheckFailure(
             "cannot read {}: {}".format(INDEX_PATH, exc)

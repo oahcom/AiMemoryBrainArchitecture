@@ -22,6 +22,32 @@ NORMATIVE_ROOTS = {
     "08-bmcp-protocol", "09-security-governance", "10-storage-consistency", "13-engineering-decisions",
     "14-ai-development",
 }
+
+
+def outside_root_markdown_paths(
+    changed_status: dict[str, str],
+    normative_roots: set[str],
+) -> list[str]:
+    """Return changed Markdown paths outside the normative roots."""
+    return [
+        path
+        for path in changed_status
+        if Path(path).parts
+        and Path(path).parts[0] not in normative_roots
+        and Path(path).suffix.lower() == ".md"
+    ]
+
+
+def outside_root_additions(
+    changed_status: dict[str, str],
+    normative_roots: set[str],
+) -> list[str]:
+    """Return newly added Markdown paths outside the normative roots."""
+    return [
+        path
+        for path in outside_root_markdown_paths(changed_status, normative_roots)
+        if changed_status[path] == "A"
+    ]
 ROOT = Path(__file__).resolve().parents[1]
 _missing_roots = sorted(r for r in NORMATIVE_ROOTS if not (ROOT / r).is_dir())
 if _missing_roots:
@@ -1585,10 +1611,20 @@ def main() -> int:
     )
     errors.extend(check_normative_root_departures(exception))
 
-    skipped = [p for p in changed if Path(p).parts and Path(p).parts[0] not in NORMATIVE_ROOTS
-               and Path(p).suffix.lower() == ".md"]
+    additions_outside_roots = outside_root_additions(statuses, NORMATIVE_ROOTS)
+    for path in additions_outside_roots:
+        errors.append(
+            f"{path}: new Markdown file is outside NORMATIVE_ROOTS; "
+            "move it into a governed root, or register it as governed/excluded "
+            "with a justification."
+        )
+
+    skipped = outside_root_markdown_paths(statuses, NORMATIVE_ROOTS)
     if skipped:
-        sys.stderr.write(f"NOTE: {len(skipped)} changed .md path(s) outside NORMATIVE_ROOTS were not pairing-checked\n")
+        sys.stderr.write(
+            f"NOTE: {len(skipped)} changed .md path(s) outside NORMATIVE_ROOTS "
+            "were not pairing-checked\n"
+        )
 
     if exception:
         print("Approved bilingual exception declaration detected; human governance approval remains mandatory.")
