@@ -88,6 +88,20 @@ At base commit `31c1e5d83e7dad326dbd4b69d4a8e19534718ff1`:
 
 The Owner decision does not define the serialized representation of a multi-shard transaction's cursor-entry set or the consistent snapshot/cut protocol for F/G consumers. Those remain explicit follow-up contract work. The existing D/F detailed documents still contain older global-cursor wording and must be reconciled under separately scoped work after this decision record is reviewed.
 
+## Prompt-to-implementation trace pins
+
+The Work Item manifest now records the prompt and implementation ancestry inputs consumed by `scripts/ci/check_prompt_commit_trace.py`:
+
+- `prompt_file`: `14-ai-development/work-items/AID-2026-326/prompt-v1.md`
+- `prompt_sha256`: `228d7d3d9b22dd6a4908b00583378c55a3bde03f7962f7fabe03a16c771a1c09`
+- `prompt_file_blob_sha`: `9721457bf64f03929abf8153dcc214d8e4f55755`
+- `prompt_file_commit_sha`: `15fe58287566d3b7370499b2b0837b5a43ebcb38` (verified to contain that exact prompt blob)
+- `implementation_commit_sha`: `1c208822c880b2666395e6a199fdee236f830341` (verified to contain the complete canonical + EN + ZH-CN D-10 decision record)
+- `implementation.merge_commit_sha`: `3595ce6ed3b45287a59a7658ad0a38b2797267fb`, explicitly typed as `PR_HEAD_TRACE_TARGET_NOT_MERGED`. This is a branch commit used only as the checker’s ancestry target; it is not an actual merge commit and does not claim that PR #1475 is merged.
+- GitHub’s unmerged test-merge commit for the preceding candidate head was `7d985e1560d3c91e31757abed015f2f2076b1680`; it is retained as provenance only and is not used as the checker target because the workflow checkout fetches branch heads/tags, not pull-request merge refs.
+
+These pins make the implementation commit reachable from a verifiable PR-head target while preserving the unmerged status. The checker’s exact semantics are ancestry-based; no source code or workflow was changed. The manifest/prompt pins were added after the prior exact-head CI run, so their final CI outcome remains unverified until a run on the new head completes.
+
 ## Exact-head CI evidence (2026-11-28)
 
 - PR: #1475, draft, head `e1a8604749c9c6d25d6eb4412a39a38703c1ef3e`, base `31c1e5d83e7dad326dbd4b69d4a8e19534718ff1`.
