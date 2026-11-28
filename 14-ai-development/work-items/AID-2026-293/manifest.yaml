@@ -86,15 +86,15 @@ evidence:
     owner_acceptance: PENDING
   ac6:
     status: EXECUTED_BY_COORDINATOR_NOT_IN_CI
-    checker: scripts/ci/check_aid_2026_293_carriers.py
-    test_file: scripts/ci/test_check_aid_2026_293_carriers.py
+    checker: scripts/ci/aid_2026_293_carrier_validation.py
+    test_file: tests/session_evidence/test_aid_2026_293_carriers.py
     local_test_result:
-      command: python -m unittest scripts.ci.test_check_aid_2026_293_carriers
+      command: python -m unittest tests.session_evidence.test_aid_2026_293_carriers
       result: "Ran 11 tests; OK"
       exit_code: 0
     local_carrier_check:
       command: >-
-        python scripts/ci/check_aid_2026_293_carriers.py --root .
+        python scripts/ci/aid_2026_293_carrier_validation.py --root .
         --data 14-ai-development/work-items/AID-2026-293/carrier-data.yaml
       result: "AID-2026-293 CARRIER CHECK PASS / R1-R10: 10/10 structural and source-evidence rules satisfied"
       exit_code: 0
@@ -121,9 +121,9 @@ documentation:
     relationship: reference
   - path: reviews/architecture/SYS-RISK-001-REVIEW.zh-CN.md
     relationship: reference
-  - path: scripts/ci/check_aid_2026_293_carriers.py
+  - path: scripts/ci/aid_2026_293_carrier_validation.py
     relationship: code
-  - path: scripts/ci/test_check_aid_2026_293_carriers.py
+  - path: tests/session_evidence/test_aid_2026_293_carriers.py
     relationship: code
   - path: 14-ai-development/work-items/AID-2026-293/carrier-data.yaml
     relationship: evidence
@@ -169,8 +169,8 @@ implementation:
     - reviews/complexity/architecture-complexity-assessment.zh-CN.md
     - reviews/architecture/SYS-RISK-001-REVIEW.md
     - reviews/architecture/SYS-RISK-001-REVIEW.zh-CN.md
-    - scripts/ci/check_aid_2026_293_carriers.py
-    - scripts/ci/test_check_aid_2026_293_carriers.py
+    - scripts/ci/aid_2026_293_carrier_validation.py
+    - tests/session_evidence/test_aid_2026_293_carriers.py
     - 14-ai-development/work-items/AID-2026-293/carrier-data.yaml
     - 14-ai-development/work-items/AID-2026-293/manifest.yaml
     - 14-ai-development/work-items/AID-2026-293/evidence.md
@@ -179,13 +179,13 @@ implementation:
     - 14-ai-development/work-items/INDEX.md
   tests:
     - name: "AC6 local unit tests"
-      command: python -m unittest scripts.ci.test_check_aid_2026_293_carriers
+      command: python -m unittest tests.session_evidence.test_aid_2026_293_carriers
       result: "Ran 11 tests; OK"
       exit_code: 0
       context: LOCAL_WORKTREE
     - name: "AC6 local carrier checker"
       command: >-
-        python scripts/ci/check_aid_2026_293_carriers.py --root .
+        python scripts/ci/aid_2026_293_carrier_validation.py --root .
         --data 14-ai-development/work-items/AID-2026-293/carrier-data.yaml
       result: "AID-2026-293 CARRIER CHECK PASS / R1-R10: 10/10 structural and source-evidence rules satisfied"
       exit_code: 0
@@ -239,11 +239,11 @@ prompt_file: "14-ai-development/work-items/AID-2026-293/prompt-v1.md"
 # SHA-256 of the exact prompt-v1.md bytes.
 # The checker independently recalculates this from both the head file
 # and the immutable Git blob.
-prompt_sha256: "c1dc5334d5f16b79a84200540657ee6f680f952aae420648d64e96ae7295a626"
+prompt_sha256: "8af39263b1d13571533d759550ac278773b074b12a69f6aedefb6f4c48939f73"
 
 # Git blob object ID of the exact same prompt-v1.md bytes.
 # This is a blob OID, not a commit SHA.
-prompt_file_blob_sha: "7653e98669afbe364d9713849cd03f4ef73f272d"
+prompt_file_blob_sha: "06d82908ccad1e1312e976e143c8c267332aa81c"
 
 # Explicitly declares this as the narrowly scoped first-registration state.
 prompt_commit_trace_initial_registration: true

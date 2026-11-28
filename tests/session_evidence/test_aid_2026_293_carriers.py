@@ -1,4 +1,5 @@
 import copy
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -6,9 +7,10 @@ from pathlib import Path
 
 import yaml
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "ci"))
 
-from check_aid_2026_293_carriers import validate
+from aid_2026_293_carrier_validation import validate
 
 
 def valid_data():
@@ -77,6 +79,25 @@ class CarrierRulesTest(unittest.TestCase):
         self.assertTrue(carrier_path.is_file(), f"missing real carrier file: {carrier_path}")
         carrier_data = yaml.safe_load(carrier_path.read_text(encoding="utf-8"))
         self.assertEqual(validate(carrier_data, root=repo_root), [])
+
+        # The validator must also pass when run as CI would run it: through the
+        # CLI entry point, on the committed carrier file, not only through the
+        # in-process helper above.
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(repo_root / "scripts" / "ci" / "aid_2026_293_carrier_validation.py"),
+                "--root",
+                str(repo_root),
+                "--data",
+                carrier_path.relative_to(repo_root).as_posix(),
+            ],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("AID-2026-293 CARRIER CHECK PASS", result.stdout)
 
     def test_negative_r1_wrong_work_item(self):
         data = valid_data()
