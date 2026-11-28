@@ -726,7 +726,7 @@ fn run_compile(mut args: impl Iterator<Item = String>) -> Result<(), String> {
             tier: ContextTier::P0,
             priority: 0,
             activation_reason: format!("source event {}", input.event.event_id.as_str()),
-            content_hash: sha256_hex(rendered_content.as_bytes()),
+            content_hash: memory_context::content_hash_for(&rendered_content),
             rendered_content,
             source_refs: current.source_refs.clone(),
             evidence_refs: claim.evidence_refs.clone(),
@@ -917,6 +917,8 @@ fn run_forget(mut args: impl Iterator<Item = String>) -> Result<(), String> {
     Ok(())
 }
 
+/// Produces bare SHA-256 hex for non-content_hash digests such as payload_digest
+/// and content_digest. Context entry content_hash values use memory_context::content_hash_for.
 fn sha256_hex(bytes: &[u8]) -> String {
     const HEX: &[u8; 16] = b"0123456789abcdef";
     let digest = Sha256::digest(bytes);

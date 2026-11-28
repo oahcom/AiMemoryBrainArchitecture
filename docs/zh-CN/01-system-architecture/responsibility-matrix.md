@@ -28,13 +28,14 @@ document_metadata:
     source: "01-system-architecture/responsibility-matrix.md"
     en: "docs/en/01-system-architecture/responsibility-matrix.md"
     zh-CN: null
+  steward: "user-authorized operator (delegated by account owner)"
 ---
 # 子系统职责矩阵
 
 - 文档 ID：SYS-RESP-001
 - 版本：1.0
 - 源规范：[项目规范性原文](../../../01-system-architecture/responsibility-matrix.md)
-- 源版本：85548fcee05b28f8c2d54d4c0a8bf77840c8cdf3
+- 源版本：7fc26ca93f4db3b5074156e76bee3555ac744e3a
 - 对应英文：[Subsystem Responsibility Matrix](../../en/01-system-architecture/responsibility-matrix.md)
 - 状态：DECIDED（职责基线）；明确列出的详细边界问题仍为 OPEN
 

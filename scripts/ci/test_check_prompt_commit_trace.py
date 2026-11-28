@@ -5,7 +5,14 @@ import unittest
 from pathlib import Path
 
 from scripts.ci.check_prompt_commit_trace import (
-    ROOT, audit, classify_primary, is_ancestor, ratchet_violations, resolve_commit, summarize,
+    ROOT,
+    audit,
+    classify_primary,
+    initial_registration_eligible,
+    is_ancestor,
+    ratchet_violations,
+    resolve_commit,
+    summarize,
 )
 
 
@@ -56,6 +63,140 @@ class RatchetBaseInventoryTests(unittest.TestCase):
             ratchet_violations({"manifests": [row]}, {"manifests": {}}, set()),
             ["NEW_NON_TRACEABLE AID-2026-999 NO_TRACE"],
         )
+
+    def test_new_work_item_with_pinned_initial_registration_passes(self):
+        row = {
+            "work_item_id": "AID-2026-999",
+            "primary_status": "NO_TRACE",
+            "findings": ["commit_absent"],
+            "initial_registration_eligible": True,
+        }
+
+        self.assertEqual(
+            ratchet_violations(
+                {"manifests": [row]},
+                {"manifests": {}},
+                set(),
+            ),
+            [],
+        )
+
+    def test_new_work_item_without_registration_evidence_still_fails(self):
+        row = {
+            "work_item_id": "AID-2026-999",
+            "primary_status": "NO_TRACE",
+            "findings": ["digest_absent", "commit_absent"],
+            "initial_registration_eligible": False,
+        }
+
+        self.assertEqual(
+            ratchet_violations(
+                {"manifests": [row]},
+                {"manifests": {}},
+                set(),
+            ),
+            [
+                "NEW_NON_TRACEABLE AID-2026-999 NO_TRACE"
+            ],
+        )
+
+    def test_initial_registration_requires_exact_immutable_prompt_blob(self):
+        manifest_path = (
+            "14-ai-development/work-items/AID-2026-999/manifest.yaml"
+        )
+        prompt_path = (
+            "14-ai-development/work-items/AID-2026-999/prompt-v1.md"
+        )
+        prompt_bytes = b"immutable prompt fixture\n"
+        blob_sha = "a" * 40
+
+        doc = {
+            "prompt_commit_trace_initial_registration": True,
+        }
+
+        valid = initial_registration_eligible(
+            manifest_path=manifest_path,
+            doc=doc,
+            prompt_path=prompt_path,
+            prompt_blob_sha=blob_sha,
+            prompt_commit_sha=None,
+            prompt_blob_bytes=prompt_bytes,
+            head_prompt_bytes=prompt_bytes,
+            implementation_commit=None,
+            merge_commit=None,
+            primary_status="NO_TRACE",
+            findings=["commit_absent"],
+        )
+
+        self.assertTrue(valid)
+
+        # Same declaration, but the prompt at HEAD has different bytes.
+        mismatched = initial_registration_eligible(
+            manifest_path=manifest_path,
+            doc=doc,
+            prompt_path=prompt_path,
+            prompt_blob_sha=blob_sha,
+            prompt_commit_sha=None,
+            prompt_blob_bytes=prompt_bytes,
+            head_prompt_bytes=b"modified prompt\n",
+            implementation_commit=None,
+            merge_commit=None,
+            primary_status="NO_TRACE",
+            findings=["commit_absent"],
+        )
+
+        self.assertFalse(mismatched)
+
+        # A declaration without the explicit registration marker is invalid.
+        unregistered_doc = {}
+
+        unregistered = initial_registration_eligible(
+            manifest_path=manifest_path,
+            doc=unregistered_doc,
+            prompt_path=prompt_path,
+            prompt_blob_sha=blob_sha,
+            prompt_commit_sha=None,
+            prompt_blob_bytes=prompt_bytes,
+            head_prompt_bytes=prompt_bytes,
+            implementation_commit=None,
+            merge_commit=None,
+            primary_status="NO_TRACE",
+            findings=["commit_absent"],
+        )
+
+        self.assertFalse(unregistered)
+
+        # A missing digest must never qualify.
+        missing_digest = initial_registration_eligible(
+            manifest_path=manifest_path,
+            doc=doc,
+            prompt_path=prompt_path,
+            prompt_blob_sha=blob_sha,
+            prompt_commit_sha=None,
+            prompt_blob_bytes=prompt_bytes,
+            head_prompt_bytes=prompt_bytes,
+            implementation_commit=None,
+            merge_commit=None,
+            primary_status="NO_TRACE",
+            findings=["digest_absent", "commit_absent"],
+        )
+        self.assertFalse(missing_digest)
+
+        # A pinned digest mismatch must never qualify.
+        mismatched_digest = initial_registration_eligible(
+            manifest_path=manifest_path,
+            doc=doc,
+            prompt_path=prompt_path,
+            prompt_blob_sha=blob_sha,
+            prompt_commit_sha=None,
+            prompt_blob_bytes=prompt_bytes,
+            head_prompt_bytes=prompt_bytes,
+            implementation_commit=None,
+            merge_commit=None,
+            primary_status="NO_TRACE",
+            findings=["digest_pinned_mismatch", "commit_absent"],
+        )
+        self.assertFalse(mismatched_digest)
 
 
 class RepositoryRegressionTests(unittest.TestCase):
