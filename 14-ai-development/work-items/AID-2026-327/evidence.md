@@ -100,6 +100,8 @@ Issue #1210 predates the repository's AI Session Evidence effective date (2026-1
 
 The current-head `Existing gates` workflow reports a manifest-schema ratchet failure for `14-ai-development/work-items/AID-2026-016/manifest.yaml` (missing legacy `documentation` and `implementation` keys). That exact file/blob is already present at the PR base commit and is unchanged on this branch. The D-10 PR does not modify AID-2026-016; this is a pre-existing mainline gate blocker, not attributed to this Work Item. All other observed checks at the last tested head passed except this Existing-gates aggregate.
 
+- A second freshness merge incorporated the then-current main `b333ad1cf0e86992621d41cc1dac87eb3141353c` in two-parent commit `7a0c2cb32142071081d70bba613031eb3207ab89`. This is the latest explicit main ancestry pin; later main advances may require another refresh before merge.
+
 ## Provenance and validation limits
 
 - The prompt snapshot is operator-authored and not a verbatim platform prompt; executed prompt provenance is NOT_VERIFIED.
