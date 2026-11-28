@@ -63,8 +63,9 @@ session_evidence:
 implementation:
   status: IMPLEMENTED
   implementation_commit_sha: "1c208822c880b2666395e6a199fdee236f830341"
-  merge_commit_sha: "7d985e1560d3c91e31757abed015f2f2076b1680"
-  merge_commit_kind: GITHUB_TEST_MERGE_CANDIDATE
+  merge_commit_sha: "3595ce6ed3b45287a59a7658ad0a38b2797267fb"
+  merge_commit_kind: PR_HEAD_TRACE_TARGET_NOT_MERGED
+  github_test_merge_commit_sha: "7d985e1560d3c91e31757abed015f2f2076b1680"
   merge_candidate_head_sha: "3595ce6ed3b45287a59a7658ad0a38b2797267fb"
   merge_candidate_base_sha: "efbdebfaa9fede98c9f2501e2fb941f344d0ca03"
   merge_candidate_status: UNMERGED
