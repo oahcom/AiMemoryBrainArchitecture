@@ -1359,7 +1359,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-27.2 "
+            "Work-item manifest consistency version=2026-11-27.3 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
@@ -1402,7 +1402,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-27.2 "
+            "Work-item manifest consistency version=2026-11-27.3 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
@@ -1449,7 +1449,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-27.2 "
+            "Work-item manifest consistency version=2026-11-27.3 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
