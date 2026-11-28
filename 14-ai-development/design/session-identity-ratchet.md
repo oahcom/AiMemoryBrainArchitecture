@@ -363,3 +363,20 @@ Bootstrap 会冻结目标分支树中已经存在的违规。只有当当前树�
 - 每条历史会话证据记录都是真实可信的。
 
 这些主张需要独立证据和独立控制。
+
+
+## 12. 为什么采用相对 base 的差分，而不是基线快照
+
+2026-11-28 的迁移依据是 83 次 workflow run 采样：65 次 failure、18 次 success，失败率约 78%；最近 8 次依次为 failure、failure、failure、failure、success、success、failure、failure。main 上的检查器报告 92 项违规，其中 91 项已基线化、1 项新增；唯一新增项为 SESSION_UNPARSEABLE 14-ai-development/work-items/AID-2026-297/manifest.yaml#1，由 PR #1513 引入。库存统计另报告 no_evidence_section=39。这些测量说明，持续失败主要来自快照把 PR base 已存在的债务错误归因给后续 PR，而不是每个 PR 都引入违规。
+
+旧快照机制存在两个恢复死结：--write-baseline 只允许缩小，current - previous 非空便以 exit 1 拒绝；--bootstrap-baseline --base-ref REF 又要求 REF 树不含 baseline 文件，而 baseline 已经存在于 main。基线一旦落入目标分支，常规操作无法重新锚定。共享文件还集中所有权，使并行 PR 更新时产生持续冲突。
+
+差分模式以 violations(current_tree) - violations(base_tree) 作为 PR 增量判据。存量债务自动吸收；PR 无需修改或合并 baseline 文件；不再需要人工记忆基线是否最新；检查可直接挂入既有 required job，而不引入新的 required context。base 中存在、HEAD 中消失的违规是修复，不是新增；base 中没有、HEAD 中出现的违规必须逐条以 NEW: 前缀输出并以 exit 1 阻断。
+
+差分模式不读取、不写入、也不要求 baseline 文件。当前树中的 SESSION_YAML_INVALID 永远失败；base 树中的 YAML 无效项作为已存在债务报告，不计入新增项。无法解析 ref、非 Git 工作树、shallow clone 或缺失 Git 对象均以 exit 2 失败关闭。--diff-base 与旧 baseline 写入/初始化参数互斥。
+
+存量债务不会因差分门禁而自动消失。PR 自己引入的违规仍然失败；但直接 push 到 main 引入的违规会成为下一次 PR 的 base 债务。该缺口必须由 main 上的定期全量扫描和告警暴露，不能声称 PR 差分门禁能够发现它。因此，差分门禁防止 PR 增量，但不证明 main 全量无债务。
+
+本次检查只作为 step 挂入 Repository hygiene (hard gate)，保持 job ID、job name 和既有 required context 不变。Session identity ratchet 不在 PR-GOVERNANCE-001 §7 声明的 16 项 required context 中；真正生效的是 Repository hygiene (hard gate) 内部的 step。新增 required context 会使已打开且未生成该 check run 的 PR 永久处于 required check absent 状态；实测 18 个 open PR 中只有 2 个曾生成旧 ratchet check run。
+
+83-run 样本、65/18 结果、最近 8 次序列、92/91/1 计数、AID-2026-297 具体发现、两个恢复死结，以及 required-job 迁移依据均来自 2026-11-28 协调方提供的实测记录；它们不是本 PR 重新执行的测量结果。
