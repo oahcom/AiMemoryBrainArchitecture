@@ -1,3 +1,49 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-293/manifest.yaml"
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "This record describes the implementing AI session and its drafted outputs only. Coordinator-local checks and mutation tests were performed later in a separate execution context and are not attributed to this session. CI verification, independent review and Owner acceptance are not established."
+    usage_status: Active
+    modification_status: Active-Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "AID-2026-293 implementing AI session record, including its input snapshot, actions, visible outputs and explicit non-performed activities."
+    canonical_scope_id: "ai-development/aid-2026-293-session-evidence"
+    canonical_scope_keywords:
+      - "AID-2026-293"
+      - "implementing AI session"
+      - "session evidence"
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+  steward: "user-authorized operator (delegated by account owner)"
+---
 # AID-2026-293 Session Evidence
 
 - Work item: AID-2026-293
@@ -13,10 +59,12 @@ The implementing AI session inspected the target documentation and repository go
 
 ## Actual AI input
 
-The executed prompt snapshot for this session is `14-ai-development/work-items/AID-2026-293/prompt-v1.md`.
+The executed prompt body is preserved verbatim in `14-ai-development/work-items/AID-2026-293/prompt-v1.md`, following its document-metadata front-matter. The measurements below identify the original executed prompt body only; they are not the SHA-256 digest or byte length of the complete Markdown file.
 
-- SHA-256: `c1dc5334d5f16b79a84200540657ee6f680f952aae420648d64e96ae7295a626`
-- Bytes: `1543`
+- Original prompt body SHA-256: `c1dc5334d5f16b79a84200540657ee6f680f952aae420648d64e96ae7295a626`
+- Original prompt body bytes: `1543`
+
+The manifest's `executed_prompt_sha256` and `executed_prompt_bytes` fields identify the complete committed `prompt-v1.md` Git blob, including its front-matter.
 
 The prompt directed the session to prepare the AID-2026-293 carriers for Issue #262, covering AC3 risk-register evidence states, AC4 four-dimensional complexity assessment, AC6 checker and tests, and AC8 bilingual review templates. The snapshot file is the authoritative record of the complete executed prompt.
 

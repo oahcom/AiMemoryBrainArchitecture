@@ -1,3 +1,47 @@
+---
+document_metadata:
+  domain: ai-development
+  role: reference
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-293/manifest.yaml"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "The prompt body is retained verbatim as the session input snapshot. The manifest records the snapshot digest and byte count; those values must identify the committed file blob after this metadata block is added. No CI result or independent review is asserted."
+    usage_status: Active
+    modification_status: Active-Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: null
+    canonical_scope_id: null
+    canonical_scope_keywords: []
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+  steward: "user-authorized operator (delegated by account owner)"
+---
 # AID-2026-293 Prompt Snapshot v1
 
 Prepare one documentation-only carrier for Issue #262 in `oahcom/AiMemoryBrainArchitecture`, using exact baseline `31c1e5d83e7dad326dbd4b69d4a8e19534718ff1`.

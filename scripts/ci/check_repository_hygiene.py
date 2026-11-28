@@ -20,7 +20,9 @@ from pathlib import PurePosixPath
 # closed when either side of the relation is absent, where it used to return no
 # violations over an empty set (AID-2026-199, #1212). The two versions are
 # separate numbers on purpose -- one changed the contract, the other the rules.
-CHECK_VERSION = "2026-11-27.2"
+# 2026-11-27.3 is a rule change: admit only the exact AID-2026-293
+# carrier-data.yaml path; other YAML files remain denied.
+CHECK_VERSION = "2026-11-27.3"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -81,6 +83,12 @@ ALLOWED_DATA_PATHS = frozenset({
     "14-ai-development/work-items/AID-2026-291/baseline.json",
     "scripts/ci/baselines/protection-fingerprint.json",
 })
+
+# AID-2026-293: admit only the carrier data file required by this work item.
+# This is deliberately an exact path, not a work-item-wide YAML allowance.
+AID_293_CARRIER_DATA_PATH = (
+    "14-ai-development/work-items/AID-2026-293/carrier-data.yaml"
+)
 
 REQUIREMENTS_FILE_RE = re.compile(r"requirements(?:-[A-Za-z0-9_.-]+)?\.txt\Z")
 FULL_SHA_RE = re.compile(r"[0-9a-fA-F]{40}\Z")
@@ -348,6 +356,9 @@ def is_allowed_new_path(path):
         return True
 
     if DOCUMENT_SCOPE_REGISTRY_RE.fullmatch(path):
+        return True
+
+    if path == AID_293_CARRIER_DATA_PATH:
         return True
 
     if REMOTE_WORKER_INVENTORY_RE.fullmatch(path):

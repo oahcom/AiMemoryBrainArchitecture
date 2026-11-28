@@ -1,3 +1,49 @@
+---
+document_metadata:
+  domain: ai-development
+  role: work-record
+  lifecycle:
+    approval:
+      decision_status: Draft
+      approver: null
+      decision_date: null
+      approved_version: null
+      approval_scope:
+        type: Full-document
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "14-ai-development/work-items/AID-2026-293/manifest.yaml"
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Coordinator-local path-line verification, checker execution, unit tests and four negative mutations were performed and recorded separately; they are not CI results. This evidence record retains its stated scope and limitations. Independent review and CI verification are not established."
+    usage_status: Active
+    modification_status: Active-Modified
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Non-Canonical
+    canonical_scope: "AID-2026-293 evidence record for the documentation and validation carriers addressing Issue #262 AC3, AC4, AC6 and AC8."
+    canonical_scope_id: "ai-development/aid-2026-293-evidence-record"
+    canonical_scope_keywords:
+      - "AID-2026-293"
+      - "Issue #262"
+      - "evidence record"
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Informative
+  bilingual_counterpart:
+    source: null
+    en: null
+    zh-CN: null
+  steward: "user-authorized operator (delegated by account owner)"
+---
 # AID-2026-293 Evidence Record
 
 ## Baseline

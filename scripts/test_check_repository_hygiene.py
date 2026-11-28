@@ -991,6 +991,26 @@ class RepositoryHygieneTests(unittest.TestCase):
 
         self.assert_admission_fails(base, head, path)
 
+    # M22: the exact AID-2026-293 carrier data path is admitted
+    def test_aid_2026_293_carrier_data_is_admitted(self):
+        base = self.seed_base()
+        path = "14-ai-development/work-items/AID-2026-293/carrier-data.yaml"
+        head = self.commit({path: "risks: []\nmodules: []\n"})
+
+        self.assert_admission_passes(base, head)
+
+    # M23: a similarly named YAML file beside the admitted carrier is rejected
+    # The exact-path rule must not admit other YAML files in the same directory.
+    def test_other_yaml_near_aid_2026_293_carrier_data_is_rejected(self):
+        base = self.seed_base()
+        path = (
+            "14-ai-development/work-items/AID-2026-293/"
+            "carrier-data-extra.yaml"
+        )
+        head = self.commit({path: "note: value\n"})
+
+        self.assert_admission_fails(base, head, path)
+
     # M22: nesting is not the registry shape. work-items/<ID>/nested/ is one
     # directory deeper than a manifest may live.
     def test_nested_work_item_manifest_is_rejected(self):
@@ -1335,7 +1355,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-27.2 "
+            "Work-item manifest consistency version=2026-11-27.3 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
@@ -1378,7 +1398,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-27.2 "
+            "Work-item manifest consistency version=2026-11-27.3 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
@@ -1425,7 +1445,7 @@ class RepositoryHygieneTests(unittest.TestCase):
         result = self.run_checker_args("--head-tree-only")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn(
-            "Work-item manifest consistency version=2026-11-27.2 "
+            "Work-item manifest consistency version=2026-11-27.3 "
             "manifests=1 in_scope=1 excluded_by_record_type=0 "
             "unrecognized=0 violations=0",
             result.stdout,
