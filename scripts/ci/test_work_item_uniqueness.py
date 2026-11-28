@@ -623,15 +623,17 @@ class WorkItemUniquenessTests(unittest.TestCase):
             self.assertIncomplete(result)
             self.assertIn("missing required ref(s): --base", result.stdout)
 
-    # Acceptance row 2: the workflow must serialize all candidates for the
-    # same target branch and fetch that branch before making its decision.
+    # Acceptance row 2: the workflow must fetch the target branch before making
+    # its decision, and serialize per candidate. Serializing by target branch
+    # let one pending slot replace queued runs, so a stale verdict could
+    # outlive the base it was computed against.
     def test_workflow_serializes_by_target_and_fetches_latest_base(self):
         workflow = WORKFLOW.read_text(encoding="utf-8")
 
         self.assertIn(
-            "group: ${{ github.workflow }}-${{ "
-            "github.event.merge_group.base_ref || "
-            "github.event.pull_request.base.ref || github.ref_name }}",
+            "group: ${{ github.workflow }}-${{ github.event_name }}-${{ "
+            "github.event.pull_request.number || "
+            "github.event.merge_group.head_ref || github.ref_name }}",
             workflow,
         )
         self.assertIn("cancel-in-progress: false", workflow)
@@ -743,8 +745,7 @@ class WorkItemUniquenessTests(unittest.TestCase):
             workflow,
         )
         self.assertIn(
-            "group: ${{ github.workflow }}-${{ "
-            "github.event.merge_group.base_ref || ",
+            "github.event.merge_group.head_ref",
             workflow,
         )
         self.assertNotIn(
