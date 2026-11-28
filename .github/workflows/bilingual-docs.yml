@@ -50,15 +50,23 @@ jobs:
           HEAD_SHA: ${{ github.event_name == 'merge_group' && github.event.merge_group.head_sha || github.event.pull_request.head.sha }}
           PR_BODY: ${{ github.event.pull_request.body }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
+          MERGE_GROUP_HEAD_SHA: ${{ github.event.merge_group.head_sha }}
         run: |
-          # The merge_group payload has no PR body, and the gate reads it.
-          # The queue ref is refs/heads/gh-readonly-queue/<base>/pr-<N>-<sha>.
-          if [ -z "$PR_NUMBER" ]; then
-            PR_NUMBER=$(printf '%s' "$GITHUB_REF" | sed -n 's#.*/pr-\([0-9]\+\)-.*#\1#p')
-            PR_BODY=$(curl -sS -f -H "Authorization: Bearer $GITHUB_TOKEN" \
-              -H "Accept: application/vnd.github+json" \
-              "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
-              | python3 -c 'import json,sys; print(json.load(sys.stdin).get("body") or "", end="")')
-            export PR_BODY
+          set -eu
+          # The queue ref names only the last entry of the candidate; the
+          # shared resolver reads the whole queue, fixes the tail prefix and
+          # runs this gate once per member body, with PR_NUMBER/PR_BODY bound
+          # to that member.
+          if [ "$GITHUB_EVENT_NAME" = "merge_group" ]; then
+            if [ ! -f scripts/governance/merge_group/candidate.py ]; then
+              echo "::error::QUEUE_MEMBERSHIP_INCOMPLETE: trusted checkout lacks candidate.py"
+              exit 2
+            fi
+            python3 scripts/governance/merge_group/candidate.py \
+              --output "$RUNNER_TEMP/merge-group-members.json" \
+              --exec "python3 scripts/check_bilingual_docs.py"
+          else
+            python3 scripts/check_bilingual_docs.py
           fi
-          python3 scripts/check_bilingual_docs.py

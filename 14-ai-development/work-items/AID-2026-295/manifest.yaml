@@ -1,0 +1,90 @@
+work_item_id: AID-2026-295
+title: "Validate the whole merge-group candidate and every candidate PR"
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  Adds a read-only candidate resolver and a merge-group branch to the existing
+  verdict script. It does not change branch protection, the merge queue
+  configuration, any required context, or the single-pull-request path, and it
+  writes nothing outside the workflow step summary.
+status: IN_PROGRESS
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner acceptance not recorded"
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "a0500d5196dc990d899d8ccaca2e270faaf29efc"
+scope:
+  objective: >-
+    Decide the three candidate relations on one merge-group candidate tree and
+    validate every member pull request body against that tree, so a multi-member
+    queue cannot pass by validating only its tail.
+  issue: "#1517"
+  decisions:
+    - "Ancestry is decided through the GitHub Compare API because the verdict job checks out the base with a shallow history."
+    - "INCOMPLETE (exit 2) and VIOLATION (exit 1) are separate verdicts; an incomplete member prevents a PRESENT total."
+    - "Member verdict lines never carry the AI-SESSION-EVIDENCE prefix; only the total verdict line does."
+evidence: 14-ai-development/work-items/AID-2026-295/evidence.md
+documentation:
+  - path: scripts/governance/merge_group/candidate.py
+    relationship: implementation
+  - path: scripts/governance/session_evidence/validate.py
+    relationship: implementation
+  - path: .github/workflows/session-evidence.yml
+    relationship: implementation
+  - path: .github/workflows/bilingual-docs.yml
+    relationship: implementation
+  - path: tests/merge_group/fixtures.py
+    relationship: reference
+  - path: tests/merge_group/test_candidate.py
+    relationship: reference
+  - path: tests/merge_group/test_validate_integration.py
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-295/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-295/session-evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-295/prompt-v1.md
+    relationship: evidence
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1517"
+    implementing_ai_session: "ChatGPT-GPT-6"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-295/session-evidence.md
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-295/prompt-v1.md
+    executed_prompt_sha256: "9fa62f5bce5a0a1e5cc3eaa6ee4f2a32b0e7df0f78ef72168ac93d1d4b59fe8f"
+    executed_prompt_bytes: 3358
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+implementation:
+  status: IN_PROGRESS
+  summary: >-
+    Adds the shared candidate resolver, the merge-group branch of the verdict
+    script, the wiring in the two affected workflows, and 30 offline tests. The
+    single-pull-request path keeps its previous semantics, including the
+    None-return of _changed_paths_for_manifest when the base cannot be read.
+  files_changed:
+    - scripts/governance/merge_group/candidate.py
+    - scripts/governance/session_evidence/validate.py
+    - .github/workflows/session-evidence.yml
+    - .github/workflows/bilingual-docs.yml
+    - tests/merge_group/__init__.py
+    - tests/merge_group/fixtures.py
+    - tests/merge_group/test_candidate.py
+    - tests/merge_group/test_validate_integration.py
+    - 14-ai-development/work-items/INDEX.md
+    - 14-ai-development/work-items/AID-2026-295/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-295/evidence.md
+    - 14-ai-development/work-items/AID-2026-295/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-295/prompt-v1.md
+  tests:
+    - "python -m unittest discover -s tests/merge_group -p \"test_*.py\" -v"
+    - "python -m unittest discover -s tests/session_evidence -p \"test_*.py\""
+    - "python scripts/check_session_evidence_workflow_shape.py"
+    - "python scripts/ci/check_test_reachability.py"
+    - "python scripts/ci/check_line_endings.py"

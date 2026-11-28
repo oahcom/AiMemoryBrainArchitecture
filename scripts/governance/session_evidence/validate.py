@@ -93,7 +93,11 @@ from typing import Any
 
 
 class ValidationError(Exception):
-    """A fail-closed validation error."""
+    """A confirmed evidence or policy violation."""
+
+
+class IncompleteValidationError(ValidationError):
+    """Required GitHub or Git evidence could not be established."""
 
 
 # ---------------------------------------------------------------------------
@@ -110,7 +114,7 @@ _BLOB_BYTES_CACHE: dict[tuple[str, str, str], bytes] = {}
 def _request_json(path: str) -> Any:
     token = os.environ.get("GITHUB_TOKEN")
     if not token:
-        raise ValidationError("GITHUB_TOKEN is missing")
+        raise IncompleteValidationError("GITHUB_TOKEN is missing")
 
     url = path if path.startswith("https://") else _API_ROOT + path
     request = urllib.request.Request(
@@ -123,32 +127,33 @@ def _request_json(path: str) -> Any:
         },
         method="GET",
     )
-
     try:
         with urllib.request.urlopen(request, timeout=20) as response:
             return json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as exc:
-        raise ValidationError(
+        raise IncompleteValidationError(
             f"GitHub API HTTP {exc.code}: {url}"
         ) from exc
-    except (urllib.error.URLError, TimeoutError, ValueError) as exc:
-        raise ValidationError(
+    except (urllib.error.URLError, TimeoutError, ValueError, UnicodeDecodeError) as exc:
+        raise IncompleteValidationError(
             f"GitHub API request failed: {url}: {exc}"
         ) from exc
-
 
 def gh_api(path: str) -> dict:
     """GET a GitHub API endpoint, following Link-header pagination."""
     result = _request_json(path)
-
     if not isinstance(result, list):
+        if not isinstance(result, dict):
+            raise IncompleteValidationError(
+                f"Unexpected GitHub API response type for {path}"
+            )
         return result
 
     items = list(result)
     url = path if path.startswith("https://") else _API_ROOT + path
     token = os.environ.get("GITHUB_TOKEN")
     if not token:
-        raise ValidationError("GITHUB_TOKEN is missing")
+        raise IncompleteValidationError("GITHUB_TOKEN is missing")
 
     while True:
         request = urllib.request.Request(
@@ -172,23 +177,21 @@ def gh_api(path: str) -> dict:
                             next_url = match.group(1)
                             break
         except Exception as exc:
-            raise ValidationError(
+            raise IncompleteValidationError(
                 f"GitHub pagination failed: {exc}"
             ) from exc
 
         if not next_url:
             break
-
         page = _request_json(next_url)
         if not isinstance(page, list):
-            raise ValidationError(
+            raise IncompleteValidationError(
                 "Unexpected paginated GitHub API response"
             )
         items.extend(page)
         url = next_url
 
     return {"items": items}
-
 
 def gh_compare_paths(
     repo: str,
@@ -265,30 +268,32 @@ def gh_tree(repo: str, sha: str) -> list[dict]:
     if key in _TREE_CACHE:
         return _TREE_CACHE[key]
 
-    response = gh_api(
-        f"/repos/{repo}/git/trees/{sha}?recursive=1"
-    )
-    tree = response.get("tree")
-    if not isinstance(tree, list):
-        raise ValidationError(
-            f"Git tree unavailable for commit {sha}"
+    try:
+        response = gh_api(
+            f"/repos/{repo}/git/trees/{sha}?recursive=1"
         )
+    except IncompleteValidationError:
+        raise
+    except Exception as exc:
+        raise IncompleteValidationError(
+            f"Git tree API read failed for {sha}: {exc}"
+        ) from exc
 
+    tree = response.get("tree") if isinstance(response, dict) else None
+    if not isinstance(tree, list):
+        raise IncompleteValidationError(
+            f"Git tree response is incomplete for commit {sha}"
+        )
     if response.get("truncated"):
-        raise ValidationError(
+        raise IncompleteValidationError(
             f"Git tree for {sha} is truncated; refusing partial validation"
         )
 
     _TREE_CACHE[key] = tree
     return tree
 
-
 def gh_blob_bytes(repo: str, sha: str, path: str) -> bytes:
-    """Read original bytes from a blob SHA obtained from the PR Head tree.
-
-    The caller must resolve the exact path through gh_tree first and pass
-    that tree entry's blob SHA. This function never uses the Contents API.
-    """
+    """Read original bytes from a blob SHA obtained from the PR Head tree."""
     key = (repo, sha, path)
     if key in _BLOB_BYTES_CACHE:
         return _BLOB_BYTES_CACHE[key]
@@ -296,57 +301,59 @@ def gh_blob_bytes(repo: str, sha: str, path: str) -> bytes:
     if not isinstance(sha, str) or not re.fullmatch(
         r"[0-9a-fA-F]{40,64}", sha
     ):
-        raise ValidationError(
-            f"Invalid Git blob SHA for {path}"
-        )
+        raise ValidationError(f"Invalid Git blob SHA for {path}")
 
-    response = gh_api(
-        f"/repos/{repo}/git/blobs/{sha}"
-    )
+    try:
+        response = gh_api(f"/repos/{repo}/git/blobs/{sha}")
+    except IncompleteValidationError:
+        raise
+    except Exception as exc:
+        raise IncompleteValidationError(
+            f"Git blob API read failed for {path}: {exc}"
+        ) from exc
+
+    if not isinstance(response, dict):
+        raise IncompleteValidationError(
+            f"Git blob response is incomplete for {path}"
+        )
     if response.get("encoding") != "base64":
-        raise ValidationError(
-            f"Unsupported blob encoding: {path}"
+        raise IncompleteValidationError(
+            f"Unsupported or missing blob encoding: {path}"
         )
 
     try:
-        # The REST API wraps its base64 payload at 60 characters, so the
-        # content arrives with newlines in it. Stripping them is not leniency:
-        # the alphabet is still validated, and the alternative is that every
-        # file larger than one line fails to decode. The fixtures encoded
-        # short blobs, which is why this survived a green suite.
+        content = response["content"]
+        if not isinstance(content, str):
+            raise TypeError("blob content is not a string")
         raw = base64.b64decode(
-            "".join(response["content"].split()),
+            "".join(content.split()),
             validate=True,
         )
     except (KeyError, ValueError, TypeError) as exc:
-        raise ValidationError(
-            f"Cannot decode blob bytes: {path}"
+        raise IncompleteValidationError(
+            f"Cannot read or decode blob bytes: {path}"
         ) from exc
 
     _BLOB_BYTES_CACHE[key] = raw
     return raw
 
-
 def gh_blob_text(repo: str, sha: str, path: str) -> str:
-    """Read UTF-8 text from a blob SHA obtained from the PR Head tree.
-
-    The caller must resolve the exact path through gh_tree first and pass
-    that tree entry's blob SHA. This function never uses the Contents API.
-    """
+    """Read UTF-8 text from a blob SHA obtained from the PR Head tree."""
     key = (repo, sha, path)
     if key in _BLOB_CACHE:
         return _BLOB_CACHE[key]
 
     try:
         result = gh_blob_bytes(repo, sha, path).decode("utf-8")
+    except IncompleteValidationError:
+        raise
     except UnicodeDecodeError as exc:
         raise ValidationError(
-            f"Cannot decode text blob: {path}"
+            f"Cannot decode text blob as UTF-8: {path}"
         ) from exc
 
     _BLOB_CACHE[key] = result
     return result
-
 
 # ---------------------------------------------------------------------------
 # Data structures
@@ -1928,33 +1935,59 @@ def _changed_paths_for_manifest(
     ctx: ValidationContext,
     manifest_path: str,
 ) -> set[str] | None:
+    is_merge_group = (
+        os.environ.get("GITHUB_EVENT_NAME") == "merge_group"
+    )
+
     base = ctx.pr.get("base") or {}
     base_sha = base.get("sha") if isinstance(base, dict) else None
 
     if not isinstance(base_sha, str) or not re.fullmatch(
         r"[0-9a-fA-F]{40,64}", base_sha
     ):
-        return None
+        if not is_merge_group:
+            return None
+
+        raise IncompleteValidationError(
+            f"unable to determine changed paths for {manifest_path}: "
+            "PR Base SHA is missing or invalid"
+        )
 
     try:
-        return gh_compare_paths(
-            ctx.repo,
-            base_sha,
-            ctx.head_sha,
-        )
+        return gh_compare_paths(ctx.repo, base_sha, ctx.head_sha)
+    except IncompleteValidationError:
+        raise
     except ValidationError as exc:
         message = str(exc)
         if "unable to determine changed paths" in message.lower():
+            if is_merge_group:
+                raise IncompleteValidationError(
+                    f"unable to determine changed paths for {manifest_path}: "
+                    f"{message}"
+                ) from exc
             raise
+
+        if is_merge_group:
+            raise IncompleteValidationError(
+                f"unable to determine changed paths for {manifest_path}: "
+                f"{message}"
+            ) from exc
+
         raise ValidationError(
-            f"unable to determine changed paths for {manifest_path}: {message}"
+            f"unable to determine changed paths for {manifest_path}: "
+            f"{message}"
         ) from exc
     except Exception as exc:
+        if is_merge_group:
+            raise IncompleteValidationError(
+                f"unable to determine changed paths for {manifest_path}: "
+                f"{type(exc).__name__}: {exc}"
+            ) from exc
+
         raise ValidationError(
             f"unable to determine changed paths for {manifest_path}: "
             f"{type(exc).__name__}: {exc}"
         ) from exc
-
 
 def _check_manifest_entries(
     ctx: ValidationContext,
@@ -1979,7 +2012,11 @@ def _check_manifest_entries(
     check_11_prompt_snapshot_hashes(ctx, entries)
 
 
-def _load_context() -> ValidationContext:
+def _load_context(
+    body_override: str | None = None,
+    candidate_sha: str | None = None,
+    expected_pr_head_sha: str | None = None,
+) -> ValidationContext:
     repo = os.environ.get(
         "GITHUB_REPOSITORY",
         "",
@@ -1994,53 +2031,112 @@ def _load_context() -> ValidationContext:
     )
 
     if not repo or not re.fullmatch(r"[^/]+/[^/]+", repo):
-        raise ValidationError(
+        raise IncompleteValidationError(
             "GITHUB_REPOSITORY is missing or invalid"
         )
 
     if not number_text.isdigit() or int(number_text) <= 0:
-        raise ValidationError(
+        raise IncompleteValidationError(
             "PR_NUMBER is missing or invalid"
         )
 
     effective_at = parse_utc_timestamp(effective_text)
     pr_number = int(number_text)
 
-    pr = gh_api(
-        f"/repos/{repo}/pulls/{pr_number}"
-    )
-    if not isinstance(pr, dict):
-        raise ValidationError(
-            "GitHub returned an invalid Pull Request"
+    try:
+        pr = gh_api(f"/repos/{repo}/pulls/{pr_number}")
+    except IncompleteValidationError:
+        raise
+    except Exception as exc:
+        raise IncompleteValidationError(
+            f"PR #{pr_number}: cannot read Pull Request: {exc}"
+        ) from exc
+
+    if not isinstance(pr, dict) or pr.get("number") != pr_number:
+        raise IncompleteValidationError(
+            f"PR #{pr_number}: GitHub returned an invalid or mismatched Pull Request"
         )
 
-    body = pr.get("body") or ""
+    if body_override is None:
+        body = pr.get("body") or ""
+    else:
+        if not isinstance(body_override, str):
+            raise IncompleteValidationError(
+                f"PR #{pr_number}: body_override is not text"
+            )
+        body = body_override
+
+    # All downstream consumers, including _manifest_path_from_pr(ctx.body)
+    # and check_01, must see the exact queue-member body.
+    pr["body"] = body
+
     head = pr.get("head") or {}
-    head_sha = head.get("sha")
+    head_sha = head.get("sha") if isinstance(head, dict) else None
 
     if not isinstance(head_sha, str) or not re.fullmatch(
         r"[0-9a-fA-F]{40,64}",
         head_sha,
     ):
-        raise ValidationError(
-            "PR Head SHA is missing or invalid"
+        raise IncompleteValidationError(
+            f"PR #{pr_number}: PR Head SHA is missing or invalid"
         )
+    head_sha = head_sha.lower()
 
-    tree = gh_tree(repo, head_sha)
+    if expected_pr_head_sha is not None:
+        if not isinstance(expected_pr_head_sha, str) or not re.fullmatch(
+            r"[0-9a-fA-F]{40,64}",
+            expected_pr_head_sha,
+        ):
+            raise IncompleteValidationError(
+                f"PR #{pr_number}: queue head SHA is missing or invalid"
+            )
+        if head_sha != expected_pr_head_sha.lower():
+            raise IncompleteValidationError(
+                "QUEUE_MEMBERSHIP_INCOMPLETE: PR API head SHA does not match "
+                f"queue headRefOid for PR #{pr_number}"
+            )
+
+    if candidate_sha is not None:
+        if not isinstance(candidate_sha, str) or not re.fullmatch(
+            r"[0-9a-fA-F]{40,64}",
+            candidate_sha,
+        ):
+            raise IncompleteValidationError(
+                "GIT_GRAPH_INCOMPLETE: candidate_sha is missing or invalid"
+            )
+        tree_sha = candidate_sha.lower()
+    else:
+        tree_sha = head_sha
+
+    try:
+        tree = gh_tree(repo, tree_sha)
+    except IncompleteValidationError:
+        raise
+    except Exception as exc:
+        raise IncompleteValidationError(
+            f"Cannot read Git tree {tree_sha}: {exc}"
+        ) from exc
+
     tree_index = _tree_index(tree)
 
-    numbers = parse_related_issues(
-        body,
-        repo,
-    )
+    numbers = parse_related_issues(body, repo)
     issues = {}
 
     for number in numbers:
-        issue = gh_api(
-            f"/repos/{repo}/issues/{number}"
-        )
+        try:
+            issue = gh_api(f"/repos/{repo}/issues/{number}")
+        except IncompleteValidationError:
+            raise
+        except Exception as exc:
+            raise IncompleteValidationError(
+                f"Issue #{number}: cannot read Issue: {exc}"
+            ) from exc
 
-        if not isinstance(issue, dict) or issue.get("pull_request"):
+        if not isinstance(issue, dict):
+            raise IncompleteValidationError(
+                f"Issue #{number}: GitHub returned an invalid response"
+            )
+        if issue.get("pull_request"):
             raise ValidationError(
                 f"Issue #{number}: reference does not resolve to an Issue"
             )
@@ -2066,12 +2162,235 @@ def _load_context() -> ValidationContext:
         pr_number=pr_number,
         pr=pr,
         body=body,
-        head_sha=head_sha,
+        head_sha=tree_sha,
         tree=tree,
         tree_by_path=tree_index,
         effective_at=effective_at,
         issues=issues,
     )
+
+def _load_merge_group_contexts() -> tuple[list[ValidationContext], str, str]:
+    path = os.environ.get("MERGE_GROUP_MEMBERS_JSON", "").strip()
+    if not path:
+        raise IncompleteValidationError(
+            "QUEUE_MEMBERSHIP_INCOMPLETE: MERGE_GROUP_MEMBERS_JSON is missing"
+        )
+
+    try:
+        with open(path, "r", encoding="utf-8") as stream:
+            document = json.load(stream)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise IncompleteValidationError(
+            f"QUEUE_MEMBERSHIP_INCOMPLETE: cannot read member JSON: {exc}"
+        ) from exc
+
+    if not isinstance(document, dict):
+        raise IncompleteValidationError(
+            "QUEUE_MEMBERSHIP_INCOMPLETE: member JSON root is not an object"
+        )
+
+    base_sha = document.get("base_sha")
+    candidate_sha = document.get("candidate_sha")
+    members = document.get("members")
+
+    if not isinstance(base_sha, str) or not re.fullmatch(
+        r"[0-9a-fA-F]{40,64}", base_sha
+    ):
+        raise IncompleteValidationError(
+            "GIT_GRAPH_INCOMPLETE: member JSON base_sha is missing or invalid"
+        )
+    if not isinstance(candidate_sha, str) or not re.fullmatch(
+        r"[0-9a-fA-F]{40,64}", candidate_sha
+    ):
+        raise IncompleteValidationError(
+            "GIT_GRAPH_INCOMPLETE: member JSON candidate_sha is missing or invalid"
+        )
+    if not isinstance(members, list) or not members:
+        raise IncompleteValidationError(
+            "QUEUE_MEMBERSHIP_INCOMPLETE: member JSON has no candidate prefix"
+        )
+
+    repository = document.get("repository")
+    expected_repository = os.environ.get("GITHUB_REPOSITORY", "")
+    if repository != expected_repository:
+        raise IncompleteValidationError(
+            "QUEUE_MEMBERSHIP_INCOMPLETE: member JSON repository does not "
+            "match GITHUB_REPOSITORY"
+        )
+
+    contexts = []
+    seen_numbers = set()
+    seen_positions = set()
+
+    for member in members:
+        if not isinstance(member, dict):
+            raise IncompleteValidationError(
+                "QUEUE_MEMBERSHIP_INCOMPLETE: member entry is not an object"
+            )
+
+        number = member.get("number")
+        position = member.get("position")
+        body = member.get("body")
+        head_sha = member.get("head_sha")
+
+        if (
+            not isinstance(number, int)
+            or isinstance(number, bool)
+            or number <= 0
+            or number in seen_numbers
+        ):
+            raise IncompleteValidationError(
+                "QUEUE_MEMBERSHIP_INCOMPLETE: member PR number is invalid "
+                "or duplicated"
+            )
+        if (
+            not isinstance(position, int)
+            or isinstance(position, bool)
+            or position <= 0
+            or position in seen_positions
+        ):
+            raise IncompleteValidationError(
+                "QUEUE_MEMBERSHIP_INCOMPLETE: member position is invalid "
+                "or duplicated"
+            )
+        if not isinstance(body, str):
+            raise IncompleteValidationError(
+                f"QUEUE_MEMBERSHIP_INCOMPLETE: PR #{number} body is missing"
+            )
+        if not isinstance(head_sha, str) or not re.fullmatch(
+            r"[0-9a-fA-F]{40,64}", head_sha
+        ):
+            raise IncompleteValidationError(
+                f"QUEUE_MEMBERSHIP_INCOMPLETE: PR #{number} head_sha is invalid"
+            )
+
+        seen_numbers.add(number)
+        seen_positions.add(position)
+
+        previous_number = os.environ.get("PR_NUMBER")
+        previous_body = os.environ.get("PR_BODY")
+        os.environ["PR_NUMBER"] = str(number)
+        os.environ["PR_BODY"] = body
+
+        try:
+            ctx = _load_context(
+                body_override=body,
+                candidate_sha=candidate_sha,
+                expected_pr_head_sha=head_sha,
+            )
+        finally:
+            if previous_number is None:
+                os.environ.pop("PR_NUMBER", None)
+            else:
+                os.environ["PR_NUMBER"] = previous_number
+
+            if previous_body is None:
+                os.environ.pop("PR_BODY", None)
+            else:
+                os.environ["PR_BODY"] = previous_body
+
+        # Every member uses the same base for changed-path comparisons.
+        # The candidate tree was loaded directly by _load_context above.
+        ctx.pr["base"] = {"sha": base_sha}
+        contexts.append(ctx)
+
+    if [item["position"] for item in members] != sorted(seen_positions):
+        raise IncompleteValidationError(
+            "QUEUE_MEMBERSHIP_INCOMPLETE: member JSON is not ordered by position"
+        )
+
+    return contexts, base_sha.lower(), candidate_sha.lower()
+
+def _run_merge_group_checks(
+    contexts: list[ValidationContext],
+) -> tuple[str, list[dict]]:
+    results = []
+    saw_violation = False
+    saw_incomplete = False
+
+    for ctx in contexts:
+        try:
+            _run_checks(ctx)
+            results.append(
+                {
+                    "number": ctx.pr_number,
+                    "status": "PRESENT",
+                    "detail": "session evidence valid",
+                }
+            )
+        except IncompleteValidationError as exc:
+            saw_incomplete = True
+            results.append(
+                {
+                    "number": ctx.pr_number,
+                    "status": "INCOMPLETE",
+                    "detail": str(exc),
+                }
+            )
+        except ValidationError as exc:
+            saw_violation = True
+            results.append(
+                {
+                    "number": ctx.pr_number,
+                    "status": "VIOLATION",
+                    "detail": str(exc),
+                }
+            )
+        except Exception as exc:
+            saw_incomplete = True
+            results.append(
+                {
+                    "number": ctx.pr_number,
+                    "status": "INCOMPLETE",
+                    "detail": (
+                        f"unexpected validation error: "
+                        f"{type(exc).__name__}: {exc}"
+                    ),
+                }
+            )
+
+    # An incomplete member prevents a complete candidate verdict, even if
+    # another member has already produced a confirmed violation.
+    if saw_incomplete:
+        return "AI-SESSION-EVIDENCE: INCOMPLETE", results
+    if saw_violation:
+        return "AI-SESSION-EVIDENCE: VIOLATION", results
+    return "AI-SESSION-EVIDENCE: PRESENT", results
+
+
+def _write_merge_group_summary(
+    verdict: str,
+    results: list[dict],
+) -> None:
+    if verdict not in {
+        "AI-SESSION-EVIDENCE: PRESENT",
+        "AI-SESSION-EVIDENCE: VIOLATION",
+        "AI-SESSION-EVIDENCE: INCOMPLETE",
+    }:
+        raise ValueError(f"invalid merge-group verdict: {verdict!r}")
+
+    lines = [verdict]
+    for result in results:
+        lines.append(
+            f"PR #{result['number']}: {result['status']}: "
+            f"{result['detail']}"
+        )
+
+    # Always emit the complete member detail to stdout.
+    for line in lines:
+        print(line)
+
+    path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if not path:
+        return
+
+    try:
+        with open(path, "a", encoding="utf-8") as stream:
+            for line in lines:
+                stream.write(line + "\n")
+    except OSError:
+        # Do not swallow the failure: main() must return INCOMPLETE/2.
+        raise
 
 
 SUMMARY_SCOPE_NOTE = (
@@ -2284,6 +2603,92 @@ def main(argv: list[str] | None = None) -> int:
     _BLOB_CACHE.clear()
     _BLOB_BYTES_CACHE.clear()
 
+    if os.environ.get("GITHUB_EVENT_NAME") == "merge_group":
+        try:
+            contexts, _, _ = _load_merge_group_contexts()
+            verdict, results = _run_merge_group_checks(contexts)
+
+            try:
+                _write_merge_group_summary(verdict, results)
+            except OSError as exc:
+                print(
+                    "AI-SESSION-EVIDENCE: INCOMPLETE",
+                    file=sys.stdout,
+                )
+                print(
+                    f"INCOMPLETE: cannot write GITHUB_STEP_SUMMARY: {exc}",
+                    file=sys.stderr,
+                )
+                return 2
+
+            if verdict == "AI-SESSION-EVIDENCE: PRESENT":
+                return 0
+            if verdict == "AI-SESSION-EVIDENCE: VIOLATION":
+                return 1
+            return 2
+
+        except IncompleteValidationError as exc:
+            verdict = "AI-SESSION-EVIDENCE: INCOMPLETE"
+            results = [
+                {
+                    "number": os.environ.get("PR_NUMBER", "unknown"),
+                    "status": "INCOMPLETE",
+                    "detail": str(exc),
+                }
+            ]
+            try:
+                _write_merge_group_summary(verdict, results)
+            except OSError as summary_exc:
+                print(
+                    f"INCOMPLETE: cannot write GITHUB_STEP_SUMMARY: "
+                    f"{summary_exc}",
+                    file=sys.stderr,
+                )
+            return 2
+
+        except ValidationError as exc:
+            verdict = "AI-SESSION-EVIDENCE: VIOLATION"
+            results = [
+                {
+                    "number": os.environ.get("PR_NUMBER", "unknown"),
+                    "status": "VIOLATION",
+                    "detail": str(exc),
+                }
+            ]
+            try:
+                _write_merge_group_summary(verdict, results)
+            except OSError as summary_exc:
+                print(
+                    f"INCOMPLETE: cannot write GITHUB_STEP_SUMMARY: "
+                    f"{summary_exc}",
+                    file=sys.stderr,
+                )
+                return 2
+            return 1
+
+        except Exception as exc:
+            verdict = "AI-SESSION-EVIDENCE: INCOMPLETE"
+            results = [
+                {
+                    "number": os.environ.get("PR_NUMBER", "unknown"),
+                    "status": "INCOMPLETE",
+                    "detail": (
+                        f"unexpected validation error: "
+                        f"{type(exc).__name__}: {exc}"
+                    ),
+                }
+            ]
+            try:
+                _write_merge_group_summary(verdict, results)
+            except OSError as summary_exc:
+                print(
+                    f"INCOMPLETE: cannot write GITHUB_STEP_SUMMARY: "
+                    f"{summary_exc}",
+                    file=sys.stderr,
+                )
+            return 2
+
+    # Single-PR path: preserve the established output and exit semantics.
     try:
         ctx = _load_context()
         verdict = _run_checks(ctx)
@@ -2294,21 +2699,16 @@ def main(argv: list[str] | None = None) -> int:
     except ValidationError as exc:
         message = str(exc)
         print(f"MISSING: {message}")
-        _write_summary(
-            "AI-SESSION-EVIDENCE: MISSING"
-        )
+        _write_summary("AI-SESSION-EVIDENCE: MISSING")
         return 1
 
     except Exception as exc:
-        # Unexpected API or parsing errors fail closed.
         message = (
             f"unexpected validation error: "
             f"{type(exc).__name__}: {exc}"
         )
         print(f"MISSING: {message}")
-        _write_summary(
-            "AI-SESSION-EVIDENCE: MISSING"
-        )
+        _write_summary("AI-SESSION-EVIDENCE: MISSING")
         return 1
 
 
