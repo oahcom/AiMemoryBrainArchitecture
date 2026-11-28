@@ -22,23 +22,19 @@ document_metadata:
       - trust-boundary
       - ownership
       - forget
-      - cursor
-      - tenant
-      - shard
     canonical_conflict_status: None
     normative_status: Normative
   bilingual_counterpart:
     source: "01-system-architecture/system-boundaries.md"
     en: null
     zh-CN: "docs/zh-CN/01-system-architecture/system-boundaries.md"
-  steward: "Architecture Governance"
 ---
 # System Boundaries
 
 - Document ID: SYS-BOUNDARIES-001
 - Version: 1.0
 - Source: [Normative source specification](../../../01-system-architecture/system-boundaries.md)
-- Source revision: 42b2411048b53ebe6c7947075427665cdfb2d30c
+- Source revision: fd05a4d559a852fd24370297c7cd290384d9414a
 - Chinese counterpart: [系统边界](../../zh-CN/01-system-architecture/system-boundaries.md)
 - Status: DECIDED where explicitly identified; CANDIDATE/OPEN items remain non-normative
 
@@ -290,4 +286,3 @@ The D canonical contract at [01-system-architecture/forget-fence-and-completion-
 ### 15.5 Open implementation boundary
 
 This decision does not define the serialized representation of a multi-shard transaction's cursor-entry set or the consistent snapshot/cut protocol used by F/G consumers. Those details remain open for the corresponding D/F/G contracts; they must not be inferred from a single scalar cursor. This record does not authorize code or runtime implementation.
-
