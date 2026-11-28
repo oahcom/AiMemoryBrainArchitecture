@@ -61,12 +61,114 @@ session_evidence:
     session_evidence_ref: 14-ai-development/work-items/AID-2026-268/session-evidence.md
 acceptance:
   required:
-    - Every enumerated Git blob pin is recomputed from committed bytes.
-    - Missing paths and mismatched digests fail with declared and actual values where available.
-    - Explicit cross-commit pins resolve only at their declared source commit; unavailable commits exit 2.
-    - Prompt SHA-256 and byte-count pins are both verified.
-    - The existing Repository hygiene required context remains the carrier.
-    - Positive, mismatch, missing-path, cross-commit and prompt tests pass.
+    - >-
+      All ledger-governed manifest pin identity transitions must be
+      represented in the canonical append-only manifest pin ledger at
+      scripts/ci/manifest-pin-ledger.md. Each record must identify its
+      manifest, field, path, previous pin, new pin, and full repin commit SHA.
+    - >-
+      The checker must detect historical pin identity transitions that
+      are not represented by the canonical ledger. Ledger records must
+      be validated against the applicable historical manifest states,
+      and repin commits must be valid ancestors of the target commit.
+    - >-
+      Every in-scope blob_sha256 declaration, including qualified
+      *_blob_sha256 declarations recognized by the checker, must be
+      independently validated against the committed bytes at its own
+      bound path. Unbound declarations, missing paths, and mismatches
+      must fail closed.
+    - >-
+      The manifest-blob-pins ratchet must remain monotonic and reject
+      newly introduced violations. A baseline must not convert a
+      checker violation or incomplete verification into PASS.
+    - >-
+      INCOMPLETE must remain distinct from PASS. Missing historical
+      Git evidence, invalid ancestry, unreadable ledger evidence, or
+      internal verification failures must not be accepted as verified
+      pin transitions.
+    - >-
+      Exit status 0 means all required verification completed without
+      violations. Exit status 1 means a pin or ledger violation was
+      found. Exit status 2 means verification was incomplete.
+    - >-
+      The exact PR candidate must be evaluated using the canonical
+      checker and the registered manifest-blob-pins ratchet against
+      the authoritative PR base and candidate commits. Local test
+      results alone do not constitute acceptance.
+    - >-
+      Final stage-one acceptance requires complete PASS evidence for
+      the checker, ledger verification, baseline ratchet, applicable
+      repository gates, and independent exact-Head review, with all
+      evidence bound to the same accepted main revision.
+
+  historical_required:
+    - >-
+      Every enumerated Git blob pin is recomputed from committed bytes.
+    - >-
+      Missing paths and mismatched digests fail with declared and actual values where available.
+    - >-
+      Explicit cross-commit pins resolve only at their declared source commit; unavailable commits exit 2.
+    - >-
+      Prompt SHA-256 and byte-count pins are both verified.
+    - >-
+      The existing Repository hygiene required context remains the carrier.
+    - >-
+      Positive, mismatch, missing-path, cross-commit and prompt tests pass.
+
+  historical_required_status: RETAINED_FOR_TRACEABILITY_NOT_CURRENT_ACCEPTANCE_BASIS
+
+  amendment:
+    amendment_type: governance_model_supersession
+    effective_basis:
+      implementation_commits:
+        - "#1490"
+        - "#1512"
+      adjudication_issue: "#1350"
+      adjudication_status: CLOSED
+      current_model:
+        ledger: scripts/ci/manifest-pin-ledger.md
+        checker: scripts/ci/check_manifest_blob_pins.py
+        ratchet: manifest-blob-pins
+
+    supersedes:
+      - fixed A-F pin field classification
+      - five-category pin classification requirement
+      - UNRESOLVED and NON_BLOB classification requirements
+      - separate unresolved pin ledger
+      - independent unresolved and resolved pin ratchets
+      - acceptance criteria requiring two independent debt counters
+
+    retired_acceptance:
+      - independent_unresolved_ledger
+      - independent_unresolved_ratchet
+      - independent_debt_classification_counters
+      - INCOMPLETE UNRESOLVED(...) as a required checker output
+      - independent baseline updates for ordinary and unresolved findings
+
+    non_goals:
+      - introducing reference_mode into Pin identity
+      - changing the ledger identity schema for Option C
+      - restoring the superseded two-ledger architecture
+      - claiming Option C historical reference semantics are implemented
+      - treating INCOMPLETE as PASS
+
+    closure_condition: >-
+      Stage one may be considered for closure only when the canonical
+      pin ledger is complete, historical ledger-governed transitions
+      are verified, no unledgered transitions exist, candidate blob
+      declarations pass committed-byte verification, no MISMATCH,
+      PATH_MISSING, UNBOUND_BLOB_SHA256, or INCOMPLETE findings remain,
+      the manifest-blob-pins ratchet passes, and all acceptance
+      evidence corresponds to the same actual main revision.
+
+    adjudication_record: >-
+      The closure decision on issue #1350 dated 2026-11-28T04:57:25Z
+      formally superseded the original two-ledger acceptance model.
+      This amendment records that decision in the AID-2026-268
+      manifest without reopening or modifying the closed issue.
+      This amendment is a governance-model update and does not
+      constitute stage-one closure approval.
+
   status: PENDING_CI
 review:
   independent_reviewer: NOT_ASSIGNED
