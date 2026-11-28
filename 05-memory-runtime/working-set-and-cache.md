@@ -2,6 +2,7 @@
 document_metadata:
   domain: memory-runtime
   role: design-specification
+  steward: "user-authorized operator (delegated by account owner)"
   lifecycle:
     approval:
       decision_status: Draft
