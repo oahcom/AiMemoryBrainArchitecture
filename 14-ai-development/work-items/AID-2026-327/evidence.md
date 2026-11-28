@@ -73,6 +73,16 @@ The canonical System Boundaries section 15 records:
 - No code, runtime, API, schema, DDL, tests, workflows, branch-protection, or Issue-body changes are included.
 - Detailed D/F/G consumer specifications, multi-shard transaction representation, and F/G consistent-snapshot/cut protocol remain follow-up work.
 
+## Prompt-to-implementation trace pins
+
+- Prompt file: `14-ai-development/work-items/AID-2026-327/prompt-v1.md`
+- Prompt SHA-256: `1f632841337ee0f3b2e652d3f5c7d938dd6e6ce7845c42bcece3c173c97da545`
+- Prompt Git blob: `f230db28d3bf77556f8132fcd08d15bdbc1e0362`
+- Prompt commit: `2878317ed1c9acbdd6cdf4c77654ed62aa416e48`
+- Implementation commit: `3cdbf702bde3149cb0d9041dc48289637699e7ac`
+- Pre-merge ancestry target: `2878317ed1c9acbdd6cdf4c77654ed62aa416e48`, explicitly not an actual merge commit. It is recorded in the manifest as `PR_HEAD_TRACE_TARGET_NOT_MERGED`.
+- PR #1495 is draft and unmerged. The trace pins are not a claim of merge or formal acceptance.
+
 ## Provenance and validation limits
 
 - The prompt snapshot is operator-authored and not a verbatim platform prompt; executed prompt provenance is NOT_VERIFIED.
