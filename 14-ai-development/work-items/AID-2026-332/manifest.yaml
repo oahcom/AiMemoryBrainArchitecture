@@ -31,7 +31,10 @@ scope:
     one for #1196 owner-namespace references and one for #1208
     governance-operation traceability, so CI reports distinct named results
     for the two checks. Do not change either checker implementation, the
-    required context names, or branch protection.
+    required context names, or branch protection. The PR also includes a
+    narrowly scoped repository-hygiene repair to AID-2026-016/manifest.yaml,
+    restoring its required documentation and implementation top-level
+    sections.
   files_changed:
     - .github/workflows/bilingual-docs.yml
 

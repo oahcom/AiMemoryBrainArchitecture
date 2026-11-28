@@ -131,6 +131,33 @@ It does not by itself prove that either checker passes, that all canonical
 root and EN/ZH-CN mirror cases are covered, or that the positive and negative
 fixtures demonstrate the required boundaries.
 
+## Accompanying repair: AID-2026-016 manifest schema regression
+
+This PR also carries a narrowly scoped repair for the pre-existing
+manifest-schema regression on `origin/main`. The required
+`Work Item manifest schema (read-only baseline)` context was failing because
+`14-ai-development/work-items/AID-2026-016/manifest.yaml` lacked the required
+top-level `documentation` and `implementation` keys. This baseline failure
+blocked PRs independently of the GOV-DOC-001 workflow change.
+
+The AID-2026-016 manifest was updated with a `documentation` section listing
+its five existing work-item records and an `implementation` section recording
+the implementation status, factual summary, three changed source files, and
+three recorded test results. No implementation or test source files for
+AID-2026-016 were changed by this accompanying repair.
+
+The schema checker was run locally on the updated tree using
+`check_work_item_manifest_schema.py --tree HEAD --baseline 14-ai-development/reports/work-item-manifest-ac4-baseline.json`.
+It reported `Legacy ratchet new regressions: 0` and exited `0`.
+
+This result establishes that the updated tree introduces no new regressions
+under the local manifest-schema ratchet invocation. It does not establish
+that `origin/main` has been repaired, that the required context has passed
+on this PR's exact head in GitHub Actions, or that the GOV-DOC-001 workflow
+change has passed CI. The AID-2026-016 manifest repair is included here as a
+supporting repository-hygiene correction; it does not change the scope or
+acceptance criteria of #1237 AC3.
+
 ## Local execution boundary
 
 The operator environment is Windows PowerShell with Python 3.12. WSL is

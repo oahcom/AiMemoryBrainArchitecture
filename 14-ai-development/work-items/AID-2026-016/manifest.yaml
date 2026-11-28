@@ -51,6 +51,40 @@ scope:
     - "DDL and database schema."
     - "Bilingual documentation mirrors."
 
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-016/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-016/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-016/prompt-v2.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-016/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-016/session-evidence-2.md"
+    relationship: evidence
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    Implemented content-hash verification for ContextEntryVersion against
+    rendered content. The recorded change scope includes
+    crates/memory-context/src/lib.rs,
+    crates/memory-context/tests/content_hash_integrity.rs, and
+    crates/brain-cli/src/main.rs. The recorded implementation head is
+    d07a64faf121c61e50c189b327a20dd08e81ce9d. Recorded test results are
+    memory_context: 185 passed, brain_cli: 24 passed, and
+    agent_integration: 63 passed, for a total of 272 passed and 0 failed.
+    This records implementation and test results only; it does not assert
+    merge, independent acceptance, or final work-item closure.
+  files_changed:
+    - "crates/memory-context/src/lib.rs"
+    - "crates/memory-context/tests/content_hash_integrity.rs"
+    - "crates/brain-cli/src/main.rs"
+  tests:
+    - "memory_context tests: 185 passed, 0 failed (recorded)."
+    - "brain_cli tests: 24 passed, 0 failed (recorded)."
+    - "agent_integration tests: 63 passed, 0 failed (recorded)."
+
 measurements:
   integration_branch: "fix/2026-11-27-aid-016-context-content-hash"
   implementation_head: "d07a64faf121c61e50c189b327a20dd08e81ce9d"
