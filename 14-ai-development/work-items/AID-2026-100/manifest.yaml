@@ -120,10 +120,7 @@ baseline_and_source_evidence:
       disposition: "REMOVED_FROM_PR_SCOPE_BY_OWNER_RULING_ON_OA_MERGE_2026_11_26_01"
       note: "The reconstruction was produced at commit cae1b31e and is retained there; this PR no longer carries it and makes no claim about it."
       en_mirror: "docs/en/04-memory-compiler/compiler-stage-contract.md"
-      en_mirror_blob: "6d733294232a93aa59123009d2a2801d9b83f459"
       zh_cn_mirror: "docs/zh-CN/04-memory-compiler/compiler-stage-contract.md"
-      zh_cn_mirror_blob: "ad386cac5636b4ba3eaf8b93ad93afcb444e8b46"
-      reconstructed_root_blob: "1f79eeb40fb234423290f97fcce934e11bdca9bf"
 
   authored_indexes:
     - root: "05-memory-runtime/README.md"
