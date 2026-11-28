@@ -47,7 +47,7 @@ risks:
 
   - id: R-08
     evidence_state: PATH_LINE
-    path_line: "01-system-architecture/system-boundaries.md:239"
+    path_line: "01-system-architecture/system-boundaries.md:240"
     quote: "| Authorization and revocation | Owner I | Owner I for authorization / PermissionEpoch state | Each affected subsystem at its access boundary | Versioned authorization or revocation record plus enforcement evidence from each affected boundary; a policy record alone is not proof of enforcement |"
 
   - id: R-09
