@@ -1,0 +1,100 @@
+work_item_id: AID-2026-328
+title: "Anchor gate ratchet exemptions to the PR base commit and prohibit baseline growth"
+class: GATE/TEST
+risk: R1
+risk_rationale: >-
+  The change closes an exemption-authoring vulnerability in two existing
+  CI ratchets. It makes the base commit authoritative, rejects candidate
+  baseline additions, and fails closed when the comparison cannot be
+  established. Existing checks, baseline entries, required contexts,
+  and workflow topology are preserved. No new exemption is introduced.
+status: IN_PROGRESS
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner acceptance not recorded"
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "31c1e5d83e7dad326dbd4b69d4a8e19534718ff1"
+scope:
+  objective: >-
+    Prevent a pull-request candidate from authoring its own ratchet
+    exemptions. Read the authoritative baseline from the PR base commit,
+    restrict each invocation to its registered baseline path, reject
+    candidate baseline growth with individually named entries, permit
+    legitimate debt retirement, and fail closed when Git state is
+    unavailable or ambiguous.
+  issue: "#1462"
+  decisions:
+    - "Use --baseline-ref and git show <resolved-commit>:<path>."
+    - "Use registered baseline identifiers to bind each existing call site to its exact path."
+    - "Reject candidate baseline additions before accepting a ratchet result."
+    - "Treat missing base commits and missing base paths as INCOMPLETE, exit 2."
+    - "Compare exact normalized failure items, retaining arrow details."
+    - "Use set semantics; ignore blank lines and full-line comments."
+    - "Do not add --allow-unanchored or any default-allow behavior."
+    - "Preserve existing required contexts and workflow topology."
+  files_to_modify:
+    - scripts/ci/gate_ratchet.py
+    - scripts/ci/test_gate_ratchet.py
+    - .github/workflows/repository-hygiene.yml
+    - .github/workflows/gates.yml
+    - scripts/ci/baselines/manifest-blob-pins.txt
+    - scripts/ci/baselines/bilingual-docs.txt
+    - 14-ai-development/work-items/INDEX.md
+    - 14-ai-development/work-items/AID-2026-328/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-328/session-evidence.md
+evidence:
+  - "Issue #1462: candidate-tree baseline mutation can produce ratchet PASS while the underlying manifest blob-pin checker exits FAIL."
+  - "The previous --baseline implementation reads arbitrary working-tree paths."
+  - "Repository hygiene BASELINE_FILE_RE governs new-path admission, not modifications to existing baseline files."
+  - "Branch freshness GUARDED_ROOTS does not cover scripts/ci/baselines/."
+  - "Existing ratchet call sites are repository-hygiene.yml and gates.yml."
+  - "check_test_reachability.py reads gate-wiring.txt independently and does not call gate_ratchet.py."
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-328/session-evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-291/session-evidence.md
+    relationship: reference
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1462"
+    implementing_ai_session: "NOT_RECORDED"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-328/session-evidence.md"
+    executed_prompt_sha256: "db455c0a09ecd1885fda105415c6da21e031d32b6ada13655dde70551c639419"
+    executed_prompt_bytes: 6941
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-328/session-evidence.md"
+implementation:
+  status: IN_PROGRESS
+  summary: >-
+    The implementation design and replacement artifacts establish base-commit
+    anchoring, registered baseline identities, candidate-subset enforcement,
+    named growth failures, and INCOMPLETE handling. Exact repository execution,
+    Actions validation, and independent review remain pending.
+  files_changed:
+    - scripts/ci/gate_ratchet.py
+    - scripts/ci/test_gate_ratchet.py
+    - .github/workflows/repository-hygiene.yml
+    - .github/workflows/gates.yml
+    - scripts/ci/baselines/manifest-blob-pins.txt
+    - scripts/ci/baselines/bilingual-docs.txt
+    - 14-ai-development/work-items/INDEX.md
+    - 14-ai-development/work-items/AID-2026-328/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-328/session-evidence.md
+  tests:
+    - "python3 scripts/ci/test_gate_ratchet.py"
+    - "python3 -m unittest scripts.ci.test_gate_ratchet -v"
+    - "T-a: identical base and candidate baseline"
+    - "T-b: remove a fixed baseline entry"
+    - "T-c: add an unauthorized candidate entry"
+    - "T-d: inject a real checker failure and append its entry"
+    - "T-e: nonexistent base commit and absent base path"
+    - "T-f: substitute a different baseline path"
+    - "Existing manifest blob-pin checker self-check"
+    - "Existing bilingual gate self-check"

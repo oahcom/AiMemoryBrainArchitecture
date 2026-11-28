@@ -1,34 +1,13 @@
 #!/usr/bin/env python3
-"""Ratchet gate wrapper: fail only when a known-red gate gets worse.
+"""Run a failure-set ratchet against a base-commit-anchored baseline.
 
-A ratchet is not a green exemption. The baseline records the *exact set* of
-currently-failing items. The gate fails when:
+The base commit is authoritative. The candidate baseline may remove entries
+to pay down existing debt, but may never add entries.
 
-  * a new item appears that is not in the baseline (regression), or
-  * a baseline item no longer fails (the baseline is stale and must be lowered).
-
-Failing on the second case is deliberate: it stops the baseline from silently
-absorbing fixed items and drifting into a permanent blanket exemption.
-
-Usage:
-    python3 scripts/ci/gate_ratchet.py \
-        --baseline scripts/ci/baselines/bilingual-docs.txt \
-        --format paths \
-        --command "python3 scripts/check_bilingual_docs_full.py"
-
-An *item* is the whole line the wrapped gate printed for it, minus its
-`NNN. ` prefix: the part after ` -> ` is part of the item, not decoration. A
-line that only reports the run's verdict or a count is not an item, but a
-verdict word in front of a path (`OK <path> has no counterpart`) does not make
-one a summary.
-
-Exit codes: 0 ratchet holds, 1 regression, stale baseline, or a wrapped
-command that exited non-zero without reporting an item, 2 usage/IO error.
-
-ponytail: `--format schema` is now uncalled -- the only gate that used it
-(`schema-nonempty`) went green and became a hard gate, and its baseline was
-deleted. The branch costs three lines; delete it, and the `--format` flag with
-it, whenever this file is next touched for another reason.
+Exit codes:
+    0: ratchet holds
+    1: regression, baseline growth, or stale remaining debt
+    2: incomplete Git state, invalid invocation, or unreadable baseline
 """
 from __future__ import annotations
 
@@ -38,25 +17,111 @@ import subprocess
 import sys
 from pathlib import Path
 
-NUMBERED_PREFIX = re.compile(r"^\d{3,4}\.\s+")
+BASELINES = {
+    "manifest-blob-pins": "scripts/ci/baselines/manifest-blob-pins.txt",
+    "bilingual-docs": "scripts/ci/baselines/bilingual-docs.txt",
+}
 
-# Lines that report a verdict or a count rather than an offending item. The
-# boundary keeps an item whose name merely starts with a verdict word
-# ("OK_STATUS") out of the summary set.
+NUMBERED_PREFIX = re.compile(r"^\d{3,4}\.\s+")
 SUMMARY_RE = re.compile(
     r"^(?:PASS|FAIL|OK|FAILED|NO TESTS)(?![A-Za-z0-9_])"
     r"|^Ran\s"
     r"|^GOV-DOC-001 full scan:"
     r"|^runner admission:"
 )
-
-# A token that names a repository object. A "summary" line that still names
-# one is not a summary: it is an offending item wearing a verdict prefix.
-# `OK 00-governance/a.md has no counterpart` used to be dropped whole by the
-# prefix filter, so a real failure never reached the comparison.
 ITEM_TOKEN_RE = re.compile(
     r"\S*/\S*|\b[\w.-]+\.(?:md|py|ya?ml|rs|toml|json|txt)\b"
 )
+
+
+class IncompleteError(Exception):
+    """The requested comparison cannot be established safely."""
+
+
+def git_output(root: Path, *args: str) -> bytes:
+    try:
+        proc = subprocess.run(
+            ["git", *args],
+            cwd=root,
+            capture_output=True,
+            check=False,
+        )
+    except OSError as exc:
+        raise IncompleteError(f"cannot execute git: {exc}") from exc
+    if proc.returncode != 0:
+        detail = proc.stderr.decode("utf-8", errors="replace").strip()
+        raise IncompleteError(
+            f"git {' '.join(args)} failed ({proc.returncode}): {detail}"
+        )
+    return proc.stdout
+
+
+def resolve_base_commit(root: Path, ref: str) -> str:
+    if not ref or ref.startswith("-"):
+        raise IncompleteError("baseline ref is missing or invalid")
+    try:
+        resolved = git_output(
+            root, "rev-parse", "--verify", "--end-of-options",
+            f"{ref}^{{commit}}",
+        ).decode("ascii").strip()
+    except IncompleteError as exc:
+        raise IncompleteError(
+            f"base ref is not an available commit: {ref}: {exc}"
+        ) from exc
+    if not re.fullmatch(r"[0-9a-fA-F]{40,64}", resolved):
+        raise IncompleteError(f"base ref did not resolve to a commit: {ref}")
+    return resolved
+
+
+def parse_entries(data: bytes, description: str) -> set[str]:
+    try:
+        content = data.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise IncompleteError(
+            f"{description} is not valid UTF-8: {exc}"
+        ) from exc
+
+    entries: set[str] = set()
+    for raw in content.splitlines():
+        item = raw.strip()
+        if not item or item.startswith("#"):
+            continue
+        entries.add(item)
+    return entries
+
+
+def read_base_baseline(root: Path, commit: str, path: str) -> set[str]:
+    try:
+        data = git_output(root, "show", f"{commit}:{path}")
+    except IncompleteError as exc:
+        raise IncompleteError(
+            f"baseline path does not exist or cannot be read at base "
+            f"{commit}: {path}: {exc}"
+        ) from exc
+    return parse_entries(data, f"base baseline {path}")
+
+
+def read_candidate_baseline(root: Path, path: str) -> set[str]:
+    candidate = root / path
+    try:
+        if candidate.is_symlink():
+            raise IncompleteError(
+                f"candidate baseline must not be a symlink: {path}"
+            )
+        resolved = candidate.resolve(strict=True)
+        resolved.relative_to(root.resolve(strict=True))
+        if not resolved.is_file():
+            raise IncompleteError(
+                f"candidate baseline is not a regular file: {path}"
+            )
+        data = resolved.read_bytes()
+    except IncompleteError:
+        raise
+    except (OSError, ValueError) as exc:
+        raise IncompleteError(
+            f"candidate baseline cannot be read: {path}: {exc}"
+        ) from exc
+    return parse_entries(data, f"candidate baseline {path}")
 
 
 def is_summary(line: str) -> bool:
@@ -64,59 +129,28 @@ def is_summary(line: str) -> bool:
 
 
 def normalize(lines: list[str], fmt: str) -> list[str]:
-    """Reduce raw gate output to the stable set of offending items.
-
-    The item keeps everything the gate printed for it, including what follows
-    ` -> `. Truncating at the arrow merged two different failures on the same
-    path into one item, which is exactly the information a ratchet exists to
-    compare.
-    """
     items: set[str] = set()
     for raw in lines:
         line = raw.strip()
-        if not line:
-            continue
-        if is_summary(line):
+        if not line or is_summary(line):
             continue
         if fmt == "paths":
-            # Bilingual scanner: "042. some/path.md -> target expression"
             line = NUMBERED_PREFIX.sub("", line)
-        # fmt == "schema": already one item per line, keep verbatim.
         items.add(line)
     return sorted(items)
 
 
-def read_baseline(path: Path) -> list[str]:
-    if not path.is_file():
-        raise SystemExit(f"gate_ratchet: baseline not found: {path}")
-    entries = []
-    for line in path.read_text(encoding="utf-8").splitlines():
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
-            continue
-        entries.append(stripped)
-    return sorted(set(entries))
-
-
-def compare(baseline: list[str], current: list[str]) -> tuple[list[str], list[str]]:
-    """Pair items with baseline entries; return (regressions, fixed).
-
-    A baseline entry may be a bare path -- the shape `gates.yml` documents for
-    `--format paths` (`sed -E 's/ -> .*$//'`), which is what every entry in the
-    shipped baseline is. Such an entry stands for one item that begins with
-    `"<path> -> "`.
-
-    One item, not all of them: two different failures on the same path now need
-    two baseline entries, so the second one is a regression. Covering every
-    item of a path with that path's single entry is the same silent merge the
-    arrow truncation used to perform.
-    """
-    unused = list(baseline)
+def compare(
+    baseline: set[str], current: list[str]
+) -> tuple[list[str], list[str]]:
+    """Return (regressions, remaining baseline entries no longer failing)."""
+    unused = set(baseline)
     regressions: list[str] = []
+
     for item in current:
         matched = item if item in unused else None
         if matched is None:
-            for entry in unused:
+            for entry in sorted(unused):
                 if item.startswith(entry + " -> "):
                     matched = entry
                     break
@@ -124,65 +158,129 @@ def compare(baseline: list[str], current: list[str]) -> tuple[list[str], list[st
             regressions.append(item)
         else:
             unused.remove(matched)
-    return regressions, sorted(unused)
+
+    return sorted(regressions), sorted(unused)
+
+
+def run_command(command: str) -> subprocess.CompletedProcess[str]:
+    try:
+        return subprocess.run(
+            command,
+            shell=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+    except OSError as exc:
+        raise IncompleteError(f"cannot execute wrapped command: {exc}") from exc
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--baseline", required=True, type=Path)
+    parser.add_argument("--baseline-ref", required=True)
+    parser.add_argument("--baseline-id", required=True, choices=sorted(BASELINES))
+    parser.add_argument("--baseline", required=True)
     parser.add_argument("--command", required=True)
     parser.add_argument(
-        "--format",
-        choices=("schema", "paths"),
-        default="schema",
-        help="output shape of the wrapped gate",
+        "--format", choices=("schema", "paths"), default="schema"
     )
     args = parser.parse_args(argv)
 
-    baseline = read_baseline(args.baseline)
+    expected_path = BASELINES[args.baseline_id]
+    if args.baseline.replace("\\", "/") != expected_path:
+        print(
+            "INCOMPLETE: baseline path does not match registered baseline "
+            f"{args.baseline_id}: expected {expected_path}, "
+            f"received {args.baseline}",
+            file=sys.stderr,
+        )
+        return 2
 
-    proc = subprocess.run(
-        args.command,
-        shell=True,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-    )
-    # Items are printed to stdout. stderr carries interpreter warnings and
-    # tracebacks, which are not items. A command that exits non-zero without
-    # printing an item has not reported a failure set at all; that is checked
-    # below, because an empty set minus an empty baseline is otherwise a pass.
+    root = Path.cwd()
+    try:
+        base_commit = resolve_base_commit(root, args.baseline_ref)
+        base_entries = read_base_baseline(root, base_commit, expected_path)
+        candidate_entries = read_candidate_baseline(root, expected_path)
+    except IncompleteError as exc:
+        print(f"INCOMPLETE: {exc}", file=sys.stderr)
+        return 2
+
+    try:
+        proc = run_command(args.command)
+    except IncompleteError as exc:
+        print(f"INCOMPLETE: {exc}", file=sys.stderr)
+        return 2
+
     current = normalize(proc.stdout.splitlines(), args.format)
 
-    regressions, fixed = compare(baseline, current)
-    print(f"ratchet: {args.baseline.as_posix()}")
-    print(f"ratchet: baseline={len(baseline)} current={len(current)} "
-          f"regressions={len(regressions)} fixed={len(fixed)}")
+    additions = sorted(candidate_entries - base_entries)
+    removals = sorted(base_entries - candidate_entries)
+
+    print(f"ratchet: baseline-id={args.baseline_id}")
+    print(f"ratchet: baseline-path={expected_path}")
+    print(f"ratchet: baseline-ref={base_commit}")
+    print(
+        f"ratchet: base={len(base_entries)} "
+        f"candidate={len(candidate_entries)} "
+        f"added={len(additions)} removed={len(removals)}"
+    )
+
+    if additions:
+        print(f"ratchet: wrapped-command-exit={proc.returncode}")
+        for item in current:
+            print(f"ratchet: wrapped-command-item: {item}")
+        for item in additions:
+            print(f"::error::unauthorized baseline addition: {item}")
+        print(
+            f"ratchet: FAIL - candidate baseline added "
+            f"{len(additions)} unauthorized item(s)."
+        )
+        return 1
+
+    for item in removals:
+        print(f"ratchet: baseline debt retired: {item}")
+
+    regressions, fixed = compare(candidate_entries, current)
+
+    print(
+        f"ratchet: current={len(current)} "
+        f"regressions={len(regressions)} "
+        f"remaining_fixed={len(fixed)}"
+    )
 
     if proc.returncode not in (0, 1):
-        print(f"ratchet: FAIL - the wrapped command exited {proc.returncode}; "
-              "only 0 (clean) and 1 (red) carry a comparable failure set.")
+        print(
+            f"ratchet: FAIL - wrapped command exited {proc.returncode}; "
+            "only exit 0 and 1 provide a comparable failure set."
+        )
         return 1
 
     if proc.returncode != 0 and not current:
-        print(f"ratchet: FAIL - the wrapped command exited {proc.returncode} "
-              "without printing any item; a crash is not a clean run.")
+        print(
+            f"ratchet: FAIL - wrapped command exited {proc.returncode} "
+            "without printing any item; a crash is not a clean run."
+        )
         return 1
 
     for item in regressions:
-        print(f"::error::ratchet regression (new failure not in baseline): {item}")
+        print(f"::error::ratchet regression: {item}")
     for item in fixed:
-        print(f"::error::ratchet baseline is stale (no longer failing): {item}")
+        print(f"::error::ratchet baseline is stale: {item}")
 
     if regressions or fixed:
         if regressions:
-            print(f"ratchet: FAIL - {len(regressions)} new failure(s) above baseline.")
+            print(
+                f"ratchet: FAIL - {len(regressions)} new failure(s)."
+            )
         if fixed:
-            print(f"ratchet: FAIL - lower the baseline by {len(fixed)} fixed item(s).")
+            print(
+                f"ratchet: FAIL - {len(fixed)} baseline item(s) "
+                "no longer fail; lower the candidate baseline."
+            )
         return 1
 
-    print("ratchet: PASS - failure set matches the baseline exactly.")
+    print("ratchet: PASS - failure set matches the authorized baseline.")
     return 0
 
 
