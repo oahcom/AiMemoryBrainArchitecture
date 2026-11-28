@@ -28,13 +28,14 @@ document_metadata:
     source: "01-system-architecture/responsibility-matrix.md"
     en: null
     zh-CN: "docs/zh-CN/01-system-architecture/responsibility-matrix.md"
+  steward: "user-authorized operator (delegated by account owner)"
 ---
 # Subsystem Responsibility Matrix
 
 - Document ID: SYS-RESP-001
 - Version: 1.0
 - Source: [Normative source specification](../../../01-system-architecture/responsibility-matrix.md)
-- Source revision: 85548fcee05b28f8c2d54d4c0a8bf77840c8cdf3
+- Source revision: 7fc26ca93f4db3b5074156e76bee3555ac744e3a
 - Chinese counterpart: [子系统职责矩阵](../../zh-CN/01-system-architecture/responsibility-matrix.md)
 - Status: DECIDED ownership baseline; detailed boundary questions remain OPEN where stated
 

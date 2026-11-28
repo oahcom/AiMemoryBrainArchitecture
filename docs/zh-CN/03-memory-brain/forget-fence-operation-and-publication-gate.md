@@ -44,15 +44,16 @@ document_metadata:
     source: "03-memory-brain/forget-fence-operation-and-publication-gate.md"
     en: "docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md"
     zh-CN: null
+  steward: "user-authorized operator (delegated by account owner)"
 ---
 # Forget Fence Operation 与 Publication Gate（遗忘栅栏操作与发布门）
 
 - 文档 ID：D-FORGET-GATE-001
 - 版本：1.0（拆分式双语伴随文档）
 - 源分支：session-d-memory-brain-2026-11-16
-- 源文件版本：RESTORED — 原始源正文 Blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` 已恢复到规范根路径；根文件带 GOV-DOC-002 metadata。
+- 源文件版本：dd26e3cae2e60dbdc44a6e084004effcd2033efa
 - 英文对应：[Forget Fence Operation and Publication Gate](../../en/03-memory-brain/forget-fence-operation-and-publication-gate.md)
-- 规范源：[已恢复的根级文档](../../../03-memory-brain/forget-fence-operation-and-publication-gate.md)（源正文 Blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5`；恢复文件包含 GOV-DOC-002 metadata）。本页仍是非规范导航 Stub；拆分文件族等待 Owner 处置。
+- 源规范：[已恢复的根级文档](../../../03-memory-brain/forget-fence-operation-and-publication-gate.md)（源正文 Blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5`；恢复文件包含 GOV-DOC-002 metadata）。本页仍是非规范导航 Stub；拆分文件族等待 Owner 处置。
 - 状态：D 语义契约为 DECIDED；E/Storage 执行、I 授权新鲜度和跨模块 Conformance 仍为 OPEN
 
 源规范较长，拆分为四个中英并行阅读部分。源文件仍是规范性来源；拆分文档完整覆盖其章节。
