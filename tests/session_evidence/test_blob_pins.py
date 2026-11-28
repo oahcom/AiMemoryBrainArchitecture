@@ -348,5 +348,98 @@ class BlobPinContractTests(unittest.TestCase):
         self.assertEqual(len(self.calls), 1)
 
 
+
+    def test_sequence_block_scalar_is_kept_as_one_scalar(self):
+        manifest = (
+            "items:\n"
+            "  - |-\n"
+            "    evidence_file: docs/evidence.md\n"
+            f"    evidence_blob: {self.sha}\n"
+            "  - ordinary item\n"
+        )
+
+        result = self.verify(manifest)
+
+        self.assertEqual(result, [])
+        self.assertEqual(self.calls, [])
+
+    def test_sequence_mapping_block_scalar_does_not_consume_siblings(self):
+        manifest = (
+            "items:\n"
+            "  - description: >-\n"
+            "      explanatory text\n"
+            "      evidence_blob: not-a-pin\n"
+            '    evidence_file: "docs/evidence.md"\n'
+            f'    evidence_blob: "{self.sha}"\n'
+        )
+
+        result = self.verify(manifest)
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(
+            result[0].location,
+            "$.items[0].evidence_blob",
+        )
+        self.assertEqual(result[0].path, "docs/evidence.md")
+        self.assertEqual(self.calls, [(self.sha, "docs/evidence.md")])
+
+    def test_sequence_mapping_block_scalar_preserves_digest_token_span(self):
+        from scripts.governance.session_evidence.blob_pins import (
+            _enumerate_pin_records,
+        )
+
+        manifest = (
+            "items:\n"
+            "  - description: |-\n"
+            "      evidence_blob: not-a-pin\n"
+            '    evidence_file: "docs/evidence.md"\n'
+            f'    evidence_blob: "{self.sha}"\n'
+        )
+
+        records, errors = _enumerate_pin_records(manifest)
+
+        self.assertEqual(errors, [])
+        self.assertEqual(len(records), 1)
+
+        token = f'"{self.sha}"'
+        token_start = manifest.index(token)
+        self.assertEqual(records[0].start, token_start)
+        self.assertEqual(records[0].end, token_start + len(token))
+
+    def test_sequence_plain_scalar_with_colon_is_not_a_mapping(self):
+        manifest = (
+            "items:\n"
+            "  - https://example.invalid/evidence\n"
+        )
+
+        from scripts.governance.session_evidence.blob_pins import (
+            _parse_yaml_subset,
+        )
+
+        document = _parse_yaml_subset(manifest)
+
+        self.assertEqual(
+            document,
+            {"items": ["https://example.invalid/evidence"]},
+        )
+
+    def test_sequence_mapping_with_colon_and_space_is_still_a_mapping(self):
+        manifest = (
+            "items:\n"
+            "  - evidence_file: docs/evidence.md\n"
+        )
+
+        from scripts.governance.session_evidence.blob_pins import (
+            _parse_yaml_subset,
+        )
+
+        document = _parse_yaml_subset(manifest)
+
+        self.assertEqual(
+            document,
+            {"items": [{"evidence_file": "docs/evidence.md"}]},
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

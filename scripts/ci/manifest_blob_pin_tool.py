@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import fnmatch
 import hashlib
-import json
 import os
 import re
 import subprocess
@@ -24,7 +23,7 @@ _FULL_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 
 
 class AuditUnavailable(RuntimeError):
-    """The requested commit/tree/blob audit could not be completed."""
+    """Git data or a required write precondition is unavailable."""
 
 
 @dataclass(frozen=True)
@@ -85,16 +84,9 @@ def resolve_commit(repo: Path, ref: str) -> str:
 
 
 def discover_manifests(repo: Path, commit: str) -> list[str]:
-    # NUL termination preserves unusual Git path names, including newlines.
     raw = git(
-        repo,
-        "ls-tree",
-        "-r",
-        "--name-only",
-        "-z",
-        commit,
-        "--",
-        MANIFEST_ROOT,
+        repo, "ls-tree", "-r", "--name-only", "-z",
+        commit, "--", MANIFEST_ROOT,
     )
     paths = [
         item.decode("utf-8", "strict")
@@ -132,18 +124,6 @@ def read_tree(repo: Path, commit: str) -> dict[str, TreeEntry]:
     return result
 
 
-def tree_index(entries: dict[str, TreeEntry]) -> dict:
-    return {
-        path: {
-            "mode": entry.mode,
-            "type": entry.object_type,
-            "sha": entry.oid,
-            "size": entry.size,
-        }
-        for path, entry in entries.items()
-    }
-
-
 def read_blob(repo: Path, entry: TreeEntry) -> bytes:
     raw = git(repo, "cat-file", "blob", entry.oid)
     if len(raw) != entry.size:
@@ -158,7 +138,7 @@ def decode_manifest(raw: bytes, path: str) -> str:
     try:
         return raw.decode("utf-8", "strict")
     except UnicodeDecodeError as exc:
-        raise AuditUnavailable(
+        raise ValueError(
             f"{path}: manifest blob is not valid UTF-8: {exc}"
         ) from exc
 
@@ -236,19 +216,17 @@ def pin_tree_for(repo, pin, candidate_entries, historical_cache):
     return historical_cache[source_commit]
 
 
-def verify_one_pin(
-    repo,
-    pin,
-    candidate_entries,
-    historical_cache,
-):
+def verify_one_pin(repo, pin, candidate_entries, historical_cache):
     selected = pin_tree_for(
         repo, pin, candidate_entries, historical_cache
     )
+    # Pin paths are always repository-root-relative. There is deliberately
+    # no fallback to the manifest's directory.
     entry = selected.get(pin.path)
     if entry is None:
         raise bp.BlobPinError(
-            f"{pin.location}: path {pin.path!r} absent from selected commit tree"
+            f"{pin.location}: path_not_in_tree: "
+            f"{pin.path!r} absent from selected commit tree"
         )
     if entry.object_type != "blob" or entry.mode not in ("100644", "100755"):
         raise bp.BlobPinError(
@@ -257,7 +235,6 @@ def verify_one_pin(
 
     raw = read_blob(repo, entry)
     actual_git_sha = bp._git_blob_sha1(raw)
-
     if actual_git_sha != entry.oid.lower():
         raise bp.BlobPinError(
             f"{pin.location}: cat-file bytes do not hash to tree object "
@@ -280,6 +257,20 @@ def verify_one_pin(
         )
 
     return entry, raw, actual
+
+
+def is_contract_error(exc: bp.BlobPinError) -> bool:
+    message = str(exc).lower()
+    return any(
+        marker in message
+        for marker in (
+            "path_not_in_tree",
+            "absent from selected commit tree",
+            "is not a regular file blob",
+            "historical source commit must be a full sha-1",
+            "unsupported algorithm",
+        )
+    )
 
 
 def audit(args) -> int:
@@ -317,7 +308,7 @@ def audit(args) -> int:
             _raw, source = load_manifest(
                 repo, commit, manifest_path, entries
             )
-        except (AuditUnavailable, UnicodeDecodeError) as exc:
+        except ValueError as exc:
             counts["errors"] += 1
             counts["unparsed"] += 1
             print(f"ERROR path={manifest_path} reason={exc}")
@@ -352,18 +343,23 @@ def audit(args) -> int:
         for record in records:
             try:
                 verify_one_pin(
-                    repo,
-                    record.pin,
-                    entries,
-                    historical_cache,
+                    repo, record.pin, entries, historical_cache
                 )
             except bp.BlobPinError as exc:
-                counts["mismatches"] += 1
-                print(
-                    f"MISMATCH manifest={manifest_path} "
-                    f"location={record.pin.location} "
-                    f"pin_path={record.pin.path} reason={exc}"
-                )
+                if is_contract_error(exc):
+                    counts["errors"] += 1
+                    print(
+                        f"ERROR manifest={manifest_path} "
+                        f"location={record.pin.location} "
+                        f"reason={exc}"
+                    )
+                else:
+                    counts["mismatches"] += 1
+                    print(
+                        f"MISMATCH manifest={manifest_path} "
+                        f"location={record.pin.location} "
+                        f"pin_path={record.pin.path} reason={exc}"
+                    )
 
     if counts["manifests"] != counts["parsed"] + counts["unparsed"]:
         counts["errors"] += 1
@@ -421,7 +417,7 @@ def _source_scalar_replacement(source, start, end, new_value):
 
 
 def _collect_bytes_targets(document):
-    """Find existing *_bytes scalars paired with their sibling *_file path."""
+    """Find existing *_bytes scalars paired with sibling *_file paths."""
     targets = []
     for location, mapping in iter_mappings(document):
         for key, value in mapping.items():
@@ -442,148 +438,15 @@ def _collect_bytes_targets(document):
     return targets
 
 
-def _make_replacements(
-    repo,
-    source,
-    records,
-    document,
-    candidate_entries,
-    historical_cache,
-):
-    replacements = []
-
-    # Reject multiple candidate scalar tokens on the same source line. This
-    # is intentionally conservative, even when their individual spans exist.
-    line_counts = {}
-    for record in records:
-        line = record.pin.line
-        line_counts[line] = line_counts.get(line, 0) + 1
-
-    for record in records:
-        pin = record.pin
-        if pin.line is None:
-            raise bp.BlobPinError(
-                f"{pin.location}: parser did not provide a source line"
-            )
-        if line_counts.get(pin.line, 0) != 1:
-            raise bp.BlobPinError(
-                f"{pin.location}: multiple candidate pin scalars on line "
-                f"{pin.line}"
-            )
-        if record.start is None or record.end is None:
-            raise bp.BlobPinError(
-                f"{pin.location}: parser did not provide an exact token span"
-            )
-
-        selected = pin_tree_for(
-            repo, pin, candidate_entries, historical_cache
+def _diagnostic_signature(diagnostics):
+    return [
+        (
+            item.location,
+            item.reason.value,
+            item.message,
         )
-        entry = selected.get(pin.path)
-        if entry is None or entry.object_type != "blob":
-            raise bp.BlobPinError(
-                f"{pin.location}: target path {pin.path!r} is not a blob"
-            )
-        raw = read_blob(repo, entry)
-        if bp._git_blob_sha1(raw) != entry.oid.lower():
-            raise bp.BlobPinError(
-                f"{pin.location}: target blob bytes do not match tree object"
-            )
-
-        new_digest = (
-            entry.oid.lower()
-            if pin.algorithm == "sha1"
-            else hashlib.sha256(raw).hexdigest()
-        )
-
-        old_source_token = source[record.start:record.end]
-        if pin.location.endswith("]") and ".d_source_blobs[" in pin.location:
-            if old_source_token.lower() != pin.digest.lower():
-                raise bp.BlobPinError(
-                    f"{pin.location}: SHA child span does not match parsed digest"
-                )
-            replacement_text = new_digest
-        else:
-            replacement_text = _source_scalar_replacement(
-                source, record.start, record.end, new_digest
-            )
-
-        replacements.append(
-            Replacement(
-                record.start,
-                record.end,
-                old_source_token,
-                replacement_text,
-                pin.location,
-                pin.path,
-                entry.oid.lower(),
-                len(raw),
-            )
-        )
-
-    # Existing *_bytes fields are updated only when their paired *_file path
-    # is present in the same mapping. No new field is ever created.
-    for location, path, scalar in _collect_bytes_targets(document):
-        entry = candidate_entries.get(path)
-        if entry is None or entry.object_type != "blob":
-            continue
-        raw = read_blob(repo, entry)
-        if bp._git_blob_sha1(raw) != entry.oid.lower():
-            raise bp.BlobPinError(
-                f"{location}: target blob bytes do not match tree object"
-            )
-        start = getattr(scalar, "start", None)
-        end = getattr(scalar, "end", None)
-        line = getattr(scalar, "line", None)
-        if start is None or end is None or line is None:
-            raise bp.BlobPinError(
-                f"{location}: *_bytes scalar has no exact parser span"
-            )
-        new_value = str(len(raw))
-        token = source[start:end]
-        if token.startswith(("'", '"')):
-            replacement_text = _source_scalar_replacement(
-                source, start, end, new_value
-            )
-        else:
-            replacement_text = new_value
-        replacements.append(
-            Replacement(
-                start,
-                end,
-                token,
-                replacement_text,
-                location,
-                path,
-                entry.oid.lower(),
-                len(raw),
-            )
-        )
-
-    replacements.sort(key=lambda item: (item.start, item.end))
-    for previous, current in zip(replacements, replacements[1:]):
-        if current.start < previous.end:
-            raise bp.BlobPinError(
-                f"overlapping token spans: {previous.location} and "
-                f"{current.location}"
-            )
-
-    # Every target span is checked against its exact old source slice before
-    # constructing any modified source.
-    for item in replacements:
-        if source[item.start:item.end] != item.old:
-            raise bp.BlobPinError(
-                f"{item.location}: source token changed after parsing"
-            )
-
-    updated = source
-    for item in reversed(replacements):
-        updated = (
-            updated[:item.start]
-            + item.new
-            + updated[item.end:]
-        )
-
-    return replacements, updated
+        for item in diagnostics
+    ]
 
 
 def _pin_signature(records):
@@ -598,34 +461,306 @@ def _pin_signature(records):
     ]
 
 
-def _verify_rewritten_source(before, after, replacements, old_records):
-    # Explicitly reconstruct the expected source using only the approved
-    # half-open character spans. Any other character difference fails.
+def _candidate_replacement(
+    repo,
+    source,
+    *,
+    start,
+    end,
+    line,
+    location,
+    path,
+    new_value,
+    object_id,
+    byte_size,
+    preserve_quote=True,
+):
+    if line is None:
+        raise bp.BlobPinError(
+            f"{location}: parser did not provide a source line"
+        )
+    if start is None or end is None:
+        raise bp.BlobPinError(
+            f"{location}: parser did not provide an exact token span"
+        )
+    if start < 0 or end <= start or end > len(source):
+        raise bp.BlobPinError(
+            f"{location}: token source span is invalid"
+        )
+
+    old = source[start:end]
+    if preserve_quote:
+        new = _source_scalar_replacement(
+            source, start, end, str(new_value)
+        )
+    else:
+        new = str(new_value)
+
+    return Replacement(
+        start, end, old, new, location, path, object_id, byte_size
+    )
+
+
+def _make_replacements(
+    repo,
+    source,
+    records,
+    document,
+    candidate_entries,
+    historical_cache,
+):
+    """Build independent candidates; one bad pin never aborts its siblings."""
+    candidates = []
+    errors = []
+
+    # Pin digest candidates.
+    for record in records:
+        pin = record.pin
+        try:
+            selected = pin_tree_for(
+                repo, pin, candidate_entries, historical_cache
+            )
+            # Always repository-root-relative; never resolve beside manifest.
+            entry = selected.get(pin.path)
+            if entry is None:
+                raise bp.BlobPinError(
+                    f"{pin.location}: path_not_in_tree: "
+                    f"target path {pin.path!r} is absent from selected commit tree"
+                )
+            if entry.object_type != "blob" or entry.mode not in (
+                "100644", "100755"
+            ):
+                raise bp.BlobPinError(
+                    f"{pin.location}: target path {pin.path!r} is not "
+                    "a regular file blob"
+                )
+
+            raw = read_blob(repo, entry)
+            if bp._git_blob_sha1(raw) != entry.oid.lower():
+                raise bp.BlobPinError(
+                    f"{pin.location}: target blob bytes do not match "
+                    "the Git tree object"
+                )
+
+            if pin.algorithm == "sha1":
+                new_digest = entry.oid.lower()
+            elif pin.algorithm == "sha256":
+                new_digest = hashlib.sha256(raw).hexdigest()
+            else:
+                raise bp.BlobPinError(
+                    f"{pin.location}: unsupported algorithm {pin.algorithm!r}"
+                )
+
+            # d_source_blobs stores "path: SHA" in one scalar. Its parser
+            # record span is specifically the SHA child token, not the path.
+            # Do not rewrite any other part of that scalar.
+            source_list_child = (
+                pin.location.endswith("]")
+                and ".d_source_blobs[" in pin.location
+            )
+            if source_list_child:
+                start, end = record.start, record.end
+                if source[start:end].lower() != pin.digest.lower():
+                    raise bp.BlobPinError(
+                        f"{pin.location}: SHA child span does not match "
+                        "the parsed digest"
+                    )
+                replacement = _candidate_replacement(
+                    repo, source,
+                    start=start,
+                    end=end,
+                    line=pin.line,
+                    location=pin.location,
+                    path=pin.path,
+                    new_value=new_digest,
+                    object_id=entry.oid.lower(),
+                    byte_size=len(raw),
+                    preserve_quote=False,
+                )
+            else:
+                replacement = _candidate_replacement(
+                    repo, source,
+                    start=record.start,
+                    end=record.end,
+                    line=pin.line,
+                    location=pin.location,
+                    path=pin.path,
+                    new_value=new_digest,
+                    object_id=entry.oid.lower(),
+                    byte_size=len(raw),
+                )
+            candidates.append(replacement)
+
+        except bp.BlobPinError as exc:
+            errors.append((pin.location, str(exc)))
+        except AuditUnavailable:
+            # Git object failures are infrastructure failures, not recoverable
+            # per-pin contract errors.
+            raise
+
+    # Existing *_bytes candidates. These are independent of digest candidates.
+    for location, path, scalar in _collect_bytes_targets(document):
+        try:
+            # No manifest-relative fallback: path must be repo-root-relative.
+            entry = candidate_entries.get(path)
+            if entry is None:
+                raise bp.BlobPinError(
+                    f"{location}: path_not_in_tree: "
+                    f"target path {path!r} is absent from selected commit tree"
+                )
+            if entry.object_type != "blob" or entry.mode not in (
+                "100644", "100755"
+            ):
+                raise bp.BlobPinError(
+                    f"{location}: target path {path!r} is not a regular file blob"
+                )
+
+            raw = read_blob(repo, entry)
+            if bp._git_blob_sha1(raw) != entry.oid.lower():
+                raise bp.BlobPinError(
+                    f"{location}: target blob bytes do not match "
+                    "the Git tree object"
+                )
+
+            start = getattr(scalar, "start", None)
+            end = getattr(scalar, "end", None)
+            line = getattr(scalar, "line", None)
+            replacement = _candidate_replacement(
+                repo, source,
+                start=start,
+                end=end,
+                line=line,
+                location=location,
+                path=path,
+                new_value=str(len(raw)),
+                object_id=entry.oid.lower(),
+                byte_size=len(raw),
+            )
+            candidates.append(replacement)
+
+        except bp.BlobPinError as exc:
+            errors.append((location, str(exc)))
+        except AuditUnavailable:
+            raise
+
+    # Same-line ambiguity is checked across all digest and bytes candidates.
+    # Every candidate on an ambiguous line is refused, not just the later one.
+    line_counts = {}
+    for item in candidates:
+        line = source.count("\n", 0, item.start) + 1
+        line_counts[line] = line_counts.get(line, 0) + 1
+
+    safe = []
+    for item in candidates:
+        line = source.count("\n", 0, item.start) + 1
+        if line_counts[line] != 1:
+            errors.append((
+                item.location,
+                f"{item.location}: multiple candidate scalar tokens on "
+                f"source line {line}",
+            ))
+        else:
+            safe.append(item)
+
+    safe.sort(key=lambda item: (item.start, item.end))
+    non_overlapping = []
+    for item in safe:
+        if non_overlapping and item.start < non_overlapping[-1].end:
+            previous = non_overlapping[-1]
+            errors.append((
+                item.location,
+                f"overlapping token spans: {previous.location} and "
+                f"{item.location}",
+            ))
+            # Refuse both overlapping candidates.
+            non_overlapping.pop()
+        else:
+            non_overlapping.append(item)
+
+    # Verify all retained spans still identify exactly their parsed source text.
+    verified = []
+    for item in non_overlapping:
+        if source[item.start:item.end] != item.old:
+            errors.append((
+                item.location,
+                f"{item.location}: source token changed after parsing",
+            ))
+        else:
+            verified.append(item)
+
+    # No-op candidates are reported but never enter the write set.
+    changes = []
+    for item in verified:
+        if item.old == item.new:
+            print(
+                f"NOOP location={item.location} path={item.path} "
+                f"value={item.old!r} blob={item.object_id} "
+                f"bytes={item.byte_size}"
+            )
+        else:
+            changes.append(item)
+
+    updated = source
+    for item in reversed(changes):
+        updated = (
+            updated[:item.start]
+            + item.new
+            + updated[item.end:]
+        )
+
+    return changes, updated, errors
+
+
+def _verify_rewritten_source(
+    before,
+    after,
+    replacements,
+    old_records,
+    old_diagnostics,
+):
+    # Character offsets are Python str indices. Reconstruct only the approved
+    # half-open token replacements; all other source characters must match.
     expected = before
     for item in reversed(replacements):
         expected = expected[:item.start] + item.new + expected[item.end:]
     if after != expected:
         raise bp.BlobPinError(
-            "post-write source differs outside the approved token spans"
+            "post-rewrite source differs outside approved token spans"
         )
 
-    new_records, diagnostics = bp._enumerate_pin_records(after)
-    if diagnostics:
+    new_records, new_diagnostics = bp._enumerate_pin_records(after)
+    if _diagnostic_signature(old_diagnostics) != _diagnostic_signature(
+        new_diagnostics
+    ):
         raise bp.BlobPinError(
-            "post-write parser diagnostics: "
-            + "; ".join(item.message for item in diagnostics)
+            "post-rewrite parser/binding diagnostics changed"
         )
+
     if _pin_signature(old_records) != _pin_signature(new_records):
         raise bp.BlobPinError(
-            "post-write pin path/location/algorithm/source_commit changed"
+            "post-rewrite pin path/location/algorithm/source_commit changed"
         )
 
-    # Every resulting digest must be syntactically valid. Exact blob identity
-    # is checked by the subsequent audit against the same commit tree.
+    # Confirm that every changed digest is the value emitted into its token.
+    changed_digest_locations = {
+        item.location: item.new.strip("'\"")
+        for item in replacements
+        if item.location in {record.pin.location for record in old_records}
+    }
+    for old_record, new_record in zip(old_records, new_records):
+        expected_digest = changed_digest_locations.get(
+            old_record.pin.location, old_record.pin.digest
+        )
+        if new_record.pin.digest != expected_digest:
+            raise bp.BlobPinError(
+                f"{new_record.pin.location}: post-rewrite digest differs "
+                "from the planned token value"
+            )
+
     for record in new_records:
         if not bp._valid_digest(record.pin.digest, record.pin.algorithm):
             raise bp.BlobPinError(
-                f"{record.pin.location}: post-write digest is invalid"
+                f"{record.pin.location}: post-rewrite digest is invalid"
             )
 
 
@@ -664,8 +799,14 @@ def reanchor(args) -> int:
     manifests = discover_manifests(repo, commit)
     exclusions = [parse_exclusion(item) for item in args.contract_exclusion]
     historical_cache = {}
+
     planned = []
     originals = {}
+    error_count = 0
+    noop_count = 0
+    change_count = 0
+
+    print(f"commit={commit}")
 
     for manifest_path in manifests:
         exclusion = matching_exclusion(manifest_path, exclusions)
@@ -676,11 +817,19 @@ def reanchor(args) -> int:
             )
             continue
 
+        # Failure to read the manifest itself is Git/tree data failure.
         raw, source = load_manifest(
             repo, commit, manifest_path, entries
         )
+
         records, diagnostics = bp._enumerate_pin_records(source)
-        if diagnostics:
+        yaml_failed = any(
+            item.reason == bp.BlobPinErrorReason.YAML_PARSE
+            for item in diagnostics
+        )
+
+        if yaml_failed:
+            error_count += len(diagnostics)
             for diagnostic in diagnostics:
                 print(
                     f"ERROR path={manifest_path} "
@@ -688,11 +837,31 @@ def reanchor(args) -> int:
                     f"reason={diagnostic.reason.value} "
                     f"message={diagnostic.message}"
                 )
-            # A manifest with any parser/binding error is never rewritten.
+            # A syntactically unparseable manifest has no safe rewrite scope.
             continue
 
-        document = bp._parse_yaml_subset(source)
-        replacements, updated = _make_replacements(
+        # Binding errors are recorded, but do not suppress independently
+        # parsed pins from the same manifest.
+        error_count += len(diagnostics)
+        for diagnostic in diagnostics:
+            print(
+                f"ERROR path={manifest_path} "
+                f"location={diagnostic.location} "
+                f"reason={diagnostic.reason.value} "
+                f"message={diagnostic.message}"
+            )
+
+        try:
+            document = bp._parse_yaml_subset(source)
+        except bp.BlobPinError as exc:
+            error_count += 1
+            print(
+                f"ERROR path={manifest_path} location=$ "
+                f"reason=yaml_parse message={exc}"
+            )
+            continue
+
+        replacements, updated, candidate_errors = _make_replacements(
             repo,
             source,
             records,
@@ -700,33 +869,67 @@ def reanchor(args) -> int:
             entries,
             historical_cache,
         )
-        _verify_rewritten_source(
-            source, updated, replacements, records
-        )
+
+        for location, message in candidate_errors:
+            error_count += 1
+            print(
+                f"ERROR path={manifest_path} location={location} "
+                f"reason=reanchor_refused message={message}"
+            )
+
+        try:
+            _verify_rewritten_source(
+                source,
+                updated,
+                replacements,
+                records,
+                diagnostics,
+            )
+        except bp.BlobPinError as exc:
+            error_count += 1
+            print(
+                f"ERROR path={manifest_path} location=$ "
+                f"reason=post_reparse message={exc}"
+            )
+            # Do not write any part of a manifest whose postcondition fails.
+            continue
 
         if not replacements:
             continue
 
+        # Convert character spans to byte offsets explicitly before preparing
+        # bytes for disk. This also verifies the source encoding assumption.
+        source_bytes = source.encode("utf-8")
         updated_bytes = updated.encode("utf-8")
-        if args.write:
-            working_path = repo / manifest_path
-            try:
-                current_bytes = working_path.read_bytes()
-            except OSError as exc:
-                raise AuditUnavailable(
-                    f"cannot read working manifest {manifest_path}: {exc}"
-                ) from exc
-            if current_bytes != raw:
-                raise AuditUnavailable(
-                    f"working manifest differs from commit blob; refusing "
-                    f"to overwrite: {manifest_path}"
+        reconstructed = source_bytes
+        for item in reversed(replacements):
+            byte_start = len(source[:item.start].encode("utf-8"))
+            byte_end = len(source[:item.end].encode("utf-8"))
+            old_bytes = source_bytes[byte_start:byte_end]
+            if old_bytes != item.old.encode("utf-8"):
+                error_count += 1
+                print(
+                    f"ERROR path={manifest_path} location={item.location} "
+                    "reason=byte_span_mismatch"
                 )
-            originals[working_path] = current_bytes
-            planned.append((working_path, updated_bytes, manifest_path))
-        else:
-            planned.append((None, updated_bytes, manifest_path))
+                reconstructed = b""
+                break
+            reconstructed = (
+                reconstructed[:byte_start]
+                + item.new.encode("utf-8")
+                + reconstructed[byte_end:]
+            )
+
+        if not reconstructed or reconstructed != updated_bytes:
+            error_count += 1
+            print(
+                f"ERROR path={manifest_path} location=$ "
+                "reason=utf8_byte_reconstruction_failed"
+            )
+            continue
 
         for item in replacements:
+            change_count += 1
             print(
                 f"CHANGE manifest={manifest_path} "
                 f"location={item.location} "
@@ -735,12 +938,34 @@ def reanchor(args) -> int:
                 f"blob={item.object_id} bytes={item.byte_size}"
             )
 
+        if args.write:
+            working_path = repo / manifest_path
+            try:
+                current_bytes = working_path.read_bytes()
+            except OSError as exc:
+                raise AuditUnavailable(
+                    f"cannot read working manifest {manifest_path}: {exc}"
+                ) from exc
+
+            if current_bytes != raw:
+                raise AuditUnavailable(
+                    "working manifest differs from commit blob; refusing "
+                    f"to overwrite: {manifest_path}"
+                )
+
+            originals[working_path] = current_bytes
+            planned.append((working_path, updated_bytes, manifest_path))
+        else:
+            planned.append((None, updated_bytes, manifest_path))
+
+    # All worktree/commit comparisons happen before the first write.
     if not args.write:
         print(
             f"DRY-RUN commit={commit} manifests={len(manifests)} "
-            f"files_to_change={len(planned)}"
+            f"files_to_change={len(planned)} changes={change_count} "
+            f"errors={error_count}"
         )
-        return 0
+        return 1 if error_count else 0
 
     written = []
     try:
@@ -764,9 +989,10 @@ def reanchor(args) -> int:
 
     print(
         f"REANCHORED commit={commit} manifests={len(manifests)} "
-        f"files_changed={len(written)}"
+        f"files_changed={len(written)} changes={change_count} "
+        f"errors={error_count}"
     )
-    return 0
+    return 1 if error_count else 0
 
 
 def build_parser():
@@ -810,9 +1036,15 @@ def main(argv=None):
 
     try:
         return audit(args) if args.command == "audit" else reanchor(args)
-    except (AuditUnavailable, ValueError, OSError, bp.BlobPinError) as exc:
+    except AuditUnavailable as exc:
         print(f"FATAL: {exc}", file=sys.stderr)
         return 2
+    except (ValueError, OSError, bp.BlobPinError) as exc:
+        # This outer handler is for errors that escaped the per-item
+        # recoverable paths. Ordinary parser/binding/pin errors are handled
+        # and counted inside audit/reanchor.
+        print(f"FATAL: {exc}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

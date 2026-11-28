@@ -609,6 +609,7 @@ def _parse_mapping(lines, index, indent, initial=None):
 
 def _parse_sequence(lines, index, indent):
     result = []
+    block_markers = ("|", "|-", "|+", ">", ">-", ">+")
 
     while index < len(lines):
         current_indent, content, line_number, content_start = lines[index]
@@ -638,12 +639,26 @@ def _parse_sequence(lines, index, indent):
                 result.append(None)
             continue
 
-        if re.match(r"^[^'\"]+:\s*", remainder):
+        if remainder in block_markers:
+            item, index = _parse_block_scalar(
+                lines, index, indent, remainder.startswith(">")
+            )
+            result.append(item)
+            continue
+
+        if re.match(r"^[^'\"]+:(?:\s+|$)", remainder):
             key, value_text, value_offset = _split_mapping_pair(remainder)
             initial = {}
             value_start = remainder_start + value_offset
 
-            if value_text:
+            if value_text in block_markers:
+                initial[key], index = _parse_block_scalar(
+                    lines,
+                    index,
+                    indent + 2,
+                    value_text.startswith(">"),
+                )
+            elif value_text:
                 initial[key] = _scalar(
                     value_text,
                     line_number,
