@@ -82,6 +82,7 @@ session_evidence:
     session_evidence_ref: "14-ai-development/work-items/AID-2026-342/session-evidence.md"
     executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-342/prompt-v1.md"
     executed_prompt_sha256: fc41bcba7f7e104a24eecd2c161862bfae0fba0e34168c83b42bede28d502a0d
+    executed_prompt_bytes: 8000
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
 
