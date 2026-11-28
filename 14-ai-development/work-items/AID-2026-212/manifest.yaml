@@ -1,0 +1,96 @@
+work_item_id: AID-2026-212
+title: "Implement fail-closed Git blob pin integrity verification"
+class: GATE/CI/TEST
+risk: R2
+risk_rationale: "Adds check 12 inside the existing Session Evidence validator and a standard-library parser; no new job, required context, workflow or branch-protection change, but the check can reject manifests the current gate accepts."
+status: IMPLEMENTED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository:
+  name: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 4fa75e7809a9319db2ab04489cc8f2f9e17fbd79
+prompt_status: RECORDED_NOT_FROZEN
+prompt_provenance: DISPATCHED_TASK_FILE
+approval_scope:
+  type: Full-document
+evidence:
+  record: "14-ai-development/work-items/AID-2026-212/evidence.md"
+  session: "14-ai-development/work-items/AID-2026-212/session-evidence.md"
+  issue: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1350"
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-212/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-212/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-212/prompt-v1.md"
+    relationship: evidence
+  - path: "scripts/governance/session_evidence/blob_pins.py"
+    relationship: implementation
+  - path: "tests/session_evidence/test_blob_pins.py"
+    relationship: implementation
+supersession:
+  supersedes: []
+  supersession_reason: null
+  effective_date: null
+archival:
+  archived_date: null
+  archival_reason: null
+  archival_reference: null
+canonical_scope_keywords:
+  - "blob-pin-integrity"
+  - "session-evidence"
+  - "fail-closed-verification"
+scope:
+  objective: "Every declared blob identity must resolve to a regular committed blob and match the original bytes in the merge candidate tree; explicit historical source pins may resolve only through an exact, independently retrievable source commit."
+  changes:
+    - "scripts/governance/session_evidence/blob_pins.py"
+    - "scripts/governance/session_evidence/validate.py"
+    - "tests/session_evidence/test_blob_pins.py"
+    - "14-ai-development/work-items/AID-2026-212/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-212/evidence.md"
+    - "14-ai-development/work-items/AID-2026-212/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-212/prompt-v1.md"
+    - "14-ai-development/work-items/INDEX.md"
+  non_goals:
+    - "Rewrite or normalize existing historical manifests."
+    - "Require historical source blobs to exist in the current main tree."
+    - "Change checks 01, 02, 03, 04, 06, 09 or 11."
+    - "Introduce third-party YAML dependencies."
+    - "Silently skip unresolved pins."
+prompt_sha256: "8b1fe2b2a0cbb11b042190a638fbf8fd65c19ce9cede26e323c3eed25f4b0cce"
+prompt_file: "14-ai-development/work-items/AID-2026-212/prompt-v1.md"
+prompt_file_blob_sha: "4d3886ac7ffdec43b0d322a7dc70111dff8fcc88"
+prompt_file_commit_sha: "38edfdf2b2f48e246e3e7cf7f147db41d1036e4a"
+session_evidence:
+  - role: "IMPLEMENTATION_SESSION"
+    issue_refs:
+      - "#1350"
+    implementing_ai_session: "ChatGPT-GPT-6-S6-A"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-212/prompt-v1.md"
+    executed_prompt_sha256: "8b1fe2b2a0cbb11b042190a638fbf8fd65c19ce9cede26e323c3eed25f4b0cce"
+    executed_prompt_bytes: 3695
+    executed_prompt_provenance: "NOT_VERIFIED"
+    session_reference_status: "RECORDED"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-212/session-evidence.md"
+implementation:
+  implementation_commit_sha: "38edfdf2b2f48e246e3e7cf7f147db41d1036e4a"
+  merge_commit_sha: "4e56895cab4d44a59213e1050007626d9249d040"
+  status: IMPLEMENTED
+  summary: "blob_pins.py parses the manifest subset, binds each digest to a path in the same mapping, verifies the Git blob SHA-1 against the tree entry and recomputed bytes, and verifies SHA-256 declarations against the original committed bytes. validate.py wires it as check 12 against the candidate head tree. Path-only mappings are path declarations, not pins."
+  files_changed:
+    - "scripts/governance/session_evidence/blob_pins.py"
+    - "scripts/governance/session_evidence/validate.py"
+    - "tests/session_evidence/test_blob_pins.py"
+    - "14-ai-development/work-items/AID-2026-212/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-212/evidence.md"
+    - "14-ai-development/work-items/AID-2026-212/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-212/prompt-v1.md"
+    - "14-ai-development/work-items/INDEX.md"
+  tests:
+    - "python -m pytest tests/session_evidence -q — offline adversarial suite."
+    - "Mutation evidence: disabling the digest comparison turns the suite red."

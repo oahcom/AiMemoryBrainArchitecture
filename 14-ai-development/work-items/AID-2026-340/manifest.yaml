@@ -1,0 +1,197 @@
+work_item_id: AID-2026-340
+title: "Disclose unrestored Phase 3.5/3.6 normative references in canonical security and runtime documentation"
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  This is a documentation-only disclosure correction. It replaces existing
+  Markdown sentences to identify historical references to unrestored Phase
+  3.5/3.6 normative files and adds steward metadata to six mirrored documents.
+  No code, workflow, CI configuration, enforcement gate, or normative
+  requirements are changed. Risk is limited to documentation accuracy and
+  consistency.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "cc5d22b9126e00e3f93ffe71282554309908bc89"
+tracking_issue: "#1485"
+
+scope:
+  summary: >-
+    Correct canonical runtime and security documentation that cites
+    unrestored Phase 3.5/3.6 normative files without disclosing their
+    restoration status. Synchronize the corresponding English and
+    docs/zh-CN mirror copies, and add steward metadata to six mirror
+    documents. The change is limited to disclosure accuracy and
+    documentation metadata; it does not restore normative files or
+    establish new normative requirements.
+  in_scope:
+    - "05-memory-runtime/runtime-overview.md: update two references to disclose the historical and unrestored status of Phase 3.5/3.6 normative material."
+    - "09-security-governance/principal-actor-and-authorization-contract.md: update two references to disclose the historical and unrestored status of Phase 3.5/3.6 normative material."
+    - "09-security-governance/security-and-identity-overview.md: disclose the historical and unrestored status of referenced normative material."
+    - "09-security-governance/global-forget-target-inventory-and-completion-evidence.md: disclose the historical and unrestored status of referenced normative material."
+    - "09-security-governance/forget-retention-backup-and-erasure-policy.md: disclose the historical and unrestored status of referenced normative material."
+    - "docs/en/ mirrors of the five canonical Markdown documents: synchronize the corresponding sentence changes."
+    - "docs/zh-CN/ mirrors of the five canonical Markdown documents: synchronize the corresponding sentence changes without undertaking translation or correction of the existing English-language corpus."
+    - "Add steward metadata to the six mirror documents requiring that field."
+    - "Record the executed prompt snapshot as prompt-v1.md with its supplied SHA-256 and byte count."
+  files_out_of_scope:
+    - "All source code and executable implementation files."
+    - "CI workflows, scripts, test logic, and enforcement gates."
+    - "Phase 3.5 and Phase 3.6 normative source files and their restoration."
+    - "Creation of new normative requirements, security contracts, or runtime behavior."
+    - "Translation or linguistic correction of the existing English-language content in docs/zh-CN."
+    - "Unrelated documentation and governance records."
+  change_boundary: >-
+    Exactly fifteen existing Markdown files are in scope: five canonical
+    documents and their ten corresponding docs/en/ and docs/zh-CN/ mirrors.
+    The changes consist of existing sentence replacements and steward
+    metadata additions to six mirror files. The intended disclosure is
+    that cited Phase 3.5/3.6 normative material is historical and has not
+    been restored. No referenced normative material is thereby made
+    effective, restored, approved, or newly authoritative. No new
+    normative content or executable behavior is introduced.
+
+evidence:
+  - "Issue #1485: Canonical security/runtime docs cite unrestored Phase 3.5/3.6 normative files without disclosing their status."
+  - "User-provided base commit: cc5d22b9126e00e3f93ffe71282554309908bc89."
+  - "User-provided head commit: 655ae3a7e098bac991a9d3e2084cb6f55a015670."
+  - "User-reported change scope: 15 existing Markdown files, +35 / -20."
+  - "User-reported prompt snapshot: fix-A.md, 9493 bytes."
+  - "User-provided prompt SHA-256: ffb1ab41c51aa9e25752e89802c0b038caf997652775e0c79215627681abb51d."
+  - "User-reported local bilingual documentation and incremental document-management gate results; these are recorded as operator-provided evidence, not independently verified results."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-340/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-340/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-340/session-evidence.md"
+    relationship: evidence
+
+acceptance_criteria:
+  - id: AC1
+    description: >-
+      All five canonical documents disclose that the referenced Phase 3.5/3.6
+      normative material is historical and unrestored, rather than presenting
+      those references without restoration-status qualification.
+    measurement: >-
+      Run:
+      git grep -nEi 'Phase 3[.]5|Phase 3[.]6' -- 05-memory-runtime/runtime-overview.md 09-security-governance/principal-actor-and-authorization-contract.md 09-security-governance/security-and-identity-overview.md 09-security-governance/global-forget-target-inventory-and-completion-evidence.md 09-security-governance/forget-retention-backup-and-erasure-policy.md
+      and inspect the resulting reference sentences together with:
+      git diff --unified=5 cc5d22b9126e00e3f93ffe71282554309908bc89..655ae3a7e098bac991a9d3e2084cb6f55a015670 -- 05-memory-runtime/runtime-overview.md 09-security-governance/
+    expected_result: "Every in-scope normative reference is explicitly qualified as historical and unrestored."
+
+  - id: AC2
+    description: >-
+      The five canonical documents and their docs/en/ and docs/zh-CN/
+      counterparts contain synchronized corresponding sentence changes.
+    measurement: >-
+      Run:
+      git diff --unified=3 cc5d22b9126e00e3f93ffe71282554309908bc89..655ae3a7e098bac991a9d3e2084cb6f55a015670 -- 05-memory-runtime/runtime-overview.md 09-security-governance/ docs/en/ docs/zh-CN/
+      and compare each canonical document with its two corresponding mirrors.
+    expected_result: "All fifteen documents contain the intended corresponding disclosure changes without an omitted or contradictory mirror."
+
+  - id: AC3
+    description: >-
+      All six mirror documents designated for steward metadata contain the
+      required steward field with the delegated operator attribution.
+    measurement: >-
+      Run:
+      git grep -n -F 'steward: "user-authorized operator (delegated by account owner)"' -- docs/en/ docs/zh-CN/
+      and inspect the six changed mirror files using:
+      git diff --unified=3 cc5d22b9126e00e3f93ffe71282554309908bc89..655ae3a7e098bac991a9d3e2084cb6f55a015670 -- docs/en/ docs/zh-CN/
+    expected_result: "Each of the six designated mirror files contains the exact required steward field."
+
+  - id: AC4
+    description: >-
+      Any Markdown link targets affected by the documentation changes continue
+      to resolve to existing repository paths; no nonexistent normative file
+      is represented as restored or available.
+    measurement: >-
+      Run:
+      git diff --unified=0 cc5d22b9126e00e3f93ffe71282554309908bc89..655ae3a7e098bac991a9d3e2084cb6f55a015670 -- '*.md'
+      and inspect changed Markdown link destinations against the checkout
+      using:
+      git ls-tree -r --name-only 655ae3a7e098bac991a9d3e2084cb6f55a015670
+    expected_result: "All affected link destinations are valid repository paths or are explicitly disclosed as unrestored historical references rather than presented as existing normative files."
+
+  - id: AC5
+    description: >-
+      The change introduces no new normative requirements, security rules,
+      runtime behavior, or executable implementation.
+    measurement: >-
+      Run:
+      git diff --stat cc5d22b9126e00e3f93ffe71282554309908bc89..655ae3a7e098bac991a9d3e2084cb6f55a015670
+      and:
+      git diff --name-status cc5d22b9126e00e3f93ffe71282554309908bc89..655ae3a7e098bac991a9d3e2084cb6f55a015670
+      and:
+      git diff --unified=5 cc5d22b9126e00e3f93ffe71282554309908bc89..655ae3a7e098bac991a9d3e2084cb6f55a015670
+    expected_result: "The diff contains only the fifteen declared existing Markdown files, sentence replacements, and six steward metadata additions; no new normative content or code changes are present."
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    Independent review has not been assigned or recorded. No independent
+    reviewer approval or review completion is claimed.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: NOT_ASSIGNED
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    According to the operator-provided execution record, the documentation
+    changes were committed at head 655ae3a7e098bac991a9d3e2084cb6f55a015670.
+    The change covers fifteen existing Markdown files and reports
+    thirty-five insertions and twenty deletions. It updates historical
+    Phase 3.5/3.6 normative-reference disclosures across canonical
+    documentation and mirrors, and adds steward metadata to six mirror
+    files. This summary does not claim independent verification,
+    acceptance, or CI completion.
+  pull_request: PENDING
+  merge_commit: ""
+  implementation_commit: "655ae3a7e098bac991a9d3e2084cb6f55a015670"
+  ci_status: NOT_CLAIMED
+  files_changed:
+    - "05-memory-runtime/runtime-overview.md"
+    - "09-security-governance/principal-actor-and-authorization-contract.md"
+    - "09-security-governance/security-and-identity-overview.md"
+    - "09-security-governance/global-forget-target-inventory-and-completion-evidence.md"
+    - "09-security-governance/forget-retention-backup-and-erasure-policy.md"
+    - "docs/en/05-memory-runtime/runtime-overview.md"
+    - "docs/en/09-security-governance/principal-actor-and-authorization-contract.md"
+    - "docs/en/09-security-governance/security-and-identity-overview.md"
+    - "docs/en/09-security-governance/global-forget-target-inventory-and-completion-evidence.md"
+    - "docs/en/09-security-governance/forget-retention-backup-and-erasure-policy.md"
+    - "docs/zh-CN/05-memory-runtime/runtime-overview.md"
+    - "docs/zh-CN/09-security-governance/principal-actor-and-authorization-contract.md"
+    - "docs/zh-CN/09-security-governance/security-and-identity-overview.md"
+    - "docs/zh-CN/09-security-governance/global-forget-target-inventory-and-completion-evidence.md"
+    - "docs/zh-CN/09-security-governance/forget-retention-backup-and-erasure-policy.md"
+  tests:
+    - "Static verification: compare canonical disclosure sentences with the corresponding docs/en/ and docs/zh-CN/ mirrors."
+    - "Static verification: inspect the six mirror files for the required steward metadata field."
+    - "Static verification: inspect affected Markdown link targets against the repository tree."
+    - "Static verification: inspect the complete diff to confirm that only the declared Markdown documentation changes are present."
+    - "Operator-reported check_bilingual_docs.py result: PASS; not independently verified in this record."
+    - "Operator-reported check_document_management.py --require-changed origin/main result: PASS (incremental); not independently verified in this record."
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1485"
+    implementing_ai_session: 9ROUTER_HERMES_SESSION_20261128_AID2026340
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-340/prompt-v1.md
+    executed_prompt_sha256: 68ae32ace8f974969db06c17ba14327b9cf6d5d1dbfa47d9d19162c0645731f2
+    executed_prompt_bytes: 10857
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: "RECORDED"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-340/session-evidence.md

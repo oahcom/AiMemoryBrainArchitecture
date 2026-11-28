@@ -53,7 +53,7 @@ concurrency:
 on:
   pull_request:
     branches: [main]
-  # Six required contexts live in this file. The queue only reports checks
+  # Seven required contexts live in this file. The queue only reports checks
   # produced by `merge_group`, so every job here must also run for it.
   merge_group:
     types: [checks_requested]
@@ -357,6 +357,34 @@ jobs:
       - name: Report all four historical cohort migration batches
         run: python scripts/ci/check_work_item_manifest_schema.py --tree HEAD --baseline "14-ai-development/reports/work-item-manifest-ac4-baseline.json" --batch-report
 
+  # AID-2026-293: the canonical work-item registry is the sole authority for
+  # normalized work-item field values. This job is its mandatory validator. It
+  # reads registry blobs from the candidate Git tree rather than the filesystem,
+  # so a sparse checkout, an untracked leftover, or a stale working copy cannot
+  # change the answer. An empty registry is a legal PASS during the migration --
+  # the per-check NOT_APPLICABLE event records which check had nothing to read,
+  # and a record that is present but malformed still fails.
+  work-item-registry:
+    name: Work Item registry validator (hard gate)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # A prompt pin is verified against the commit each record declares, so
+          # the history has to be present, not only the tip.
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install the pinned parsers
+        run: python -m pip install --quiet --disable-pip-version-check PyYAML==6.0.2 "jsonschema>=4.23,<5"
+      - name: Self-check the registry validator
+        run: python -m unittest scripts.ci.test_check_work_item_registry -v
+      - name: Validate the registry in the candidate tree
+        run: python scripts/ci/check_work_item_registry.py --tree HEAD
+
   prompt-commit-trace:
     name: Prompt-to-commit trace (ratchet)
     runs-on: ubuntu-latest
@@ -394,48 +422,91 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
-          python scripts/ci/check_prompt_commit_trace.py --commit "$BASE_SHA" --base "$BASE_SHA" --emit-baseline "$RUNNER_TEMP/main-baseline.json" > "$RUNNER_TEMP/main-baseline.stdout.json"
-          python scripts/ci/check_prompt_commit_trace.py --commit "$HEAD_SHA" --base "$BASE_SHA" --emit-baseline "$RUNNER_TEMP/pr-snapshot.json" > "$RUNNER_TEMP/pr-snapshot.stdout.json"
-          python - "$RUNNER_TEMP/main-baseline.json" "$RUNNER_TEMP/pr-snapshot.json" "$RUNNER_TEMP/baseline-seed.json" <<'PY'
-          import json, sys
-          main = json.load(open(sys.argv[1], encoding="utf-8"))
-          pr = json.load(open(sys.argv[2], encoding="utf-8"))
-          seeded = sorted(set(pr["manifests"]) - set(main["manifests"]))
-          for work_item_id in seeded:
-              main["manifests"][work_item_id] = pr["manifests"][work_item_id]
-          main["seeded_work_items"] = {
-              work_item_id: {
-                  "observed_in_pr_head": pr["commit"],
-                  "reason": "Initial ratchet seed for the newly registered work item; this records its current NO_TRACE state without claiming traceability."
-              }
-              for work_item_id in seeded
-          }
-          with open(sys.argv[3], "w", encoding="utf-8") as handle:
-              json.dump(main, handle, sort_keys=True, indent=2)
-              handle.write("\n")
-          PY
-          python scripts/ci/check_prompt_commit_trace.py --commit "$BASE_SHA" --base "$BASE_SHA" --baseline "$RUNNER_TEMP/baseline-seed.json" --base-snapshot "$RUNNER_TEMP/main-baseline.json" --json > "$RUNNER_TEMP/main-summary.json"
-          python scripts/ci/check_prompt_commit_trace.py --commit "$HEAD_SHA" --base "$BASE_SHA" --baseline "$RUNNER_TEMP/baseline-seed.json" --base-snapshot "$RUNNER_TEMP/main-baseline.json" --json > "$RUNNER_TEMP/pr-summary.json"
+
+          python scripts/ci/check_prompt_commit_trace.py \
+            --commit "$BASE_SHA" \
+            --base "$BASE_SHA" \
+            --emit-baseline "$RUNNER_TEMP/main-baseline.json" \
+            > "$RUNNER_TEMP/main-baseline.stdout.json"
+
+          python scripts/ci/check_prompt_commit_trace.py \
+            --commit "$HEAD_SHA" \
+            --base "$BASE_SHA" \
+            --emit-baseline "$RUNNER_TEMP/pr-snapshot.json" \
+            > "$RUNNER_TEMP/pr-snapshot.stdout.json"
+
+          # The exact base snapshot is the comparison baseline for both
+          # audits. New-item admission is decided by the checker itself,
+          # using the manifest and immutable prompt blob at the audited head.
+          python scripts/ci/check_prompt_commit_trace.py \
+            --commit "$BASE_SHA" \
+            --base "$BASE_SHA" \
+            --baseline "$RUNNER_TEMP/main-baseline.json" \
+            --base-snapshot "$RUNNER_TEMP/main-baseline.json" \
+            --json \
+            > "$RUNNER_TEMP/main-summary.json"
+
+          python scripts/ci/check_prompt_commit_trace.py \
+            --commit "$HEAD_SHA" \
+            --base "$BASE_SHA" \
+            --baseline "$RUNNER_TEMP/main-baseline.json" \
+            --base-snapshot "$RUNNER_TEMP/main-baseline.json" \
+            --json \
+            > "$RUNNER_TEMP/pr-summary.json"
+
           python - "$RUNNER_TEMP/main-summary.json" "$RUNNER_TEMP/pr-summary.json" <<'PY' >> "$GITHUB_STEP_SUMMARY"
           import json, os, sys
-          for label, path in (("Main baseline", sys.argv[1]), ("PR head", sys.argv[2])):
+
+          for label, path in (
+              ("Main baseline", sys.argv[1]),
+              ("PR head", sys.argv[2]),
+          ):
               data = json.load(open(path, encoding="utf-8"))
+
               print(f"## {label}: prompt-to-commit trace")
-              print(f"Commit: {os.environ['BASE_SHA'] if label == 'Main baseline' else os.environ['HEAD_SHA']}")
+              print(
+                  f"Commit: "
+                  f"{os.environ['BASE_SHA'] if label == 'Main baseline' else os.environ['HEAD_SHA']}"
+              )
               print(f"Manifest count: {data['manifest_count']}")
+
               print("### Five primary states")
               for name, count in data["primary_status"].items():
                   print(f"- {name}: {count}")
+
               print("### 3×4 prompt × commit matrix")
               for prompt, commits in data["matrix"].items():
                   for commit, count in commits.items():
                       print(f"- {prompt} × {commit}: {count}")
+
               if label == "PR head":
-                  row = next((x for x in data["manifests"] if x["work_item_id"] == "AID-2026-047"), None)
+                  row = next(
+                      (
+                          x for x in data["manifests"]
+                          if x["work_item_id"] == "AID-2026-047"
+                      ),
+                      None,
+                  )
                   print("AID-2026-047: " + json.dumps(row, sort_keys=True))
+
+                  print("### Initial-registration evidence")
+                  for row in data["manifests"]:
+                      if row.get("initial_registration_eligible"):
+                          print(
+                              f"- {row['work_item_id']}: "
+                              "verified immutable prompt blob; "
+                              "initial NO_TRACE admission"
+                          )
+
+                  print("### Ratchet violations")
+                  for violation in data["ratchet_violations"]:
+                      print(f"- {violation}")
+
               print()
+
           print(f"BASE_SHA: {os.environ.get('BASE_SHA', 'see workflow env')}")
           PY
+
       - name: Reproduce the historical #1453 false-new-manifest failure
         shell: bash
         run: |
@@ -480,7 +551,6 @@ jobs:
           path: |
             ${{ runner.temp }}/main-baseline.json
             ${{ runner.temp }}/pr-snapshot.json
-            ${{ runner.temp }}/baseline-seed.json
             ${{ runner.temp }}/main-summary.json
             ${{ runner.temp }}/pr-summary.json
           if-no-files-found: error

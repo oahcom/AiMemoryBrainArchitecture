@@ -962,6 +962,26 @@ class RepositoryHygieneTests(unittest.TestCase):
 
         self.assert_admission_fails(base, head, path)
 
+    # B13: the canonical work-item registry schema is a singleton path.
+    def test_work_item_registry_schema_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "00-governance/schemas/work-item-registry.schema.json":
+                '{"$schema": "https://json-schema.org/draft/2020-12/schema"}\n',
+        })
+
+        self.assert_admission_passes(base, head)
+
+    # B13: a sibling schema under the same directory is a different document.
+    def test_other_registry_schema_is_rejected(self):
+        base = self.seed_base()
+        path = "00-governance/schemas/other-registry.schema.json"
+        head = self.commit({
+            path: '{"type": "object"}\n',
+        })
+
+        self.assert_admission_fails(base, head, path)
+
     # B12: the remote worker inventory is a singleton path.
     def test_remote_worker_inventory_is_admitted(self):
         base = self.seed_base()

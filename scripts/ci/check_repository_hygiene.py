@@ -20,8 +20,12 @@ from pathlib import PurePosixPath
 # closed when either side of the relation is absent, where it used to return no
 # violations over an empty set (AID-2026-199, #1212). The two versions are
 # separate numbers on purpose -- one changed the contract, the other the rules.
-# 2026-11-28.1 admits the two registry migration artifacts by exact path
-# (D21). It is a rule change on new-file admission only; no existing path
+# 2026-11-28.1 is a rule change on two fronts. One exact path,
+# `00-governance/schemas/work-item-registry.schema.json`, joins the admission
+# allowlist for the canonical work-item registry (AID-2026-293): the schema is
+# JSON, and JSON was admitted only at named configuration paths, so the new file
+# could not land without this line. The same version admits the two registry
+# migration artifacts by exact path (D21, AID-2026-297). No existing path
 # changes verdict.
 CHECK_VERSION = "2026-11-28.1"
 
@@ -82,6 +86,7 @@ ALLOWED_DATA_PATHS = frozenset({
     "14-ai-development/reports/work-item-manifest-ac4-baseline.json",
     "14-ai-development/reports/steward-adoption-baseline.json",
     "14-ai-development/work-items/AID-2026-291/baseline.json",
+    "scripts/ci/baselines/protection-fingerprint.json",
 })
 
 REQUIREMENTS_FILE_RE = re.compile(r"requirements(?:-[A-Za-z0-9_.-]+)?\.txt\Z")
@@ -185,6 +190,14 @@ ARCHITECTURE_METADATA_SCHEMA_RE = re.compile(
     r"00-governance/architecture-document-metadata\.schema\.yaml"
 )
 DOCUMENT_SCOPE_REGISTRY_RE = re.compile(r"00-governance/document-scope-registry\.yaml")
+
+# AID-2026-293: the canonical work-item registry record schema. One exact path,
+# for the same reason as the two governance singletons above: JSON is admitted
+# only at named configuration paths, and a sibling `.schema.json` in the same
+# directory is a different document, not this one.
+WORK_ITEM_REGISTRY_SCHEMA_RE = re.compile(
+    r"00-governance/schemas/work-item-registry\.schema\.json"
+)
 
 # D21: the registry migration program's two non-Markdown artifacts. Each is an
 # exact path, not a directory pattern: a second JSON under
@@ -361,6 +374,9 @@ def is_allowed_new_path(path):
         return True
 
     if DOCUMENT_SCOPE_REGISTRY_RE.fullmatch(path):
+        return True
+
+    if WORK_ITEM_REGISTRY_SCHEMA_RE.fullmatch(path):
         return True
 
     if REGISTRY_ADJUDICATION_SCHEMA_RE.fullmatch(path):
