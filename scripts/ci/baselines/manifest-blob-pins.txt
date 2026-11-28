@@ -5,7 +5,4 @@
 # Measured against main bf7fd91cbb3ccad4d2dba5662b14b849e446d706.
 # This is the history-scan anchor for the append-only manifest pin ledger.
 # Pin transitions before this commit are historical context, not new ledger entries.
-# The two PATH_MISSING entries below are intentional AID-2026-261 sentinels.
-# Do not remove or alter them without an explicit owner decision.
-PATH_MISSING path=14-ai-development/work-items/AID-2026-261/prompt-v1.md; declared=0000000000000000000000000000000000000000000000000000000000000000
-PATH_MISSING path=14-ai-development/work-items/AID-2026-261/prompt-v1.md; declared=0
+

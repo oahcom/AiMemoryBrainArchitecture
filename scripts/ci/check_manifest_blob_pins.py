@@ -253,8 +253,12 @@ def pointer_token(key: Any) -> str:
     return str(key).replace("~", "~0").replace("/", "~1")
 
 
-def walk_declarations(node: Any, pointer: str = ""):
-    """Yield (JSON pointer, field, value, containing mapping) for blob_sha256 keys."""
+def walk_declarations(
+    node: Any,
+    pointer: str = "",
+    manifest_path: str = "",
+):
+    """Yield blob_sha256 declarations, excluding the documented absent-prompt sentinel."""
     stack = [(pointer, node)]
     while stack:
         ptr, current = stack.pop()
@@ -262,7 +266,13 @@ def walk_declarations(node: Any, pointer: str = ""):
             for key, value in current.items():
                 child = f"{ptr}/{pointer_token(key)}"
                 if isinstance(key, str) and BLOB_SHA256_KEY.match(key):
-                    yield child, key, value, current
+                    if not (
+                        key == "executed_prompt_sha256"
+                        and is_aid_2026_261_absent_prompt_sentinel(
+                            manifest_path, current
+                        )
+                    ):
+                        yield child, key, value, current
                 stack.append((child, value))
         elif isinstance(current, list):
             for index, value in enumerate(current):
@@ -302,6 +312,22 @@ def discover_manifests(git: Git, commit: str) -> list[str]:
         path for path in names
         if path.startswith(MANIFEST_ROOT + "/")
         and path.endswith("/manifest.yaml")
+    )
+
+
+def is_aid_2026_261_absent_prompt_sentinel(
+    manifest_path: str,
+    container: Any,
+) -> bool:
+    """Recognize only the exact absent-prompt record in AID-2026-261."""
+    return (
+        manifest_path == "14-ai-development/work-items/AID-2026-261/manifest.yaml"
+        and isinstance(container, dict)
+        and container.get("executed_prompt_snapshot_file")
+        == "14-ai-development/work-items/AID-2026-261/prompt-v1.md"
+        and container.get("executed_prompt_sha256") == "0" * 64
+        and type(container.get("executed_prompt_bytes")) is int
+        and container.get("executed_prompt_bytes") == 0
     )
 
 
@@ -438,8 +464,11 @@ def extract_manifest_pins(
     for index, item in enumerate(document.get("session_evidence", []) or []):
         if not isinstance(item, dict):
             continue
+
         field = f"session_evidence[{index}].executed_prompt_snapshot_file"
         path_key = "executed_prompt_snapshot_file"
+        if is_aid_2026_261_absent_prompt_sentinel(manifest_path, item):
+            continue
         if "executed_prompt_sha256" in item:
             add(
                 field, item.get(path_key), item.get("executed_prompt_sha256"),
@@ -516,7 +545,9 @@ def verify_blob_sha256_declarations(
             )
             continue
 
-        for pointer, field, declared, container in walk_declarations(document):
+        for pointer, field, declared, container in walk_declarations(
+            document, manifest_path=manifest_path
+        ):
             # Empty/null placeholders are not blob identities.
             if declared is None or (
                 isinstance(declared, str) and not declared.strip()

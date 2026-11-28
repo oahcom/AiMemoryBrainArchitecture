@@ -95,6 +95,20 @@ class BlobPinsTest(unittest.TestCase):
         self.assertIn(f"actual={self.blob_sha(data)}", out)
         print(out.strip())
 
+    def test_aid_2026_261_absent_prompt_sentinel_is_not_a_pin(self):
+        commit_tree(self.root, {
+            "14-ai-development/work-items/AID-2026-261/manifest.yaml": (
+                "session_evidence:\n"
+                "  - executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-261/prompt-v1.md\n"
+                f"    executed_prompt_sha256: \"{'0' * 64}\"\n"
+                "    executed_prompt_bytes: 0\n"
+            ),
+        })
+        code, out, err = self.run_gate()
+        self.assertEqual(code, 0, out + err)
+        self.assertNotIn("PATH_MISSING", out)
+        self.assertNotIn("prompt-v1.md", out)
+
     def test_deleted_path_is_rejected_and_named(self):
         commit_tree(self.root, {
             "14-ai-development/work-items/AID-2026-900/manifest.yaml":
