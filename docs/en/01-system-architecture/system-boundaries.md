@@ -22,19 +22,23 @@ document_metadata:
       - trust-boundary
       - ownership
       - forget
+      - cursor
+      - tenant
+      - shard
     canonical_conflict_status: None
     normative_status: Normative
   bilingual_counterpart:
     source: "01-system-architecture/system-boundaries.md"
     en: null
     zh-CN: "docs/zh-CN/01-system-architecture/system-boundaries.md"
+  steward: "Architecture Governance"
 ---
 # System Boundaries
 
 - Document ID: SYS-BOUNDARIES-001
 - Version: 1.0
 - Source: [Normative source specification](../../../01-system-architecture/system-boundaries.md)
-- Source revision: ad9ea5ce00e74dba89d325601677270a50f30926
+- Source revision: 42b2411048b53ebe6c7947075427665cdfb2d30c
 - Chinese counterpart: [系统边界](../../zh-CN/01-system-architecture/system-boundaries.md)
 - Status: DECIDED where explicitly identified; CANDIDATE/OPEN items remain non-normative
 
@@ -255,3 +259,35 @@ The following register keeps three authorities separate. A policy authority auth
 ## 14. Forget Fence authority boundary — 2026-11-26
 
 The D canonical contract at [01-system-architecture/forget-fence-and-completion-contract.md](forget-fence-and-completion-contract.md) is the sole logical authority for ForgetOperation and ForgetFence target/lineage decisions. Storage/Consistency may persist and physically protect that authority, but a Storage-local Memory/Version fence is only a derived, rebuildable projection; it MUST NOT issue an independent generation/cursor or become a competing decision source. If current D authority cannot be established, affected reads and publication fail closed. Local suppression is not Global Forget Completion. This is a recorded direction decision; exact-version Owner acceptance and implementation evidence remain pending.
+
+## 15. Canonical commit cursor authority
+
+**Decision status:** DECIDED — Owner decision recorded in [Issue #1210](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/1210#issuecomment-7174534633) on 2026-11-27. This section records that decision; it does not imply that downstream D/F/G specifications or runtime implementations have been updated or accepted.
+
+### 15.1 Authority and partition boundaries
+
+- One deployment has one logical Brain authority. Tenant and shard are partition boundaries within that authority, not separate authorities.
+- `CanonicalCommitCursor` is partitioned per tenant/shard. There is no total order across tenants or shards. A globally ordered cursor across tenants is rejected: it would require a global serialization point or distributed consensus that this architecture does not specify.
+- Cursor entries are ordered only within their own tenant/shard partition.
+- Authority identity and epoch/incarnation are explicit parts of cursor identity. Rollover is an epoch change. Cursors from different authorities or epochs are not comparable; comparison across them is an error, never a numeric ordering.
+
+### 15.2 Cross-shard transactions
+
+- A cross-shard transaction produces one `CanonicalCommitCursor` entry for each participating shard, ordered within each shard.
+- The transaction is atomic: either all participating shard entries commit or none do.
+- Atomic all-or-none commit does not imply a cross-shard total order, and no API may imply one.
+
+### 15.3 Authority-fence scope
+
+- `ForgetFence`, `ProducerRegistrationHighWater`, and similar fences are per-authority.
+- They must carry authority identity and their applicable target/partition scope so a fence from one shard cannot be read as covering another shard.
+
+### 15.4 Required rejection cases
+
+- `cursor_comparison_across_authority_rejected`: comparison across authority identity or epoch/incarnation is rejected explicitly; it is not coerced into a numeric ordering.
+- `cross_shard_commit_exposes_no_total_order`: a cross-shard commit exposes its per-shard cursor entries and atomic outcome, but no cross-shard total-order relation.
+
+### 15.5 Open implementation boundary
+
+This decision does not define the serialized representation of a multi-shard transaction's cursor-entry set or the consistent snapshot/cut protocol used by F/G consumers. Those details remain open for the corresponding D/F/G contracts; they must not be inferred from a single scalar cursor. This record does not authorize code or runtime implementation.
+
