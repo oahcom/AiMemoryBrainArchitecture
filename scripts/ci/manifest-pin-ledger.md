@@ -9,8 +9,14 @@ Each record must satisfy all of the following validity rules:
 3. `new_pin` equals the pin value introduced by `repin_commit`.
 4. `repin_commit` is a valid full commit SHA and is an ancestor of the commit being verified.
 5. Records for the same `(manifest, field, path)` form a continuous history, and the target commit's pin equals the latest recorded `new_pin`.
+6. For squash-merged changes, `repin_commit` MUST identify the
+   resulting squash commit on the target branch, not the original
+   commit from the pull request branch. The referenced commit MUST
+   be an ancestor of the target commit being checked. A pull request
+   branch commit that is not reachable from the target branch MUST
+   NOT be recorded as `repin_commit`.
 
 | manifest | field | path | previous_pin | new_pin | repin_commit |
 |---|---|---|---|---|---|
-|14-ai-development/work-items/AID-2026-101/manifest.yaml|session_evidence[0].executed_prompt_snapshot_file|14-ai-development/work-items/AID-2026-101/prompt-v1.md|4470|4412|6045af65fcc2e89d1895e09ed666af4d737203bf|
-|14-ai-development/work-items/AID-2026-102/manifest.yaml|session_evidence[0].executed_prompt_snapshot_file|14-ai-development/work-items/AID-2026-102/prompt-v1.md|4470|4412|6045af65fcc2e89d1895e09ed666af4d737203bf|
+|14-ai-development/work-items/AID-2026-101/manifest.yaml|session_evidence[0].executed_prompt_snapshot_file|14-ai-development/work-items/AID-2026-101/prompt-v1.md|4470|4412|2ab66153dbcdd8a8f2d68d234914751a748a8f74|
+|14-ai-development/work-items/AID-2026-102/manifest.yaml|session_evidence[0].executed_prompt_snapshot_file|14-ai-development/work-items/AID-2026-102/prompt-v1.md|4470|4412|2ab66153dbcdd8a8f2d68d234914751a748a8f74|

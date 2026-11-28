@@ -905,6 +905,9 @@ def verify_ledger(
                     f"{manifest_path}::{field}::{path} at {repin}: "
                     f"ledger={record.new_pin} actual={repin_value}"
                 )
+            # For squash merges, the PR branch commit is not necessarily part of
+            # the target branch history. The ledger must reference the resulting
+            # squash commit that contains the repin change.
             if not git.is_ancestor(repin, resolved_target):
                 raise Incomplete(
                     f"ledger repin commit {repin} is not an ancestor "
