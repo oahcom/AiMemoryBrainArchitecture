@@ -1,0 +1,180 @@
+work_item_id: AID-2026-347
+title: "Strip comments before INDEX.md AID-link matching and reject newly added Markdown outside governed roots"
+class: GATE/TEST
+risk: R2
+risk_rationale: >-
+  This change alters two enforcement gate scripts. check_traceability.py stops
+  counting AID links that are inside HTML comments or fenced code, which turns a
+  previously silent false registration into a blocking error. check_bilingual_docs.py
+  turns a NOTE for newly added Markdown outside NORMATIVE_ROOTS into a blocking
+  error, while modified and deleted files keep the existing NOTE. Both changes
+  can only add failures, never remove one, and neither relaxes an existing check.
+  No runtime, wire schema, product behaviour or normative requirement changes.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "f0843a8f38a420883921cfda96b515204967f885"
+tracking_issue: "#1540"
+
+scope:
+  summary: >-
+    Close two gate-blindness defects. First, check_traceability.py matched AID
+    links against the raw INDEX.md text, so an HTML-commented row still counted
+    as a registration while check_repository_hygiene.py treated the same row as
+    absent. A single module-level pure function now blanks HTML comments and
+    fenced code without moving line numbers, and every consumer of the INDEX
+    text uses it. Second, check_bilingual_docs.py downgraded every changed
+    Markdown file outside NORMATIVE_ROOTS to a NOTE, so a newly added normative
+    document could land in an excluded root and get both gates green. New files
+    are now errors; modified and deleted files keep the NOTE.
+  in_scope:
+    - "scripts/check_traceability.py: add module-level sanitize_index_text() and route both index_text consumers through it."
+    - "scripts/check_bilingual_docs.py: add module-level outside_root_markdown_paths() and outside_root_additions(); report newly added Markdown outside NORMATIVE_ROOTS as an error."
+    - "scripts/test_check_traceability_sanitize.py: six regression tests for comment and fence stripping and for line-count preservation."
+    - "scripts/test_check_bilingual_docs_outside_root.py: seven regression tests for the added/modified/deleted classification."
+    - "Register the work item and its INDEX.md row."
+  files_out_of_scope:
+    - "scripts/ci/check_repository_hygiene.py and its comment handling."
+    - "scripts/check_document_management.py."
+    - "The contents of NORMATIVE_ROOTS, any baseline file, and any exemption list."
+    - "Any new environment-variable switch."
+    - "Crates, runtime behaviour, wire schemas and product semantics."
+  change_boundary: >-
+    Two gate scripts gain one sanitisation helper and one status-aware
+    classifier, plus two new unittest files. No existing check is weakened; the
+    only behaviour change is that inputs which previously passed silently now
+    fail with a named path.
+
+evidence:
+  - "Issue #1540: Gate scripts accept commented-out INDEX registrations and skip newly added Markdown outside governed roots."
+  - "Measured on origin/main f0843a8f3: commenting out the AID-2026-340 INDEX row makes check_traceability.py --index-only PASS before the fix and FAIL T-04 after it."
+  - "Measured on origin/main f0843a8f3: a newly added reviews/fixture-new-normative.md makes check_bilingual_docs.py PASS before the fix and FAIL with the named path after it."
+  - "Measured on the same base: a modified reviews/ file still produces only the NOTE and exit 0 after the fix."
+  - "All four test files pass locally: 6 + 7 new tests, 41 existing traceability tests, 27 existing bilingual tests."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-347/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-347/prompt-v2.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-347/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-347/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-347/session-evidence-2.md"
+    relationship: evidence
+
+acceptance_criteria:
+  - id: AC1
+    description: >-
+      An AID link that appears only inside an HTML comment or a fenced code
+      block in INDEX.md is not counted as a registration by
+      check_traceability.py.
+    measurement: >-
+      Run:
+      python scripts/check_traceability.py --index-only
+      after wrapping the AID-2026-340 row of
+      14-ai-development/work-items/INDEX.md in an HTML comment.
+    expected_result: "FAIL with ERROR T-04 for AID-2026-340/manifest.yaml (previously PASS)."
+
+  - id: AC2
+    description: >-
+      Sanitisation preserves line count so that any later line-numbered
+      diagnostic still points at the same line.
+    measurement: >-
+      Run:
+      python scripts/test_check_traceability_sanitize.py
+    expected_result: "6 tests pass, including test_line_count_is_preserved and test_sanitization_is_idempotent."
+
+  - id: AC3
+    description: >-
+      A newly added Markdown file outside NORMATIVE_ROOTS fails
+      check_bilingual_docs.py with the offending path named.
+    measurement: >-
+      Add reviews/fixture-new-normative.md on top of origin/main and run:
+      BASE_SHA=origin/main HEAD_SHA=HEAD PR_BODY="BILINGUAL-MANIFEST: COMPLETE" python scripts/check_bilingual_docs.py
+    expected_result: "exit 1 with ::error::reviews/fixture-new-normative.md: new Markdown file is outside NORMATIVE_ROOTS ..."
+
+  - id: AC4
+    description: >-
+      Modified and deleted Markdown files outside NORMATIVE_ROOTS keep the
+      previous NOTE-only behaviour.
+    measurement: >-
+      Modify an already committed reviews/ Markdown file and run the same
+      command with BASE_SHA set to the commit that introduced it.
+    expected_result: "exit 0, one NOTE line, gate PASS."
+
+  - id: AC5
+    description: >-
+      No existing test regresses and no third-party dependency is added.
+    measurement: >-
+      Run:
+      python scripts/test_check_traceability.py
+      python scripts/test_check_bilingual_docs.py
+      python scripts/test_check_bilingual_docs_outside_root.py
+    expected_result: "41 + 27 + 7 tests pass; both scripts import only the standard library."
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    Independent review has not been assigned or recorded. No independent
+    reviewer approval or review completion is claimed.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: NOT_ASSIGNED
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    Both scripts were edited by mechanically applying authoring blocks produced
+    in the recorded AI sessions, and each OLD string was required to match
+    exactly once before the block was applied. Two new unittest files were
+    created. The pre-fix and post-fix behaviour was measured on the same base
+    commit for both defects.
+  pull_request: PENDING
+  merge_commit: ""
+  implementation_commit: "13cbbe964c946eddcc91fb0a4069c72140904a85"
+  ci_status: NOT_CLAIMED
+  files_changed:
+    - "scripts/check_traceability.py"
+    - "scripts/check_bilingual_docs.py"
+    - "scripts/test_check_traceability_sanitize.py"
+    - "scripts/test_check_bilingual_docs_outside_root.py"
+  tests:
+    - "python scripts/test_check_traceability_sanitize.py -> 6 tests, OK."
+    - "python scripts/test_check_bilingual_docs_outside_root.py -> 7 tests, OK."
+    - "python scripts/test_check_traceability.py -> 41 tests, OK."
+    - "python scripts/test_check_bilingual_docs.py -> 27 tests, OK."
+    - "Fixture: commented INDEX row -> PASS before, FAIL T-04 after."
+    - "Fixture: new reviews/ Markdown -> PASS before, named ::error:: after."
+    - "Fixture: modified reviews/ Markdown -> NOTE only, exit 0 after."
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1540"
+    implementing_ai_session: 6b0a5e72-e540-83ec-a94c-8b7a6849ed9d
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-347/prompt-v1.md
+    executed_prompt_sha256: 01e5a8b0589716c2c0b24207b7510c11d84d870491b16a174cb56e77cf36a496
+    executed_prompt_bytes: 9585
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: "RECORDED"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-347/session-evidence.md
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1540"
+    implementing_ai_session: 6b0a5e8d-06f8-83ec-a73e-de6917ca18fd
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-347/prompt-v2.md
+    executed_prompt_sha256: 969c19656b2f3b7e57213acb0c2b9aaa8d1a1cd332fd8ed47a265ceed492294a
+    executed_prompt_bytes: 10395
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: "RECORDED"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-347/session-evidence-2.md
