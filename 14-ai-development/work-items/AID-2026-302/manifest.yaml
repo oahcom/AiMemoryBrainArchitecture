@@ -98,3 +98,26 @@ implementation:
     - "python scripts/ci/check_repository_hygiene.py --base cb5b3dcd23ff86e10a354bb27b668dce19e95f62 --head HEAD"
     - "python scripts/check_bilingual_docs.py"
     - "negative control on a temporary branch: one flipped digest nibble -> exit 1"
+
+# Initial registration only:
+# permits this newly introduced Work Item to enter main before its
+# implementation commit is reachable from the target branch.
+prompt_file: "14-ai-development/work-items/AID-2026-302/prompt-v1.md"
+
+# SHA-256 of the exact prompt-v1.md bytes.
+# The checker independently recalculates this from both the head file
+# and the immutable Git blob.
+prompt_sha256: "5771c25c5dbc299bd6ed7cc4ffe0a05dd810a820929d35daca39a62f9d03318a"
+
+# Git blob object ID of the exact same prompt-v1.md bytes.
+# This is a blob OID, not a commit SHA.
+prompt_file_blob_sha: "5f2c044dda0206069e1637eb04d150b226dc257e"
+
+# Explicitly declares this as the narrowly scoped first-registration state.
+prompt_commit_trace_initial_registration: true
+
+# IMPORTANT:
+# Do not add prompt_file_commit_sha here.
+# Do not add implementation.implementation_commit_sha here.
+# Do not add implementation.merge_commit_sha here.
+# The initial-registration exception rejects those pins.
