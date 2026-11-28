@@ -22,6 +22,13 @@ The properties, each a real failure mode:
      validator reads the PR body live, so without `edited` a body edit after a
      green run leaves a verdict describing text that no longer exists (#1074).
      GitHub's default set is `opened, synchronize, reopened`, which omits it.
+  5. The `validate` job contains exactly one step named
+     `Bind the verdict to the body it judged`. Its condition must be
+     `if: always()` or `if: ${{ always() }}`, it must write
+     `AI-SESSION-EVIDENCE-BODY-SHA256: $digest` to `$GITHUB_STEP_SUMMARY`,
+     and it must validate 64 lowercase hexadecimal characters. This is a
+     raw-text shape check: it does not execute the shell or prove that
+     `$digest` was computed from the live PR body's `body` field.
 
 Exit codes follow the repository vocabulary:
     0  PASS        the workflow has the three-job shape and the `edited` trigger
@@ -77,6 +84,23 @@ PULL_REQUEST_RE = re.compile(r"^  pull_request:\s*(.*)$")
 TYPES_FLOW_RE = re.compile(r"^    types:\s*\[(.*?)\]")
 TYPES_BLOCK_RE = re.compile(r"^    types:\s*$")
 TYPES_ITEM_RE = re.compile(r"^      -\s*(\S.*?)\s*$")
+
+# Issue #1246: locate the body-digest step by its exact step name.
+BODY_DIGEST_STEP_NAME = "Bind the verdict to the body it judged"
+BODY_DIGEST_NAME_RE = re.compile(
+    r"^\s*-\s*name:\s*['\"]?Bind the verdict to the body it judged['\"]?\s*$"
+)
+BODY_DIGEST_ALWAYS_RE = re.compile(
+    r"^\s*if:\s*(?:always\(\)|\$\{\{\s*always\(\)\s*\}\})\s*(?:#.*)?$"
+)
+BODY_DIGEST_WRITE_RE = re.compile(
+    r'^\s*echo\s+"AI-SESSION-EVIDENCE-BODY-SHA256:\s*\$digest"'
+    r'\s*>>\s*"\$GITHUB_STEP_SUMMARY"\s*$'
+)
+BODY_DIGEST_HEX_RE = re.compile(
+    r"""^\s*if\s+!\s*printf\s+'%s'\s+"\$digest"\s+\|\s+"""
+    r"""grep\s+-Eq\s+'\^\[0-9a-f\]\{64\}\$';\s*then\s*$"""
+)
 
 
 class JobBlock(NamedTuple):
@@ -305,6 +329,92 @@ def violations(blocks: dict[str, JobBlock]) -> list[str]:
     return found
 
 
+def _body_digest_violations(blocks: dict[str, JobBlock]) -> list[str]:
+    """Pin the three body-digest regressions that made the summary write unguarded.
+
+    All required properties must occur in the uniquely named step. Diagnostics
+    identify the mutation and provide a source line or the containing job line.
+    """
+    if VERDICT_JOB not in blocks:
+        return []
+
+    verdict = blocks[VERDICT_JOB]
+    matching = [
+        step for step in steps(verdict)
+        if any(BODY_DIGEST_NAME_RE.match(line) for line in step.text.splitlines())
+    ]
+
+    # Issue #1246 mutation 1: deleting the complete named digest step must fail.
+    if not matching:
+        return [
+            f"PR body digest mutation 1: step {BODY_DIGEST_STEP_NAME!r} is missing "
+            f"from job {VERDICT_JOB!r} (near line {verdict.first_line})"
+        ]
+
+    found: list[str] = []
+    if len(matching) != 1:
+        found.append(
+            f"PR body digest contract: expected exactly one "
+            f"{BODY_DIGEST_STEP_NAME!r} step, found {len(matching)} "
+            f"(near line {matching[0].first_line})"
+        )
+
+    step = matching[0]
+    lines = step.text.splitlines()
+
+    # Issue #1246 mutation 2: the digest step must run even after a failed verdict.
+    always_line = next(
+        (
+            step.first_line + index
+            for index, line in enumerate(lines)
+            if re.match(r"^\s*if:", line)
+        ),
+        step.first_line,
+    )
+    if not any(BODY_DIGEST_ALWAYS_RE.match(line) for line in lines):
+        found.append(
+            f"PR body digest mutation 2: {BODY_DIGEST_STEP_NAME!r} must use "
+            "`if: always()` or `if: ${{ always() }}` "
+            f"(line {always_line}); a success-only or other condition can "
+            "suppress the digest after a failed verdict"
+        )
+
+    # Issue #1246 mutation 3: replacing the digest write with generic PRESENT must fail.
+    write_line = next(
+        (
+            step.first_line + index
+            for index, line in enumerate(lines)
+            if "AI-SESSION-EVIDENCE-BODY-SHA256" in line
+            or "AI-SESSION-EVIDENCE: PRESENT" in line
+        ),
+        step.first_line,
+    )
+    if not any(BODY_DIGEST_WRITE_RE.match(line) for line in lines):
+        found.append(
+            f"PR body digest mutation 3: {BODY_DIGEST_STEP_NAME!r} must write "
+            f"`AI-SESSION-EVIDENCE-BODY-SHA256: $digest` to "
+            f"`$GITHUB_STEP_SUMMARY` (line {write_line}); a generic "
+            "`AI-SESSION-EVIDENCE: PRESENT` is not a body digest"
+        )
+
+    # Keep the digest's 64-character lowercase hexadecimal format enforced.
+    hex_line = next(
+        (
+            step.first_line + index
+            for index, line in enumerate(lines)
+            if "grep" in line and "64" in line
+        ),
+        step.first_line,
+    )
+    if not any(BODY_DIGEST_HEX_RE.match(line) for line in lines):
+        found.append(
+            f"PR body digest contract: {BODY_DIGEST_STEP_NAME!r} must validate "
+            f"64 lowercase hexadecimal characters (line {hex_line})"
+        )
+
+    return found
+
+
 def main(root: Path | None = None) -> int:
     root = Path(root or ".").resolve()
     workflow = root / WORKFLOW_PATH
@@ -326,7 +436,11 @@ def main(root: Path | None = None) -> int:
         )
         return 2
 
-    found = violations(blocks) + _trigger_violations(text)
+    found = (
+        violations(blocks)
+        + _trigger_violations(text)
+        + _body_digest_violations(blocks)
+    )
     if found:
         for message in found:
             print(f"::error::{message}", file=sys.stderr)
@@ -339,8 +453,8 @@ def main(root: Path | None = None) -> int:
     print(
         f"::notice::{WORKFLOW_PATH} has the three independent jobs "
         f"{', '.join(REQUIRED_JOB_IDS)}; the head job carries no `ref:`, "
-        "the verdict job carries no `needs:`, and the `pull_request:` trigger "
-        "declares `edited`",
+        "the verdict job carries no `needs:`, the `pull_request:` trigger "
+        "declares `edited`, and the verdict binds its PR body digest",
         file=sys.stderr,
     )
     print("SESSION EVIDENCE WORKFLOW SHAPE: PASS", file=sys.stderr)

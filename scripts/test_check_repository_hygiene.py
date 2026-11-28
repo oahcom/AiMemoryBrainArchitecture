@@ -188,6 +188,17 @@ class RepositoryHygieneTests(unittest.TestCase):
 
         self.assert_admission_passes(base, head)
 
+    def test_steward_adoption_baseline_report_is_admitted(self):
+        base = self.seed_base()
+        head = self.commit({
+            "14-ai-development/reports/steward-adoption-baseline.json": (
+                '{"pin":"0000000000000000000000000000000000000000",'
+                '"governed":1,"classified":1,"present":0,"missing":["a.md"]}\\n'
+            ),
+        })
+
+        self.assert_admission_passes(base, head)
+
     def test_prompt_commit_trace_baseline_is_admitted(self):
         base = self.seed_base()
         head = self.commit({
