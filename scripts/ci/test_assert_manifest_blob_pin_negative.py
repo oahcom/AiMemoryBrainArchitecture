@@ -14,7 +14,7 @@ COMMIT = "9a2063ae1fa5d905b3817cd4eddba065a06daa73"
 
 SUMMARY = (
     "main=9a2063ae1fa5d905b3817cd4eddba065a06daa73 "
-    "manifests=108 pins=172 ok=82 mismatch=86 "
+    "manifests=108 pins=172 ok=85 mismatch=83 "
     "path_missing=0 incomplete=0 unbound=4"
 )
 
@@ -53,11 +53,14 @@ class NegativeAssertionTests(unittest.TestCase):
         lines = [
             "#!/usr/bin/env python3",
             "import sys",
+            "if '--allow-missing-reference-mode' not in sys.argv:",
+            "    print('missing --allow-missing-reference-mode', file=sys.stderr)",
+            "    sys.exit(2)",
             f"print({SUMMARY!r})",
         ]
         lines.extend(
             f"print('MISMATCH fixture-{i} path=file-{i} declared=old actual=new')"
-            for i in range(86)
+            for i in range(83)
         )
         lines.extend(
             f"print('UNBOUND_BLOB_SHA256 manifest=m{i} pointer=/p/f field=f declared=d')"
