@@ -5,7 +5,7 @@
 # One AID maps to exactly one work_item_id.
 
 schema: 1
-updated_at_utc: "2026-11-28T01:46:05Z"
+updated_at_utc: "2026-11-28T02:59:54Z"
 entries:
   - id: AID-2026-082
     state: MERGED
@@ -265,6 +265,25 @@ entries:
     carrier: "branch docs/aid-287-capacity-alignment-ruling (PR pending)"
     note: "2026-11-27 scan (fetch of origin at main cb5b3dcd23ff86e10a354bb27b668dce19e95f62): main 14-ai-development/work-items carries 280/281/284/285/290/321/323 above 279; every origin ref's added work-item directories include 282/283/301/302/303/311/312/320/322 as well; this ledger holds 281/284/285/286/312/313; 289 is held by branch fix/289-post-merge-remediation. 287 scanned free on the main tree, on every origin ref and in this ledger. Scope: one governance decision record AI-DEV-CAPACITY-ALIGNMENT-RULING-001 stating the measured diagnosis of why capacity goes to records instead of product, plus rulings A1-A4 with rationale, alternatives, consequences and falsifiers; no code, workflow, gate or branch-protection change."
   - id: AID-2026-332
+    state: OCCUPIED_BY_OTHER
+    carrier: "PR #1504 (commit b51da8c0d)"
+    note: >-
+      The reservation is invalid. At origin/main 895d5dcbc,
+      14-ai-development/work-items/AID-2026-332/manifest.yaml already exists
+      for "Split GOV-DOC-001 owner-namespace and governance-operation checker
+      steps", class GATE/TEST, risk R2, introduced by PR #1504. The reservation
+      on origin/aid-ledger at ccbdc4244 was later than the existing claim.
+      Do not use AID-2026-332 for GOV-DOC-002 Context Versioning mirrors.
+  - id: AID-2026-341
     state: RESERVED
-    carrier: "branch docs/aid-2026-332-gov-doc-002-context-versioning-bilingual-mirrors (PR pending)"
-    note: "2026-11-28 scan (origin/main 9c25f56fa): scanned 1171 origin remote refs (26 without work-items trees), all 26 open PR heads fetched; ledger origin/aid-ledger at 1435dc69 has 61 entries; union occupancy = 173 identifiers, max = 340; 327-331 occupied outside ledger; 332 absent from all refs, all open PR heads and ledger; free ranges include 332-339. Scope: one GOV-DOC-002 work item and Issue covering the five existing probe files in commit 1 and the two complete Context Versioning bilingual mirrors in dependent commit 2; no gate or policy changes."
+    carrier: "branch docs/aid-2026-341-gov-doc-002-context-versioning-bilingual-mirrors (PR pending)"
+    note: >-
+      Reserved for "Complete GOV-DOC-002 steward metadata and Context Versioning
+      bilingual mirrors" tracked by Issue #1507. The collision scan used
+      origin/main 895d5dcbc and origin/aid-ledger ccbdc42: 1,186 refs examined
+      (1,160 successful fetches and 26 refs skipped because they had no
+      work-items tree), all 28 open PR heads fetched, and 62 ledger entries
+      inspected (MERGED 36, OCCUPIED_BY_OTHER 9, RESERVED 9, IN_FLIGHT 7,
+      FREE 1). AID-2026-340 is the highest occupied identifier. AID-2026-341
+      through AID-2026-350 are absent from refs, open PR heads, and ledger.
+      AID-2026-341 is the first identifier in that verified free range.
