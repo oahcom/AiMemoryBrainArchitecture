@@ -12,11 +12,11 @@ document_metadata:
         type: Full-document
       approval_applicability: Not-Applicable-To-Current-Version
       evidence_reference:
-        - "14-ai-development/work-items/AID-2026-321/evidence.md"
+        - "14-ai-development/work-items/AID-2026-341/evidence.md"
       revocation: null
     evidence_verification:
       verification_status: Unverified
-      last_verified_date: "2026-11-27"
+      last_verified_date: "2026-11-28"
       last_verification_note: "Task snapshot recorded for traceability; no implementation or independent verification is claimed."
     usage_status: Active
     modification_status: Modified
@@ -30,10 +30,10 @@ document_metadata:
       archival_reference: null
   authority:
     canonical_status: Non-Canonical
-    canonical_scope: "Implementation task snapshot for AID-2026-321 DM-12 additional mirrors and source-less group closure."
-    canonical_scope_id: "ai-development/aid-2026-321-prompt-snapshot"
+    canonical_scope: "Implementation task snapshot for AID-2026-341 DM-12 additional mirrors and source-less group closure."
+    canonical_scope_id: "ai-development/aid-2026-341-prompt-snapshot"
     canonical_scope_keywords:
-      - "AID-2026-321"
+      - "AID-2026-341"
       - "DM-12"
       - "additional mirrors"
       - "source-less group"
@@ -47,7 +47,7 @@ document_metadata:
   steward: "user-authorized operator (delegated by account owner)"
 ---
 
-# AID-2026-321 — Prompt Snapshot
+# AID-2026-341 — Prompt Snapshot
 
 ## 1. Task
 
@@ -95,7 +95,7 @@ The change must not:
 - `scripts/test_check_document_management.py`
 - `00-governance/architecture-document-metadata.schema.yaml`
 - `00-governance/architecture-document-management-policy.md`
-- AID-2026-321's four work-item files and INDEX row.
+- AID-2026-341's four work-item files and INDEX row.
 
 ## 5. Verification contract
 
@@ -104,3 +104,19 @@ The operator must run:
 ```bash
 python scripts/test_check_document_management.py
 python scripts/check_document_management.py --require-changed origin/main
+```
+
+The operator must record the actual outputs and exit codes. No
+implementation, verification, review, merge, or Owner acceptance is
+presumed by this task snapshot.
+
+## 6. Identifier migration
+
+The work-item identifier for this package is AID-2026-341.
+
+The migration replaces the previously proposed AID-2026-321 identifier.
+All internal work-item paths and self-references must use
+`AID-2026-341/`.
+
+The migration does not change the DM-12 technical requirements or
+authorize changes to the four AID-2026-320 documents.

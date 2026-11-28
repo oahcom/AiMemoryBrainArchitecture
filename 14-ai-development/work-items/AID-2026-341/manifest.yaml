@@ -1,4 +1,4 @@
-work_item_id: AID-2026-321
+work_item_id: AID-2026-341
 title: "Extend DM-12 for additional mirrors and source-less bilingual groups"
 class: GATE/TEST + DOC/GOVERNANCE
 risk: R1
@@ -15,10 +15,10 @@ sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
 acceptance_authority: "Owner acceptance not recorded"
 attribution: "user-authorized operator (delegated by account owner)"
-date: "2026-11-27"
+date: "2026-11-28"
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: "229c0a6b51f4c761ed969337f6ddf7d0bbbb7d0c"
+base_commit_sha: "b51da8c0d4a58727c5a0d407ee76675f71648797"
 
 scope:
   objective: >-
@@ -48,14 +48,14 @@ scope:
     - No new workflow, job, required context, or branch-protection change.
     - No third-party dependencies.
 
-evidence: 14-ai-development/work-items/AID-2026-321/evidence.md
+evidence: 14-ai-development/work-items/AID-2026-341/evidence.md
 
 documentation:
-  - path: 14-ai-development/work-items/AID-2026-321/evidence.md
+  - path: 14-ai-development/work-items/AID-2026-341/evidence.md
     relationship: evidence
-  - path: 14-ai-development/work-items/AID-2026-321/prompt-v1.md
+  - path: 14-ai-development/work-items/AID-2026-341/prompt-v1.md
     relationship: reference
-  - path: 14-ai-development/work-items/AID-2026-321/session-evidence.md
+  - path: 14-ai-development/work-items/AID-2026-341/session-evidence.md
     relationship: evidence
 
 session_evidence:
@@ -64,8 +64,8 @@ session_evidence:
       - "#1461"
       - "#1267"
     implementing_ai_session: "6b09267a-1e40-83ec-a1ee-8cad6f6c15c8"
-    session_evidence_ref: 14-ai-development/work-items/AID-2026-321/session-evidence.md
-    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-321/prompt-v1.md
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-341/session-evidence.md
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-341/prompt-v1.md
     executed_prompt_sha256: "a18b592d6b64abc4ccc034cb4c0d73524aaf43a37c02b8a2decfe4aab1e69ed1"
     executed_prompt_bytes: 3464
     executed_prompt_provenance: NOT_VERIFIED
