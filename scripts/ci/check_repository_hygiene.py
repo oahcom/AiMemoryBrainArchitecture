@@ -20,7 +20,10 @@ from pathlib import PurePosixPath
 # closed when either side of the relation is absent, where it used to return no
 # violations over an empty set (AID-2026-199, #1212). The two versions are
 # separate numbers on purpose -- one changed the contract, the other the rules.
-CHECK_VERSION = "2026-11-27.2"
+# 2026-11-28.1 admits the two registry migration artifacts by exact path
+# (D21). It is a rule change on new-file admission only; no existing path
+# changes verdict.
+CHECK_VERSION = "2026-11-28.1"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -182,6 +185,17 @@ ARCHITECTURE_METADATA_SCHEMA_RE = re.compile(
     r"00-governance/architecture-document-metadata\.schema\.yaml"
 )
 DOCUMENT_SCOPE_REGISTRY_RE = re.compile(r"00-governance/document-scope-registry\.yaml")
+
+# D21: the registry migration program's two non-Markdown artifacts. Each is an
+# exact path, not a directory pattern: a second JSON under
+# registry-adjudications/ or a second YAML under registry-migration/ must stay
+# refused until a reviewer admits it deliberately.
+REGISTRY_ADJUDICATION_SCHEMA_RE = re.compile(
+    r"00-governance/registry-adjudications/schema\.json"
+)
+REGISTRY_MIGRATION_INVENTORY_RE = re.compile(
+    r"00-governance/registry-migration/inventory\.yaml"
+)
 REMOTE_WORKER_INVENTORY_RE = re.compile(r"14-ai-development/remote-worker-inventory\.yaml")
 
 
@@ -347,6 +361,12 @@ def is_allowed_new_path(path):
         return True
 
     if DOCUMENT_SCOPE_REGISTRY_RE.fullmatch(path):
+        return True
+
+    if REGISTRY_ADJUDICATION_SCHEMA_RE.fullmatch(path):
+        return True
+
+    if REGISTRY_MIGRATION_INVENTORY_RE.fullmatch(path):
         return True
 
     if REMOTE_WORKER_INVENTORY_RE.fullmatch(path):
