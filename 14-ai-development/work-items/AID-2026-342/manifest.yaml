@@ -112,5 +112,5 @@ implementation:
     - "python scripts/check_document_management.py -> no DM-01/DM-07/DM-12/DM-15 error lines; exit 2 INCOMPLETE for 368 unrelated unclassified documents."
     - "python scripts/ci/check_work_item_manifest_schema.py --tree HEAD --baseline 14-ai-development/reports/work-item-manifest-ac4-baseline.json -> Legacy ratchet new regressions: 0, exit 0."
 
-pull_request: PIN_PR_NUMBER
-pull_request_url: "PIN_PR_URL"
+pull_request: 1518
+pull_request_url: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1518"
