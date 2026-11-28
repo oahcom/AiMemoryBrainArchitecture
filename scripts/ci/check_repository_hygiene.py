@@ -27,7 +27,19 @@ from pathlib import PurePosixPath
 # could not land without this line. The same version admits the two registry
 # migration artifacts by exact path (D21, AID-2026-297). No existing path
 # changes verdict.
-CHECK_VERSION = "2026-11-28.1"
+#
+# 2026-11-28.2 is a rule change for the canonical work-item registry
+# (AID-2026-293). It preserves the exact-path admission for
+# `00-governance/schemas/work-item-registry.schema.json` and adds
+# fixture-only admission for direct children of
+# `00-governance/schemas/fixtures/` ending in `.yaml` or `.expected.json`.
+# These are separate, explicitly scoped asset classes. This does not
+# admit arbitrary JSON or YAML files elsewhere under `00-governance/schemas/`
+# or anywhere else in the repository.
+#
+# 2026-11-28.3 adds the two registry migration artifacts by exact path
+# (D21, AID-2026-297), on top of the 2026-11-28.2 fixture admission.
+CHECK_VERSION = "2026-11-28.3"
 
 # Repository-root-relative paths, written with a leading slash.
 PROHIBITED_PATHS = (
@@ -209,6 +221,13 @@ REGISTRY_ADJUDICATION_SCHEMA_RE = re.compile(
 REGISTRY_MIGRATION_INVENTORY_RE = re.compile(
     r"00-governance/registry-migration/inventory\.yaml"
 )
+
+# AID-2026-293: fixture assets for the canonical work-item registry.
+# Admit only direct fixture files with the explicitly supported suffixes.
+# Do not admit arbitrary YAML or JSON elsewhere in the schema subtree.
+WORK_ITEM_REGISTRY_SCHEMA_ASSET_RE = re.compile(
+    r"00-governance/schemas/fixtures/[^/]+\.(?:yaml|expected\.json)"
+)
 REMOTE_WORKER_INVENTORY_RE = re.compile(r"14-ai-development/remote-worker-inventory\.yaml")
 
 
@@ -383,6 +402,9 @@ def is_allowed_new_path(path):
         return True
 
     if REGISTRY_MIGRATION_INVENTORY_RE.fullmatch(path):
+        return True
+
+    if WORK_ITEM_REGISTRY_SCHEMA_ASSET_RE.fullmatch(path):
         return True
 
     if REMOTE_WORKER_INVENTORY_RE.fullmatch(path):
