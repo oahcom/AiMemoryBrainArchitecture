@@ -5,7 +5,7 @@ name: Architecture document management gate
 # gate in independent concurrency groups. Do not cancel a running decision
 # when another candidate arrives.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.base.ref || github.ref_name }}
+  group: ${{ github.workflow }}-${{ github.event.merge_group.base_ref || github.event.pull_request.base.ref || github.ref_name }}
   cancel-in-progress: false
 
 on:
@@ -13,6 +13,8 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
+  merge_group:
+    types: [checks_requested]
 
 permissions:
   contents: read
@@ -43,24 +45,44 @@ jobs:
       # advances, closing the interval between this check and a later merge.
       - name: Enforce work-item uniqueness against the current target base
         env:
-          PR_BASE: ${{ github.event.pull_request.base.sha }}
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          BASE_REF: ${{ github.event.merge_group.base_ref || github.event.pull_request.base.ref || github.ref_name }}
+          MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
           PUSH_BEFORE: ${{ github.event.before }}
-          CANDIDATE_SHA: ${{ github.sha }}
+          CANDIDATE_SHA: ${{ github.event.merge_group.head_sha || github.sha }}
         run: |
           set -euo pipefail
 
-          if [ -n "$BASE_REF" ] && [ -n "$PR_BASE" ]; then
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            if [ -z "$PUSH_BEFORE" ] || [ -z "$CANDIDATE_SHA" ]; then
+              echo "::error::Missing push before/head SHA"
+              exit 2
+            fi
+            python3 scripts/ci/check_work_item_uniqueness.py \
+              --base "$PUSH_BEFORE" \
+              --head "$CANDIDATE_SHA"
+
+          elif [ "$GITHUB_EVENT_NAME" = "merge_group" ]; then
+            if [ -z "$MERGE_GROUP_BASE_SHA" ] || [ -z "$CANDIDATE_SHA" ] || [ -z "$BASE_REF" ]; then
+              echo "::error::Incomplete merge_group base/head/base_ref"
+              exit 2
+            fi
+            python3 scripts/ci/check_work_item_uniqueness.py \
+              --base "$MERGE_GROUP_BASE_SHA" \
+              --head "$CANDIDATE_SHA"
+
+          elif [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            if [ -z "$BASE_REF" ] || [ -z "$CANDIDATE_SHA" ]; then
+              echo "::error::Missing pull_request base ref or candidate SHA"
+              exit 2
+            fi
             git fetch origin "+refs/heads/${BASE_REF}:refs/remotes/origin/${BASE_REF}"
             python3 scripts/ci/check_work_item_uniqueness.py \
               --base "refs/remotes/origin/$BASE_REF" \
               --head "$CANDIDATE_SHA"
-          elif [ -n "$PUSH_BEFORE" ] && [ "$PUSH_BEFORE" != "0000000000000000000000000000000000000000" ]; then
-            python3 scripts/ci/check_work_item_uniqueness.py \
-              --base "$PUSH_BEFORE" \
-              --head "$CANDIDATE_SHA"
+
           else
-            python3 scripts/ci/check_work_item_uniqueness.py
+            echo "::error::Unsupported event for work-item uniqueness: $GITHUB_EVENT_NAME"
+            exit 2
           fi
 
       - name: Emit steward adoption census (baseline evidence)
