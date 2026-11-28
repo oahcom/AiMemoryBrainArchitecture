@@ -1,0 +1,126 @@
+work_item_id: AID-2026-350
+title: "Record an Owner decision request for the three runtime invariant defects"
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: >-
+  Documentation-only. The change adds one Informative record that states three
+  already-adjudicated facts, names one decision question per defect, and lists
+  the consequences of each option. It decides nothing, changes no code, changes
+  no gate and asserts no approval. The defect records themselves remain HIGH and
+  open until the Owner rules.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "73b3ebbee1a77b05e361990e0fd9f0911e00f097"
+tracking_issue: "#1569"
+
+scope:
+  summary: >-
+    DEF-drift-03, DEF-drift-04 and DEF-tests-01 were adjudicated as real defects,
+    and the same adjudication concluded that none of them can be repaired
+    without changing product semantics: each requires an Owner decision. That
+    conclusion currently lives only in an out-of-tree review conversation. This
+    change records it in-tree as an Informative decision request so the three
+    defects have a reviewable, citable blocking reason and a named decision
+    question instead of an unstated dependency.
+  in_scope:
+    - "14-ai-development/work-items/AID-2026-350/decision-request.md: the decision request itself."
+    - "Register the work item and its INDEX.md row."
+  files_out_of_scope:
+    - "Any change to crates/, scripts/, workflows or baselines."
+    - "Any implementation of the three defects."
+    - "Any claim that an Owner decision has been made."
+  change_boundary: >-
+    One new Informative Markdown file plus the work-item registration. No
+    normative requirement, no gate, no code.
+
+evidence:
+  - "Issue #1569: record the Owner decision request for DEF-drift-03, DEF-drift-04 and DEF-tests-01."
+  - "Adjudication obtained on 2026-11-28 from an independent reviewing session: all three are real defects; each is blocked on an Owner decision."
+  - "crates/agent-integration/src/lib.rs:462 and :474; crates/memory-context/src/delivery_lifecycle.rs:36, :53 and :305 (drift-03)."
+  - "crates/memory-compiler/src/admission.rs:665 and :578 (drift-04)."
+  - "crates/memory-compiler/src/lib.rs:653-656 (tests-01)."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-350/decision-request.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-350/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-350/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-350/session-evidence.md"
+    relationship: evidence
+
+acceptance_criteria:
+  - id: AC1
+    description: >-
+      Each of the three defects has exactly one named decision question.
+    measurement: >-
+      Open 14-ai-development/work-items/AID-2026-350/decision-request.md and
+      count the "决策问题" entries.
+    expected_result: "Exactly three, one per defect."
+
+  - id: AC2
+    description: >-
+      The record asserts no decision, no approval and no implementation.
+    measurement: >-
+      Run:
+      git grep -n -i -e 'approved' -e 'accepted' -e 'decided' -- 14-ai-development/work-items/AID-2026-350/decision-request.md
+    expected_result: "No sentence asserts that a decision or approval exists."
+
+  - id: AC3
+    description: >-
+      The record is structurally valid and does not alter any gate outcome.
+    measurement: >-
+      Run:
+      python scripts/check_document_management.py --require-changed origin/main
+      BASE_SHA=origin/main HEAD_SHA=HEAD PR_BODY="BILINGUAL-MANIFEST: COMPLETE" python scripts/check_bilingual_docs.py
+    expected_result: "Both PASS."
+
+review:
+  status: NOT_ASSIGNED
+  note: >-
+    Independent review has not been assigned or recorded. No independent
+    reviewer approval or review completion is claimed.
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: NOT_ASSIGNED
+
+implementation:
+  status: IMPLEMENTED
+  summary: >-
+    The decision request was authored in the recorded AI session and written
+    verbatim; the operator moved the mandated steward field into
+    document_metadata and retargeted the file into the work-item directory so
+    that the document is governed without creating a new top-level normative
+    document.
+  pull_request: PENDING
+  merge_commit: ""
+  implementation_commit: "c0c9314117b11cc6ee2cfd38c5a1031878531b10"
+  ci_status: NOT_CLAIMED
+  files_changed:
+    - "14-ai-development/work-items/AID-2026-350/decision-request.md"
+  tests:
+    - "check_document_management.py --require-changed origin/main: PASS (incremental)."
+    - "check_bilingual_docs.py: PASS."
+    - "check_traceability.py --index-only: PASS, 0 errors."
+
+session_evidence:
+  - role: IMPLEMENTER
+    issue_refs:
+      - "#1569"
+    implementing_ai_session: 6b0a7419-b758-83ec-af7d-dbf83b616505
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-350/prompt-v1.md
+    executed_prompt_sha256: 90b75eecfda9bace96aabd21732e69f7df07c1330971060e16fdea7c6964438b
+    executed_prompt_bytes: 8622
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: "RECORDED"
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-350/session-evidence.md
