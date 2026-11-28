@@ -1,0 +1,126 @@
+work_item_id: AID-2026-349
+title: "Enforce fail-closed validation for bilingual document groups in CI"
+class: GOV/CI
+risk: R2
+risk_rationale: >-
+  The change adds fail-closed validation for registered bilingual document
+  groups and makes both relevant CI checks require that validation. The
+  checker API retains compatibility for existing content-only fixtures by
+  making group closure opt-in at the check() call boundary; CI explicitly
+  opts in. The change is bounded to the shared validation helper, two
+  checkers, their CI invocations, tests, and this work-item record.
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-28"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: f0843a8f3
+
+prompt_sha256: fcaaf64a72c0fccd2da42df84cfe689a5f81f37cae0442bdd3d42c67b80825c4
+prompt_bytes: 8684
+prompt_file: "14-ai-development/work-items/AID-2026-349/prompt-v1.md"
+prompt_file_blob_sha: 63ca3b9a2c6bcd6c8e6ee7390b4cd36fe8d5b473
+prompt_file_commit_sha: 307cfa305059c272a86a309c219198a8cfa57b9d
+
+scope:
+  objective: >-
+    Add reusable fail-closed validation for registered bilingual document
+    groups by reusing the document-management metadata and DM-12 relationship
+    checks; connect it to the owner-namespace and governance-operation
+    traceability checkers through an explicit require_group_closure option;
+    and require that option in both bilingual-docs CI checker invocations.
+    Preserve compatibility for existing body-only unit fixtures while
+    ensuring CI cannot omit group-closure validation.
+  files_changed:
+    - ".github/workflows/bilingual-docs.yml"
+    - "scripts/gov_doc_fail_closed.py"
+    - "scripts/check_owner_namespace_references.py"
+    - "scripts/check_governance_operation_traceability.py"
+    - "tests/test_ac3_fail_closed_fixtures.py"
+    - "14-ai-development/work-items/AID-2026-349/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-349/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-349/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-349/evidence.md"
+  in_scope:
+    - "Add scripts/gov_doc_fail_closed.py with validate_group(root, registered_files) -> list[str] and report_group() using the existing check_document_management metadata and relationship validation functions."
+    - "Fail closed for missing registered members, unreadable members, unclassified or invalid metadata, and invalid source/mirror mutual closure."
+    - "Reject symlinks and non-regular files; do not run the relationship graph when the registered group is incomplete."
+    - "Only elevate DM-12 relationship diagnostics from check_scope_and_relations() into FAIL_CLOSED diagnostics."
+    - "Add require_group_closure: bool = False as a keyword-only check() parameter in both checkers and add the --require-group-closure CLI flag."
+    - "When require_group_closure is true, extend checker errors with validate_group(root, FILES); otherwise preserve the legacy content-only fixture behavior."
+    - "Make both checker invocations in .github/workflows/bilingual-docs.yml pass --require-group-closure."
+    - "Add eight fixture tests covering complete groups, missing members, unclassified members, unreadable members, and source/mirror mismatch."
+    - "Keep the existing tests/test_check_owner_namespace_references.py and tests/test_check_governance_operation_traceability.py unchanged."
+  out_of_scope:
+    - "Change canonical authority or canonical_status of existing governance documents."
+    - "Change the registered document groups or their source/mirror ownership."
+    - "Replace or duplicate the existing document-management metadata parser or DM-12 relationship implementation."
+    - "Change unrelated CI workflows, checkers, or governance policies."
+    - "Modify existing body-only fixtures solely to add front matter."
+
+evidence:
+  - "14-ai-development/work-items/AID-2026-349/evidence.md"
+  - "14-ai-development/work-items/AID-2026-349/session-evidence.md"
+
+documentation:
+  - path: "scripts/gov_doc_fail_closed.py"
+    relationship: implementation
+  - path: "scripts/check_owner_namespace_references.py"
+    relationship: code
+  - path: "scripts/check_governance_operation_traceability.py"
+    relationship: code
+  - path: "tests/test_ac3_fail_closed_fixtures.py"
+    relationship: code
+  - path: ".github/workflows/bilingual-docs.yml"
+    relationship: code
+  - path: "14-ai-development/work-items/AID-2026-349/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-349/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-349/evidence.md"
+    relationship: evidence
+
+session_evidence:
+  - role: "AI-assisted governance and CI design, implementation specification, test design, and delivery-record drafting; the authorized operator performs repository edits, executes validation commands, and prepares the pull request."
+    issue_refs:
+      - "#1237"
+    implementing_ai_session: "6b08ffa5-bccc-83ec-ae24-ea58c1d913b9"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-349/session-evidence.md"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-349/prompt-v1.md"
+    executed_prompt_sha256: fcaaf64a72c0fccd2da42df84cfe689a5f81f37cae0442bdd3d42c67b80825c4
+    executed_prompt_bytes: 8684
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: RECORDED
+
+implementation:
+  status: IN_PROGRESS
+  implementation_commit_sha: 307cfa305059c272a86a309c219198a8cfa57b9d
+  summary: >-
+    Implemented a shared fail-closed document-group validator, connected it
+    to both registered-document checkers through the opt-in
+    require_group_closure argument and CLI flag, and enabled the flag in
+    both bilingual-docs CI steps. Eight fixture tests cover positive group
+    validation and the four fail-closed categories. The reported local test
+    suite passes with 36 tests, and both CI-mode checker commands report
+    PASS. Pull request and final commit pins remain pending.
+  files_changed:
+    - ".github/workflows/bilingual-docs.yml"
+    - "scripts/gov_doc_fail_closed.py"
+    - "scripts/check_owner_namespace_references.py"
+    - "scripts/check_governance_operation_traceability.py"
+    - "tests/test_ac3_fail_closed_fixtures.py"
+    - "14-ai-development/work-items/AID-2026-349/manifest.yaml"
+    - "14-ai-development/work-items/AID-2026-349/prompt-v1.md"
+    - "14-ai-development/work-items/AID-2026-349/session-evidence.md"
+    - "14-ai-development/work-items/AID-2026-349/evidence.md"
+  tests:
+    - "python -m pytest -q tests/test_ac3_fail_closed_fixtures.py tests/test_check_owner_namespace_references.py tests/test_check_governance_operation_traceability.py -> 36 passed in 0.35s, exit 0 (operator-reported)."
+    - "python scripts/check_owner_namespace_references.py --check --require-group-closure -> OWNER NAMESPACE: PASS (15 registered documents scanned), exit 0 (operator-reported)."
+    - "python scripts/check_governance_operation_traceability.py --check --require-group-closure -> GOVERNANCE OPERATION TRACEABILITY: PASS (7 operations x 3 mirrors), exit 0 (operator-reported)."
+
+pull_request: PIN_PULL_REQUEST_NUMBER
+pull_request_url: "PIN_PULL_REQUEST_URL"
