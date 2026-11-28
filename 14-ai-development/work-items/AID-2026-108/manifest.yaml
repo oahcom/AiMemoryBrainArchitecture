@@ -89,3 +89,15 @@ review:
 acceptance:
   status: "NOT_GRANTED"
   note: "Registration and historical-baseline correction only; no Owner acceptance or implementation evidence is asserted."
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-108/FOLLOWUP-01.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-108/correction-record.md"
+    relationship: reference
+  - path: "docs/en/14-ai-development/work-items/AID-2026-108/correction-record.md"
+    relationship: reference
+  - path: "docs/zh-CN/14-ai-development/work-items/AID-2026-108/correction-record.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-108/prompt-v1.md"
+    relationship: reference

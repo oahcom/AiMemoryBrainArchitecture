@@ -7,6 +7,10 @@ concurrency:
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited, ready_for_review]
+  # Merge queue: the queue only reports checks produced by `merge_group`, so a
+  # required context that only listens to `pull_request` blocks every merge.
+  merge_group:
+    types: [checks_requested]
 
 permissions:
   contents: read
@@ -39,7 +43,22 @@ jobs:
 
       - name: Check paired documentation and PR manifest
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # merge_group carries no pull_request object; base/head come from the
+          # merge group, and the base must never fall back to the PR base.
+          BASE_SHA: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_sha || github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event_name == 'merge_group' && github.event.merge_group.head_sha || github.event.pull_request.head.sha }}
           PR_BODY: ${{ github.event.pull_request.body }}
-        run: python3 scripts/check_bilingual_docs.py
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          # The merge_group payload has no PR body, and the gate reads it.
+          # The queue ref is refs/heads/gh-readonly-queue/<base>/pr-<N>-<sha>.
+          if [ -z "$PR_NUMBER" ]; then
+            PR_NUMBER=$(printf '%s' "$GITHUB_REF" | sed -n 's#.*/pr-\([0-9]\+\)-.*#\1#p')
+            PR_BODY=$(curl -sS -f -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
+              | python3 -c 'import json,sys; print(json.load(sys.stdin).get("body") or "", end="")')
+            export PR_BODY
+          fi
+          python3 scripts/check_bilingual_docs.py

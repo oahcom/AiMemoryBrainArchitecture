@@ -82,8 +82,14 @@ session_evidence:
       - "#262"
     implementing_ai_session: session-r44-reg-b
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-068/prompt-v1.md
-    executed_prompt_sha256: 7d55d2011f931207ec4d63a6d0a94715a82ab16365cef390cf7423f8e7ab5a31
-    executed_prompt_bytes: 6031
+    executed_prompt_sha256: 9a1e0e823d200aedebfefeb1f4bb26de3cbd1569938e6625f56a5e6599eb71f5
+    executed_prompt_bytes: 5973
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
     session_evidence_ref: 14-ai-development/work-items/AID-2026-068/session-evidence-r44.md
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-068/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-068/session-evidence-r44.md"
+    relationship: reference

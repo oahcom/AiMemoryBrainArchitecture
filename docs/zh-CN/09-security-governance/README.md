@@ -103,3 +103,17 @@ Each of the five documents declares `canonical_status: Canonical` in its own fro
 Original source branch: `session-i-security-governance-2026-11-16` @ `8abddf814467b271344a9814613a6b7ca6a446c6`.
 
 Restoration and source/new blob comparisons are recorded in [AID-2026-109](../14-ai-development/work-items/AID-2026-109/i-security-governance-root-restoration.md).
+
+## 中文侧内容状态：重要说明
+
+以下五份文档虽然具有 `canonical_status: Canonical` 元数据，但当前 zh-CN 镜像尚未形成中文规范文本。其正文主要为英文内容，仅包含少量中文标题或说明，不构成完整中文翻译，也不应被视为已经提供中文规范文本。
+
+涉及文档：
+
+- `forget-retention-backup-and-erasure-policy.md`
+- `global-forget-target-inventory-and-completion-evidence.md`
+- `principal-actor-and-authorization-contract.md`
+- `scope-and-revocation-policy.md`
+- `security-and-identity-overview.md`
+
+阅读和引用规范内容时，应以对应的 Canonical 原文为准。此说明不改变 Canonical 身份、文档效力或现有镜像关系。

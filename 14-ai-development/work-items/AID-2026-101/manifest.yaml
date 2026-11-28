@@ -261,7 +261,7 @@ session_evidence:
       - "#1244"
     implementing_ai_session: owner-proxy-2026-11-26
     executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-101/prompt-v1.md
-    executed_prompt_sha256: 89ac65f2d58e187451b7c0a98648d0dd4352e3dac79f521b8029b0432f7e94c1
+    executed_prompt_sha256: de3b9b80c952096d7ba14b5226517eed8c14b61593328f80d3a3cf3f1122fc94
     executed_prompt_bytes: 4470
     executed_prompt_provenance: NOT_VERIFIED
     session_reference_status: RECORDED
@@ -274,3 +274,11 @@ session_evidence:
       INDEX cell cites - and none of them is in MANIFEST_FIELDS, so they do not conflict with
       this block. The digest and byte count are repeated here because entry #1 has to pin the
       snapshot it executed; they are the same measurement, not a second source of truth.
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-101/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-101/session-evidence-1244.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference

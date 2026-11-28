@@ -80,3 +80,36 @@ The PR description contains:
 
 署名：user-authorized operator (delegated by account owner)
 日期：2026-11-27
+
+ 
+## Rework 2026-11-27 — Session role / use case
+
+Role: delegated repository implementation operator for the AID-2026-250 rework.
+Use case: move REQ-01 signature-field validation from Issue comments into the four assessment-document bodies, preserve the historical comments, and retain the existing required workflow context.
+
+## Rework 2026-11-27 — Actual AI input
+
+The user directed this session to rework AID-2026-250 without allocating a new AID: add the three exact fields plus a retrospective-attachment disclosure to the four specified English/Chinese assessment documents; rewrite the same-path checker to validate those checked-out files with `--root`; replace tests with missing-field/value/file/determinism coverage; wire a 12-case field-deletion mutation proof into the existing Schema non-empty hard-gate job; append evidence, manifest, session-evidence and INDEX records; and use a merge-method PR with the required Issue #262 and session-evidence declarations.
+
+## Rework 2026-11-27 — AI-visible output
+
+The branch `rework/aid-250-doc-signatures` was created from live `main` `46dac1b1e198c8d88daff5a34faf759ecb075869`. The four document insertions preserve existing text and use baseline `b372b62c640a2b656e54b6db62a4ee67d7d8c001`; the checker has no network dependency and reads only the current checkout. The workflow keeps the same `Schema non-empty audit (hard gate)` job and removes the no-longer-needed `issues: read` permission. Historical comment bodies remain untouched. Exact-head CI, mutation output, required-context results, merge and post-merge blob checks remain pending at this point in the session.
+
+署名：user-authorized operator (delegated by account owner)
+日期：2026-11-27
+
+ 
+## Rework 2026-11-27 — AI-visible output (verification update)
+
+PR #1424 was opened with the required Related issue, AI-assisted work, and session-evidence reference declarations. The first head query returned zero Actions runs, so a recovery comment was recorded and the PR was closed/reopened; the PR description was then corrected to include the required per-Issue mapping table and reopened to dispatch the validator. The Session Evidence Gate subsequently passed on the updated head. The Architecture document management gate passed. The existing `Schema non-empty audit (hard gate)` job passed the four-document checker, all eight unit tests, and the 12/12 deletion mutation check. Exact mutation output and its run URL are in the appended evidence section. Remaining all-context verification and branch-protection setting verification are pending.
+
+署名：user-authorized operator (delegated by account owner)
+日期：2026-11-27
+
+ 
+## Rework 2026-11-27 — CI verification result
+
+On exact head `aab994d3e40671a41012b8110a3b2fa84aec359f`, the Session Evidence Gate, Architecture document management gate, Repository hygiene, Bilingual documentation gate, Runner admission policy, Branch freshness, Rust Phase 1 Workspace Tests and Existing gates all completed successfully. The 16 protected required contexts were individually checked and all 16 were SUCCESS. The Schema non-empty audit job passed the document checker, eight unit tests and 12/12 field-deletion mutations. Evidence records the exact run URLs and mutation output. Final record commit and post-merge blob verification remain pending.
+
+署名：user-authorized operator (delegated by account owner)
+日期：2026-11-27

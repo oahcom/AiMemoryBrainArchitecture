@@ -74,6 +74,13 @@ ALLOWED_CONFIG_PATHS = frozenset({
     "tsconfig.json",
 })
 
+# The AC4 legacy ratchet is data, but only this exact report path is admitted.
+ALLOWED_DATA_PATHS = frozenset({
+    "14-ai-development/reports/work-item-manifest-ac4-baseline.json",
+    "14-ai-development/reports/steward-adoption-baseline.json",
+    "14-ai-development/work-items/AID-2026-291/baseline.json",
+})
+
 REQUIREMENTS_FILE_RE = re.compile(r"requirements(?:-[A-Za-z0-9_.-]+)?\.txt\Z")
 FULL_SHA_RE = re.compile(r"[0-9a-fA-F]{40}\Z")
 # Work-item manifests are YAML, so no suffix rule can admit them without
@@ -271,6 +278,9 @@ def is_allowed_new_path(path):
         return True
 
     if path in ALLOWED_CONFIG_PATHS:
+        return True
+
+    if path in ALLOWED_DATA_PATHS:
         return True
 
     if (

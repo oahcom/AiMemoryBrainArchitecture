@@ -25,11 +25,11 @@ source:
   tree: "258f53ab74a6618493a15e6a0d190467997bec43"
   files:
     - path: "03-memory-brain/canonical-memory-store.md"
-      blob: "6b37c91033fda21f072e2a3bde6f274663b1e76e"
+      blob: "2e10e23f651f1f6cb03247f01727f2b7ff5342f1"
     - path: "03-memory-brain/commit-cursor-semantics.md"
-      blob: "4688a0ca487bf4d853c7f0220408abe8d743d159"
+      blob: "2c68161d039310b8df0e1387b4f1111ed74699db"
     - path: "03-memory-brain/forget-fence-operation-and-publication-gate.md"
-      blob: "4da0b61ba3656a768ea56b4a2a24e09da4e21cd5"
+      blob: "dd26e3cae2e60dbdc44a6e084004effcd2033efa"
 authority:
   sponsor: "USER-PRINCIPAL-DELEGATED"
   accountable_owner: "USER-PRINCIPAL-DELEGATED"
@@ -97,7 +97,8 @@ carrier:
   branch: "docs/aid-2026-150-restore-d-normative-roots"
   pull_request: "1320"
   pull_request_url: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/1320"
-  merge_commit_sha: "PENDING"
+  merge_commit_sha: "6ab36b3697a0994d8de449d2b9c344f23aac0fda"
+  merged_at: "2026-11-26T14:02:52Z"
 session_evidence:
   - role: "IMPLEMENTATION_SESSION"
     issue_refs:
@@ -108,3 +109,11 @@ session_evidence:
     executed_prompt_provenance: "NOT_VERIFIED"
     session_reference_status: "NOT_RECORDED"
     session_evidence_ref: "14-ai-development/work-items/AID-2026-150/session-evidence.md"
+
+post_merge_correction:
+  date: "2026-11-27"
+  basis: "GitHub API GET /pulls/1320 returned merged=true; the merge commit is reachable from origin/main. This block records the correction so the original value stays auditable."
+  original_values:
+    - "carrier.merge_commit_sha: PENDING"
+  corrected_values:
+    - "PR #1320 merged; see implementation/carrier above"

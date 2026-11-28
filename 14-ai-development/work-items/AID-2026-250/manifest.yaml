@@ -3,7 +3,7 @@ title: "Enforce version-pinned assessor metadata on the four REQ-01 assessment c
 class: GATE/CI/TEST
 risk: R2
 risk_rationale: "The checker is read-only and blocks the required gate when any of the four primary Issue #262 assessment comments lacks its source-pinned assessor metadata."
-status: DISPATCHED
+status: MERGED
 id_status: PROVISIONAL
 sponsor: USER-PRINCIPAL-DELEGATED
 accountable_owner: USER-PRINCIPAL-DELEGATED
@@ -72,7 +72,7 @@ session_evidence:
     session_reference_status: NOT_RECORDED
     session_evidence_ref: "14-ai-development/work-items/AID-2026-250/session-evidence.md"
 implementation:
-  status: IN_PROGRESS
+  status: IMPLEMENTED
   summary: "Four Issue #262 assessment comments received append-only metadata; the read-only GitHub API checker and tests run in the existing required Schema non-empty audit job."
   files_changed:
     - scripts/ci/check_req_assessment_signatures.py
@@ -82,8 +82,35 @@ implementation:
     - "python -m unittest scripts.ci.test_check_req_assessment_signatures"
     - "python scripts/ci/check_req_assessment_signatures.py"
   pull_request: 1388
-  merge_commit_sha: NOT_MERGED
+  merge_commit_sha: 652aeaaea9cc77db959e6241f65184b4bf21c9c8
+  merged_at: "2026-11-27T05:06:44Z"
 review:
   status: PENDING_INDEPENDENT_REVIEW
   reviewer: NOT_RECORDED
   note: "Independent exact-Head review is required; no self-review is claimed."
+
+rework:
+  date: "2026-11-27"
+  defect: "The previous checker validated four Issue #262 comments instead of the four assessment-document bodies required by AC2 §5(3)."
+  acceptance_object_before: "Four Issue #262 comments"
+  acceptance_object_after:
+    - "reviews/architecture/SYS-RISK-001.en.md"
+    - "reviews/architecture/SYS-RISK-001.zh-CN.md"
+    - "reviews/complexity/architecture-complexity-assessment.en.md"
+    - "reviews/complexity/architecture-complexity-assessment.zh-CN.md"
+  gate_behaviour_change: "The existing required Schema non-empty audit job validates the four assessment documents in the checked-out tree rather than the four Issue comments; no required context or job name changes."
+  retrospective_boundary: "Three signature fields were attached on 2026-11-27 and do not satisfy the contemporaneity requirement; Owner adjudication remains required."
+
+  pull_request: 1424
+  branch: "rework/aid-250-doc-signatures"
+  exact_head_with_16_successful_required_contexts: "aab994d3e40671a41012b8110a3b2fa84aec359f"
+
+post_merge_correction:
+  date: "2026-11-27"
+  basis: "GitHub API GET /pulls/1388 returned merged=true; the merge commit is reachable from origin/main. This block records the correction so the original value stays auditable."
+  original_values:
+    - "implementation.status: IN_PROGRESS"
+    - "implementation.merge_commit_sha: NOT_MERGED"
+    - "status: DISPATCHED"
+  corrected_values:
+    - "PR #1388 merged; see implementation/carrier above"

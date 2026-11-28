@@ -146,3 +146,15 @@ acceptance:
   acceptance_authority: "NOT_ASSIGNED; no acceptance decision is asserted"
 
 session_evidence: []
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-092/prompt-v1.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-092/ISSUE-1189-approval-provenance.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-092/ISSUE-1197-phase-freeze-audit.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/AID-2026-092/ISSUE-1037-validator-and-metadata-verification.md"
+    relationship: reference
+  - path: "14-ai-development/work-items/INDEX.md"
+    relationship: reference

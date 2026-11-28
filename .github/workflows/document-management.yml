@@ -1,8 +1,12 @@
 name: Architecture document management gate
 
+# Work-item uniqueness is a shared target-branch invariant, not a
+# per-candidate invariant. PRs targeting the same branch must not run this
+# gate in independent concurrency groups. Do not cancel a running decision
+# when another candidate arrives.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.base.ref || github.ref_name }}
+  cancel-in-progress: false
 
 on:
   pull_request:
@@ -23,6 +27,7 @@ jobs:
         with:
           # Full history: DM-10 compares the current body against the body at
           # approval.approved_version, which may be any ancestor commit.
+          # The uniqueness gate also needs the merge-base and target history.
           fetch-depth: 0
 
       - name: Self-check the gate
@@ -31,19 +36,44 @@ jobs:
       - name: Self-test work-item uniqueness gate
         run: python3 scripts/ci/test_work_item_uniqueness.py
 
+      # A PR's event base SHA can be stale by the time this job executes.
+      # Fetch the target branch itself and evaluate the exact generated merge
+      # candidate against that fetched commit. Strict branch protection
+      # requires a new candidate and a fresh required check after the target
+      # advances, closing the interval between this check and a later merge.
       - name: Enforce work-item uniqueness against the current target base
         env:
           PR_BASE: ${{ github.event.pull_request.base.sha }}
-          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
           PUSH_BEFORE: ${{ github.event.before }}
           CANDIDATE_SHA: ${{ github.sha }}
         run: |
-          if [ -n "$PR_BASE" ] && [ -n "$PR_HEAD" ]; then
-            python3 scripts/ci/check_work_item_uniqueness.py --base "$PR_BASE" --head "$PR_HEAD"
+          set -euo pipefail
+
+          if [ -n "$BASE_REF" ] && [ -n "$PR_BASE" ]; then
+            git fetch origin "+refs/heads/${BASE_REF}:refs/remotes/origin/${BASE_REF}"
+            python3 scripts/ci/check_work_item_uniqueness.py \
+              --base "refs/remotes/origin/$BASE_REF" \
+              --head "$CANDIDATE_SHA"
           elif [ -n "$PUSH_BEFORE" ] && [ "$PUSH_BEFORE" != "0000000000000000000000000000000000000000" ]; then
-            python3 scripts/ci/check_work_item_uniqueness.py --base "$PUSH_BEFORE" --head "$CANDIDATE_SHA"
+            python3 scripts/ci/check_work_item_uniqueness.py \
+              --base "$PUSH_BEFORE" \
+              --head "$CANDIDATE_SHA"
           else
             python3 scripts/ci/check_work_item_uniqueness.py
+          fi
+
+      - name: Emit steward adoption census (baseline evidence)
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          PIN="${PR_BASE:-$GITHUB_SHA}"
+          set +e
+          python3 scripts/check_document_management.py --list-missing --json --pin "$PIN"
+          status=$?
+          # Exit 2 means the census completed but unclassified governed documents remain.
+          if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
+            exit "$status"
           fi
 
       # Every governed file added or modified here must carry metadata. The
@@ -81,3 +111,4 @@ jobs:
               exit "$status"
             }
           fi
+

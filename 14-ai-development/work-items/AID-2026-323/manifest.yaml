@@ -1,0 +1,69 @@
+work_item_id: AID-2026-323
+title: "Issue #1285 — Decision Record for Principal-Level Distinctness in PR Governance"
+class: DOC/GOVERNANCE
+risk: R1
+risk_rationale: "Documentation-only decision record. It establishes the measured limits of repository-verifiable principal identity and records two bounded convergence paths without changing normative governance or implementation."
+status: DISPATCHED
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: "Owner acceptance not recorded"
+attribution: "user-authorized operator (delegated by account owner)"
+date: "2026-11-27"
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: "5670357db7a836d4f26838dbaf99494af41e2b65"
+
+scope:
+  included:
+    - "Record the exact normative requirement in PR-GOVERNANCE-001 §5 item (2)."
+    - "Establish an artifact-based unsatisfiability proof using the supplied read-only measurements E1–E4."
+    - "Define a minimal principal-registry convergence path, its exact change surface, acceptance criteria, dependencies, and failure mode."
+    - "Define a downgrade convergence path, its exact change surface, acceptance criteria, and failure mode."
+    - "Identify the decision authority and the evidence required to settle the choice."
+    - "Explicitly preserve the canonical document and its independent approval boundary."
+  excluded:
+    - "Editing 14-ai-development/PR-GOVERNANCE-001.md."
+    - "Creating a principal registry."
+    - "Defining or implementing an identity-resolution mechanism."
+    - "Changing manifest schemas, validation scripts, CI workflows, or other executable artifacts."
+    - "Resolving SB-01."
+    - "Selecting or approving either convergence path."
+    - "Claiming that principal-level distinctness has been established or disproved for any individual work item."
+    - "Claiming CI execution, PR merge, or Owner acceptance."
+
+evidence: 14-ai-development/work-items/AID-2026-323/evidence.md
+
+documentation:
+  - path: "14-ai-development/work-items/AID-2026-323/prompt-v1.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-323/evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/work-items/AID-2026-323/session-evidence.md"
+    relationship: evidence
+  - path: "14-ai-development/PR-GOVERNANCE-001.md"
+    relationship: normative
+  - path: "09-security-governance/principal-actor-and-authorization-contract.md"
+    relationship: design
+  - path: "docs/en/02-domain-model/principal-actor-binding-mapping.md"
+    relationship: design
+  - path: "01-system-architecture/system-boundaries.md"
+    relationship: design
+
+session_evidence:
+  - role: IMPLEMENTATION_SESSION
+    issue_refs:
+      - "#1285"
+    implementing_ai_session: "6b092946-cf54-83ec-81bc-cb7e7993ed28"
+    session_evidence_ref: "14-ai-development/work-items/AID-2026-323/session-evidence.md"
+    executed_prompt_snapshot_file: "14-ai-development/work-items/AID-2026-323/prompt-v1.md"
+    executed_prompt_sha256: "21154aa6ded18e276009b2a319763433bcda9da5b8c44510426bf935599f5b8d"
+    executed_prompt_bytes: 6262
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: "RECORDED"
+
+implementation:
+  status: NOT_APPLICABLE
+  summary: "This is a documentation-only decision record. The four work-item documents record evidence, alternatives, acceptance criteria, and decision ownership. No repository implementation, registry, validator, workflow, or canonical governance document was changed or executed."
+  files_changed: []
+  tests: []

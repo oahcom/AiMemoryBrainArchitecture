@@ -1,48 +1,28 @@
 #!/usr/bin/env python3
-"""Verify that the required check contexts PR-GOVERNANCE-001 declares are real.
+"""Verify required ⊆ declared ⊆ produced for the governed check contexts.
 
-The document declares a set of GitHub check contexts as the required set on
-`main`. Two different artifacts can disagree with that declaration, and they
-disagree in opposite directions:
+The checker compares three independently sourced sets:
 
-  declared -> produced    every declared name is produced by a job in this tree.
-                          A renamed job makes the document claim a context that
-                          no longer exists. That is the defect class #864 records.
-  declared -> protected   every declared name is required on the platform, and
-                          every required name is declared. A context added to
-                          branch protection without a document change leaves the
-                          document under-declaring; a context removed from
-                          protection while the document still lists it leaves
-                          merges gated by a check that no longer blocks. Neither
-                          is visible to the produced test, which is a subset
-                          test -- dropping a line can only make it truer. That is
-                          the defect class #1029 records.
+  required   live main branch protection payload:
+             GET /repos/{owner}/{repo}/branches/{branch}
+             .protection.required_status_checks.contexts
+  declared   the fenced context list in PR-GOVERNANCE-001.md §7
+  produced   job ids and job display names from every .yml/.yaml workflow
 
-The protected side is read from `GET /repos/{owner}/{repo}/branches/{branch}`,
-whose `protection.required_status_checks.contexts` needs only Contents (read) --
-`GITHUB_TOKEN`'s default, and no credential at all on a public repository. The
-separate `/protection` endpoint needs Administration (read), which the token
-permission vocabulary cannot express; it is not used here and must not be.
-`GITHUB_TOKEN` is sent when present, only to raise the anonymous rate limit.
+The contract is inclusion, not equality. Extra documented contexts are
+permitted; every platform-required context must be documented, and every
+documented context must be produced by a workflow job. No protected-context
+snapshot is committed. The Administration-only /protection endpoint is not
+used.
 
-Exit codes follow the repository vocabulary:
-    0  PASS        every declared context is produced, and the two sets are equal
-    1  VIOLATION   a declared context is produced by no job, is listed twice, or
-                   the sets differ
-    2  INCOMPLETE  a condition could not be evaluated at all
+Exit codes:
+    0  PASS        required ⊆ declared ⊆ produced
+    1  VIOLATION   a required context is undocumented, a declared context is
+                   unproduced, or the declaration contains duplicates
+    2  INCOMPLETE  a required input cannot be read or evaluated
 
-The incomplete branch is the point, and it covers the credential case: an absent
-token is not a reason to skip the comparison, and an unreadable payload is not
-"no violations". A checker whose "cannot read the platform" path falls through to
-exit 0 is a false PASS, which is worse than having no checker (#1003, #1017).
-
-The produced side is read from both workflow suffixes GitHub honours, `.yml` and
-`.yaml`, and comments are stripped before the structural read (#1212). A
-`jobs:  # comment` line used to be neither the `jobs:` key nor a column-0 key, so
-the mapping was never entered and the file produced no contexts at all: the
-subset test then reported every declared name as produced by *some* other file,
-which is a silent pass, not a comparison. Reading only `*.yml` had the same
-shape one level up -- a `.yaml` workflow's jobs were invisible.
+An unreadable platform payload is INCOMPLETE, never PASS and never a repository
+VIOLATION. A network failure must not be mistaken for an empty required set.
 """
 
 from __future__ import annotations
@@ -240,6 +220,47 @@ def main(root: Path | None = None, protection: list[str] | None = None) -> int:
     for path in workflow_files_found:
         produced |= produced_contexts(path.read_text(encoding="utf-8"))
 
+    # Read and validate the required side before classifying any local
+    # declaration/workflow disagreement. If the platform input is unavailable,
+    # INCOMPLETE (2) takes precedence over a simultaneous local VIOLATION (1).
+    if protection is None:
+        try:
+            protection = fetch_protected_contexts()
+        except Exception as error:  # noqa: BLE001 - every failure is INCOMPLETE
+            print(
+                "::error::INCOMPLETE: input "
+                f"{REPO_SLUG}/branches/{BRANCH}.protection.required_status_checks.contexts "
+                "could not be read: "
+                f"{type(error).__name__}: {error}",
+                file=sys.stderr,
+            )
+            return 2
+
+    if protection is None:
+        print(
+            "::error::INCOMPLETE: input "
+            f"{REPO_SLUG}/branches/{BRANCH}.protection.required_status_checks.contexts "
+            "returned None; the required set is unavailable",
+            file=sys.stderr,
+        )
+        return 2
+    if not isinstance(protection, list) or not protection:
+        print(
+            "::error::INCOMPLETE: input "
+            f"{REPO_SLUG}/branches/{BRANCH}.protection.required_status_checks.contexts "
+            "is missing, empty, or not a list of required context strings",
+            file=sys.stderr,
+        )
+        return 2
+    if not all(isinstance(context, str) for context in protection):
+        print(
+            "::error::INCOMPLETE: input "
+            f"{REPO_SLUG}/branches/{BRANCH}.protection.required_status_checks.contexts "
+            "contains a non-string context",
+            file=sys.stderr,
+        )
+        return 2
+
     unproduced = [context for context in contexts if context not in produced]
 
     if unproduced:
@@ -275,53 +296,39 @@ def main(root: Path | None = None, protection: list[str] | None = None) -> int:
         )
         return 1
 
-    if protection is None:
-        try:
-            protection = fetch_protected_contexts()
-        except Exception as error:  # noqa: BLE001 - every failure is INCOMPLETE
-            print(
-                "::error::INCOMPLETE: the branch-protection payload could not be "
-                "read, so the declared set cannot be compared to it: "
-                f"{type(error).__name__}: {error}",
-                file=sys.stderr,
-            )
-            return 2
+    required_not_declared = sorted(set(protection) - set(contexts))
+    declared_not_produced = sorted(set(contexts) - produced)
 
-    if not protection:
+    print(
+        f"CONTEXT COUNTS: declared={len(contexts)} required={len(protection)} "
+        f"produced={len(produced)}",
+        file=sys.stderr,
+    )
+    print(f"required_not_declared={required_not_declared}", file=sys.stderr)
+    print(f"declared_not_produced={declared_not_produced}", file=sys.stderr)
+
+    violated = False
+    for context in required_not_declared:
         print(
-            "::error::INCOMPLETE: the branch-protection payload reports no "
-            "required contexts; an empty protected set cannot be compared",
+            f"::error::{BRANCH} requires {context!r}, but {DOC_PATH} does not "
+            "declare it",
             file=sys.stderr,
         )
-        return 2
-
-    undeclared = sorted(set(protection) - set(contexts))
-    unprotected = sorted(set(contexts) - set(protection))
-
-    if undeclared or unprotected:
-        for context in unprotected:
-            print(
-                f"::error::{DOC_PATH} declares {context!r}, but it is not a "
-                f"required context on {BRANCH}",
-                file=sys.stderr,
-            )
-        for context in undeclared:
-            print(
-                f"::error::{BRANCH} requires {context!r}, but {DOC_PATH} does not "
-                "declare it",
-                file=sys.stderr,
-            )
+        violated = True
+    for context in declared_not_produced:
         print(
-            f"DECLARED CHECK CONTEXTS: FAIL (declared {len(contexts)}, protected "
-            f"{len(protection)}; {len(unprotected)} declared-not-protected, "
-            f"{len(undeclared)} protected-not-declared)",
+            f"::error::{DOC_PATH} declares required check context "
+            f"{context!r}, but no job in {WORKFLOWS} produces it",
             file=sys.stderr,
         )
+        violated = True
+
+    if violated:
+        print("DECLARED CHECK CONTEXTS: VIOLATION", file=sys.stderr)
         return 1
 
     print(
-        f"::notice::{len(contexts)} declared check contexts, all produced by "
-        f"a job in {WORKFLOWS} and all required on {BRANCH}",
+        f"::notice::{len(contexts)} declared, {len(protection)} required, all produced",
         file=sys.stderr,
     )
     print("DECLARED CHECK CONTEXTS: PASS", file=sys.stderr)

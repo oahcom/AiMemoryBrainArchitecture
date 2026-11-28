@@ -1,0 +1,100 @@
+work_item_id: AID-2026-255
+title: Add sibling-key association tests for the landed manifest blob-pin checker
+class: GATE/CI/TEST
+risk: R1
+risk_rationale: >-
+  Adds test methods only. The landed checker, its baseline, the Repository
+  hygiene workflow and every manifest are unchanged; the delta proves that
+  each path/digest sibling pair is resolved against its own path key rather
+  than a neighbouring one, and records the ratchet's negative contract.
+status: DRAFT
+id_status: PROVISIONAL
+sponsor: USER-PRINCIPAL-DELEGATED
+accountable_owner: USER-PRINCIPAL-DELEGATED
+acceptance_authority: NOT_ASSIGNED
+attribution: user-authorized operator (delegated by account owner)
+date: 2026-11-27
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 981397d99b76123678382bcbdd298333a72176c9
+approval_scope:
+  type: Full-document
+evidence_reference:
+  record: 14-ai-development/work-items/AID-2026-255/evidence.md
+  session: 14-ai-development/work-items/AID-2026-255/session-evidence.md
+supersession:
+  status: NONE
+archival:
+  status: ACTIVE
+canonical_scope_keywords:
+  - manifest
+  - blob pin
+  - sibling key
+  - mutation test
+documentation:
+  - path: 14-ai-development/work-items/AID-2026-255/evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-255/prompt-v1.md
+    relationship: reference
+  - path: 14-ai-development/work-items/AID-2026-255/session-evidence.md
+    relationship: evidence
+  - path: 14-ai-development/work-items/AID-2026-255/ratchet-negative.md
+    relationship: evidence
+evidence: 14-ai-development/work-items/AID-2026-255/evidence.md
+scope:
+  files_to_create:
+    - 14-ai-development/work-items/AID-2026-255/manifest.yaml
+    - 14-ai-development/work-items/AID-2026-255/evidence.md
+    - 14-ai-development/work-items/AID-2026-255/session-evidence.md
+    - 14-ai-development/work-items/AID-2026-255/prompt-v1.md
+    - 14-ai-development/work-items/AID-2026-255/independent-review.md
+    - 14-ai-development/work-items/AID-2026-255/ratchet-negative.md
+  files_to_modify:
+    - scripts/ci/test_check_manifest_blob_pins.py
+    - 14-ai-development/work-items/INDEX.md
+  files_out_of_scope:
+    - scripts/ci/check_manifest_blob_pins.py
+    - scripts/ci/baselines/manifest-blob-pins.txt
+    - .github/workflows/repository-hygiene.yml
+    - 14-ai-development/work-items/AID-2026-268
+session_evidence:
+  - role: implementation
+    issue_refs:
+      - "#1350"
+    implementing_ai_session: S6-B
+    executed_prompt_snapshot_file: 14-ai-development/work-items/AID-2026-255/prompt-v1.md
+    executed_prompt_sha256: cce0468584619d12be78ac613d8a4d37ac7e9e61cecfd87e95d398bba0fe44a7
+    executed_prompt_bytes: 21758
+    executed_prompt_provenance: NOT_VERIFIED
+    session_reference_status: NOT_RECORDED
+    session_evidence_ref: 14-ai-development/work-items/AID-2026-255/session-evidence.md
+acceptance:
+  required:
+    - Each path/digest sibling pair the landed checker enumerates is covered by a mutation test that fails when the resolver reads a neighbouring key.
+    - All pre-existing test methods in scripts/ci/test_check_manifest_blob_pins.py remain byte-identical.
+    - The landed checker, baseline, workflow and AID-2026-268 records are unchanged by this delta.
+    - The ratchet's negative contract is demonstrated against the landed baseline and the landed checker.
+  status: PENDING_CI
+review:
+  independent_reviewer: S6-C (independent review session)
+  status: NOT_RECORDED
+prompt_file: 14-ai-development/work-items/AID-2026-255/prompt-v1.md
+prompt_sha256: cce0468584619d12be78ac613d8a4d37ac7e9e61cecfd87e95d398bba0fe44a7
+carrier:
+  branch: delta/AID-2026-255-sibling-key-tests
+  pull_request: 1395
+  merge_method: merge
+  merge_sha: PENDING
+implementation:
+  status: IN_PROGRESS
+  summary: >-
+    Delta only. main already carries the manifest blob-pin checker, its
+    baseline and its workflow from AID-2026-268; this work item adds
+    sibling-key association mutation tests to the existing test module and
+    records ratchet-negative and independent-review evidence.
+  files_changed:
+    - scripts/ci/test_check_manifest_blob_pins.py
+    - 14-ai-development/work-items/INDEX.md
+  tests:
+    - python3 scripts/ci/test_check_manifest_blob_pins.py
+    - python3 scripts/ci/gate_ratchet.py --baseline scripts/ci/baselines/manifest-blob-pins.txt --format schema --command "python3 scripts/ci/check_manifest_blob_pins.py --commit HEAD | sed -n '/^MISMATCH /p; /^PATH_MISSING /p; /^INCOMPLETE /p'"
