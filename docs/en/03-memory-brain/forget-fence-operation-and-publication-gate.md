@@ -44,6 +44,7 @@ document_metadata:
     source: "03-memory-brain/forget-fence-operation-and-publication-gate.md"
     en: null
     zh-CN: "docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate.md"
+  steward: "user-authorized operator (delegated by account owner)"
 ---
 # Forget Fence Operation and Publication Gate
 

@@ -43,6 +43,7 @@ document_metadata:
     normative_status: Informative
   bilingual_counterpart:
     source: "01-system-architecture/forget-fence-and-completion-contract.md"
+  steward: "user-authorized operator (delegated by account owner)"
 ---
 # Canonical Forget Fence 与完成契约
 

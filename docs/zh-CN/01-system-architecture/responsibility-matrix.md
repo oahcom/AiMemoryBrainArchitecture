@@ -28,6 +28,7 @@ document_metadata:
     source: "01-system-architecture/responsibility-matrix.md"
     en: "docs/en/01-system-architecture/responsibility-matrix.md"
     zh-CN: null
+  steward: "user-authorized operator (delegated by account owner)"
 ---
 # 子系统职责矩阵
 

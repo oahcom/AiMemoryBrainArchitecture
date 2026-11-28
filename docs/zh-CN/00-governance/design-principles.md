@@ -46,6 +46,7 @@ document_metadata:
   bilingual_counterpart:
     source: "00-governance/design-principles.md"
     en: "docs/en/00-governance/design-principles.md"
+  steward: "user-authorized operator (delegated by account owner)"
 ---
 
 # 架构设计原则

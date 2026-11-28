@@ -46,6 +46,7 @@ document_metadata:
   bilingual_counterpart:
     source: "00-governance/design-principles.md"
     zh-CN: "docs/zh-CN/00-governance/design-principles.md"
+  steward: "user-authorized operator (delegated by account owner)"
 ---
 
 # Design Principles
